@@ -1,0 +1,6 @@
+ccxt==1.41.78
+tabulate==0.8.7
+pandas==1.2.2
+numpy==1.20.1
+six==1.15.0
+ta-lib==0.4.19
