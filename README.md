@@ -11,7 +11,7 @@ Running this backtesting engine just takes a quite simple steps if you have the 
 #### Running
 First run:
 ```` 
-pip install requirements.txt
+pip install -r requirements.txt
 ````
 
 After installing, you can run the backtesting module:
