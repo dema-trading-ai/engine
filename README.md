@@ -1,4 +1,4 @@
-# Backtesting Engine
+# dema-backtesting-module
 
 ## Running
 #### Requirements
@@ -19,3 +19,14 @@ After installing, you can run the backtesting module:
 python3 main.py
 ````
 ## Developing
+#### New Features
+> T.B.A.
+
+#### Improvements
+> T.B.A
+
+#### Standard GitFlow
+> T.B.A
+
+## License
+This project is licensed under AGPL-3.0 License. You have any questions regarding this project? Feel free to get in touch using the contactform at https://DemaTrading.ai. 
