@@ -1,7 +1,7 @@
 # ======================================================================
 # OHLCV Class is used for candle-data served by CCXT
 #
-# © 2021 DemaTrading.AI - Tijs Verbeek
+# © 2021 DemaTrading.AI
 # ======================================================================
 
 

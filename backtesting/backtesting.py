@@ -6,7 +6,7 @@ from collections import defaultdict, namedtuple
 # BackTesting class is responsible for processing the ticks (ohlcv-data)
 # besides responsible for calculations
 #
-# © 2021 DemaTrading.AI - Tijs Verbeek
+# © 2021 DemaTrading.AI
 # ======================================================================
 
 

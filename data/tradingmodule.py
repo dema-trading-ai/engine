@@ -7,9 +7,7 @@ from datetime import datetime
 # TradingModule is responsible for tracking trades, calling strategy methods
 # and virtually opening / closing trades based on strategies' signal.
 #
-# DataFrame parser is
-#
-# © 2021 DemaTrading.AI - Tijs Verbeek
+# © 2021 DemaTrading.AI
 # ======================================================================
 
 
