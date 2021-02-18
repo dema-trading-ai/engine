@@ -21,7 +21,7 @@ python3 main.py
 ## Developing
 #### GitFlow
 To keep features, versions and fixes organized, we will be using the following gitflow.
-![Our gitflow](https://images.prismic.io/clubhouse/e02ba62c-26e6-4250-acff-1b2c93ecc789_image-32.png?auto=format%2Ccompress&rect=0%2C0%2C905%2C380&w=1512&h=635&fit=max&q=50)
+![Our gitflow](https://images.prismic.io/clubhouse/e02ba62c-26e6-4250-acff-1b2c93ecc789_image-32.png)
 
 #### New Features
 > T.B.A.
