@@ -173,7 +173,6 @@ class TradingModule:
             self.max_drawdown = trade.profit_percentage
 
         if trade.profit_percentage < 0:
-            print('!!!! closed trade with loss')
             if self.last_closed_trade is None:
                 self.temp_realized_drawdown = trade.profit_percentage
                 self.last_closed_trade = trade

@@ -1,11 +1,13 @@
 from data.datamodule import DataModule
 import json
+import sys
 
 from main_controller import MainController
 
 
 def main():
     read_config()
+
 
 def read_config():
     print('====================================== \n Starting up DEMA BACKTESTING \n======================================')
@@ -17,7 +19,7 @@ def read_config():
         print("[ERROR] no config file found.")
         raise SystemExit
     except:
-        print("[ERROR] something went wrong parsing config file.")
+        print("[ERROR] something went wrong parsing config file.", sys.exc_info()[0])
         raise SystemExit
 
     config = json.loads(data)
