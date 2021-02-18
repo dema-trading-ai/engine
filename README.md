@@ -19,6 +19,10 @@ After installing, you can run the backtesting module:
 python3 main.py
 ````
 ## Developing
+#### GitFlow
+To keep features, versions and fixes organized, we will be using the following gitflow.
+![Our gitflow](https://miro.medium.com/max/1400/1*uUpzVOpdFw5V-tJ_YvgFmA.png)
+
 #### New Features
 > T.B.A.
 
