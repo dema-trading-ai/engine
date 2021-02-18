@@ -1,4 +1,3 @@
-from data.datamodule import DataModule
 import json
 import sys
 

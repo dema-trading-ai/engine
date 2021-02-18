@@ -12,6 +12,8 @@ from collections import defaultdict, namedtuple
 
 # These constants are used for displaying and
 # emphasizing in commandline backtestresults
+from models.trade import Trade
+
 FONT_BOLD = "\033[1m"
 FONT_RESET = "\033[0m"
 
@@ -27,7 +29,21 @@ class BackTesting:
         self.starting_capital = float(self.config['starting-capital'])
 
     # This method is called by DataModule when all data is gathered from chosen exchange
-    def start_backtesting(self, data, backtesting_from, backtesting_to):
+    def start_backtesting(self, data, backtesting_from, backtesting_to) -> None:
+        """
+        Method formats received data.
+        Method calls tradingmodule for each tick/candle (OHLCV).
+        Method finally calls generate result method
+
+        :param data: dictionary of all coins with all OHLCV data
+        :type data: dictionary
+        :param backtesting_from: 8601 timestamp
+        :type backtesting_from: int
+        :param backtesting_to: 8601 timestamp
+        :type backtesting_to: int
+        :return: None
+        :rtype: None
+        """
         self.data = data
         self.backtesting_from = backtesting_from
         self.backtesting_to = backtesting_to
@@ -52,7 +68,20 @@ class BackTesting:
         self.generate_backtesting_result(open_trades, closed_trades, budget)
 
     # This method is called when backtesting method finished processing all OHLCV-data
-    def generate_backtesting_result(self, open_trades, closed_trades, budget):
+    def generate_backtesting_result(self, open_trades: [Trade], closed_trades: [Trade], budget: float) -> None:
+        """
+        TODO Feel free to optimize this method :)
+        Oversized method for generating backtesting results
+
+        :param open_trades: array of open trades
+        :type open_trades: [Trade]
+        :param closed_trades: array of closed trades
+        :type closed_trades: [Trade]
+        :param budget: Budget at the moment backtests end
+        :type budget: float
+        :return: None
+        :rtype: None
+        """
         print("================================================= \n| %sBacktesting Results%s "
               "\n=================================================" % (FONT_BOLD, FONT_RESET))
         budget += self.calculate_worth_of_open_trades(open_trades)
@@ -116,13 +145,31 @@ class BackTesting:
         print("======================================================================")
 
     # Helper method for calculating worth of open trades
-    def calculate_worth_of_open_trades(self, open_trades):
+    def calculate_worth_of_open_trades(self, open_trades: [Trade]) -> float:
+        """
+        Method calculates worth of open trades
+
+        :param open_trades: array of open trades
+        :type open_trades: [Trade]
+        :return: returns the total value of all open trades
+        :rtype: float
+        """
         return_value = 0
         for trade in open_trades:
             return_value += (trade.amount * trade.current)
         return return_value
 
     def calculate_statistics_per_coin(self, open_trades, closed_trades):
+        """
+        TODO Feel free to optimize this method :)
+
+        :param open_trades: array of open trades
+        :type open_trades: [Trade]
+        :param closed_trades: array of closed trades
+        :type closed_trades: [Trade]
+        :return: returns dictionary with statistics per coin.
+        :rtype: dictionary
+        """
         trades_per_coin = defaultdict(self.default_empty_dict_dict)
         all_trades = []
         all_trades += open_trades
@@ -174,7 +221,13 @@ class BackTesting:
 
     # Method for calculating max seen drawdown
     # Max seen = visual drawdown (if you plot it). This drawdown might not be realized.
-    def calculate_max_seen_drawdown(self):
+    def calculate_max_seen_drawdown(self) -> dict:
+        """
+        Method calculates max seen drawdown based on the saved budget / value changes
+
+        :return: returns max_seen_drawdown as a dictionary
+        :rtype: dictionary
+        """
         max_seen_drawdown = {
             "from": "",
             "to": "",
@@ -218,7 +271,15 @@ class BackTesting:
 
         return max_seen_drawdown
 
-    def calculate_loss_trades(self, closed_trades):
+    def calculate_loss_trades(self, closed_trades: [Trade]) -> int:
+        """
+        Method calculates the amount of closed trades with loss
+
+        :param closed_trades: closed trades in an array
+        :type closed_trades: [Trade]
+        :return: amount of trades closed with loss
+        :rtype: int
+        """
         loss = 0
         for trade in closed_trades:
             if trade.profit_percentage < 0:
@@ -226,9 +287,15 @@ class BackTesting:
         return loss
 
     def default_empty_array_dict(self):
+        """
+        Helper method for initializing defaultdict containing arrays
+        """
         return []
 
     def default_empty_dict_dict(self):
+        """
+        Helper method for initializing defaultdict
+        """
         return defaultdict()
 
 
