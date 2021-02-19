@@ -20,7 +20,7 @@ class Strategy:
         return True
 
     def populate_sell_signal(self, indicators, current_candle, trade: Trade):
-        # print
+        
         if trade.profit_percentage > 2:
             return True
         return False

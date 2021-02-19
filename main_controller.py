@@ -14,5 +14,3 @@ class MainController:
         self.trading_module = TradingModule(config)
         self.backtesting_module = BackTesting(self.trading_module, config)
         self.data_module = DataModule(config, self.backtesting_module)
-
-

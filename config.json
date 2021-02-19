@@ -12,5 +12,6 @@
     "BTC/USDT",
     "ETH/USDT",
     "LTC/USDT"
-  ]
+  ],
+  "fee": "0.25"
 }

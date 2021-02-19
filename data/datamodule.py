@@ -96,12 +96,12 @@ class DataModule:
         if not match:
             print("[ERROR] Error whilst parsing timeframe")
             raise SystemExit
-        if match:
-            items = re.split(r'([0-9]+)', timeframe)
-            if items[2] == 'm':
-                self.timeframe_calc = int(items[1]) * minute
-            if items[2] == 'h':
-                self.timeframe_calc = int(items[1]) * hour
+        
+        items = re.split(r'([0-9]+)', timeframe)
+        if items[2] == 'm':
+            self.timeframe_calc = int(items[1]) * minute
+        elif items[2] == 'h':
+            self.timeframe_calc = int(items[1]) * hour
 
     def config_from_to(self):
         test_from = self.config['backtesting-from']

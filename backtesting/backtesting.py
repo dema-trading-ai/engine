@@ -1,16 +1,19 @@
 from tabulate import tabulate
 from datetime import datetime, timedelta
+from collections import defaultdict, namedtuple
 
 # ======================================================================
 # BackTesting class is responsible for processing the ticks (ohlcv-data)
 # besides responsible for calculations
 #
-# © 2021 DemaTrading.AI - Tijs Verbeek
+# © 2021 DemaTrading.AI
 # ======================================================================
 
 
 # These constants are used for displaying and
 # emphasizing in commandline backtestresults
+from models.trade import Trade
+
 FONT_BOLD = "\033[1m"
 FONT_RESET = "\033[0m"
 
@@ -30,28 +33,29 @@ class BackTesting:
 
     # This method is called by DataModule when all data is gathered from chosen exchange
     def start_backtesting(self, data, backtesting_from, backtesting_to):
+        """
+        Method formats received data.
+        Method calls tradingmodule for each tick/candle (OHLCV).
+        Method finally calls generate result method
+        :param data: dictionary of all coins with all OHLCV data
+        :type data: dictionary
+        :param backtesting_from: 8601 timestamp
+        :type backtesting_from: int
+        :param backtesting_to: 8601 timestamp
+        :type backtesting_to: int
+        :return: None
+        :rtype: None
+        """
         self.data = data
         self.backtesting_from = backtesting_from
         self.backtesting_to = backtesting_to
         print('[INFO] Starting backtest...')
 
-        data_per_tick = {}
+        data_per_tick = defaultdict(self.default_empty_array_dict)  # Saves data in format: time -> [tick]
         for pair in data:
             for tick in data[pair]:
-                try:
-                    data_per_tick[tick.time].append(tick)
-                except KeyError:
-                    data_per_tick[tick.time] = []
-                    data_per_tick[tick.time].append(tick)
-        for tick in data_per_tick:
-            ticks_passed_per_pair = {}
-            for pair_tick in data_per_tick[tick]:
-                try:
-                    var = ticks_passed_per_pair[pair_tick.pair]
-                except KeyError:
-                    ticks_passed_per_pair[pair_tick.pair] = []
-                self.trading_module.tick(pair_tick, ticks_passed_per_pair[pair_tick.pair])
-                ticks_passed_per_pair[pair_tick.pair].append(pair_tick)
+                data_per_tick[tick.time].append(tick)
+                self.trading_module.tick(tick)
 
         open_trades = self.trading_module.open_trades
         closed_trades = self.trading_module.closed_trades
@@ -60,19 +64,35 @@ class BackTesting:
 
     # This method is called when backtesting method finished processing all OHLCV-data
     def generate_backtesting_result(self, open_trades, closed_trades, budget):
+        """
+        TODO Feel free to optimize this method :)
+        Oversized method for generating backtesting results
+        :param open_trades: array of open trades
+        :type open_trades: [Trade]
+        :param closed_trades: array of closed trades
+        :type closed_trades: [Trade]
+        :param budget: Budget at the moment backtests end
+        :type budget: float
+        :return: None
+        :rtype: None
+        """
         print("================================================= \n| %sBacktesting Results%s "
               "\n=================================================" % (FONT_BOLD, FONT_RESET))
         budget += self.calculate_worth_of_open_trades(open_trades)
         starting_capital = self.starting_capital
         overall_profit = ((budget - starting_capital) / starting_capital) * 100
         max_seen_drawdown = self.calculate_max_seen_drawdown()
+        loss = self.calculate_loss_trades(closed_trades)
         print("| Backtesting from: \t\t%s" % datetime.fromtimestamp(self.backtesting_from / 1000))
         print("| Backtesting to: \t\t\t%s" % datetime.fromtimestamp(self.backtesting_to / 1000))
+        print("| ")
         print("| Started with: \t\t\t%s" % starting_capital + ' $')
         print("| Ended with: \t\t\t\t%s" % round(budget, 2) + ' $')
         print("| Overall profit: \t\t\t%s" % round(overall_profit, 2) + ' %')
         print("| Amount of trades: \t\t%s" % (len(open_trades) + len(closed_trades)))
         print("| Left-open trades:\t\t\t%s" % len(open_trades))
+        print("| Trades with loss: \t\t%s" % loss)
+        print("| ")
         print("| Max realized drawdown:\t%s" % round(self.trading_module.realized_drawdown, 2) + ' %')
         print("| Max drawdown 1 trade: \t%s" % round(self.trading_module.max_drawdown, 2) + ' %')
         print("| Max seen drawdown: \t\t%s" % round(max_seen_drawdown['drawdown'], 2) + ' %')
@@ -80,10 +100,9 @@ class BackTesting:
         print("| Drawdown to \t\t\t\t%s" % datetime.fromtimestamp(max_seen_drawdown['to'] / 1000))
         print("================================================="
               "\n| %s Per coin insights %s " % (FONT_BOLD, FONT_RESET))
-        # print(tabulate([['Alice', 24], ['Bob', 19]], headers=['Fancy', 'Table'], tablefmt='orgtbl'))
+
         stats = self.calculate_statistics_per_coin(open_trades, closed_trades)
         new_stats = []
-        index = 0
         for coin in stats:
             sell_reasons = {
                 "ROI": 0,
@@ -114,49 +133,53 @@ class BackTesting:
         print(tabulate(open_trade_stats,
                        headers=['Pair', 'cur. profit (%)', ' cur. profit ($)', 'max drawdown %', 'opened at'],
                        tablefmt='pretty'))
+        print("======================================================================")
+        print("%s|  DEMA BACKTESTING ENGINE IS SUBJECTED TO THE GNU AGPL-3.0 License %s" % (FONT_BOLD, FONT_RESET))
+        print("%s|  Copyright © 2021 - DemaTrading.ai%s" % (FONT_BOLD, FONT_RESET))
+        print("======================================================================")
 
     # Helper method for calculating worth of open trades
     def calculate_worth_of_open_trades(self, open_trades):
+        """
+        Method calculates worth of open trades
+        :param open_trades: array of open trades
+        :type open_trades: [Trade]
+        :return: returns the total value of all open trades
+        :rtype: float
+        """
         return_value = 0
         for trade in open_trades:
-            return_value += (trade.amount * trade.current)
+            return_value += (trade.currency_amount * trade.current)
         return return_value
 
     def calculate_statistics_per_coin(self, open_trades, closed_trades):
-        trades_per_coin = {}
-        all_trades = []
-        all_trades += open_trades
-        all_trades += closed_trades
+        """
+        TODO Feel free to optimize this method :)
+        :param open_trades: array of open trades
+        :type open_trades: [Trade]
+        :param closed_trades: array of closed trades
+        :type closed_trades: [Trade]
+        :return: returns dictionary with statistics per coin.
+        :rtype: dictionary
+        """
+        all_trades = open_trades + closed_trades
+        trades_per_coin = {
+            pair : {
+                'total_profit_prct' : 0,
+                'total_profit_amount': 0,
+                'amount_of_trades' : 0,
+                'max_drawdown' : 0.0,
+                'avg_duration' : [],
+                'sell_reasons' : defaultdict(int)
+            } for pair in self.data.keys()
+        }
 
         for trade in all_trades:
+            if trade.profit_percentage is not None:
+                trades_per_coin[trade.pair]['total_profit_prct'] += trade.profit_percentage
 
-            try:
-                trades_per_coin[trade.pair]
-            except KeyError:
-                trades_per_coin[trade.pair] = {}
-
-            try:
-                trades_per_coin[trade.pair]['total_profit_prct']
-            except KeyError:
-                trades_per_coin[trade.pair]['total_profit_prct'] = 0
-
-            try:
-                trades_per_coin[trade.pair]['total_profit_amount']
-            except KeyError:
-                trades_per_coin[trade.pair]['total_profit_amount'] = 0
-
-            try:
-                var1 = trades_per_coin[trade.pair]['amount_of_trades']
-                var2 = trades_per_coin[trade.pair]['max_drawdown']
-                var3 = trades_per_coin[trade.pair]['avg_duration']
-            except KeyError:
-                trades_per_coin[trade.pair]['avg_duration'] = []
-                trades_per_coin[trade.pair]['amount_of_trades'] = 0
-                trades_per_coin[trade.pair]['max_drawdown'] = 0.0
-
-            trades_per_coin[trade.pair]['total_profit_prct'] += trade.profit_percentage
-            trades_per_coin[trade.pair]['total_profit_amount'] += (trade.amount * trade.current) - (
-                    trade.amount * trade.open)
+            trades_per_coin[trade.pair]['total_profit_amount'] += (trade.currency_amount * trade.current) - (
+                    trade.currency_amount * trade.open)
             trades_per_coin[trade.pair]['amount_of_trades'] += 1
 
             if trade.status == 'closed':
@@ -165,17 +188,6 @@ class BackTesting:
                         trades_per_coin[trade.pair]['max_drawdown'] = trade.profit_percentage
 
                 trades_per_coin[trade.pair]['avg_duration'].append(trade.closed_at - trade.opened_at)
-                try:
-                    trades_per_coin[trade.pair]['sell_reasons']
-                except KeyError:
-                    trades_per_coin[trade.pair]['sell_reasons'] = {}
-
-                trades_per_coin[trade.pair]['avg_duration'].append(trade.closed_at - trade.opened_at)
-                try:
-                    trades_per_coin[trade.pair]['sell_reasons'][trade.sell_reason]
-                except KeyError:
-                    trades_per_coin[trade.pair]['sell_reasons'][trade.sell_reason] = 0
-
                 trades_per_coin[trade.pair]['sell_reasons'][trade.sell_reason] += 1
             else:
                 trades_per_coin[trade.pair]['avg_duration'].append(datetime.now() - trade.opened_at)
@@ -185,7 +197,12 @@ class BackTesting:
 
     # Method for calculating max seen drawdown
     # Max seen = visual drawdown (if you plot it). This drawdown might not be realized.
-    def calculate_max_seen_drawdown(self):
+    def calculate_max_seen_drawdown(self) -> dict:
+        """
+        Method calculates max seen drawdown based on the saved budget / value changes
+        :return: returns max_seen_drawdown as a dictionary
+        :rtype: dictionary
+        """
         max_seen_drawdown = {
             "from": "",
             "to": "",
@@ -196,7 +213,7 @@ class BackTesting:
             "to": "",
             "drawdown": 0
         }
-        timestamp_value = self.trading_module.value_per_timestamp
+        timestamp_value = self.trading_module.open_order_value_per_timestamp
         timestamp_budget = self.trading_module.budget_per_timestamp
         old_value = self.starting_capital
         for tick in timestamp_value:
@@ -228,3 +245,29 @@ class BackTesting:
                 temp_seen_drawdown['drawdown'] = tick_profit_percentage
 
         return max_seen_drawdown
+
+    def calculate_loss_trades(self, closed_trades: [Trade]) -> int:
+        """
+        Method calculates the amount of closed trades with loss
+        :param closed_trades: closed trades in an array
+        :type closed_trades: [Trade]
+        :return: amount of trades closed with loss
+        :rtype: int
+        """
+        loss = 0
+        for trade in closed_trades:
+            if trade.profit_percentage < 0:
+                loss+=1
+        return loss
+
+    def default_empty_array_dict(self):
+        """
+        Helper method for initializing defaultdict containing arrays
+        """
+        return []
+
+    def default_empty_dict_dict(self):
+        """
+        Helper method for initializing defaultdict
+        """
+        return defaultdict()
