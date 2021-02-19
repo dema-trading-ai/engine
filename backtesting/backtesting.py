@@ -238,7 +238,7 @@ class BackTesting:
             "to": "",
             "drawdown": 0
         }
-        timestamp_value = self.trading_module.value_per_timestamp
+        timestamp_value = self.trading_module.open_order_value_per_timestamp
         timestamp_budget = self.trading_module.budget_per_timestamp
         old_value = self.starting_capital
         for tick in timestamp_value:
