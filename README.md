@@ -1,14 +1,20 @@
 # dema-backtesting-module
 
 ## Running
-#### Requirements
+### Requirements for running without Docker
 Running this backtesting engine just takes a quite simple steps if you have the right things configured. Things you need:
 1. Python 3 installed on your system
 2. Pip Running on your system (https://pip.pypa.io/en/stable/installing/)
 3. Some code editor (PyCharm Community or Visual Studio Code Community works fine)
 4. Very very little knowlegde about Python
 
-#### Running
+### Requirements for running with Docker
+1. Docker installed on your system
+2. Some code editor (PyCharm Community or Visual Studio Code Community works fine)
+3. Very very little knowlegde about Python
+
+
+#### Running without Docker
 First run:
 ```` 
 pip install -r requirements.txt
@@ -18,6 +24,19 @@ After installing, you can run the backtesting module:
 ````
 python3 main.py
 ````
+
+#### Running with Docker
+First run:
+```` 
+docker build . -t dema-engine:alpha
+````
+
+To run the container: 
+````
+docker run --rm dema-engine:alpha
+````
+
+Note: do not forget '--rm' as your Docker will keep the container if you do, which is not necessary and will cause extreme increase in memory usage.
 ## Developing
 #### GitFlow
 To keep features, versions and fixes organized, we will be using the following gitflow.
