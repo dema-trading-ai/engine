@@ -6,7 +6,8 @@ Running this backtesting engine just takes a quite simple steps if you have the 
 1. Python 3 installed on your system
 2. Pip Running on your system (https://pip.pypa.io/en/stable/installing/)
 3. Some code editor (PyCharm Community or Visual Studio Code Community works fine)
-4. Very very little knowlegde about Python
+4. Install TA-Lib dependencies (see: https://github.com/mrjbq7/ta-lib Installation -> Dependencies)
+5. Very very little knowlegde about Python
 
 ### Requirements for running with Docker
 1. Docker installed on your system (https://docs.docker.com/get-docker/)
