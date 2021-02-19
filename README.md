@@ -9,7 +9,7 @@ Running this backtesting engine just takes a quite simple steps if you have the 
 4. Very very little knowlegde about Python
 
 ### Requirements for running with Docker
-1. Docker installed on your system
+1. Docker installed on your system (https://docs.docker.com/get-docker/)
 2. Some code editor (PyCharm Community or Visual Studio Code Community works fine)
 3. Very very little knowlegde about Python
 
