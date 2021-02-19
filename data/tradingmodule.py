@@ -7,9 +7,7 @@ from datetime import datetime
 # TradingModule is responsible for tracking trades, calling strategy methods
 # and virtually opening / closing trades based on strategies' signal.
 #
-# DataFrame parser is
-#
-# © 2021 DemaTrading.AI - Tijs Verbeek
+# © 2021 DemaTrading.AI
 # ======================================================================
 
 
@@ -41,6 +39,12 @@ class TradingModule:
         self.max_open_trades = int(self.config['max-open-trades'])
 
     def tick(self, ohlcv: OHLCV):
+        """
+        :param ohlcv: OHLCV Model filled with tick-data
+        :type ohlcv: OHLCV
+        :return: None
+        :rtype: None
+        """
         self.past_ticks.append(ohlcv)
         trade = self.find_open_trade(ohlcv.pair)
         if trade:
@@ -51,12 +55,32 @@ class TradingModule:
         self.budget_per_timestamp[ohlcv.time] = self.budget
 
     def no_trade_tick(self, ohlcv: OHLCV):
+        """
+        Method is called when specified pair has no open trades
+        populates buy signals
+        :param ohlcv: OHLCV Model filled with tick-data
+        :type ohlcv: OHLCV
+        :return: None
+        :rtype: None
+        """
         indicators = self.strategy.populate_indicators(self.past_ticks, ohlcv)
         buy = self.strategy.populate_buy_signal(indicators, ohlcv)
         if buy:
             self.open_trade(ohlcv)
 
     def open_trade_tick(self, ohlcv: OHLCV, trade: Trade):
+        """
+        Method is called when specified pair has open trades.
+        checks for ROI
+        checks for SL
+        populates Sell Signal
+        :param ohlcv: OHLCV Model filled with tick-data
+        :type ohlcv: OHLCV
+        :param trade: Trade corresponding to tick pair
+        :type Trade: Trade
+        :return: None
+        :rtype: None
+        """
         self.update_value_per_timestamp_tracking(trade, ohlcv)  # update total value tracking
 
         # if current profit is below 0, update drawdown / check SL
@@ -72,6 +96,16 @@ class TradingModule:
             self.close_trade(trade, reason="Sell signal", ohlcv=ohlcv)
 
     def close_trade(self, trade: Trade, reason: str, ohlcv: OHLCV):
+        """
+        :param trade: Trade model, trade to close
+        :type trade: Trade
+        :param reason: Reason for the trade to be closed (SL, ROI, Sell Signal)
+        :type reason: string
+        :param ohlcv: Last candle
+        :type ohlcv: OHLCV model
+        :return: None
+        :rtype: None
+        """
         date = datetime.fromtimestamp(ohlcv.time / 1000)
         trade.close_trade(reason, date)
         earnings = (trade.close * trade.currency_amount)
@@ -81,6 +115,13 @@ class TradingModule:
         self.update_drawdowns_closed_trade(trade)
 
     def open_trade(self, ohlcv: OHLCV):
+        """
+        Method opens a trade for pair in ohlcv
+        :param ohlcv: last OHLCV model (candle)
+        :type ohlcv: OHLCV model
+        :return: None
+        :rtype: None
+        """
         if self.budget <= 0:
             print("[INFO] Budget is running low, cannot buy")
             return
@@ -95,12 +136,28 @@ class TradingModule:
         self.open_trades.append(new_trade)
 
     def check_roi_open_trade(self, trade: Trade, ohlcv: OHLCV) -> bool:
+        """
+        :param trade: Trade model to check
+        :type trade: Trade model
+        :param ohlcv: last candle
+        :type ohlcv: OHLCV model
+        :return: return whether to close the trade based on ROI
+        :rtype: boolean
+        """
         if trade.profit_percentage > float(self.config['roi']):
             self.close_trade(trade, reason="ROI", ohlcv=ohlcv)
             return True
         return False
 
     def check_stoploss_open_trade(self, trade: Trade, ohlcv: OHLCV) -> bool:
+        """
+        :param trade: Trade model to check
+        :type trade: Trade model
+        :param ohlcv: last candle
+        :type ohlcv: OHLCV model
+        :return: return whether to close the trade based on Stop Loss
+        :rtype: boolean
+        """
         if trade.profit_percentage < 0:
             if trade.max_drawdown is None or trade.max_drawdown > trade.profit_percentage:
                 trade.max_drawdown = trade.profit_percentage
@@ -110,22 +167,51 @@ class TradingModule:
         return False
 
     def find_open_trade(self, pair: str):
+        """
+        :param pair: pair to check in "AAA/BBB" format
+        :type pair: string
+        :return: trade if found
+        :rtype: Trade model / None
+        """
         for trade in self.open_trades:
             if trade.pair == pair:
                 return trade
         return None
 
     def get_total_value_of_open_trades(self):
+        """
+        Method calculates the total value of all open trades
+
+        :return: The total value in base-currency of all open trades
+        :rtype: float
+        """
         return_value = 0
         for trade in self.open_trades:
             return_value += (trade.currency_amount * trade.current)
         return return_value
 
     def update_value_per_timestamp_tracking(self, trade: Trade, ohlcv: OHLCV):
+        """
+        Method is used to be able to track the value change per timestamp per open trade
+        next, this is used for calculating max seen drawdown
+        :param trade: Any open trade
+        :type trade: Trade model
+        :param ohlcv: last candle
+        :type ohlcv: OHLCV model
+        :return: None
+        :rtype: None
+        """
         current_total_price = (trade.currency_amount * trade.current)
         self.open_order_value_per_timestamp[ohlcv.time] = current_total_price
 
     def update_drawdowns_closed_trade(self, trade: Trade):
+        """
+        This method updates realized drawdown tracking after closing a trade
+        :param trade: last closed Trade
+        :type trade: Trade Model
+        :return: None
+        :rtype: None
+        """
         if trade.profit_percentage < self.max_drawdown:
             self.max_drawdown = trade.profit_percentage
 

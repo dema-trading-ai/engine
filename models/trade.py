@@ -28,12 +28,18 @@ class Trade:
         self.opened_at = date
 
     def close_trade(self, reason, date):
+        """
+        Closes this trade and updates stats according to latest data.
+        """
         self.status = 'closed'
         self.sell_reason = reason
         self.close = self.current
         self.closed_at = date
 
     def update_stats(self, ohlcv):
+        """
+        Updates states according to latest data.
+        """
         self.current = ohlcv.close
         self.profit_percentage = ((ohlcv.close - self.open) / self.open) * 100
         self.profit_dollar = (self.currency_amount * self.current) - (self.currency_amount * self.open)
