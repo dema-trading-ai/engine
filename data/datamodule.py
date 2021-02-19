@@ -90,7 +90,6 @@ class DataModule:
                 print("[INFO] Did not find datafile for %s" % pair)
                 self.history_data[pair] = []
                 self.download_data_for_pair(pair, True)
-                continue
             elif self.does_datafile_cover_backtesting_period(pair, self.config['timeframe']):
                 # load data from datafile instead of exchange
                 self.history_data[pair] = []
@@ -197,18 +196,25 @@ class DataModule:
         :return: Returns whether datafile for specified pair / timeframe already exists
         :rtype: boolean
         """
-        filename = self.generate_datafile_name(pair, timeframe)
-        dirpath = "data/backtesting-data/" + self.config["exchange"] + "/" + filename
+        dirpath = os.path.join("data/backtesting-data", self.config["exchange"], filename)
+        exhange_path = os.path.join("data/backtesting-data", self.config["exchange"])
+        self.create_directory_if_not_exists(exhange_path)
+        return path.exists(dirpath)
 
-        if not path.exists("data/backtesting-data/%s" % self.config["exchange"]):
+    def create_directory_if_not_exists(self, directory: str) -> None:
+        """
+        :param directory: string of path to directory
+        :type directory: string
+        :return: None
+        :rtype: None
+        """
+        if not path.exists(directory):
             try:
-                os.makedirs("data/backtesting-data/%s" % self.config["exchange"])
+                os.makedirs(directory)
             except OSError:
                 print("Creation of the directory %s failed" % path)
             else:
                 print("Successfully created the directory %s " % path)
-                return False
-        return path.exists(dirpath)
 
     def read_data_from_datafile(self, pair, timeframe) -> None:
         """
@@ -224,7 +230,7 @@ class DataModule:
         :rtype: None
         """
         filename = self.generate_datafile_name(pair, timeframe)
-        filepath = "data/backtesting-data/" + self.config["exchange"] + "/" + filename
+        filepath = os.path.join("data/backtesting-data/", self.config["exchange"], filename)
         try:
             with open(filepath, 'r') as datafile:
                 data = datafile.read()
@@ -256,7 +262,7 @@ class DataModule:
         """
         data_for_file = {}
         filename = self.generate_datafile_name(pair, timeframe)
-        filepath = "data/backtesting-data/" + self.config["exchange"] + "/" + filename
+        filepath = os.path.join("data/backtesting-data/", self.config["exchange"], filename)
         data_for_file["from"] = self.backtesting_from
         data_for_file["to"] = self.backtesting_to
         data_for_file["ohlcv"] = []
@@ -291,7 +297,7 @@ class DataModule:
         :rtype: None
         """
         filename = self.generate_datafile_name(pair, timeframe)
-        filepath = "data/backtesting-data/" + self.config["exchange"] + "/" + filename
+        filepath = os.path.join("data/backtesting-data/", self.config["exchange"], filename)
         os.remove(filepath)
 
     def does_datafile_cover_backtesting_period(self, pair: str, timeframe: str) -> bool:
@@ -304,7 +310,7 @@ class DataModule:
         :rtype: boolean
         """
         filename = self.generate_datafile_name(pair, timeframe)
-        filepath = "data/backtesting-data/%s/%s" % (self.config['exchange'], filename)
+        filepath = os.path.join("data/backtesting-data/", self.config["exchange"], filename)
         try:
             with open(filepath, 'r') as datafile:
                 data = datafile.read()

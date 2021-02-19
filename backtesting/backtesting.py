@@ -55,8 +55,6 @@ class BackTesting:
                 data_per_tick[tick.time].append(tick)
 
         for tick in data_per_tick:
-            if len(data_per_tick[tick]) < 3:
-                print("Length of tick array: %s" % len(data_per_tick[tick]))
             ticks_passed_per_pair = defaultdict(self.default_empty_array_dict)
             for pair_tick in data_per_tick[tick]:
                 self.trading_module.tick(pair_tick, ticks_passed_per_pair[pair_tick.pair])
