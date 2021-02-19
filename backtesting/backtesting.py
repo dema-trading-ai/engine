@@ -55,8 +55,6 @@ class BackTesting:
                 data_per_tick[tick.time].append(tick)
 
         for tick in data_per_tick:
-            if len(data_per_tick[tick]) < 3:
-                print("Length of tick array: %s" % len(data_per_tick[tick]))
             ticks_passed_per_pair = defaultdict(self.default_empty_array_dict)
             for pair_tick in data_per_tick[tick]:
                 self.trading_module.tick(pair_tick, ticks_passed_per_pair[pair_tick.pair])
@@ -238,7 +236,7 @@ class BackTesting:
             "to": "",
             "drawdown": 0
         }
-        timestamp_value = self.trading_module.value_per_timestamp
+        timestamp_value = self.trading_module.open_order_value_per_timestamp
         timestamp_budget = self.trading_module.budget_per_timestamp
         old_value = self.starting_capital
         for tick in timestamp_value:
