@@ -4,10 +4,6 @@ from data.tradingmodule import TradingModule
 
 
 class MainController:
-    config = None
-    data_module = None
-    backtesting_module = None
-    trading_module = None
 
     def __init__(self, config):
         self.config = config

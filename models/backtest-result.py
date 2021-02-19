@@ -1,7 +1,7 @@
 # ======================================================================
 # BacktestResult is used for passing data from/to backtesting module
 #
-# © 2021 DemaTrading.AI - Tijs Verbeek
+# © 2021 DemaTrading.AI
 # ======================================================================
 
 
