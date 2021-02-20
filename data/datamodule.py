@@ -196,7 +196,8 @@ class DataModule:
         :return: Returns whether datafile for specified pair / timeframe already exists
         :rtype: boolean
         """
-        dirpath = os.path.join("data/backtesting-data", self.config["exchange"], filename)
+        pair_without_slash = pair.split('/')
+        dirpath = os.path.join("data/backtesting-data", self.config["exchange"], pair_without_slash[0], pair_without_slash[1])
         exhange_path = os.path.join("data/backtesting-data", self.config["exchange"])
         self.create_directory_if_not_exists(exhange_path)
         return path.exists(dirpath)

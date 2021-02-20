@@ -54,8 +54,8 @@ class BackTesting:
             for tick in data[pair]:
                 data_per_tick[tick.time].append(tick)
 
+        ticks_passed_per_pair = defaultdict(self.default_empty_array_dict)
         for tick in data_per_tick:
-            ticks_passed_per_pair = defaultdict(self.default_empty_array_dict)
             for pair_tick in data_per_tick[tick]:
                 self.trading_module.tick(pair_tick, ticks_passed_per_pair[pair_tick.pair])
                 ticks_passed_per_pair[pair_tick.pair].append(pair_tick)

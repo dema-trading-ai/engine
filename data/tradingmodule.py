@@ -293,14 +293,12 @@ class TradingModule:
         if trade.profit_percentage < 0:
             if self.last_closed_trade is None:
                 self.temp_realized_drawdown = trade.profit_percentage
-                self.last_closed_trade = trade
-                return
-            if self.last_closed_trade.profit_percentage < 0:
+            elif self.last_closed_trade.profit_percentage < 0:
                 self.temp_realized_drawdown += trade.profit_percentage
-            self.temp_realized_drawdown = trade.profit_percentage
+            else:
+                self.temp_realized_drawdown = trade.profit_percentage
         else:
             if self.temp_realized_drawdown < self.realized_drawdown:
                 self.realized_drawdown = self.temp_realized_drawdown
             self.temp_realized_drawdown = 0
-
         self.last_closed_trade = trade
