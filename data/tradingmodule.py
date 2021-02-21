@@ -17,7 +17,6 @@ class TradingModule:
     max_open_trades = None
 
     config = None
-    past_ticks = []
     closed_trades = []
     open_trades = []
     max_drawdown = 0
@@ -38,23 +37,24 @@ class TradingModule:
         self.fee = float(self.config['fee']) / 100
         self.max_open_trades = int(self.config['max-open-trades'])
 
-    def tick(self, ohlcv: OHLCV):
+    def tick(self, ohlcv: OHLCV, data: [OHLCV]) -> None:
         """
         :param ohlcv: OHLCV Model filled with tick-data
         :type ohlcv: OHLCV
+        :param data: All passed ticks
+        :type data: [OHLCV]
         :return: None
         :rtype: None
         """
-        self.past_ticks.append(ohlcv)
         trade = self.find_open_trade(ohlcv.pair)
         if trade:
             trade.update_stats(ohlcv)
-            self.open_trade_tick(ohlcv, trade)
+            self.open_trade_tick(ohlcv, data, trade)
         else:
-            self.no_trade_tick(ohlcv)
+            self.no_trade_tick(ohlcv, data)
         self.budget_per_timestamp[ohlcv.time] = self.budget
 
-    def no_trade_tick(self, ohlcv: OHLCV):
+    def no_trade_tick(self, ohlcv: OHLCV, data: [OHLCV]):
         """
         Method is called when specified pair has no open trades
         populates buy signals
@@ -63,12 +63,12 @@ class TradingModule:
         :return: None
         :rtype: None
         """
-        indicators = self.strategy.populate_indicators(self.past_ticks, ohlcv)
+        indicators = self.strategy.populate_indicators(data, ohlcv)
         buy = self.strategy.populate_buy_signal(indicators, ohlcv)
         if buy:
             self.open_trade(ohlcv)
 
-    def open_trade_tick(self, ohlcv: OHLCV, trade: Trade):
+    def open_trade_tick(self, ohlcv: OHLCV, data: [OHLCV], trade: Trade) -> None:
         """
         Method is called when specified pair has open trades.
         checks for ROI
@@ -89,13 +89,13 @@ class TradingModule:
         if stoploss or roi:
             return
 
-        indicators = self.strategy.populate_indicators(self.past_ticks, ohlcv)
+        indicators = self.strategy.populate_indicators(data, ohlcv)
         sell = self.strategy.populate_sell_signal(indicators, ohlcv, trade)
 
         if sell:
             self.close_trade(trade, reason="Sell signal", ohlcv=ohlcv)
 
-    def close_trade(self, trade: Trade, reason: str, ohlcv: OHLCV):
+    def close_trade(self, trade: Trade, reason: str, ohlcv: OHLCV) -> None:
         """
         :param trade: Trade model, trade to close
         :type trade: Trade
@@ -178,7 +178,7 @@ class TradingModule:
                 return trade
         return None
 
-    def get_total_value_of_open_trades(self):
+    def get_total_value_of_open_trades(self) -> float:
         """
         Method calculates the total value of all open trades
 
@@ -202,8 +202,11 @@ class TradingModule:
         :rtype: None
         """
         current_total_price = (trade.currency_amount * trade.current)
-        self.open_order_value_per_timestamp[ohlcv.time] = current_total_price
-
+        try:
+            self.open_order_value_per_timestamp[ohlcv.time] += current_total_price
+        except KeyError:
+            self.open_order_value_per_timestamp[ohlcv.time] = current_total_price
+        
     def update_drawdowns_closed_trade(self, trade: Trade):
         """
         This method updates realized drawdown tracking after closing a trade
@@ -216,14 +219,12 @@ class TradingModule:
             self.max_drawdown = trade.profit_percentage
 
         if trade.profit_percentage < 0:
-            print('!!!! closed trade with loss')
             if self.last_closed_trade is None:
                 self.temp_realized_drawdown = trade.profit_percentage
-                self.last_closed_trade = trade
-                return
-            if self.last_closed_trade.profit_percentage < 0:
+            elif self.last_closed_trade.profit_percentage < 0:
                 self.temp_realized_drawdown += trade.profit_percentage
-            self.temp_realized_drawdown = trade.profit_percentage
+            else:
+                self.temp_realized_drawdown = trade.profit_percentage
         else:
             if self.temp_realized_drawdown < self.realized_drawdown:
                 self.realized_drawdown = self.temp_realized_drawdown

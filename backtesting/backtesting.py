@@ -19,9 +19,6 @@ FONT_RESET = "\033[0m"
 
 
 class BackTesting:
-    config = None
-    trading_module = None
-    starting_capital = None
     backtesting_from = None
     backtesting_to = None
     data = {}
@@ -32,7 +29,7 @@ class BackTesting:
         self.starting_capital = float(self.config['starting-capital'])
 
     # This method is called by DataModule when all data is gathered from chosen exchange
-    def start_backtesting(self, data, backtesting_from, backtesting_to):
+    def start_backtesting(self, data, backtesting_from, backtesting_to) -> None:
         """
         Method formats received data.
         Method calls tradingmodule for each tick/candle (OHLCV).
@@ -51,11 +48,16 @@ class BackTesting:
         self.backtesting_to = backtesting_to
         print('[INFO] Starting backtest...')
 
-        data_per_tick = defaultdict(self.default_empty_array_dict)  # Saves data in format: time -> [tick]
+        data_per_tick = defaultdict(self.default_empty_array_dict)
         for pair in data:
             for tick in data[pair]:
                 data_per_tick[tick.time].append(tick)
-                self.trading_module.tick(tick)
+
+        ticks_passed_per_pair = defaultdict(self.default_empty_array_dict)
+        for time in data_per_tick:
+            for pair_tick in data_per_tick[time]:
+                self.trading_module.tick(pair_tick, ticks_passed_per_pair[pair_tick.pair])
+                ticks_passed_per_pair[pair_tick.pair].append(pair_tick)
 
         open_trades = self.trading_module.open_trades
         closed_trades = self.trading_module.closed_trades
@@ -63,10 +65,11 @@ class BackTesting:
         self.generate_backtesting_result(open_trades, closed_trades, budget)
 
     # This method is called when backtesting method finished processing all OHLCV-data
-    def generate_backtesting_result(self, open_trades, closed_trades, budget):
+    def generate_backtesting_result(self, open_trades: [Trade], closed_trades: [Trade], budget: float) -> None:
         """
         TODO Feel free to optimize this method :)
         Oversized method for generating backtesting results
+
         :param open_trades: array of open trades
         :type open_trades: [Trade]
         :param closed_trades: array of closed trades
@@ -139,9 +142,10 @@ class BackTesting:
         print("======================================================================")
 
     # Helper method for calculating worth of open trades
-    def calculate_worth_of_open_trades(self, open_trades):
+    def calculate_worth_of_open_trades(self, open_trades: [Trade]) -> float:
         """
         Method calculates worth of open trades
+
         :param open_trades: array of open trades
         :type open_trades: [Trade]
         :return: returns the total value of all open trades
@@ -177,7 +181,6 @@ class BackTesting:
         for trade in all_trades:
             if trade.profit_percentage is not None:
                 trades_per_coin[trade.pair]['total_profit_prct'] += trade.profit_percentage
-
             trades_per_coin[trade.pair]['total_profit_amount'] += (trade.currency_amount * trade.current) - (
                     trade.currency_amount * trade.open)
             trades_per_coin[trade.pair]['amount_of_trades'] += 1
@@ -254,11 +257,11 @@ class BackTesting:
         :return: amount of trades closed with loss
         :rtype: int
         """
-        loss = 0
+        loss_trades = 0
         for trade in closed_trades:
             if trade.profit_percentage < 0:
-                loss+=1
-        return loss
+                loss_trades += 1
+        return loss_trades
 
     def default_empty_array_dict(self):
         """

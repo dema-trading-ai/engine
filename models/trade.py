@@ -2,8 +2,9 @@
 # Trade class is used by TradingModule for registering trades and tracking
 # stats while ticks pass.
 #
-# © 2021 DemaTrading.AI - Tijs Verbeek
+# © 2021 DemaTrading.AI
 # ======================================================================
+
 
 class Trade:
     pair = None
