@@ -97,7 +97,8 @@ class DataModule:
             elif not self.does_datafile_cover_backtesting_period(pair, self.config['timeframe']):
                 # remove file, download data from exchange, create new datafile
                 self.history_data[pair] = []
-                self.delete_file(pair, self.config['timeframe'])
+                if self.check_for_datafile_existence(pair, self.config['timeframe']):
+                    self.delete_file(pair, self.config['timeframe'])
                 self.download_data_for_pair(pair, True)
 
         self.backtesting_module.start_backtesting(self.history_data, self.backtesting_from, self.backtesting_to)

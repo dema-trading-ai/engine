@@ -63,8 +63,8 @@ class TradingModule:
         """
         past_ticks = []
         past_ticks += data
-        indicators = self.strategy.populate_indicators(past_ticks, ohlcv)
-        buy = self.strategy.populate_buy_signal(indicators, ohlcv)
+        indicators = self.strategy.generate_indicators(past_ticks, ohlcv)
+        buy = self.strategy.buy_signal(indicators, ohlcv)
         if buy:
             self.open_trade(ohlcv)
 
@@ -95,8 +95,8 @@ class TradingModule:
 
         past_ticks = []
         past_ticks += data
-        indicators = self.strategy.populate_indicators(past_ticks, ohlcv)
-        sell = self.strategy.populate_sell_signal(indicators, ohlcv, trade)
+        indicators = self.strategy.generate_indicators(past_ticks, ohlcv)
+        sell = self.strategy.sell_signal(indicators, ohlcv, trade)
 
         if sell:
             self.close_trade(trade, reason="Sell signal", ohlcv=ohlcv)
@@ -148,6 +148,7 @@ class TradingModule:
         new_trade.amount = (amount / ohlcv.close)
         new_trade.opened_at = date
         self.open_trades.append(new_trade)
+        self.update_value_per_timestamp_tracking(new_trade, ohlcv)
 
     def check_roi_open_trade(self, trade: Trade, ohlcv: OHLCV) -> bool:
         """
@@ -247,7 +248,7 @@ class TradingModule:
         :return: None
         :rtype: None
         """
-        current_total_price = (trade.amount * trade.current)
+        current_total_price = (trade.amount * ohlcv.low)
         try:
             var = self.open_order_value_per_timestamp[ohlcv.time]
         except KeyError:
@@ -264,17 +265,7 @@ class TradingModule:
         :return: None
         :rtype: None
         """
-        # track whether KeyError arose
-        first = False
-        try:
-            var = self.budget_per_timestamp[ohlcv.time]
-        except KeyError:
-            self.budget_per_timestamp[ohlcv.time] = self.budget
-            first = True
-
-        # if KeyError didnt arise, update budget (since orders may have been placed)
-        if not first:
-            self.budget_per_timestamp[ohlcv.time] = self.budget
+        self.budget_per_timestamp[ohlcv.time] = self.budget
 
     def update_drawdowns_closed_trade(self, trade: Trade) -> None:
         """
