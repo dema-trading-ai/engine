@@ -23,22 +23,7 @@ class Strategy:
         :return: dictionary filled with indicator-data
         :rtype: dictionary
         """
-        indicators = {}
-        if (len(past_candles)+1) < self.min_candles:
-            return indicators
-
-        # dinges = numpy.stack(past_candles).astype(OHLCV)
-        #
-        # close = []
-        # volume = []
-        # for candle in past_candles:
-        #     close.append(candle.close)
-        #     volume.append(candle.volume)
-        # close.append(current_candle)
-        #
-        # indicators['SMA21'] = ta.MA(numpy.array(close), timeperiod=21)
-        # indicators['RSI'] = ta.RSI(numpy.array(close))
-        return indicators
+        return {}
 
     def buy_signal(self, indicators, current_candle: OHLCV) -> bool:
         """
@@ -49,7 +34,6 @@ class Strategy:
         :return: returns whether to buy or not buy specified coin (True = buy, False = skip)
         :rtype: boolean
         """
-
         return True
 
     def sell_signal(self, indicators, current_candle, trade: Trade) -> bool:
