@@ -114,7 +114,7 @@ class TradingModule:
         self.closed_trades.append(trade)
         self.update_drawdowns_closed_trade(trade)
 
-    def open_trade(self, ohlcv: OHLCV):
+    def open_trade(self, ohlcv: OHLCV) -> None:
         """
         Method opens a trade for pair in ohlcv
         :param ohlcv: last OHLCV model (candle)
@@ -166,7 +166,7 @@ class TradingModule:
                 return True
         return False
 
-    def find_open_trade(self, pair: str):
+    def find_open_trade(self, pair: str) -> Trade:
         """
         :param pair: pair to check in "AAA/BBB" format
         :type pair: string
@@ -190,7 +190,7 @@ class TradingModule:
             return_value += (trade.currency_amount * trade.current)
         return return_value
 
-    def update_value_per_timestamp_tracking(self, trade: Trade, ohlcv: OHLCV):
+    def update_value_per_timestamp_tracking(self, trade: Trade, ohlcv: OHLCV) -> None:
         """
         Method is used to be able to track the value change per timestamp per open trade
         next, this is used for calculating max seen drawdown
@@ -207,7 +207,7 @@ class TradingModule:
         except KeyError:
             self.open_order_value_per_timestamp[ohlcv.time] = current_total_price
         
-    def update_drawdowns_closed_trade(self, trade: Trade):
+    def update_drawdowns_closed_trade(self, trade: Trade) -> None:
         """
         This method updates realized drawdown tracking after closing a trade
         :param trade: last closed Trade
