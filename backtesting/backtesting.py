@@ -160,6 +160,7 @@ class BackTesting:
     def calculate_statistics_per_coin(self, open_trades, closed_trades):
         """
         TODO Feel free to optimize this method :)
+        TODO This method does not work fully anymore. Issue will be made.
 
         :param open_trades: array of open trades
         :type open_trades: [Trade]

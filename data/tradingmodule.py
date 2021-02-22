@@ -24,9 +24,10 @@ class TradingModule:
 
     open_order_value_per_timestamp = {}
     budget_per_timestamp = {}
+    current_drawdown = 0.0
+    last_total_value = 0.0
 
     last_closed_trade = None
-    temp_realized_drawdown = 0
     realized_drawdown = 0
 
     def __init__(self, config):
@@ -287,18 +288,24 @@ class TradingModule:
         :return: None
         :rtype: None
         """
+        # this part is for setting the max_drawdown for 1 trade
         if trade.profit_percentage < self.max_drawdown:
             self.max_drawdown = trade.profit_percentage
 
-        if trade.profit_percentage < 0:
-            if self.last_closed_trade is None:
-                self.temp_realized_drawdown = trade.profit_percentage
-            elif self.last_closed_trade.profit_percentage < 0:
-                self.temp_realized_drawdown += trade.profit_percentage
-            else:
-                self.temp_realized_drawdown = trade.profit_percentage
+        current_total_value = self.budget + self.get_total_value_of_open_trades()
+        if self.last_total_value == 0:
+            difference = 0
         else:
-            if self.temp_realized_drawdown < self.realized_drawdown:
-                self.realized_drawdown = self.temp_realized_drawdown
-            self.temp_realized_drawdown = 0
-        self.last_closed_trade = trade
+            difference = ((current_total_value - self.last_total_value) / self.last_total_value) * 100
+
+        # if the difference is drawdown, and no drawdown is realized at this moment, this is new drawdown.
+        # else update the current drawdown with the profit percentage difference
+        if difference < 0 and self.current_drawdown > 0:
+            self.current_drawdown = difference
+        else:
+            self.current_drawdown += difference
+
+        # if the current drawdown is bigger than the last realized drawdown, update it
+        if self.current_drawdown < self.realized_drawdown:
+            self.realized_drawdown = self.current_drawdown
+        self.last_total_value = current_total_value
