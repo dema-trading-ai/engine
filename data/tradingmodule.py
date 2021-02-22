@@ -25,9 +25,6 @@ class TradingModule:
     open_order_value_per_timestamp = {}
     budget_per_timestamp = {}
     current_drawdown = 0.0
-    last_total_value = 0.0
-
-    last_closed_trade = None
     realized_drawdown = 0
 
     def __init__(self, config):
@@ -293,19 +290,16 @@ class TradingModule:
             self.max_drawdown = trade.profit_percentage
 
         current_total_value = self.budget + self.get_total_value_of_open_trades()
-        if self.last_total_value == 0:
-            difference = 0
-        else:
-            difference = ((current_total_value - self.last_total_value) / self.last_total_value) * 100
+        perc_of_total_value = ((trade.amount * trade.close) / current_total_value)*100
+        perc_influence = trade.profit_percentage * (perc_of_total_value/100)
 
         # if the difference is drawdown, and no drawdown is realized at this moment, this is new drawdown.
         # else update the current drawdown with the profit percentage difference
-        if difference < 0 and self.current_drawdown > 0:
-            self.current_drawdown = difference
+        if perc_influence < 0 and self.current_drawdown >= 0:
+            self.current_drawdown = perc_influence
         else:
-            self.current_drawdown += difference
+            self.current_drawdown += perc_influence
 
         # if the current drawdown is bigger than the last realized drawdown, update it
         if self.current_drawdown < self.realized_drawdown:
             self.realized_drawdown = self.current_drawdown
-        self.last_total_value = current_total_value
