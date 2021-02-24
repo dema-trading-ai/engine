@@ -1,13 +1,13 @@
 {
   "exchange": "binance",
-  "timeframe": "5m",
+  "timeframe": "30m",
   "max-open-trades": "3",
   "starting-capital": "100",
   "backtesting-from": "2021-01-20",
-  "backtesting-to": "2021-01-31",
-  "backtesting-till-now": "True",
+  "backtesting-to": "2021-02-10",
+  "backtesting-till-now": "False",
   "stoploss": "-20",
-  "roi": "8",
+  "roi": "1",
   "pairs": [
     "BTC/USDT",
     "ETH/USDT",
