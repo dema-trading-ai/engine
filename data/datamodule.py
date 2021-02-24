@@ -44,7 +44,6 @@ class DataModule:
         checks for exchange OHLCV compatibility
         checks for timeframe support
         loads markets if no errors occur
-
         :return: None
         :rtype: None
         """
@@ -80,7 +79,6 @@ class DataModule:
     def load_historical_data(self) -> None:
         """
         Method checks for datafile existence, if not existing, download data and save to file
-
         :return: None
         :rtype: None
         """
@@ -148,7 +146,6 @@ class DataModule:
         Besides sets self.timeframe_calc property, which is used
         to calculate how much time has passed based on an amount of candles
         so:
-
         self.timeframe_calc * 10 candles passed = milliseconds passed
         """
         print('[INFO] Configuring timeframe')
@@ -157,18 +154,16 @@ class DataModule:
         if not match:
             print("[ERROR] Error whilst parsing timeframe")
             raise SystemExit
-        if match:
-            items = re.split(r'([0-9]+)', timeframe)
-            if items[2] == 'm':
-                self.timeframe_calc = int(items[1]) * minute
-            if items[2] == 'h':
-                self.timeframe_calc = int(items[1]) * hour
+        items = re.split(r'([0-9]+)', timeframe)
+        if items[2] == 'm':
+            self.timeframe_calc = int(items[1]) * minute
+        elif items[2] == 'h':
+            self.timeframe_calc = int(items[1]) * hour
 
     def config_from_to(self) -> None:
         """
         This method sets the self.backtesting_to / backtesting_from properties
         with 8601 parsed timestamp
-
         :return: None
         :rtype: None
         """
@@ -222,7 +217,6 @@ class DataModule:
         When datafile is covering requested backtesting period,
         this method reads the data from the files. Saves this in
         self.historical_data
-
         :param pair: Certain coin pair in "AAA/BBB" format
         :type pair: string
         :param timeframe: Time frame of coin pair f.e. "1h" / "5m"
@@ -251,7 +245,6 @@ class DataModule:
     def create_new_datafile(self, data: [OHLCV], pair: str, timeframe: str) -> None:
         """
         Method creates new json datafile for pair in timeframe
-
         :param data: Downloaded data to write to the datafile
         :type data: OHLCV array
         :param pair: Certain coin pair in "AAA/BBB" format
@@ -261,12 +254,13 @@ class DataModule:
         :return: None
         :rtype: None
         """
-        data_for_file = {}
+        data_for_file = {
+            "from" : self.backtesting_from,
+            "to" : self.backtesting_to,
+            "ohlcv" : []
+        }
         filename = self.generate_datafile_name(pair, timeframe)
         filepath = os.path.join("data/backtesting-data/", self.config["exchange"], filename)
-        data_for_file["from"] = self.backtesting_from
-        data_for_file["to"] = self.backtesting_to
-        data_for_file["ohlcv"] = []
         for tick in data:
             json_ohlcv = OHLCVEncoder().encode(tick)
             data_for_file["ohlcv"].append(json_ohlcv)
@@ -289,7 +283,6 @@ class DataModule:
         """
         Method removes existing datafile, as it does not cover requested
         backtesting period.
-
         :param pair: Certain coin pair in "AAA/BBB" format
         :type pair: string
         :param timeframe: Time frame of coin pair f.e. "1h" / "5m"
@@ -330,7 +323,6 @@ class DataModule:
     def customOHLCVDecoder(self, ohlcv_dict) -> namedtuple:
         """
         This method is used for reading ohlcv-data from saved json datafiles.
-
         :param ohlcv_dict: dictionary-format ohlcv-model, which is 1 candle in specified timeframe
         :type ohlcv_dict: json-format ohlcv-model
         :return: named tuple with OHLCV properties (more or less the same as the model)
