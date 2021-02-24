@@ -34,7 +34,6 @@ class BackTesting:
         Method formats received data.
         Method calls tradingmodule for each tick/candle (OHLCV).
         Method finally calls generate result method
-
         :param data: dictionary of all coins with all OHLCV data
         :type data: dictionary
         :param backtesting_from: 8601 timestamp
@@ -154,7 +153,7 @@ class BackTesting:
         """
         return_value = 0
         for trade in open_trades:
-            return_value += (trade.amount * trade.current)
+            return_value += (trade.currency_amount * trade.current)
         return return_value
 
     def calculate_statistics_per_coin(self, open_trades, closed_trades):
@@ -169,46 +168,29 @@ class BackTesting:
         :return: returns dictionary with statistics per coin.
         :rtype: dictionary
         """
-        trades_per_coin = defaultdict(self.default_empty_dict_dict)
-        all_trades = []
-        all_trades += open_trades
-        all_trades += closed_trades
+        all_trades = open_trades + closed_trades
+        trades_per_coin = {
+            pair : {
+                'total_profit_prct' : 0,
+                'total_profit_amount': 0,
+                'amount_of_trades' : 0,
+                'max_drawdown' : 0.0,
+                'avg_duration' : [],
+                'sell_reasons' : defaultdict(int)
+            } for pair in self.data.keys()
+        }
 
         for trade in all_trades:
-            try:
-                trades_per_coin[trade.pair]['total_profit_prct']
-            except KeyError:
-                trades_per_coin[trade.pair]['total_profit_prct'] = 0
-
-            try:
-                trades_per_coin[trade.pair]['total_profit_amount']
-            except KeyError:
-                trades_per_coin[trade.pair]['total_profit_amount'] = 0
-
-            try:
-                var1 = trades_per_coin[trade.pair]['amount_of_trades']
-                var2 = trades_per_coin[trade.pair]['max_drawdown']
-                var3 = trades_per_coin[trade.pair]['avg_duration']
-
-            except KeyError:
-                trades_per_coin[trade.pair]['avg_duration'] = []
-                trades_per_coin[trade.pair]['amount_of_trades'] = 0
-                trades_per_coin[trade.pair]['max_drawdown'] = 0.0
-
             if trade.profit_percentage is not None:
                 trades_per_coin[trade.pair]['total_profit_prct'] += trade.profit_percentage
-
-            trades_per_coin[trade.pair]['total_profit_amount'] += (trade.amount * trade.current) - (
-                    trade.amount * trade.open)
+            trades_per_coin[trade.pair]['total_profit_amount'] += (trade.currency_amount * trade.current) - (
+                    trade.currency_amount * trade.open)
             trades_per_coin[trade.pair]['amount_of_trades'] += 1
 
             if trade.status == 'closed':
                 if trade.profit_percentage < 0:
                     if trade.profit_percentage < trades_per_coin[trade.pair]['max_drawdown']:
                         trades_per_coin[trade.pair]['max_drawdown'] = trade.profit_percentage
-
-                trades_per_coin[trade.pair]['avg_duration'].append(trade.closed_at - trade.opened_at)
-                trades_per_coin[trade.pair]['sell_reasons'] = defaultdict(int)
 
                 trades_per_coin[trade.pair]['avg_duration'].append(trade.closed_at - trade.opened_at)
                 trades_per_coin[trade.pair]['sell_reasons'][trade.sell_reason] += 1
@@ -223,7 +205,6 @@ class BackTesting:
     def calculate_max_seen_drawdown(self) -> dict:
         """
         Method calculates max seen drawdown based on the saved budget / value changes
-
         :return: returns max_seen_drawdown as a dictionary
         :rtype: dictionary
         """
@@ -269,17 +250,16 @@ class BackTesting:
     def calculate_loss_trades(self, closed_trades: [Trade]) -> int:
         """
         Method calculates the amount of closed trades with loss
-
         :param closed_trades: closed trades in an array
         :type closed_trades: [Trade]
         :return: amount of trades closed with loss
         :rtype: int
         """
-        loss = 0
+        loss_trades = 0
         for trade in closed_trades:
             if trade.profit_percentage < 0:
-                loss+=1
-        return loss
+                loss_trades += 1
+        return loss_trades
 
     def default_empty_array_dict(self):
         """
@@ -292,5 +272,3 @@ class BackTesting:
         Helper method for initializing defaultdict
         """
         return defaultdict()
-
-
