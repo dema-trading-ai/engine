@@ -1,0 +1,5 @@
+version: '3'
+services:
+  dema-engine:
+    build: .
+    image: dema-engine:alpha
