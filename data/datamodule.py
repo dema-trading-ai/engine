@@ -188,7 +188,7 @@ class DataModule:
             print(
                 "[ERROR] Something went wrong parsing config. Please use yyyy-mm-dd format at 'backtesting-from', 'backtesting-to'")
 
-    def check_for_datafile_existence(self, pair, timeframe) -> bool:
+    def check_for_datafile_existence(self, pair: str, timeframe: str) -> bool:
         """
         :param pair: Certain coin pair in "AAA/BBB" format
         :type pair: string
@@ -198,9 +198,9 @@ class DataModule:
         :rtype: boolean
         """
         dirpath = os.path.join("data/backtesting-data", self.config["exchange"])
-        exhange_path = os.path.join("data/backtesting-data", self.config["exchange"])
-        self.create_directory_if_not_exists(exhange_path)
-        return path.exists(dirpath)
+        exchange_path = os.path.join("data/backtesting-data", self.config["exchange"], "data-" + pair + timeframe + ".json")
+        self.create_directory_if_not_exists(dirpath)
+        return path.exists(exchange_path)
 
     def create_directory_if_not_exists(self, directory: str) -> None:
         """
