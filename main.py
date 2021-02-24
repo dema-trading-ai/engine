@@ -2,6 +2,7 @@ import json
 import sys
 
 from main_controller import MainController
+from config import check_all_keys, validate_config
 
 
 def main():
@@ -18,15 +19,15 @@ def read_config():
         print("[ERROR] no config file found.")
         raise SystemExit
     except:
-        print("[ERROR] something went wrong parsing config file.", sys.exc_info()[0])
+        print("[ERROR] something went wrong parsing config file.",
+              sys.exc_info()[0])
         raise SystemExit
 
     config = json.loads(data)
 
     # Check whether config contains all necessary properties
-    check_config_max_open_trades(config)
-    check_config_starting_capital(config)
-    check_config_stoploss(config)
+    check_all_keys(config)
+    validate_config(config)
 
     MainController(config)
 
@@ -36,24 +37,6 @@ def print_pairs(config_json):
     for i in config_json['pairs']:
         coins += str(i) + ' '
     print("[INFO] Watching pairs: %s" % coins)
-
-
-def check_config_stoploss(config_json):
-    if config_json['stoploss'] is None:
-        print("[ERROR] You should define a stoploss in the config-file")
-        raise SystemExit
-
-
-def check_config_starting_capital(config_json):
-    if config_json['starting-capital'] is None:
-        print("[ERROR] You should define a starting capital in the config-file")
-        raise SystemExit
-
-
-def check_config_max_open_trades(config_json):
-    if config_json['max-open-trades'] is None:
-        print("[ERROR] You should define max_open_trades in the config-file")
-        raise SystemExit
 
 
 if __name__ == "__main__":
