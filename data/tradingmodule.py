@@ -24,9 +24,7 @@ class TradingModule:
 
     open_order_value_per_timestamp = {}
     budget_per_timestamp = {}
-
-    last_closed_trade = None
-    temp_realized_drawdown = 0
+    current_drawdown = 0.0
     realized_drawdown = 0
 
     def __init__(self, config):
@@ -65,8 +63,8 @@ class TradingModule:
         """
         past_ticks = []
         past_ticks += data
-        indicators = self.strategy.populate_indicators(past_ticks, ohlcv)
-        buy = self.strategy.populate_buy_signal(indicators, ohlcv)
+        indicators = self.strategy.generate_indicators(past_ticks, ohlcv)
+        buy = self.strategy.buy_signal(indicators, ohlcv)
         if buy:
             self.open_trade(ohlcv)
 
@@ -97,8 +95,8 @@ class TradingModule:
 
         past_ticks = []
         past_ticks += data
-        indicators = self.strategy.populate_indicators(past_ticks, ohlcv)
-        sell = self.strategy.populate_sell_signal(indicators, ohlcv, trade)
+        indicators = self.strategy.generate_indicators(past_ticks, ohlcv)
+        sell = self.strategy.sell_signal(indicators, ohlcv, trade)
 
         if sell:
             self.close_trade(trade, reason="Sell signal", ohlcv=ohlcv)
@@ -150,6 +148,7 @@ class TradingModule:
         new_trade.amount = (amount / ohlcv.close)
         new_trade.opened_at = date
         self.open_trades.append(new_trade)
+        self.update_value_per_timestamp_tracking(new_trade, ohlcv)
 
     def check_roi_open_trade(self, trade: Trade, ohlcv: OHLCV) -> bool:
         """
@@ -249,7 +248,7 @@ class TradingModule:
         :return: None
         :rtype: None
         """
-        current_total_price = (trade.amount * trade.current)
+        current_total_price = (trade.amount * ohlcv.low)
         try:
             var = self.open_order_value_per_timestamp[ohlcv.time]
         except KeyError:
@@ -266,17 +265,7 @@ class TradingModule:
         :return: None
         :rtype: None
         """
-        # track whether KeyError arose
-        first = False
-        try:
-            var = self.budget_per_timestamp[ohlcv.time]
-        except KeyError:
-            self.budget_per_timestamp[ohlcv.time] = self.budget
-            first = True
-
-        # if KeyError didnt arise, update budget (since orders may have been placed)
-        if not first:
-            self.budget_per_timestamp[ohlcv.time] = self.budget
+        self.budget_per_timestamp[ohlcv.time] = self.budget
 
     def update_drawdowns_closed_trade(self, trade: Trade) -> None:
         """
@@ -287,20 +276,21 @@ class TradingModule:
         :return: None
         :rtype: None
         """
+        # this part is for setting the max_drawdown for 1 trade
         if trade.profit_percentage < self.max_drawdown:
             self.max_drawdown = trade.profit_percentage
 
-        if trade.profit_percentage < 0:
-            if self.last_closed_trade is None:
-                self.temp_realized_drawdown = trade.profit_percentage
-                self.last_closed_trade = trade
-                return
-            if self.last_closed_trade.profit_percentage < 0:
-                self.temp_realized_drawdown += trade.profit_percentage
-            self.temp_realized_drawdown = trade.profit_percentage
-        else:
-            if self.temp_realized_drawdown < self.realized_drawdown:
-                self.realized_drawdown = self.temp_realized_drawdown
-            self.temp_realized_drawdown = 0
+        current_total_value = self.budget + self.get_total_value_of_open_trades()
+        perc_of_total_value = ((trade.amount * trade.close) / current_total_value)*100
+        perc_influence = trade.profit_percentage * (perc_of_total_value/100)
 
-        self.last_closed_trade = trade
+        # if the difference is drawdown, and no drawdown is realized at this moment, this is new drawdown.
+        # else update the current drawdown with the profit percentage difference
+        if perc_influence < 0 and self.current_drawdown >= 0:
+            self.current_drawdown = perc_influence
+        else:
+            self.current_drawdown += perc_influence
+
+        # if the current drawdown is bigger than the last realized drawdown, update it
+        if self.current_drawdown < self.realized_drawdown:
+            self.realized_drawdown = self.current_drawdown

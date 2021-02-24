@@ -97,7 +97,8 @@ class DataModule:
             elif not self.does_datafile_cover_backtesting_period(pair, self.config['timeframe']):
                 # remove file, download data from exchange, create new datafile
                 self.history_data[pair] = []
-                self.delete_file(pair, self.config['timeframe'])
+                if self.check_for_datafile_existence(pair, self.config['timeframe']):
+                    self.delete_file(pair, self.config['timeframe'])
                 self.download_data_for_pair(pair, True)
 
         self.backtesting_module.start_backtesting(self.history_data, self.backtesting_from, self.backtesting_to)
@@ -196,8 +197,7 @@ class DataModule:
         :return: Returns whether datafile for specified pair / timeframe already exists
         :rtype: boolean
         """
-        filename = self.generate_datafile_name(pair, timeframe)
-        dirpath = os.path.join("data/backtesting-data", self.config["exchange"], filename)
+        dirpath = os.path.join("data/backtesting-data", self.config["exchange"])
         exhange_path = os.path.join("data/backtesting-data", self.config["exchange"])
         self.create_directory_if_not_exists(exhange_path)
         return path.exists(dirpath)
@@ -232,7 +232,6 @@ class DataModule:
         """
         filename = self.generate_datafile_name(pair, timeframe)
         filepath = os.path.join("data/backtesting-data/", self.config["exchange"], filename)
-
         try:
             with open(filepath, 'r') as datafile:
                 data = datafile.read()
@@ -283,8 +282,8 @@ class DataModule:
         :return: returns a filename for specified pair / timeframe
         :rtype: string
         """
-        formatted_pair = pair.split('/')
-        return "data-" + formatted_pair[0] + formatted_pair[1] + timeframe + ".json"
+        coin, base = pair.split('/')
+        return "data-" + coin + base + timeframe + ".json"
 
     def delete_file(self, pair: str, timeframe: str):
         """
