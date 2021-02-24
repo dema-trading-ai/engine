@@ -17,8 +17,9 @@ RUN chmod 777 /tmp/install_talib.sh
 RUN cd /tmp && /tmp/install_talib.sh && rm -r /tmp/*ta-lib*
 ENV LD_LIBRARY_PATH /usr/local/lib
 
-COPY . .
+COPY ./requirements.txt ./requirements.txt
 RUN pip install -r requirements.txt
+COPY . .
 
 ENTRYPOINT ["python"]
 CMD ["main.py"]
