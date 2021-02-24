@@ -3,6 +3,13 @@ import sys
 
 from main_controller import MainController
 
+REQUIRED_PARAMS = [
+    'stoploss',
+    'max-open-trades',
+    'fee',
+    'starting-capital',
+]
+
 
 def main():
     read_config()
@@ -24,9 +31,8 @@ def read_config():
     config = json.loads(data)
 
     # Check whether config contains all necessary properties
-    check_config_max_open_trades(config)
-    check_config_starting_capital(config)
-    check_config_stoploss(config)
+    for param in REQUIRED_PARAMS:
+        check_config_required_param(config, param)
 
     MainController(config)
 
@@ -38,21 +44,15 @@ def print_pairs(config_json):
     print("[INFO] Watching pairs: %s" % coins)
 
 
-def check_config_stoploss(config_json):
-    if config_json['stoploss'] is None:
-        print("[ERROR] You should define a stoploss in the config-file")
-        raise SystemExit
-
-
-def check_config_starting_capital(config_json):
-    if config_json['starting-capital'] is None:
-        print("[ERROR] You should define a starting capital in the config-file")
-        raise SystemExit
-
-
-def check_config_max_open_trades(config_json):
-    if config_json['max-open-trades'] is None:
-        print("[ERROR] You should define max_open_trades in the config-file")
+def check_config_required_param(config_json, param):
+    """
+    This function checks the presence of a param in the provided config file, and throws an error when it's not
+    :param config_json: the config dictionary
+    :param param: the required param
+    :return: None
+    """
+    if param not in config_json:
+        print(f"[ERROR] {param} should be defined in the config-file")
         raise SystemExit
 
 
