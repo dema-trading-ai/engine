@@ -27,7 +27,6 @@ def read_config():
     check_config_max_open_trades(config)
     check_config_starting_capital(config)
     check_config_stoploss(config)
-    check_config_fee(config)
 
     MainController(config)
 
@@ -54,11 +53,6 @@ def check_config_starting_capital(config_json):
 def check_config_max_open_trades(config_json):
     if config_json['max-open-trades'] is None:
         print("[ERROR] You should define max_open_trades in the config-file")
-        raise SystemExit
-
-def check_config_fee(config_json):
-    if config_json['fee'] is None:
-        print("[ERROR] You should define fee in the config-file")
         raise SystemExit
 
 

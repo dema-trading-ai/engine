@@ -32,7 +32,6 @@ class TradingModule:
         self.config = config
         self.strategy = Strategy()
         self.budget = float(self.config['starting-capital'])
-        # self.fee = float(self.config['fee']) / 100
         self.max_open_trades = int(self.config['max-open-trades'])
 
     def tick(self, ohlcv: OHLCV, data: [OHLCV]) -> None:
@@ -106,9 +105,7 @@ class TradingModule:
         """
         date = datetime.fromtimestamp(ohlcv.time / 1000)
         trade.close_trade(reason, date)
-        earnings = (trade.close * trade.currency_amount)
-        # self.budget += earnings - (earnings * self.fee)
-        self.budget += earnings
+        self.budget += trade.close * trade.currency_amount
         self.open_trades.remove(trade)
         self.closed_trades.append(trade)
         self.update_drawdowns_closed_trade(trade)
@@ -129,9 +126,7 @@ class TradingModule:
         open_trades = len(self.open_trades)
         available_spaces = self.max_open_trades - open_trades
         spend_amount = (1. / available_spaces) * self.budget
-        # trade_amount = spend_amount - (spend_amount * self.fee)
-        trade_amount = spend_amount
-        new_trade = Trade(ohlcv, trade_amount, date)
+        new_trade = Trade(ohlcv, spend_amount, date)
         self.budget -= spend_amount
         self.open_trades.append(new_trade)
         self.update_value_per_timestamp_tracking(new_trade, ohlcv)
