@@ -54,8 +54,8 @@ class BackTesting:
                 data_per_tick[tick.time].append(tick)
 
         ticks_passed_per_pair = defaultdict(self.default_empty_array_dict)
-        for time in data_per_tick:
-            for pair_tick in data_per_tick[time]:
+        for tick in data_per_tick:
+            for pair_tick in data_per_tick[tick]:
                 self.trading_module.tick(pair_tick, ticks_passed_per_pair[pair_tick.pair])
                 ticks_passed_per_pair[pair_tick.pair].append(pair_tick)
 
@@ -159,6 +159,8 @@ class BackTesting:
     def calculate_statistics_per_coin(self, open_trades, closed_trades):
         """
         TODO Feel free to optimize this method :)
+        TODO This method does not work fully anymore. Issue will be made.
+
         :param open_trades: array of open trades
         :type open_trades: [Trade]
         :param closed_trades: array of closed trades
@@ -223,29 +225,25 @@ class BackTesting:
             total_value = timestamp_value[tick] + timestamp_budget[tick]
 
             # calculate profit based on last tick
-            tick_profit_percentage = ((total_value - old_value) / old_value * 100)
+            tick_profit_percentage = ((total_value - old_value) / old_value) * 100
 
-            # if profit percentage is below 0, drawdown is visualized
-            if tick_profit_percentage < 0:
+            # if profit percentage is below 0, and no drawdown is visualized before
+            # start tracking new drawdown
+            if tick_profit_percentage < 0 and temp_seen_drawdown['drawdown'] >= 0:
                 drawdown = True
+                temp_seen_drawdown['from'] = tick
+                temp_seen_drawdown['drawdown'] = tick_profit_percentage
+                temp_seen_drawdown['to'] = tick
             else:
+                temp_seen_drawdown['to'] = tick
+                temp_seen_drawdown['drawdown'] += tick_profit_percentage
                 drawdown = False
                 # if last drawdown was larger than max drawdown
                 if temp_seen_drawdown['drawdown'] < max_seen_drawdown['drawdown']:
                     max_seen_drawdown['drawdown'] = temp_seen_drawdown['drawdown']
                     max_seen_drawdown['from'] = temp_seen_drawdown['from']
                     max_seen_drawdown['to'] = temp_seen_drawdown['to']
-
-                # reset last drawdown values since profit was visualized
-                temp_seen_drawdown['from'] = ""
-                temp_seen_drawdown['drawdown'] = 0
-                temp_seen_drawdown['to'] = ""
-
-            if drawdown:
-                if temp_seen_drawdown['from'] == "":
-                    temp_seen_drawdown['from'] = tick
-                temp_seen_drawdown['to'] = tick
-                temp_seen_drawdown['drawdown'] = tick_profit_percentage
+            old_value = total_value
 
         return max_seen_drawdown
 
