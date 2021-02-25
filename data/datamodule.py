@@ -1,6 +1,7 @@
 from collections import namedtuple
 
 import numpy as np
+from pandas import DataFrame
 import pandas as pd
 import ccxt
 import re
@@ -93,7 +94,7 @@ class DataModule:
 
         self.backtesting_module.start_backtesting(self.history_data, self.backtesting_from, self.backtesting_to)
 
-    def download_data_for_pair(self, pair: str, data_from: str, data_to: str, save: bool = True) -> pd.DataFrame:
+    def download_data_for_pair(self, pair: str, data_from: str, data_to: str, save: bool = True) -> DataFrame:
         """
         :param pair: Certain coin pair in "AAA/BBB" format
         :type pair: string
@@ -124,7 +125,7 @@ class DataModule:
             start_date += np.around(asked_ticks * self.timeframe_calc)
 
         # Create pandas DataFrame and add pair info
-        df = pd.DataFrame(ohlcv_data, index=index, columns=['time', 'open', 'high', 'low', 'close', 'volume'])
+        df = DataFrame(ohlcv_data, index=index, columns=['time', 'open', 'high', 'low', 'close', 'volume'])
         df['pair'] = pair
         if save:
             print("[INFO] [%s] %s candles downloaded" % (pair, len(index)))
@@ -205,7 +206,7 @@ class DataModule:
         else:
             print("Successfully created the directory %s " % path)
 
-    def read_data_from_datafile(self, pair: str) -> pd.DataFrame:
+    def read_data_from_datafile(self, pair: str) -> DataFrame:
         """
         When datafile is covering requested backtesting period,
         this method reads the data from the files. Saves this in
@@ -260,13 +261,13 @@ class DataModule:
         self.save_dataframe(pair, df)
         return df
 
-    def save_dataframe(self, pair: str, df: pd.DataFrame) -> None:
+    def save_dataframe(self, pair: str, df: DataFrame) -> None:
         """
         Method creates new json datafile for pair in timeframe
         :param pair: Certain coin pair in "AAA/BBB" format
         :type pair: string
         :param df: Downloaded data to write to the datafile
-        :type data: pd.DataFrame
+        :type data: DataFrame
         :return: None
         :rtype: None
         """

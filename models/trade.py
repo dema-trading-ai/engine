@@ -1,3 +1,5 @@
+from pandas import DataFrame, Series
+
 # ======================================================================
 # Trade class is used by TradingModule for registering trades and tracking
 # stats while ticks pass.
@@ -20,7 +22,7 @@ class Trade:
     opened_at = None
     closed_at = None
 
-    def __init__(self, ohlcv, trade_amount, date):
+    def __init__(self, ohlcv: Series, trade_amount: float, date: int):
         self.status = 'open'
         self.pair = ohlcv['pair']
         self.open = ohlcv['close']
@@ -28,7 +30,7 @@ class Trade:
         self.currency_amount = (trade_amount / ohlcv['close'])
         self.opened_at = date
 
-    def close_trade(self, reason, date):
+    def close_trade(self, reason: str, date: int):
         """
         Closes this trade and updates stats according to latest data.
         """
@@ -37,7 +39,7 @@ class Trade:
         self.close = self.current
         self.closed_at = date
 
-    def update_stats(self, ohlcv):
+    def update_stats(self, ohlcv: Series):
         """
         Updates states according to latest data.
         """

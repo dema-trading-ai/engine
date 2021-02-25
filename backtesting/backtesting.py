@@ -1,7 +1,7 @@
 from tabulate import tabulate
 from datetime import datetime, timedelta
 from collections import defaultdict, namedtuple
-import pandas as pd
+import time
 
 # ======================================================================
 # BackTesting class is responsible for processing the ticks (ohlcv-data)
@@ -30,12 +30,12 @@ class BackTesting:
         self.starting_capital = float(self.config['starting-capital'])
 
     # This method is called by DataModule when all data is gathered from chosen exchange
-    def start_backtesting(self, data, backtesting_from, backtesting_to) -> None:
+    def start_backtesting(self, data: dict, backtesting_from: int, backtesting_to: int) -> None:
         """
         Method formats received data.
         Method calls tradingmodule for each tick/candle (OHLCV).
         Method finally calls generate result method
-        :param data: dictionary of all coins with all OHLCV data
+        :param data: dictionary of all coins with OHLCV dataframe
         :type data: dictionary
         :param backtesting_from: 8601 timestamp
         :type backtesting_from: int
@@ -51,11 +51,12 @@ class BackTesting:
 
         pairs = list(data.keys())
         ticks = list(data[pairs[0]].index.values)
+        
         for i, tick in enumerate(ticks):
             for pair in pairs:
                 # Get df for current pair and retrieve ohlcv for current tick
                 pair_df = data[pair]
-                ohlcv_tick = pair_df.loc[tick]
+                ohlcv_tick = pair_df.loc[tick].copy()
 
                 # Get passed ticks and pass to trading module
                 self.trading_module.tick(ohlcv_tick, pair_df[:i])
