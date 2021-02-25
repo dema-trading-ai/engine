@@ -13,6 +13,7 @@ from collections import defaultdict, namedtuple
 # These constants are used for displaying and
 # emphasizing in commandline backtestresults
 from models.trade import Trade
+from config.currencies import get_currency_symbol
 
 FONT_BOLD = "\033[1m"
 FONT_RESET = "\033[0m"
@@ -27,6 +28,7 @@ class BackTesting:
         self.trading_module = trading_module
         self.config = config
         self.starting_capital = float(self.config['starting-capital'])
+        self.currency_symbol = get_currency_symbol(config)
 
     # This method is called by DataModule when all data is gathered from chosen exchange
     def start_backtesting(self, data, backtesting_from, backtesting_to) -> None:
@@ -56,7 +58,8 @@ class BackTesting:
         ticks_passed_per_pair = defaultdict(self.default_empty_array_dict)
         for tick in data_per_tick:
             for pair_tick in data_per_tick[tick]:
-                self.trading_module.tick(pair_tick, ticks_passed_per_pair[pair_tick.pair])
+                self.trading_module.tick(
+                    pair_tick, ticks_passed_per_pair[pair_tick.pair])
                 ticks_passed_per_pair[pair_tick.pair].append(pair_tick)
 
         open_trades = self.trading_module.open_trades
@@ -86,21 +89,31 @@ class BackTesting:
         overall_profit = ((budget - starting_capital) / starting_capital) * 100
         max_seen_drawdown = self.calculate_max_seen_drawdown()
         loss = self.calculate_loss_trades(closed_trades)
-        print("| Backtesting from: \t\t%s" % datetime.fromtimestamp(self.backtesting_from / 1000))
-        print("| Backtesting to: \t\t\t%s" % datetime.fromtimestamp(self.backtesting_to / 1000))
+        print("| Backtesting from: \t\t%s" %
+              datetime.fromtimestamp(self.backtesting_from / 1000))
+        print("| Backtesting to: \t\t\t%s" %
+              datetime.fromtimestamp(self.backtesting_to / 1000))
         print("| ")
-        print("| Started with: \t\t\t%s" % starting_capital + ' $')
-        print("| Ended with: \t\t\t\t%s" % round(budget, 2) + ' $')
+        print("| Started with: \t\t\t%s" %
+              starting_capital + ' ' + self.currency_symbol)
+        print("| Ended with: \t\t\t\t%s" %
+              round(budget, 2) + ' ' + self.currency_symbol)
         print("| Overall profit: \t\t\t%s" % round(overall_profit, 2) + ' %')
-        print("| Amount of trades: \t\t%s" % (len(open_trades) + len(closed_trades)))
+        print("| Amount of trades: \t\t%s" %
+              (len(open_trades) + len(closed_trades)))
         print("| Left-open trades:\t\t\t%s" % len(open_trades))
         print("| Trades with loss: \t\t%s" % loss)
         print("| ")
-        print("| Max realized drawdown:\t%s" % round(self.trading_module.realized_drawdown, 2) + ' %')
-        print("| Max drawdown 1 trade: \t%s" % round(self.trading_module.max_drawdown, 2) + ' %')
-        print("| Max seen drawdown: \t\t%s" % round(max_seen_drawdown['drawdown'], 2) + ' %')
-        print("| Drawdown from \t\t\t%s" % datetime.fromtimestamp(max_seen_drawdown['from'] / 1000))
-        print("| Drawdown to \t\t\t\t%s" % datetime.fromtimestamp(max_seen_drawdown['to'] / 1000))
+        print("| Max realized drawdown:\t%s" %
+              round(self.trading_module.realized_drawdown, 2) + ' %')
+        print("| Max drawdown 1 trade: \t%s" %
+              round(self.trading_module.max_drawdown, 2) + ' %')
+        print("| Max seen drawdown: \t\t%s" %
+              round(max_seen_drawdown['drawdown'], 2) + ' %')
+        print("| Drawdown from \t\t\t%s" %
+              datetime.fromtimestamp(max_seen_drawdown['from'] / 1000))
+        print("| Drawdown to \t\t\t\t%s" %
+              datetime.fromtimestamp(max_seen_drawdown['to'] / 1000))
         print("================================================="
               "\n| %s Per coin insights %s " % (FONT_BOLD, FONT_RESET))
 
@@ -114,16 +127,18 @@ class BackTesting:
             }
             durations = list(stats[coin]['avg_duration'])
             average_timedelta = sum(durations, timedelta(0)) / len(durations)
-            stats[coin]['total_profit_prct'] = (stats[coin]['total_profit_prct'] / stats[coin]['amount_of_trades'])
+            stats[coin]['total_profit_prct'] = (
+                stats[coin]['total_profit_prct'] / stats[coin]['amount_of_trades'])
             for reason in stats[coin]['sell_reasons']:
                 if reason is not None:
                     sell_reasons[reason] += stats[coin]['sell_reasons'][reason]
             new_stats.append(
                 [coin, round(stats[coin]['total_profit_prct'], 2), round(stats[coin]['total_profit_amount'], 2),
-                 round(stats[coin]['amount_of_trades'], 2), round(stats[coin]['max_drawdown'], 2), average_timedelta,
+                 round(stats[coin]['amount_of_trades'], 2), round(
+                     stats[coin]['max_drawdown'], 2), average_timedelta,
                  sell_reasons['ROI'], sell_reasons['Stoploss'], sell_reasons['Sell signal']])
         print(tabulate(new_stats,
-                       headers=['Pair', 'avg profit (%)', ' profit ($)', 'trades', 'max drawdown %', 'avg duration',
+                       headers=['Pair', 'avg profit (%)', f' profit ({self.currency_symbol})', 'trades', 'max drawdown %', 'avg duration',
                                 'ROI', 'SL', 'Signal'], tablefmt='pretty'))
 
         print("| %sLeft open trades %s" % (FONT_BOLD, FONT_RESET))
@@ -134,11 +149,14 @@ class BackTesting:
             open_trade_stats.append([trade.pair, round(trade.profit_percentage, 2), round(trade.profit_dollar, 2),
                                      round(trade.max_drawdown, 2), trade.opened_at])
         print(tabulate(open_trade_stats,
-                       headers=['Pair', 'cur. profit (%)', ' cur. profit ($)', 'max drawdown %', 'opened at'],
+                       headers=[
+                           'Pair', 'cur. profit (%)', f' cur. profit ({self.currency_symbol})', 'max drawdown %', 'opened at'],
                        tablefmt='pretty'))
         print("======================================================================")
-        print("%s|  DEMA BACKTESTING ENGINE IS SUBJECTED TO THE GNU AGPL-3.0 License %s" % (FONT_BOLD, FONT_RESET))
-        print("%s|  Copyright © 2021 - DemaTrading.ai%s" % (FONT_BOLD, FONT_RESET))
+        print("%s|  DEMA BACKTESTING ENGINE IS SUBJECTED TO THE GNU AGPL-3.0 License %s" %
+              (FONT_BOLD, FONT_RESET))
+        print("%s|  Copyright © 2021 - DemaTrading.ai%s" %
+              (FONT_BOLD, FONT_RESET))
         print("======================================================================")
 
     # Helper method for calculating worth of open trades
@@ -195,13 +213,14 @@ class BackTesting:
                 trades_per_coin[trade.pair]['avg_duration'].append(trade.closed_at - trade.opened_at)
                 trades_per_coin[trade.pair]['sell_reasons'][trade.sell_reason] += 1
             else:
-                trades_per_coin[trade.pair]['avg_duration'].append(datetime.now() - trade.opened_at)
+                trades_per_coin[trade.pair]['avg_duration'].append(
+                    datetime.now() - trade.opened_at)
 
         return trades_per_coin
 
-
     # Method for calculating max seen drawdown
     # Max seen = visual drawdown (if you plot it). This drawdown might not be realized.
+
     def calculate_max_seen_drawdown(self) -> dict:
         """
         Method calculates max seen drawdown based on the saved budget / value changes
@@ -223,8 +242,6 @@ class BackTesting:
         old_value = self.starting_capital
         for tick in timestamp_value:
             total_value = timestamp_value[tick] + timestamp_budget[tick]
-
-            # Calculate profit based on last tick
             tick_profit_percentage = ((total_value - old_value) / old_value) * 100
 
             # Check whether profit is negative
