@@ -193,7 +193,8 @@ class DataModule:
         :rtype: boolean
         """
         dirpath = os.path.join("data/backtesting-data", self.config["exchange"])
-        exchange_path = os.path.join("data/backtesting-data", self.config["exchange"], "data-" + pair + timeframe + ".json")
+        coin, base = pair.split("/")
+        exchange_path = os.path.join("data/backtesting-data", self.config["exchange"], "data-" + coin + base + timeframe + ".json")
         self.create_directory_if_not_exists(dirpath)
         return path.exists(exchange_path)
 
