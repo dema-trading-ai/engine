@@ -1,4 +1,4 @@
-name: Docs Deployment Pipeline
+name: Test PR for Unit test
 on:
   push:
     branches: [feature/**, main, fix/**, development]
