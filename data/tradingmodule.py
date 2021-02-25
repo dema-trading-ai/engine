@@ -201,8 +201,7 @@ class TradingModule:
         try:
             self.open_order_value_per_timestamp[ohlcv.time] += current_total_price
         except KeyError:
-            self.open_order_value_per_timestamp[ohlcv.time] = 0
-        self.open_order_value_per_timestamp[ohlcv.time] += current_total_price
+            self.open_order_value_per_timestamp[ohlcv.time] = current_total_price
 
     def update_budget_per_timestamp_tracking(self, ohlcv: OHLCV) -> None:
         """
