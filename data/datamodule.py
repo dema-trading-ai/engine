@@ -92,7 +92,21 @@ class DataModule:
                 df = self.read_data_from_datafile(pair)
             self.history_data[pair] = df
 
-        self.backtesting_module.start_backtesting(self.history_data, self.backtesting_from, self.backtesting_to)
+        if self.same_backtesting_period():
+            self.backtesting_module.start_backtesting(self.history_data, self.backtesting_from, self.backtesting_to)
+        else:
+            print("[ERROR] Dataframes don't have equal backtesting periods.")
+            raise SystemExit
+
+    def same_backtesting_period(self) -> bool:
+        """
+        Check whether dataframes cover the same time period.
+        :return: Returns whether dataframes have equal lengths
+        :rtype: boolean
+        """
+        df_lengths = [len(df.index.values) for df in self.history_data.values()]
+        return all(length == df_lengths[0] for length in df_lengths)
+
 
     def download_data_for_pair(self, pair: str, data_from: str, data_to: str, save: bool = True) -> DataFrame:
         """
@@ -102,8 +116,8 @@ class DataModule:
         :type data_from: string
         :param data_to: Ending point for collecting data
         :type data_from: string
-        :return: None
-        :rtype: None
+        :return: downloaded dataframe
+        :rtype: DataFrame
         """
         start_date = data_from
         fetch_ohlcv_limit = 1000
