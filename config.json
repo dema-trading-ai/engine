@@ -9,5 +9,6 @@
   "stoploss": "-0.5",
   "roi": "5",
   "pairs": ["BTC/USDT", "ETH/USDT", "LTC/USDT"],
-  "currency": "USDT"
+  "currency": "USDT",
+  "fee": null
 }

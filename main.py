@@ -2,7 +2,7 @@ import json
 import sys
 
 from main_controller import MainController
-from config import check_all_keys, validate_config
+from config import validate_config
 
 
 def main():
@@ -26,7 +26,7 @@ def read_config():
     config = json.loads(data)
 
     # Check whether config contains all necessary properties
-    check_all_keys(config)
+ 
     validate_config(config)
 
     MainController(config)
