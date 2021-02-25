@@ -7,6 +7,7 @@
 
 class OHLCV:
 
+    
     def __init__(self, time, open, high, low, close, volume, pair):
         self.time = time
         self.open = open
