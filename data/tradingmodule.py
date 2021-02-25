@@ -2,6 +2,7 @@ from backtesting.strategy import Strategy
 from models.ohlcv import OHLCV
 from models.trade import Trade
 from datetime import datetime
+import pandas as pd
 
 # ======================================================================
 # TradingModule is responsible for tracking trades, calling strategy methods
@@ -34,7 +35,7 @@ class TradingModule:
         self.budget = float(self.config['starting-capital'])
         self.max_open_trades = int(self.config['max-open-trades'])
 
-    def tick(self, ohlcv: OHLCV, data: [OHLCV]) -> None:
+    def tick(self, ohlcv: pd.Series, data: pd.DataFrame) -> None:
         """
         :param ohlcv: OHLCV Model filled with tick-data
         :type ohlcv: OHLCV
@@ -43,7 +44,7 @@ class TradingModule:
         :return: None
         :rtype: None
         """
-        trade = self.find_open_trade(ohlcv.pair)
+        trade = self.find_open_trade(ohlcv['pair'])
         if trade:
             trade.update_stats(ohlcv)
             self.open_trade_tick(ohlcv, data, trade)
@@ -103,7 +104,7 @@ class TradingModule:
         :return: None
         :rtype: None
         """
-        date = datetime.fromtimestamp(ohlcv.time / 1000)
+        date = datetime.fromtimestamp(ohlcv['time'] / 1000)
         trade.close_trade(reason, date)
         self.budget += trade.close * trade.currency_amount
         self.open_trades.remove(trade)
@@ -122,7 +123,7 @@ class TradingModule:
             print("[INFO] Budget is running low, cannot buy")
             return
 
-        date = datetime.fromtimestamp(ohlcv.time / 1000)
+        date = datetime.fromtimestamp(ohlcv['time'] / 1000)
         open_trades = len(self.open_trades)
         available_spaces = self.max_open_trades - open_trades
         spend_amount = (1. / available_spaces) * self.budget
@@ -197,12 +198,11 @@ class TradingModule:
         :return: None
         :rtype: None
         """
-        current_total_price = (trade.currency_amount * ohlcv.low)
+        current_total_price = (trade.currency_amount * ohlcv['low'])
         try:
-            self.open_order_value_per_timestamp[ohlcv.time] += current_total_price
+            self.open_order_value_per_timestamp[ohlcv['time']] += current_total_price
         except KeyError:
-            self.open_order_value_per_timestamp[ohlcv.time] = 0
-        self.open_order_value_per_timestamp[ohlcv.time] += current_total_price
+            self.open_order_value_per_timestamp[ohlcv['time']] = current_total_price
 
     def update_budget_per_timestamp_tracking(self, ohlcv: OHLCV) -> None:
         """
@@ -214,7 +214,7 @@ class TradingModule:
         :return: None
         :rtype: None
         """
-        self.budget_per_timestamp[ohlcv.time] = self.budget
+        self.budget_per_timestamp[ohlcv['time']] = self.budget
 
     def update_drawdowns_closed_trade(self, trade: Trade) -> None:
         """
@@ -229,8 +229,8 @@ class TradingModule:
             self.max_drawdown = trade.profit_percentage
 
         current_total_value = self.budget + self.get_total_value_of_open_trades()
-        perc_of_total_value = ((trade.currency_amount * trade.close) / current_total_value)*100
-        perc_influence = trade.profit_percentage * (perc_of_total_value/100)
+        perc_of_total_value = ((trade.currency_amount * trade.close) / current_total_value) * 100
+        perc_influence = trade.profit_percentage * (perc_of_total_value / 100)
 
         # if the difference is drawdown, and no drawdown is realized at this moment, this is new drawdown.
         # else update the current drawdown with the profit percentage difference

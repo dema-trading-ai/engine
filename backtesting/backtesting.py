@@ -1,6 +1,7 @@
 from tabulate import tabulate
 from datetime import datetime, timedelta
 from collections import defaultdict, namedtuple
+import pandas as pd
 
 # ======================================================================
 # BackTesting class is responsible for processing the ticks (ohlcv-data)
@@ -48,16 +49,16 @@ class BackTesting:
         self.backtesting_to = backtesting_to
         print('[INFO] Starting backtest...')
 
-        data_per_tick = defaultdict(self.default_empty_array_dict)
-        for pair in data:
-            for tick in data[pair]:
-                data_per_tick[tick.time].append(tick)
+        pairs = list(data.keys())
+        ticks = list(data[pairs[0]].index.values)
+        for i, tick in enumerate(ticks):
+            for pair in pairs:
+                # Get df for current pair and retrieve ohlcv for current tick
+                pair_df = data[pair]
+                ohlcv_tick = pair_df.loc[tick]
 
-        ticks_passed_per_pair = defaultdict(self.default_empty_array_dict)
-        for tick in data_per_tick:
-            for pair_tick in data_per_tick[tick]:
-                self.trading_module.tick(pair_tick, ticks_passed_per_pair[pair_tick.pair])
-                ticks_passed_per_pair[pair_tick.pair].append(pair_tick)
+                # Get passed ticks and pass to trading module
+                self.trading_module.tick(ohlcv_tick, pair_df[:i])
 
         open_trades = self.trading_module.open_trades
         closed_trades = self.trading_module.closed_trades

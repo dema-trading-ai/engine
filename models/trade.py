@@ -22,10 +22,10 @@ class Trade:
 
     def __init__(self, ohlcv, trade_amount, date):
         self.status = 'open'
-        self.pair = ohlcv.pair
-        self.open = ohlcv.close
-        self.current = ohlcv.close
-        self.currency_amount = (trade_amount / ohlcv.close)
+        self.pair = ohlcv['pair']
+        self.open = ohlcv['close']
+        self.current = ohlcv['close']
+        self.currency_amount = (trade_amount / ohlcv['close'])
         self.opened_at = date
 
     def close_trade(self, reason, date):
@@ -41,6 +41,6 @@ class Trade:
         """
         Updates states according to latest data.
         """
-        self.current = ohlcv.close
-        self.profit_percentage = ((ohlcv.close - self.open) / self.open) * 100
+        self.current = ohlcv['close']
+        self.profit_percentage = ((ohlcv['close'] - self.open) / self.open) * 100
         self.profit_dollar = (self.currency_amount * self.current) - (self.currency_amount * self.open)
