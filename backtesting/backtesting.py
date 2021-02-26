@@ -1,7 +1,6 @@
 from tabulate import tabulate
 from datetime import datetime, timedelta
 from collections import defaultdict, namedtuple
-import time
 
 # ======================================================================
 # BackTesting class is responsible for processing the ticks (ohlcv-data)
