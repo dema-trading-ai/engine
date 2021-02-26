@@ -31,6 +31,7 @@ class DataModule:
     backtesting_to = None
 
     history_data = {}
+    ohlcv_indicators = ['time', 'open', 'high', 'low', 'close', 'volume', 'pair']
 
     def __init__(self, config, backtesting_module):
         print('[INFO] Starting DEMA Data-module...')
@@ -107,7 +108,6 @@ class DataModule:
         df_lengths = [len(df.index.values) for df in self.history_data.values()]
         return all(length == df_lengths[0] for length in df_lengths)
 
-
     def download_data_for_pair(self, pair: str, data_from: str, data_to: str, save: bool = True) -> DataFrame:
         """
         :param pair: Certain coin pair in "AAA/BBB" format
@@ -139,8 +139,9 @@ class DataModule:
             start_date += np.around(asked_ticks * self.timeframe_calc)
 
         # Create pandas DataFrame and add pair info
-        df = DataFrame(ohlcv_data, index=index, columns=['time', 'open', 'high', 'low', 'close', 'volume'])
+        df = DataFrame(ohlcv_data, index=index, columns=self.ohlcv_indicators[:-1])
         df['pair'] = pair
+        df.sort_index()
         if save:
             print("[INFO] [%s] %s candles downloaded" % (pair, len(index)))
             self.save_dataframe(pair, df)
@@ -244,8 +245,10 @@ class DataModule:
 
         # Convert json to dataframe
         json_file = json.loads(data)
-        df = pd.read_json(json_file, orient="records")
-        df.set_index('time', drop=False, inplace=True)
+        ohlcv_dict = {tick: list(json_file[tick].values()) for tick in json_file}
+        df = DataFrame.from_dict(ohlcv_dict, orient='index', columns=self.ohlcv_indicators)
+        df.index = df.index.map(int)
+        df.sort_index()
 
         # Get backtesting period
         index_list = list(df.index.values)
@@ -288,10 +291,15 @@ class DataModule:
         filename = self.generate_datafile_name(pair)
         filepath = os.path.join("data/backtesting-data/", self.config["exchange"], filename)
 
-        # Convert pandas dataframe to json and saves file
-        df_json = df.to_json(orient="records")
+        # Convert pandas dataframe to json
+        df_list = {}
+        for row in df.iterrows():
+            df_json = row[1].to_dict()
+            df_list[df_json['time']] = df_json
+
+        # Save json file
         with open(filepath, 'w') as outfile:
-            json.dump(df_json, outfile)
+            json.dump(df_list, outfile, indent=4)
 
     def generate_datafile_name(self, pair: str) -> str:
         """
