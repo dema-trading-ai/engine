@@ -258,9 +258,7 @@ class BackTesting:
 
                     # If last drawdown was larger than max drawdown, update max drawdown
                     if temp_seen_drawdown['drawdown'] < max_seen_drawdown['drawdown']:
-                        max_seen_drawdown['drawdown'] = temp_seen_drawdown['drawdown']
-                        max_seen_drawdown['from'] = temp_seen_drawdown['from']
-                        max_seen_drawdown['to'] = temp_seen_drawdown['to']
+                        max_seen_drawdown = temp_seen_drawdown
                 old_value = total_value
 
         return max_seen_drawdown
