@@ -224,8 +224,7 @@ class DataModule:
     def read_data_from_datafile(self, pair: str) -> DataFrame:
         """
         When datafile is covering requested backtesting period,
-        this method reads the data from the files. Saves this in
-        self.historical_data
+        this method reads the data from the files.
         :param pair: Certain coin pair in "AAA/BBB" format
         :type pair: string
         :return: None
@@ -250,10 +249,30 @@ class DataModule:
         df.index = df.index.map(int)
         df.sort_index()
 
+        # Check bactesting period
+        final_timestamp = self.backtesting_to - self.timeframe_calc   # correct final timestamp
+        df = self.check_backtesting_period(pair, df, final_timestamp)
+
+        # Return correct backtesting period
+        index_list = list(df.index.values)
+        df = df[index_list.index(self.backtesting_from):index_list.index(final_timestamp)+1]
+        self.save_dataframe(pair, df)
+        return df
+
+    def check_backtesting_period(self, pair: str, df: DataFrame, final_timestamp: int) -> DataFrame:
+        """
+        :param pair: Certain coin pair in "AAA/BBB" format
+        :type pair: string
+        :param df: Dataframe containing backtest information
+        :type df: DataFrame
+        :param final_timestamp: Timestamp to which the dataframe has gathered info
+        :type pair: int
+        :return: Dataframe with possibly additional info
+        :rtype: DataFrame
+        """
         # Get backtesting period
         index_list = list(df.index.values)
         df_begin, df_end = index_list[0], index_list[-1]
-        final_timestamp = self.backtesting_to - self.timeframe_calc   # correct final timestamp
         extra_candles = 0
 
         # Check if previous data needs to be downloaded
@@ -271,11 +290,7 @@ class DataModule:
         # Check if new candles were downloaded
         if extra_candles > 0:
             print("[INFO] [%s] %s extra candle(s) downloaded" % (pair, extra_candles))
-        
-        # Slice correct backtesting period and save df
-        index_list = list(df.index.values)                      # update index list
-        df = df[index_list.index(self.backtesting_from):index_list.index(final_timestamp)+1]
-        self.save_dataframe(pair, df)
+
         return df
 
     def save_dataframe(self, pair: str, df: DataFrame) -> None:
