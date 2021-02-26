@@ -1,5 +1,4 @@
 from backtesting.strategy import Strategy
-from models.ohlcv import OHLCV
 from models.trade import Trade
 from datetime import datetime
 from pandas import DataFrame, Series

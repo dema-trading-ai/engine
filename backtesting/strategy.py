@@ -1,7 +1,6 @@
 import numpy
 import talib as ta
 
-from models.ohlcv import OHLCV
 from models.trade import Trade
 from pandas import DataFrame, Series
 
