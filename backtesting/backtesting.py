@@ -242,28 +242,24 @@ class BackTesting:
         old_value = self.starting_capital
         for tick in timestamp_value:
             total_value = timestamp_value[tick] + timestamp_budget[tick]
+            tick_profit_percentage = ((total_value - old_value) / old_value) * 100
 
-            # calculate profit based on last tick
-            tick_profit_percentage = (
-                (total_value - old_value) / old_value) * 100
+            # Check whether profit is negative
+            if tick_profit_percentage < 0:
+                # Check if a drawdown is already being tracked
+                if temp_seen_drawdown['drawdown'] >= 0:
+                    temp_seen_drawdown['from'] = tick
+                    temp_seen_drawdown['drawdown'] = tick_profit_percentage
+                    temp_seen_drawdown['to'] = tick
 
-            # if profit percentage is below 0, and no drawdown is visualized before
-            # start tracking new drawdown
-            if tick_profit_percentage < 0 and temp_seen_drawdown['drawdown'] >= 0:
-                drawdown = True
-                temp_seen_drawdown['from'] = tick
-                temp_seen_drawdown['drawdown'] = tick_profit_percentage
-                temp_seen_drawdown['to'] = tick
-            else:
-                temp_seen_drawdown['to'] = tick
-                temp_seen_drawdown['drawdown'] += tick_profit_percentage
-                drawdown = False
-                # if last drawdown was larger than max drawdown
-                if temp_seen_drawdown['drawdown'] < max_seen_drawdown['drawdown']:
-                    max_seen_drawdown['drawdown'] = temp_seen_drawdown['drawdown']
-                    max_seen_drawdown['from'] = temp_seen_drawdown['from']
-                    max_seen_drawdown['to'] = temp_seen_drawdown['to']
-            old_value = total_value
+                else:
+                    temp_seen_drawdown['to'] = tick
+                    temp_seen_drawdown['drawdown'] += tick_profit_percentage
+
+                    # If last drawdown was larger than max drawdown, update max drawdown
+                    if temp_seen_drawdown['drawdown'] < max_seen_drawdown['drawdown']:
+                        max_seen_drawdown = temp_seen_drawdown
+                old_value = total_value
 
         return max_seen_drawdown
 
