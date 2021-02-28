@@ -1,5 +1,9 @@
 # DemaTrading.ai backtesting engine.
 
+[![Build Status](https://img.shields.io/github/forks/dema-trading-ai/engine.svg)](https://github.com/dema-trading-ai/engine)
+[![Build Status](https://img.shields.io/github/stars/dema-trading-ai/engine.svg)](https://github.com/dema-trading-ai/engine)
+[![License](https://img.shields.io/github/license/dema-trading-ai/engine.svg)](https://github.com/dema-trading-ai/engine)
+
 <!-- Place this tag where you want the button to render. -->
 <a class="github-button" href="https://github.com/dema-trading-ai/engine" data-icon="octicon-star" data-size="large" aria-label="Star dema-trading-ai/engine on GitHub">Star</a>
 <!-- Place this tag where you want the button to render. -->
