@@ -24,8 +24,7 @@ def check_config_required_param(config_json: dict, param: str):
     :return: None
     """
     if param not in config_json:
-        print(f"[ERROR] {param} should be defined in the config-file")
-        raise SystemExit
+        raise KeyError(f"[ERROR] {param} should be defined in the config-file")
 
 
 
@@ -44,10 +43,8 @@ def validate_single_currency_in_pairs(config: dict):
         pair = pair.split("/")
         assert len(pair) == 2
         if not pair[1] == currency:
-            print(
-                "[ERROR] You can only use pairs that have the base currency you specified")
-            print(
-                "[ERROR] e.g., if you specified 'USDT' as your currency, you cannot add 'BTC/EUR' as a pair")
-            raise SystemExit
+
+            raise Exception("[ERROR] You can only use pairs that have the base currency you specified\n"
+                            "[ERROR] e.g., if you specified 'USDT' as your currency, you cannot add 'BTC/EUR' as a pair")
 
 

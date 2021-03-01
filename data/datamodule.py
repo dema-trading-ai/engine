@@ -58,18 +58,15 @@ class DataModule:
             self.exchange = self.exchange()
             print("[INFO] Connected to exchange: %s." % self.config['exchange'])
         except AttributeError:
-            print("[ERROR] Exchange %s could not be found!" % exchange_id)
-            raise SystemExit
+            raise AttributeError("[ERROR] Exchange %s could not be found!" % exchange_id)
 
         # Check whether exchange supports OHLC
         if not self.exchange.has["fetchOHLCV"]:
-            print("[ERROR] Cannot load data from %s because it doesn't support OHLCV-data" % self.config['exchange'])
-            raise SystemExit
+            raise KeyError("[ERROR] Cannot load data from %s because it doesn't support OHLCV-data" % self.config['exchange'])
 
         # Check whether exchange supports requested timeframe
         if (not hasattr(self.exchange, 'timeframes')) or (self.config['timeframe'] not in self.exchange.timeframes):
-            print("[ERROR] Requested timeframe is not available from %s" % self.config['exchange'])
-            raise SystemExit
+            raise Exception("[ERROR] Requested timeframe is not available from %s" % self.config['exchange'])
 
         self.load_markets()
 
@@ -101,8 +98,7 @@ class DataModule:
         if self.same_backtesting_period():
             self.backtesting_module.start_backtesting(self.history_data, self.backtesting_from, self.backtesting_to)
         else:
-            print("[ERROR] Dataframes don't have equal backtesting periods.")
-            raise SystemExit
+            raise Exception("[ERROR] Dataframes don't have equal backtesting periods.")
 
     def same_backtesting_period(self) -> bool:
         """
@@ -167,8 +163,7 @@ class DataModule:
         timeframe = self.config['timeframe']
         match = re.match(r"([0-9]+)([mdh])", timeframe, re.I)
         if not match:
-            print("[ERROR] Error whilst parsing timeframe")
-            raise SystemExit
+            raise Exception("[ERROR] Error whilst parsing timeframe")
         items = re.split(r'([0-9]+)', timeframe)
         if items[2] == 'm':
             self.timeframe_calc = int(items[1]) * minute
