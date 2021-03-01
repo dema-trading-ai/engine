@@ -1,8 +1,8 @@
 import numpy
 import talib as ta
 
-from models.ohlcv import OHLCV
 from models.trade import Trade
+from pandas import DataFrame, Series
 
 # ======================================================================
 # Strategy-class is responsible for populating indicators / signals
@@ -14,40 +14,39 @@ from models.trade import Trade
 class Strategy:
     min_candles = 21
 
-    def generate_indicators(self, past_candles: [OHLCV], current_candle: OHLCV) -> {}:
+    def generate_indicators(self, dataframe: DataFrame, current_candle: Series) -> DataFrame:
         """
-        :param past_candles: Array of candle-data (OHLCV models)
-        :type past_candles: [OHLCV]
+        :param dataframe: All passed candles with OHLCV data
+        :type dataframe: DataFrame
         :param current_candle: Last candle
-        :type current_candle: OHLCV model
-        :return: dictionary filled with indicator-data
-        :rtype: dictionary
+        :type current_candle: Series
+        :return: Dataframe filled with indicator-data
+        :rtype: DataFrame
         """
-        return {}
+        return dataframe
 
-    def buy_signal(self, indicators, current_candle: OHLCV) -> bool:
+    def buy_signal(self, dataframe: DataFrame, current_candle: Series) -> Series:
         """
-        :param indicators: indicator dictionary created by generate_indicators method
-        :type indicators: dictionary
-        :param current_candle: last candle
-        :type current_candle: OHLCV model
-        :return: returns whether to buy or not buy specified coin (True = buy, False = skip)
-        :rtype: boolean
+        :param dataframe: Dataframe filled with indicators created by generate_indicators method
+        :type indicators: DataFrame
+        :param current_candle: Last candle
+        :type current_candle: Series
+        :return: Dataframe filled with buy signals
+        :rtype: DataFrame
         """
-        return True
+        current_candle['buy'] = 1
+        return current_candle
 
-    def sell_signal(self, indicators, current_candle, trade: Trade) -> bool:
+    def sell_signal(self, dataframe: DataFrame, current_candle: Series, trade: Trade) -> Series:
         """
-        :param indicators: indicator dictionary created by generate_indicators method
-        :type indicators: dictionary
-        :param current_candle: last candle
-        :type current_candle: OHLCV model
-        :param trade: current open trade
+        :param dataframe: Dataframe filled with indicators created by generate_indicators method
+        :type indicators: DataFrame
+        :param current_candle: Last candle
+        :type current_candle: Series
+        :param trade: Current open trade
         :type trade: Trade model
-        :return: returns whether to close or not close specified trade (True = sell, False = skip)
-        :rtype: boolean
+        :return: Dataframe filled with sell signals
+        :rtype: DataFrame
         """
-        # # print
-        # if trade.profit_percentage > 2:
-        #     return True
-        return False
+        current_candle['sell'] = 0
+        return current_candle

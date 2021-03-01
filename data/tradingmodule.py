@@ -1,7 +1,8 @@
 from backtesting.strategy import Strategy
-from models.ohlcv import OHLCV
 from models.trade import Trade
 from datetime import datetime
+from pandas import DataFrame, Series
+
 
 # ======================================================================
 # TradingModule is responsible for tracking trades, calling strategy methods
@@ -34,16 +35,16 @@ class TradingModule:
         self.budget = float(self.config['starting-capital'])
         self.max_open_trades = int(self.config['max-open-trades'])
 
-    def tick(self, ohlcv: OHLCV, data: [OHLCV]) -> None:
+    def tick(self, ohlcv: Series, data: DataFrame) -> None:
         """
-        :param ohlcv: OHLCV Model filled with tick-data
-        :type ohlcv: OHLCV
-        :param data: All passed ticks
-        :type data: [OHLCV]
+        :param ohlcv: Series object with OHLCV data for current tick
+        :type ohlcv: Series
+        :param data: All passed ticks with OHLCV data
+        :type data: DataFrame
         :return: None
         :rtype: None
         """
-        trade = self.find_open_trade(ohlcv.pair)
+        trade = self.find_open_trade(ohlcv['pair'])
         if trade:
             trade.update_stats(ohlcv)
             self.open_trade_tick(ohlcv, data, trade)
@@ -51,30 +52,34 @@ class TradingModule:
             self.no_trade_tick(ohlcv, data)
         self.update_budget_per_timestamp_tracking(ohlcv)
 
-    def no_trade_tick(self, ohlcv: OHLCV, data: [OHLCV]):
+    def no_trade_tick(self, ohlcv: Series, data: DataFrame) -> None:
         """
         Method is called when specified pair has no open trades
         populates buy signals
-        :param ohlcv: OHLCV Model filled with tick-data
-        :type ohlcv: OHLCV
+        :param ohlcv: Series object with OHLCV data for current tick
+        :type ohlcv: Series
+        :param data: All passed ticks with OHLCV data
+        :type data: DataFrame
         :return: None
         :rtype: None
         """
         indicators = self.strategy.generate_indicators(data, ohlcv)
-        buy = self.strategy.buy_signal(indicators, ohlcv)
-        if buy:
+        signal = self.strategy.buy_signal(indicators, ohlcv)
+        if signal['buy'] == 1:
             self.open_trade(ohlcv)
 
-    def open_trade_tick(self, ohlcv: OHLCV, data: [OHLCV], trade: Trade) -> None:
+    def open_trade_tick(self, ohlcv: Series, data: DataFrame, trade: Trade) -> None:
         """
         Method is called when specified pair has open trades.
         checks for ROI
         checks for SL
         populates Sell Signal
-        :param ohlcv: OHLCV Model filled with tick-data
-        :type ohlcv: OHLCV
+        :param ohlcv: Series object with OHLCV data for current tick
+        :type ohlcv: Series
+        :param data: All passed ticks with OHLCV data
+        :type data: DataFrame
         :param trade: Trade corresponding to tick pair
-        :type Trade: Trade
+        :type trade: Trade
         :return: None
         :rtype: None
         """
@@ -87,34 +92,34 @@ class TradingModule:
             return
 
         indicators = self.strategy.generate_indicators(data, ohlcv)
-        sell = self.strategy.sell_signal(indicators, ohlcv, trade)
+        signal = self.strategy.sell_signal(indicators, ohlcv, trade)
 
-        if sell:
+        if signal['sell'] == 1:
             self.close_trade(trade, reason="Sell signal", ohlcv=ohlcv)
 
-    def close_trade(self, trade: Trade, reason: str, ohlcv: OHLCV) -> None:
+    def close_trade(self, trade: Trade, reason: str, ohlcv: Series) -> None:
         """
         :param trade: Trade model, trade to close
         :type trade: Trade
         :param reason: Reason for the trade to be closed (SL, ROI, Sell Signal)
         :type reason: string
         :param ohlcv: Last candle
-        :type ohlcv: OHLCV model
+        :type ohlcv: Series
         :return: None
         :rtype: None
         """
-        date = datetime.fromtimestamp(ohlcv.time / 1000)
+        date = datetime.fromtimestamp(ohlcv['time'] / 1000)
         trade.close_trade(reason, date)
         self.budget += trade.close * trade.currency_amount
         self.open_trades.remove(trade)
         self.closed_trades.append(trade)
         self.update_drawdowns_closed_trade(trade)
 
-    def open_trade(self, ohlcv: OHLCV) -> None:
+    def open_trade(self, ohlcv: Series) -> None:
         """
         Method opens a trade for pair in ohlcv
-        :param ohlcv: last OHLCV model (candle)
-        :type ohlcv: OHLCV model
+        :param ohlcv: Last candle
+        :type ohlcv: Series
         :return: None
         :rtype: None
         """
@@ -122,7 +127,7 @@ class TradingModule:
             print("[INFO] Budget is running low, cannot buy")
             return
 
-        date = datetime.fromtimestamp(ohlcv.time / 1000)
+        date = datetime.fromtimestamp(ohlcv['time'] / 1000)
         open_trades = len(self.open_trades)
         available_spaces = self.max_open_trades - open_trades
         spend_amount = (1. / available_spaces) * self.budget
@@ -131,12 +136,12 @@ class TradingModule:
         self.open_trades.append(new_trade)
         self.update_value_per_timestamp_tracking(new_trade, ohlcv)
 
-    def check_roi_open_trade(self, trade: Trade, ohlcv: OHLCV) -> bool:
+    def check_roi_open_trade(self, trade: Trade, ohlcv: Series) -> bool:
         """
         :param trade: Trade model to check
         :type trade: Trade model
-        :param ohlcv: last candle
-        :type ohlcv: OHLCV model
+        :param ohlcv: Last candle
+        :type ohlcv: Series
         :return: return whether to close the trade based on ROI
         :rtype: boolean
         """
@@ -145,12 +150,12 @@ class TradingModule:
             return True
         return False
 
-    def check_stoploss_open_trade(self, trade: Trade, ohlcv: OHLCV) -> bool:
+    def check_stoploss_open_trade(self, trade: Trade, ohlcv: Series) -> bool:
         """
         :param trade: Trade model to check
         :type trade: Trade model
-        :param ohlcv: last candle
-        :type ohlcv: OHLCV model
+        :param ohlcv: Last candle
+        :type ohlcv: Series
         :return: return whether to close the trade based on Stop Loss
         :rtype: boolean
         """
@@ -167,7 +172,7 @@ class TradingModule:
         :param pair: pair to check in "AAA/BBB" format
         :type pair: string
         :return: trade if found
-        :rtype: Trade model / None
+        :rtype: Trade / None
         """
         for trade in self.open_trades:
             if trade.pair == pair:
@@ -177,7 +182,6 @@ class TradingModule:
     def get_total_value_of_open_trades(self) -> float:
         """
         Method calculates the total value of all open trades
-
         :return: The total value in base-currency of all open trades
         :rtype: float
         """
@@ -186,40 +190,39 @@ class TradingModule:
             return_value += (trade.currency_amount * trade.current)
         return return_value
 
-    def update_value_per_timestamp_tracking(self, trade: Trade, ohlcv: OHLCV) -> None:
+    def update_value_per_timestamp_tracking(self, trade: Trade, ohlcv: Series) -> None:
         """
         Method is used to be able to track the value change per timestamp per open trade
         next, this is used for calculating max seen drawdown
         :param trade: Any open trade
-        :type trade: Trade model
-        :param ohlcv: last candle
-        :type ohlcv: OHLCV model
+        :type trade: Trade
+        :param ohlcv: Last candle
+        :type ohlcv: Series
         :return: None
         :rtype: None
         """
-        current_total_price = (trade.currency_amount * ohlcv.low)
+        current_total_price = (trade.currency_amount * ohlcv['low'])
         try:
-            self.open_order_value_per_timestamp[ohlcv.time] += current_total_price
+            self.open_order_value_per_timestamp[ohlcv['time']] += current_total_price
         except KeyError:
-            self.open_order_value_per_timestamp[ohlcv.time] = current_total_price
+            self.open_order_value_per_timestamp[ohlcv['time']] = current_total_price
 
-    def update_budget_per_timestamp_tracking(self, ohlcv: OHLCV) -> None:
+    def update_budget_per_timestamp_tracking(self, ohlcv: Series) -> None:
         """
         Used for tracking total budget per timestamp, used to be able to calculate
         max seen drawdown
-
-        :param ohlcv: last candle
-        :type ohlcv: OHLCV Model
+        :param ohlcv: Last candle
+        :type ohlcv: Series
         :return: None
         :rtype: None
         """
-        self.budget_per_timestamp[ohlcv.time] = self.budget
+        self.budget_per_timestamp[ohlcv['time']] = self.budget
 
     def update_drawdowns_closed_trade(self, trade: Trade) -> None:
         """
         This method updates realized drawdown tracking after closing a trade
         :param trade: last closed Trade
-        :type trade: Trade Model
+        :type trade: Trade
         :return: None
         :rtype: None
         """
@@ -228,8 +231,8 @@ class TradingModule:
             self.max_drawdown = trade.profit_percentage
 
         current_total_value = self.budget + self.get_total_value_of_open_trades()
-        perc_of_total_value = ((trade.currency_amount * trade.close) / current_total_value)*100
-        perc_influence = trade.profit_percentage * (perc_of_total_value/100)
+        perc_of_total_value = ((trade.currency_amount * trade.close) / current_total_value) * 100
+        perc_influence = trade.profit_percentage * (perc_of_total_value / 100)
 
         # if the difference is drawdown, and no drawdown is realized at this moment, this is new drawdown.
         # else update the current drawdown with the profit percentage difference
