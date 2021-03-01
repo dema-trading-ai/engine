@@ -277,13 +277,13 @@ class BackTesting:
                 loss_trades += 1
         return loss_trades
 
-    def default_empty_array_dict(self):
+    def default_empty_array_dict(self) -> list:
         """
         Helper method for initializing defaultdict containing arrays
         """
         return []
 
-    def default_empty_dict_dict(self):
+    def default_empty_dict_dict(self) -> dict:
         """
         Helper method for initializing defaultdict
         """

@@ -52,7 +52,7 @@ class TradingModule:
             self.no_trade_tick(ohlcv, data)
         self.update_budget_per_timestamp_tracking(ohlcv)
 
-    def no_trade_tick(self, ohlcv: Series, data: DataFrame):
+    def no_trade_tick(self, ohlcv: Series, data: DataFrame) -> None:
         """
         Method is called when specified pair has no open trades
         populates buy signals
@@ -79,7 +79,7 @@ class TradingModule:
         :param data: All passed ticks with OHLCV data
         :type data: DataFrame
         :param trade: Trade corresponding to tick pair
-        :type Trade: Trade
+        :type trade: Trade
         :return: None
         :rtype: None
         """
@@ -172,7 +172,7 @@ class TradingModule:
         :param pair: pair to check in "AAA/BBB" format
         :type pair: string
         :return: trade if found
-        :rtype: Trade model / None
+        :rtype: Trade / None
         """
         for trade in self.open_trades:
             if trade.pair == pair:
@@ -182,7 +182,6 @@ class TradingModule:
     def get_total_value_of_open_trades(self) -> float:
         """
         Method calculates the total value of all open trades
-
         :return: The total value in base-currency of all open trades
         :rtype: float
         """
@@ -196,9 +195,9 @@ class TradingModule:
         Method is used to be able to track the value change per timestamp per open trade
         next, this is used for calculating max seen drawdown
         :param trade: Any open trade
-        :type trade: Trade model
+        :type trade: Trade
         :param ohlcv: Last candle
-        :type ohlcv: Series model
+        :type ohlcv: Series
         :return: None
         :rtype: None
         """
@@ -212,7 +211,6 @@ class TradingModule:
         """
         Used for tracking total budget per timestamp, used to be able to calculate
         max seen drawdown
-
         :param ohlcv: Last candle
         :type ohlcv: Series
         :return: None
@@ -224,7 +222,7 @@ class TradingModule:
         """
         This method updates realized drawdown tracking after closing a trade
         :param trade: last closed Trade
-        :type trade: Trade Model
+        :type trade: Trade
         :return: None
         :rtype: None
         """

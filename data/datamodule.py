@@ -74,6 +74,11 @@ class DataModule:
         self.load_markets()
 
     def load_markets(self) -> None:
+        """
+        Loads data using arguments specified in the config
+        :return: None
+        :rtype: None
+        """
         self.exchange.load_markets()
         self.config_from_to()
         self.load_historical_data()
@@ -115,7 +120,9 @@ class DataModule:
         :param data_from: Starting point for collecting data
         :type data_from: string
         :param data_to: Ending point for collecting data
-        :type data_from: string
+        :type data_to: string
+        :param save: If dataframe needs to be saved within function
+        :type save: boolean
         :return: downloaded dataframe
         :rtype: DataFrame
         """
@@ -266,7 +273,7 @@ class DataModule:
         :param df: Dataframe containing backtest information
         :type df: DataFrame
         :param final_timestamp: Timestamp to which the dataframe has gathered info
-        :type pair: int
+        :type final_timestamp: int
         :return: Dataframe with possibly additional info
         :rtype: DataFrame
         """
@@ -299,7 +306,7 @@ class DataModule:
         :param pair: Certain coin pair in "AAA/BBB" format
         :type pair: string
         :param df: Downloaded data to write to the datafile
-        :type data: DataFrame
+        :type df: DataFrame
         :return: None
         :rtype: None
         """
@@ -307,14 +314,14 @@ class DataModule:
         filepath = os.path.join("data/backtesting-data/", self.config["exchange"], filename)
 
         # Convert pandas dataframe to json
-        df_list = {}
+        df_dict = {}
         for row in df.iterrows():
             df_json = row[1].to_dict()
-            df_list[df_json['time']] = df_json
+            df_dict[df_json['time']] = df_json
 
         # Save json file
         with open(filepath, 'w') as outfile:
-            json.dump(df_list, outfile, indent=4)
+            json.dump(df_dict, outfile, indent=4)
 
     def generate_datafile_name(self, pair: str) -> str:
         """
@@ -326,7 +333,7 @@ class DataModule:
         coin, base = pair.split('/')
         return "data-{}{}{}.json".format(coin, base, self.config['timeframe'])
 
-    def remove_backtesting_file(self, pair: str):
+    def remove_backtesting_file(self, pair: str) -> None:
         """
         Method removes existing datafile, as it does not cover requested
         backtesting period.
