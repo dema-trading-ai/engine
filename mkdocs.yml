@@ -1,6 +1,7 @@
 site_name: DemaTrading.ai
 nav:
     - Documentation: documentation.md
+    - How it works: Hitw.md
     - Changelog: changelog.md
 theme: material
 repo_url: https://github.com/dema-trading-ai/engine
