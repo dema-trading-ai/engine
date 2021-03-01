@@ -31,12 +31,12 @@ class BackTesting:
         self.currency_symbol = get_currency_symbol(config)
 
     # This method is called by DataModule when all data is gathered from chosen exchange
-    def start_backtesting(self, data, backtesting_from, backtesting_to) -> None:
+    def start_backtesting(self, data: dict, backtesting_from: int, backtesting_to: int) -> None:
         """
         Method formats received data.
         Method calls tradingmodule for each tick/candle (OHLCV).
         Method finally calls generate result method
-        :param data: dictionary of all coins with all OHLCV data
+        :param data: dictionary of all coins with OHLCV dataframe
         :type data: dictionary
         :param backtesting_from: 8601 timestamp
         :type backtesting_from: int
@@ -50,17 +50,17 @@ class BackTesting:
         self.backtesting_to = backtesting_to
         print('[INFO] Starting backtest...')
 
-        data_per_tick = defaultdict(self.default_empty_array_dict)
-        for pair in data:
-            for tick in data[pair]:
-                data_per_tick[tick.time].append(tick)
+        pairs = list(data.keys())
+        ticks = list(data[pairs[0]].index.values)
+        
+        for i, tick in enumerate(ticks):
+            for pair in pairs:
+                # Get df for current pair and retrieve ohlcv for current tick
+                pair_df = data[pair]
+                ohlcv_tick = pair_df.loc[tick].copy()
 
-        ticks_passed_per_pair = defaultdict(self.default_empty_array_dict)
-        for tick in data_per_tick:
-            for pair_tick in data_per_tick[tick]:
-                self.trading_module.tick(
-                    pair_tick, ticks_passed_per_pair[pair_tick.pair])
-                ticks_passed_per_pair[pair_tick.pair].append(pair_tick)
+                # Get passed ticks and pass to trading module
+                self.trading_module.tick(ohlcv_tick, pair_df[:i])
 
         open_trades = self.trading_module.open_trades
         closed_trades = self.trading_module.closed_trades
@@ -277,13 +277,13 @@ class BackTesting:
                 loss_trades += 1
         return loss_trades
 
-    def default_empty_array_dict(self):
+    def default_empty_array_dict(self) -> list:
         """
         Helper method for initializing defaultdict containing arrays
         """
         return []
 
-    def default_empty_dict_dict(self):
+    def default_empty_dict_dict(self) -> dict:
         """
         Helper method for initializing defaultdict
         """
