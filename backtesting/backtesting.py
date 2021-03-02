@@ -1,6 +1,7 @@
 from tabulate import tabulate
 from datetime import datetime, timedelta
 from collections import defaultdict, namedtuple
+from tqdm import tqdm
 
 # ======================================================================
 # BackTesting class is responsible for processing the ticks (ohlcv-data)
@@ -53,7 +54,7 @@ class BackTesting:
         pairs = list(data.keys())
         ticks = list(data[pairs[0]].index.values)
         
-        for i, tick in enumerate(ticks):
+        for i, tick in tqdm(enumerate(ticks), total=len(ticks), ncols=75, desc='[TEST] Backtesting'):
             for pair in pairs:
                 # Get df for current pair and retrieve ohlcv for current tick
                 pair_df = data[pair]
