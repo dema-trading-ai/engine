@@ -13,12 +13,10 @@ def read_config() -> dict:
         with open('config.json', 'r') as configfile:
             data = configfile.read()
     except FileNotFoundError:
-        print("[ERROR] no config file found.")
-        raise SystemExit
-    except:
-        print("[ERROR] something went wrong parsing config file.",
+        raise FileNotFoundError("[ERROR] No config file found.")
+    except Exception:
+        raise Exception("[ERROR] Something went wrong parsing config file.",
               sys.exc_info()[0])
-        raise SystemExit
 
     config = json.loads(data)
 
