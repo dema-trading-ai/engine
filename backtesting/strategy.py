@@ -23,6 +23,16 @@ class Strategy:
         :return: Dataframe filled with indicator-data
         :rtype: DataFrame
         """
+        # Dataframe can be configured to other timeframe using:
+            # new_df = df.resample('TIME_WINDOW', origin='start').ohlc()
+        # Example:
+            # new_df = df.resample('15min', origin='start').ohlc()
+        # Remarks:
+            # Returns only OHLC data (removes columns: 'time', 'value', 'pair')
+            # 'timeframe' in config.json needs to be smaller than TIME_WINDOW.
+            # Values for TIME_WINDOW can be found here:
+            # https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#offset-aliases
+
         return dataframe
 
     def buy_signal(self, dataframe: DataFrame, current_candle: Series) -> Series:
@@ -34,15 +44,6 @@ class Strategy:
         :return: Dataframe filled with buy signals
         :rtype: DataFrame
         """
-        # Dataframe can be configured to other timeframe using:
-            # df = df.resample('TIME_WINDOW', origin='start').ohlc()
-        # Example:
-            # df = df.resample('15min', origin='start').ohlc()
-        # Remarks:
-            # Returns only OHLC data (removes columns: 'time', 'value', 'pair')
-            # 'timeframe' in config.json needs to be smaller than TIME_WINDOW.
-            # Values for TIME_WINDOW can be found here:
-            # https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#offset-aliases
 
         current_candle['buy'] = 1
         return current_candle
@@ -58,15 +59,6 @@ class Strategy:
         :return: Dataframe filled with sell signals
         :rtype: DataFrame
         """
-        # Dataframe can be configured to other timeframe using:
-            # df = df.resample('TIME_WINDOW', origin='start').ohlc()
-        # Example:
-            # df = df.resample('15min', origin='start').ohlc()
-        # Remarks:
-            # Returns only OHLC data (removes columns: 'time', 'value', 'pair')
-            # 'timeframe' in config.json needs to be smaller than TIME_WINDOW.
-            # Values for TIME_WINDOW can be found here:
-            # https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#offset-aliases
 
         current_candle['sell'] = 0
         return current_candle
