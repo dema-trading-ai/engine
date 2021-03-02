@@ -24,7 +24,7 @@ class Strategy:
         :rtype: DataFrame
         """
         # To change the dataframe to another timeframe use self.change_timeframe():
-            # EXAMPLE: new_df = self.change_timeframe(dataframe, '15min', metadict)
+            # EXAMPLE: new_df = self.change_timeframe(dataframe, '15min')
      
         return dataframe
 
@@ -60,7 +60,7 @@ class Strategy:
         """
         Changes the timeframe of the given dataframe
         Remarks:
-            - Returns only OHLC data (removes columns: 'time', 'value', 'pair')
+            - Returns only OHLC data (removes columns: 'time', 'volume', 'pair')
             - 'timeframe' in config.json needs to be smaller than new_timeframe to work correctly.
             - Values for new_timeframe can be found here:
             https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#offset-aliases
