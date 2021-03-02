@@ -148,7 +148,8 @@ class DataModule:
         # Create pandas DataFrame and add pair info
         df = DataFrame(ohlcv_data, index=index, columns=self.ohlcv_indicators[:-1])
         df['pair'] = pair
-        df.sort_index()
+        df.index = pd.to_datetime(df.index, unit='ms')
+        df.sort_index(inplace=True)
         if save:
             print("[INFO] [%s] %s candles downloaded" % (pair, len(index)))
             self.save_dataframe(pair, df)
@@ -253,15 +254,15 @@ class DataModule:
         json_file = json.loads(data)
         ohlcv_dict = {tick: list(json_file[tick].values()) for tick in json_file}
         df = DataFrame.from_dict(ohlcv_dict, orient='index', columns=self.ohlcv_indicators)
-        df.index = df.index.map(int)
-        df.sort_index()
+        df.index = pd.to_datetime(df.index, unit='ms')
+        df.sort_index(inplace=True)
 
         # Check bactesting period
         final_timestamp = self.backtesting_to - self.timeframe_calc   # correct final timestamp
         df = self.check_backtesting_period(pair, df, final_timestamp)
 
         # Return correct backtesting period
-        index_list = list(df.index.values)
+        index_list = [pd.to_datetime(time).timestamp() * 1000 for time in list(df.index.values)]
         df = df[index_list.index(self.backtesting_from):index_list.index(final_timestamp)+1]
         self.save_dataframe(pair, df)
         return df
@@ -278,7 +279,7 @@ class DataModule:
         :rtype: DataFrame
         """
         # Get backtesting period
-        index_list = list(df.index.values)
+        index_list = [pd.to_datetime(time).timestamp() * 1000 for time in list(df.index.values)]
         df_begin, df_end = index_list[0], index_list[-1]
         extra_candles = 0
 

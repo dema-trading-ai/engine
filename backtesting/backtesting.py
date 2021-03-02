@@ -89,7 +89,7 @@ class BackTesting:
         overall_profit = ((budget - starting_capital) / starting_capital) * 100
         max_seen_drawdown = self.calculate_max_seen_drawdown()
         loss = self.calculate_loss_trades(closed_trades)
-        print("| Backtesting from: \t\t%s" %
+        print("| Backtesting from: \t\t\t%s" %
               datetime.fromtimestamp(self.backtesting_from / 1000))
         print("| Backtesting to: \t\t\t%s" %
               datetime.fromtimestamp(self.backtesting_to / 1000))
@@ -99,16 +99,16 @@ class BackTesting:
         print("| Ended with: \t\t\t\t%s" %
               round(budget, 2) + ' ' + self.currency_symbol)
         print("| Overall profit: \t\t\t%s" % round(overall_profit, 2) + ' %')
-        print("| Amount of trades: \t\t%s" %
+        print("| Amount of trades: \t\t\t%s" %
               (len(open_trades) + len(closed_trades)))
         print("| Left-open trades:\t\t\t%s" % len(open_trades))
-        print("| Trades with loss: \t\t%s" % loss)
+        print("| Trades with loss: \t\t\t%s" % loss)
         print("| ")
-        print("| Max realized drawdown:\t%s" %
+        print("| Max realized drawdown:\t\t%s" %
               round(self.trading_module.realized_drawdown, 2) + ' %')
-        print("| Max drawdown 1 trade: \t%s" %
+        print("| Max drawdown 1 trade: \t\t%s" %
               round(self.trading_module.max_drawdown, 2) + ' %')
-        print("| Max seen drawdown: \t\t%s" %
+        print("| Max seen drawdown: \t\t\t%s" %
               round(max_seen_drawdown['drawdown'], 2) + ' %')
         print("| Drawdown from \t\t\t%s" %
               datetime.fromtimestamp(max_seen_drawdown['from'] / 1000))
