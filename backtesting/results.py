@@ -98,6 +98,7 @@ class OpenTradeResult:
 
     @staticmethod
     def show(instances: typing.List['OpenTradeResult'], currency_symbol):
+        print("| %sLeft open trades %s" % (FONT_BOLD, FONT_RESET))
         rows = []
         for res in instances:
             rows.append([res.pair,

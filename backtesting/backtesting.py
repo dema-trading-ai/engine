@@ -1,7 +1,7 @@
 from tabulate import tabulate
 from datetime import datetime, timedelta
 from collections import defaultdict, namedtuple
-from backtesting.results import MainResults, OpenTradeResult, CoinInsights
+from backtesting.results import MainResults, OpenTradeResult, CoinInsights, show_signature
 
 import typing
 
@@ -18,8 +18,6 @@ import typing
 from models.trade import Trade
 from config.currencies import get_currency_symbol
 
-FONT_BOLD = "\033[1m"
-FONT_RESET = "\033[0m"
 
 
 class BackTesting:
@@ -94,6 +92,8 @@ class BackTesting:
         main_results.show(self.currency_symbol)
         CoinInsights.show(coin_res, self.currency_symbol)
         OpenTradeResult.show(open_trade_res, self.currency_symbol)
+        show_signature()
+
 
     def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float) -> MainResults:
         
