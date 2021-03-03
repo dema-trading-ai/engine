@@ -1,4 +1,4 @@
-# DemaTrading.ai backtesting engine.
+# DemaTrading.ai backtesting engine
 
 [![Build Status](https://img.shields.io/github/forks/dema-trading-ai/engine.svg)](https://github.com/dema-trading-ai/engine)
 [![Build Status](https://img.shields.io/github/stars/dema-trading-ai/engine.svg)](https://github.com/dema-trading-ai/engine)
