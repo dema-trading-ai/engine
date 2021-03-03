@@ -31,6 +31,7 @@ class MainResults:
     max_seen_drawdown: float
     drawdown_from: datetime
     drawdown_to: datetime
+    configured_stoploss: float
 
     def show(self, currency_symbol: str):
         print("================================================= \n| %sBacktesting Results%s "
@@ -38,18 +39,20 @@ class MainResults:
         print("| Backtesting from: \t\t%s" % self.tested_from)
         print("| Backtesting to: \t\t%s" % self.tested_to)
         print("| ")
-        print("| Started with: \t\t%s" % round(self.starting_capital, 2) + ' ' + currency_symbol)
-        print("| Ended with: \t\t\t%s" % round(self.end_capital, 2) + ' ' + currency_symbol)
-        print("| Overall profit: \t\t%s" % round(self.overall_profit_percentage, 2) + ' %')
+        print("| Started with: \t\t%s" % round(self.starting_capital, 2) + '\t' + currency_symbol)
+        print("| Ended with: \t\t\t%s" % round(self.end_capital, 2) + '\t' + currency_symbol)
+        print("| Overall profit: \t\t%s" % round(self.overall_profit_percentage, 2) + '\t%')
         print("| Amount of trades: \t\t%s" % self.n_trades)
         print("| Left-open trades: \t\t%s" % self.n_left_open_trades)
         print("| Trades with loss: \t\t%s" % self.n_trades_with_loss)
+        print("| Stoploss: \t\t\t%s" % self.configured_stoploss + "\t" + currency_symbol)
         print("| ")
-        print("| Max realized drawdown:\t%s" % round(self.max_realized_drawdown, 2) + ' %')
-        print("| Max drawdown 1 trade: \t%s" % round(self.max_drawdown_single_trade, 2) + ' %')
-        print("| Max seen drawdown: \t\t%s" % round(self.max_seen_drawdown, 2) + ' %')
-        print("| Drawdown from \t\t%s" % self.drawdown_from)
-        print("| Drawdown to \t\t\t%s" % self.drawdown_to)
+        print("| Max realized drawdown:\t%s" % round(self.max_realized_drawdown, 2) + '\t%')
+        print("| Max drawdown 1 trade: \t%s" % round(self.max_drawdown_single_trade, 2) + '\t%')
+        print("| Max seen drawdown: \t\t%s" % round(self.max_seen_drawdown, 2) + '\t%')
+        print("| Seen drawdown from: \t\t%s" % self.drawdown_from)
+        print("| Seen drawdown to: \t\t%s" % self.drawdown_to)
+
  
 
 

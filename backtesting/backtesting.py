@@ -115,7 +115,8 @@ class BackTesting:
                            max_drawdown_single_trade=self.trading_module.max_drawdown,
                            max_seen_drawdown=max_seen_drawdown["drawdown"],
                            drawdown_from=datetime.fromtimestamp(max_seen_drawdown['from'] / 1000),
-                           drawdown_to=datetime.fromtimestamp(max_seen_drawdown['to'] / 1000))
+                           drawdown_to=datetime.fromtimestamp(max_seen_drawdown['to'] / 1000),
+                           configured_stoploss=self.config['stoploss'])
 
     def generate_coin_results(self, open_trades, closed_trades) -> typing.List[CoinInsights]:
         stats = self.calculate_statistics_per_coin(open_trades, closed_trades)
