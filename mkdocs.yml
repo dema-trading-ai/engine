@@ -1,6 +1,5 @@
 site_name: DemaTrading.ai
 nav:
-    - Home: home.md
     - Making Money: makingmoney.md
     - Quickstart: quickstart.md
     - Strategy Examples: strategyexamples.md
