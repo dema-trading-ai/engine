@@ -4,4 +4,7 @@ nav:
     - How it works: Hitw.md
     - Changelog: changelog.md
 theme: material
+    logo: assets/logo.png
 repo_url: https://github.com/dema-trading-ai/engine
+extra_css:
+    - css/extra.css
