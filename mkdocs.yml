@@ -1,7 +1,10 @@
 site_name: DemaTrading.ai
 nav:
-    - Documentation: documentation.md
-    - How it works: Hitw.md
+    - Home: home.md
+    - Making Money: makingmoney.md
+    - Quickstart: quickstart.md
+    - Strategy Examples: strategyexamples.md
+    - Definitions/FAQ: definitionsfaq.md
     - Changelog: changelog.md
 theme:
     name: material
