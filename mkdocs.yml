@@ -9,6 +9,7 @@ nav:
 theme:
     name: material
     logo: assets/logo.png
+    favicon: assets/logo.png
 repo_url: https://github.com/dema-trading-ai/engine
 extra_css:
     - css/extra.css
