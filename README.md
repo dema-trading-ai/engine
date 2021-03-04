@@ -58,11 +58,13 @@ To run the container with a volume (rebuilding not necessary on code changes)
 docker run --rm -v "$(pwd):/engine" dema-engine:alpha
 ```
 
+Note: do not forget '--rm' as your Docker will keep the container if you do, which is not necessary and will cause extreme increase in memory usage.
+
 #### Using `make`
 
 As the `docker` commands listed above are not so developer friendly, we added a `Makefile` to help you save some tears. You'll need to have `make` installed on your system, which is on most computers by default. If you have, you can run the docker commands as follows.
 
-To build image:
+To build the image:
 
 ```
 make build
@@ -85,10 +87,6 @@ To build and run:
 ```
 make
 ```
-
-To build the image
-
-Note: do not forget '--rm' as your Docker will keep the container if you do, which is not necessary and will cause extreme increase in memory usage.
 
 ## Developing
 
