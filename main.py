@@ -1,6 +1,7 @@
 
 from main_controller import MainController
 from config import validate_config, read_config, print_pairs
+import utils
 
 def main():
     config = read_config()

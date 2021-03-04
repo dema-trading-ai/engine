@@ -1,3 +1,4 @@
+from config.load_strategy import load_strategy_from_config
 from backtesting.strategy import Strategy
 from models.trade import Trade
 from datetime import datetime
@@ -31,7 +32,8 @@ class TradingModule:
     def __init__(self, config):
         print("[INFO] Initializing trading-module")
         self.config = config
-        self.strategy = Strategy()
+
+        self.strategy = load_strategy_from_config(config)
         self.budget = float(self.config['starting-capital'])
         self.max_open_trades = int(self.config['max-open-trades'])
 
