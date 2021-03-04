@@ -4,6 +4,9 @@ import sys
 from backtesting.strategy import Strategy
 
 def load_strategy_from_config(config) -> 'Strategy':
+    """This function loads the correct strategy, a class that inherits from Strategy and 
+    made by a user, based on the name and folder specified in the config file"""
+
     strategies_path = get_full_path_to_strategies_folder(config)
     sys.path.append(strategies_path) # add to path so that __import__ can find it
     for pyfile in os.listdir(strategies_path):
