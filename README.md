@@ -1,19 +1,22 @@
-# dema-backtesting-module
+# DemaTrading.ai Engine
+
+# Discord
+Please join our Discord for updates, support, our community & more:
+https://discord.gg/WXxjtNzjEx
 
 ## Running
-### Requirements for running without Docker
-Running this backtesting engine just takes a quite simple steps if you have the right things configured. Things you need:
-1. Python 3 installed on your system
-2. Pip Running on your system (https://pip.pypa.io/en/stable/installing/)
-3. Some code editor (PyCharm Community or Visual Studio Code Community works fine)
-4. Install TA-Lib dependencies (see: https://github.com/mrjbq7/ta-lib Installation -> Dependencies)
-5. Very very little knowlegde about Python
-
-### Requirements for running with Docker
+### Requirements for running with Docker (recommended)
+Running the Engine just takes a few simple things:
 1. Docker installed on your system (https://docs.docker.com/get-docker/)
-2. Some code editor (PyCharm Community or Visual Studio Code Community works fine)
-3. Very very little knowlegde about Python
+2. Some code editor (https://www.jetbrains.com/pycharm/)
+3. Abillity to copy + paste and some motivation to figure things out. 
 
+### Requirements for running without Docker (alternative)
+Running the Engine just takes a few simple things:
+1. Have Python 3 installed on your system (https://www.python.org/downloads/)
+2. Pip Running on your system (https://pip.pypa.io/en/stable/installing/)
+3. Some code editor (https://www.jetbrains.com/pycharm/)
+4. Install TA-Lib dependencies (see: https://github.com/mrjbq7/ta-lib Installation -> Dependencies)
 
 #### Running without Docker
 First run:
@@ -21,7 +24,7 @@ First run:
 pip install -r requirements.txt
 ````
 
-After installing, you can run the backtesting module:
+After installing, you can run the Engine:
 ````
 python3 main.py
 ````
@@ -43,6 +46,12 @@ Note: do not forget '--rm' as your Docker will keep the container if you do, whi
 To keep features, versions and fixes organized, we will be using the following gitflow.
 ![Our gitflow](https://images.prismic.io/clubhouse/e02ba62c-26e6-4250-acff-1b2c93ecc789_image-32.png)
 
+## Full Documentation
+https://www.docs.DemaTrading.ai
+
+## License
+This project is licensed under AGPL-3.0 License. It is not allowed to use this project to run any live trading instances. This project is for strategy testing only, if you want to monetise your strategy you can contact us. We can also help you to optimise your strategy. Any questions regarding this project? Feel free to get in touch using the contact form at https://DemaTrading.ai.
+
 #### New Features
 > T.B.A.
 
@@ -51,6 +60,3 @@ To keep features, versions and fixes organized, we will be using the following g
 
 #### Standard GitFlow
 > T.B.A
-
-## License
-This project is licensed under AGPL-3.0 License. It is not allowed to use this project to run any live trading instances. This project is for strategy testing only, if you want to monetise your strategy you can contact us. We can also help you to optimise your strategy. Any questions regarding this project? Feel free to get in touch using the contactform at https://DemaTrading.ai. 
