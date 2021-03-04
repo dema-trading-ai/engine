@@ -8,7 +8,7 @@ the main Strategy class"""
 class MyStrategy(Strategy):
 
     def generate_indicators(self, dataframe: DataFrame, current_candle: Series) -> DataFrame:
-        return dataframe
+        return DataFrame()
 
     def buy_signal(self, dataframe: DataFrame, current_candle: Series) -> Series:
         current_candle['buy'] = 1
