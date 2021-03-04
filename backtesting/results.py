@@ -45,7 +45,7 @@ class MainResults:
         print("| Amount of trades: \t\t%s" % self.n_trades)
         print("| Left-open trades: \t\t%s" % self.n_left_open_trades)
         print("| Trades with loss: \t\t%s" % self.n_trades_with_loss)
-        print("| Stoploss: \t\t\t%s" % self.configured_stoploss + "\t" + currency_symbol)
+        print("| Stoploss: \t\t\t%s" % self.configured_stoploss + "\t%")
         print("| ")
         print("| Max realized drawdown:\t%s" % round(self.max_realized_drawdown, 2) + '\t%')
         print("| Max drawdown 1 trade: \t%s" % round(self.max_drawdown_single_trade, 2) + '\t%')
