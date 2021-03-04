@@ -1,7 +1,15 @@
 site_name: DemaTrading.ai
 nav:
-    - Documentation: documentation.md
-    - How it works: Hitw.md
+    - Home: index.md
+    - Making Money: makingmoney.md
+    - Quickstart: quickstart.md
+    - Strategy Examples: strategyexamples.md
+    - Definitions/FAQ: definitionsfaq.md
     - Changelog: changelog.md
-theme: material
+theme:
+    name: material
+    logo: assets/logo.png
+    favicon: assets/logo.png
 repo_url: https://github.com/dema-trading-ai/engine
+extra_css:
+    - css/extra.css
