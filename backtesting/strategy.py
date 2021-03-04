@@ -72,4 +72,4 @@ class Strategy:
         :rtype: DataFrame
         """
 
-        return dataframe.resample(new_timeframe, origin='start').ohlc()
+        return dataframe.resample(new_timeframe, origin='start', label='right').ohlc()
