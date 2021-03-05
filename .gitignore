@@ -137,4 +137,3 @@ dmypy.json
 .idea/
 
 **/backtesting-data/**
-.vscode
