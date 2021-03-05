@@ -10,5 +10,7 @@
   "roi": "5",
   "pairs": ["BTC/USDT", "ETH/USDT", "LTC/USDT"],
   "currency": "USDT",
-  "fee": null
+  "fee": null,
+  "strategy-name": "MyStrategy",
+  "strategies-folder": "strategies"
 }

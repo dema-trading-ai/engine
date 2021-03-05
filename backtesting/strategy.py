@@ -1,5 +1,6 @@
 import numpy
 import talib as ta
+import abc
 
 from models.trade import Trade
 from pandas import DataFrame, Series
@@ -10,10 +11,14 @@ from pandas import DataFrame, Series
 # © 2021 DemaTrading.AI
 # ======================================================================
 
+"""This module defines the abstract base class (abc) that every strategie 
+must inherit from, and override all methods"""
 
-class Strategy:
+
+class Strategy(abc.ABC):
     min_candles = 21
-
+    
+    @abc.abstractmethod
     def generate_indicators(self, dataframe: DataFrame, current_candle: Series) -> DataFrame:
         """
         :param dataframe: All passed candles with OHLCV data
@@ -23,11 +28,10 @@ class Strategy:
         :return: Dataframe filled with indicator-data
         :rtype: DataFrame
         """
-        # To change the dataframe to another timeframe use self.change_timeframe():
-            # EXAMPLE: new_df = self.change_timeframe(dataframe, '15min')
-     
-        return dataframe
 
+        pass 
+    
+    @abc.abstractmethod
     def buy_signal(self, dataframe: DataFrame, current_candle: Series) -> Series:
         """
         :param dataframe: Dataframe filled with indicators created by generate_indicators method
@@ -37,10 +41,9 @@ class Strategy:
         :return: Dataframe filled with buy signals
         :rtype: DataFrame
         """
+        pass
 
-        current_candle['buy'] = 1
-        return current_candle
-
+    @abc.abstractmethod
     def sell_signal(self, dataframe: DataFrame, current_candle: Series, trade: Trade) -> Series:
         """
         :param dataframe: Dataframe filled with indicators created by generate_indicators method
@@ -52,11 +55,10 @@ class Strategy:
         :return: Dataframe filled with sell signals
         :rtype: DataFrame
         """
+        pass
 
-        current_candle['sell'] = 0
-        return current_candle
-
-    def change_timeframe(self, dataframe: DataFrame, new_timeframe: str) -> DataFrame:
+    @staticmethod
+    def change_timeframe(dataframe: DataFrame, new_timeframe: str) -> DataFrame:
         """
         Changes the timeframe of the given dataframe
         Remarks:

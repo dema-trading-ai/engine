@@ -4,6 +4,7 @@ file, like validation and currency support"""
 import json
 import sys
 from .validations import validate_config
+from .load_strategy import load_strategy_from_config
 
 
 def read_config() -> dict:

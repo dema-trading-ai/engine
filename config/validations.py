@@ -3,29 +3,44 @@ REQUIRED_PARAMS = [
     'max-open-trades',
     'fee',
     'starting-capital',
+    'strategy-name'
 ]
+
+DEFAULT_PARAMS = {
+    "strategies-folder": "./strategies"
+}
 
 
 def validate_config(config: dict):
     """Validates the configuration file"""
 
+    check_config_required_params(config)
+    set_default_param_values(config)
     validate_single_currency_in_pairs(config)
-    
-    # Check whether config contains all necessary properties
-    for param in REQUIRED_PARAMS:
-        check_config_required_param(config, param)
 
 
-def check_config_required_param(config_json: dict, param: str):
+def check_config_required_params(config_json: dict):
     """
-    This function checks the presence of a param in the provided config file, and throws an error when it's not
+    This function checks the presence of the required params in the provided 
+    config file, and throws an error when it's not
+
     :param config_json: the config dictionary
-    :param param: the required param
     :return: None
     """
-    if param not in config_json:
-        raise KeyError(f"[ERROR] {param} should be defined in the config-file")
+    for param in REQUIRED_PARAMS:
+        if param not in config_json:
+            raise KeyError(f"[ERROR] {param} should be defined in the config-file")
 
+def set_default_param_values(config: dict):
+    """
+    This function checks for every config param that has a default whether it is in the 
+    config file, and sets the defaiult value if not. 
+
+    :param config: the json config dictionary
+    """
+    for param, default_value in DEFAULT_PARAMS.items():
+        if config.get(param) == None:
+            config[param] = default_value 
 
 
 def validate_single_currency_in_pairs(config: dict):
