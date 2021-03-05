@@ -54,3 +54,7 @@ To keep features, versions and fixes organized, we will be using the following g
 
 ## License
 This project is licensed under AGPL-3.0 License. It is not allowed to use this project to run any live trading instances. This project is for strategy testing only, if you want to monetise your strategy you can contact us. We can also help you to optimise your strategy. Any questions regarding this project? Feel free to get in touch using the contactform at https://DemaTrading.ai. 
+
+
+#### Badges
+[![Test PR for Unit test](https://github.com/dema-trading-ai/engine/actions/workflows/PR%20unit%20test.yml/badge.svg)](https://github.com/dema-trading-ai/engine/actions/workflows/PR%20unit%20test.yml)

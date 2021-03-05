@@ -1,9 +1,9 @@
 name: Test PR for Unit test
 on:
   push:
-    branches: [feature/**, main, fix/**, development]
+    branches: [feature/**, fix/**, development]
   pull_request:
-    branches: [development, main]
+    branches: [development]
    
 jobs:
   deploy:
