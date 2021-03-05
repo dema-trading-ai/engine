@@ -1,6 +1,9 @@
 from tabulate import tabulate
 from datetime import datetime, timedelta
 from collections import defaultdict, namedtuple
+from backtesting.results import MainResults, OpenTradeResult, CoinInsights, show_signature
+
+import typing
 from tqdm import tqdm
 
 # ======================================================================
@@ -16,8 +19,6 @@ from tqdm import tqdm
 from models.trade import Trade
 from config.currencies import get_currency_symbol
 
-FONT_BOLD = "\033[1m"
-FONT_RESET = "\033[0m"
 
 
 class BackTesting:
@@ -83,41 +84,42 @@ class BackTesting:
         :return: None
         :rtype: None
         """
-        print("================================================= \n| %sBacktesting Results%s "
-              "\n=================================================" % (FONT_BOLD, FONT_RESET))
-        budget += self.calculate_worth_of_open_trades(open_trades)
-        starting_capital = self.starting_capital
-        overall_profit = ((budget - starting_capital) / starting_capital) * 100
-        max_seen_drawdown = self.calculate_max_seen_drawdown()
-        loss = self.calculate_loss_trades(closed_trades)
-        print("| Backtesting from: \t\t%s" %
-              datetime.fromtimestamp(self.backtesting_from / 1000))
-        print("| Backtesting to: \t\t\t%s" %
-              datetime.fromtimestamp(self.backtesting_to / 1000))
-        print("| ")
-        print("| Started with: \t\t\t%s" %
-              starting_capital + ' ' + self.currency_symbol)
-        print("| Ended with: \t\t\t\t%s" %
-              round(budget, 2) + ' ' + self.currency_symbol)
-        print("| Overall profit: \t\t\t%s" % round(overall_profit, 2) + ' %')
-        print("| Amount of trades: \t\t%s" %
-              (len(open_trades) + len(closed_trades)))
-        print("| Left-open trades:\t\t\t%s" % len(open_trades))
-        print("| Trades with loss: \t\t%s" % loss)
-        print("| ")
-        print("| Max realized drawdown:\t%s" %
-              round(self.trading_module.realized_drawdown, 2) + ' %')
-        print("| Max drawdown 1 trade: \t%s" %
-              round(self.trading_module.max_drawdown, 2) + ' %')
-        print("| Max seen drawdown: \t\t%s" %
-              round(max_seen_drawdown['drawdown'], 2) + ' %')
-        print("| Drawdown from \t\t\t%s" %
-              datetime.fromtimestamp(max_seen_drawdown['from'] / 1000))
-        print("| Drawdown to \t\t\t\t%s" %
-              datetime.fromtimestamp(max_seen_drawdown['to'] / 1000))
-        print("================================================="
-              "\n| %s Per coin insights %s " % (FONT_BOLD, FONT_RESET))
+        # generate results
+        main_results = self.generate_main_results(open_trades, closed_trades, budget)
+        coin_res = self.generate_coin_results(open_trades, closed_trades)
+        open_trade_res = self.generate_open_trades_results(open_trades)
 
+        # print tables
+        main_results.show(self.currency_symbol)
+        CoinInsights.show(coin_res, self.currency_symbol)
+        OpenTradeResult.show(open_trade_res, self.currency_symbol)
+        show_signature()
+
+
+    def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float) -> MainResults:
+        
+        budget += self.calculate_worth_of_open_trades(open_trades)
+        # starting_capital = self.starting_capital
+        overall_profit = ((budget - self.starting_capital) / self.starting_capital) * 100
+        max_seen_drawdown = self.calculate_max_seen_drawdown()
+        # loss = self.calculate_loss_trades(closed_trades)
+
+        return MainResults(tested_from=datetime.fromtimestamp(self.backtesting_from / 1000),
+                           tested_to=datetime.fromtimestamp(self.backtesting_to / 1000),
+                           starting_capital=self.starting_capital,
+                           end_capital=budget,
+                           overall_profit_percentage=overall_profit,
+                           n_trades=len(open_trades)+len(closed_trades),
+                           n_left_open_trades=len(open_trades),
+                           n_trades_with_loss=self.calculate_loss_trades(closed_trades),
+                           max_realized_drawdown=self.trading_module.realized_drawdown,
+                           max_drawdown_single_trade=self.trading_module.max_drawdown,
+                           max_seen_drawdown=max_seen_drawdown["drawdown"],
+                           drawdown_from=datetime.fromtimestamp(max_seen_drawdown['from'] / 1000),
+                           drawdown_to=datetime.fromtimestamp(max_seen_drawdown['to'] / 1000),
+                           configured_stoploss=self.config['stoploss'])
+      
+    def generate_coin_results(self, open_trades, closed_trades) -> typing.List[CoinInsights]:
         stats = self.calculate_statistics_per_coin(open_trades, closed_trades)
         new_stats = []
         for coin in stats:
@@ -133,32 +135,36 @@ class BackTesting:
             for reason in stats[coin]['sell_reasons']:
                 if reason is not None:
                     sell_reasons[reason] += stats[coin]['sell_reasons'][reason]
-            new_stats.append(
-                [coin, round(stats[coin]['total_profit_prct'], 2), round(stats[coin]['total_profit_amount'], 2),
-                 round(stats[coin]['amount_of_trades'], 2), round(
-                     stats[coin]['max_drawdown'], 2), average_timedelta,
-                 sell_reasons['ROI'], sell_reasons['Stoploss'], sell_reasons['Sell signal']])
-        print(tabulate(new_stats,
-                       headers=['Pair', 'avg profit (%)', f' profit ({self.currency_symbol})', 'trades', 'max drawdown %', 'avg duration',
-                                'ROI', 'SL', 'Signal'], tablefmt='pretty'))
 
-        print("| %sLeft open trades %s" % (FONT_BOLD, FONT_RESET))
+            coin_insight = CoinInsights(pair=coin,
+                                           avg_profit_percentage=stats[coin]['total_profit_prct'],
+                                           profit=stats[coin]['total_profit_amount'],
+                                           n_trades=stats[coin]['amount_of_trades'],
+                                           max_drawdown=stats[coin]['max_drawdown'],
+                                           avg_duration=average_timedelta,
+                                           roi=sell_reasons['ROI'],
+                                           stoploss=sell_reasons['Stoploss'],
+                                           sell_signal=sell_reasons['Sell signal'])
+            new_stats.append(coin_insight)
+
+        return new_stats
+    
+    def generate_open_trades_results(self, open_trades: [Trade]) -> typing.List[OpenTradeResult]:
+        # print("| %sLeft open trades %s" % (FONT_BOLD, FONT_RESET))
         open_trade_stats = []
         for trade in open_trades:
             if trade.max_drawdown is None:
                 trade.max_drawdown = 0.0
-            open_trade_stats.append([trade.pair, round(trade.profit_percentage, 2), round(trade.profit_dollar, 2),
-                                     round(trade.max_drawdown, 2), trade.opened_at])
-        print(tabulate(open_trade_stats,
-                       headers=[
-                           'Pair', 'cur. profit (%)', f' cur. profit ({self.currency_symbol})', 'max drawdown %', 'opened at'],
-                       tablefmt='pretty'))
-        print("======================================================================")
-        print("%s|  DEMA BACKTESTING ENGINE IS SUBJECTED TO THE GNU AGPL-3.0 License %s" %
-              (FONT_BOLD, FONT_RESET))
-        print("%s|  Copyright © 2021 - DemaTrading.ai%s" %
-              (FONT_BOLD, FONT_RESET))
-        print("======================================================================")
+
+            open_trade_res = OpenTradeResult(pair=trade.pair,
+                                             curr_profit_percentage=trade.profit_percentage,
+                                             curr_profit=trade.profit_dollar,
+                                             max_drawdown=trade.max_drawdown,
+                                             opened_at=trade.opened_at)
+
+            open_trade_stats.append(open_trade_res)
+        return open_trade_stats
+
 
     # Helper method for calculating worth of open trades
     def calculate_worth_of_open_trades(self, open_trades: [Trade]) -> float:

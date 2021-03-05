@@ -1,5 +1,6 @@
 import numpy
 import talib as ta
+import abc
 
 from models.trade import Trade
 from pandas import DataFrame, Series
@@ -14,8 +15,6 @@ from pandas import DataFrame, Series
 must inherit from, and override all methods"""
 
 
-import abc
-
 class Strategy(abc.ABC):
     min_candles = 21
     
@@ -29,6 +28,7 @@ class Strategy(abc.ABC):
         :return: Dataframe filled with indicator-data
         :rtype: DataFrame
         """
+
         pass 
     
     @abc.abstractmethod
@@ -56,3 +56,22 @@ class Strategy(abc.ABC):
         :rtype: DataFrame
         """
         pass
+
+    @staticmethod
+    def change_timeframe(dataframe: DataFrame, new_timeframe: str) -> DataFrame:
+        """
+        Changes the timeframe of the given dataframe
+        Remarks:
+            - Returns only OHLC data (removes columns: 'time', 'volume', 'pair')
+            - 'timeframe' in config.json needs to be smaller than new_timeframe to work correctly.
+            - Values for new_timeframe can be found here:
+            https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#offset-aliases
+        :param dataframe: All passed candles with OHLCV data
+        :type indicators: DataFrame
+        :param timeframe: New timeframe configuration
+        :type timeframe: string
+        :return: Dataframe in new timeframe
+        :rtype: DataFrame
+        """
+
+        return dataframe.resample(new_timeframe, origin='start', label='right').ohlc()
