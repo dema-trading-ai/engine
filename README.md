@@ -58,3 +58,4 @@ This project is licensed under AGPL-3.0 License. It is not allowed to use this p
 
 #### Badges
 [![Test PR for Unit test](https://github.com/dema-trading-ai/engine/actions/workflows/PR%20unit%20test.yml/badge.svg)](https://github.com/dema-trading-ai/engine/actions/workflows/PR%20unit%20test.yml)
+[![Docs Deployment Pipeline](https://github.com/dema-trading-ai/engine/actions/workflows/Docs%20Deployment%20Pipeline.yml/badge.svg)](https://github.com/dema-trading-ai/engine/actions/workflows/Docs%20Deployment%20Pipeline.yml)
