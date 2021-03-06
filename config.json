@@ -8,6 +8,7 @@
   "backtesting-till-now": "False",
   "stoploss": "-0.5",
   "roi": "5",
+  "exchange_fees": "0.02",
   "pairs": [
     "BTC/USDT",
     "ETH/USDT",

@@ -10,8 +10,8 @@ from datetime import datetime
 # © 2021 DemaTrading.AI
 # ======================================================================
 
-
 class TradingModule:
+
     starting_budget = 0
     budget = 0
     max_open_trades = None
@@ -117,7 +117,7 @@ class TradingModule:
         trade.close = trade.current
         date = datetime.fromtimestamp(ohlcv.time / 1000)
         trade.closed_at = date
-        self.budget += (trade.close * trade.amount)
+        self.budget += (trade.close * trade.amount) - (trade.close * trade.amount) * trade.exchange_fees
         self.open_trades.remove(trade)
         self.closed_trades.append(trade)
         self.update_drawdowns_closed_trade(trade)
@@ -139,7 +139,7 @@ class TradingModule:
         open_trades = len(self.open_trades)
         available_spaces = self.max_open_trades - open_trades
         amount = ((100 / available_spaces) / 100) * self.budget
-        self.budget-=amount
+        self.budget -= amount
         new_trade = Trade()
         new_trade.pair = ohlcv.pair
         new_trade.open = ohlcv.close
@@ -147,6 +147,7 @@ class TradingModule:
         new_trade.status = "open"
         new_trade.amount = (amount / ohlcv.close)
         new_trade.opened_at = date
+        new_trade.exchange_fees = float(self.config['exchange_fees'])
         self.open_trades.append(new_trade)
         self.update_value_per_timestamp_tracking(new_trade, ohlcv)
 
@@ -162,6 +163,7 @@ class TradingModule:
         if trade.profit_percentage > float(self.config['roi']):
             self.close_trade(trade, reason="ROI", ohlcv=ohlcv)
             return True
+
         return False
 
     def check_stoploss_open_trade(self, trade: Trade, ohlcv: OHLCV) -> bool:
@@ -190,6 +192,7 @@ class TradingModule:
         """
         if len(self.open_trades) == 0:
             return False
+
         for trade in self.open_trades:
             if trade.pair == pair:
                 return True
@@ -232,8 +235,15 @@ class TradingModule:
         """
         trade = self.find_open_trade_for_pair(ohlcv.pair)
         trade.current = ohlcv.close
-        trade.profit_percentage = ((ohlcv.close - trade.open) / trade.open) * 100
-        trade.profit_dollar = (trade.amount * trade.current) - (trade.amount * trade.open)
+
+        total_fees_percent = trade.exchange_fees * 2
+        trade.profit_percentage = ((ohlcv.close - trade.open) / trade.open) * 100 - total_fees_percent
+
+        total_fees = (trade.amount * trade.current) * trade.exchange_fees + (trade.amount * trade.open) * trade.exchange_fees
+        trade.profit_dollar = (trade.amount * trade.current) - (trade.amount * trade.open) - total_fees
+
+        total_fees_percent = trade.exchange_fees * 2
+
         return trade
 
     def update_value_per_timestamp_tracking(self, trade: Trade, ohlcv: OHLCV) -> None:

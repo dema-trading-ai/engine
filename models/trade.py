@@ -19,3 +19,4 @@ class Trade:
     sell_reason = None
     opened_at = None
     closed_at = None
+    exchange_fees = None
