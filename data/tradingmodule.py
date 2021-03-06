@@ -236,13 +236,17 @@ class TradingModule:
         trade = self.find_open_trade_for_pair(ohlcv.pair)
         trade.current = ohlcv.close
 
+        # multiplying by 2 in order to account for opening and closing the trade
         total_fees_percent = trade.exchange_fees * 2
+
+        # percentage profit
         trade.profit_percentage = ((ohlcv.close - trade.open) / trade.open) * 100 - total_fees_percent
 
+        # fees in dollar amount
         total_fees = (trade.amount * trade.current) * trade.exchange_fees + (trade.amount * trade.open) * trade.exchange_fees
-        trade.profit_dollar = (trade.amount * trade.current) - (trade.amount * trade.open) - total_fees
 
-        total_fees_percent = trade.exchange_fees * 2
+        # profit in dollar amount
+        trade.profit_dollar = (trade.amount * trade.current) - (trade.amount * trade.open) - total_fees
 
         return trade
 
