@@ -1,19 +1,15 @@
 from pathlib import Path
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 
 def get_project_root():
     return Path(__file__).parent
 
 def default_empty_array_dict() -> list:
-    """
-    Helper method for initializing defaultdict containing arrays
-    """
+    """ Helper method for initializing defaultdict containing arrays """
     return []
 
 def default_empty_dict_dict() -> dict:
-    """
-    Helper method for initializing defaultdict
-    """
+    """ Helper method for initializing defaultdict """
     return defaultdict(int)
 
 def calculate_worth_of_open_trades(open_trades) -> float:
