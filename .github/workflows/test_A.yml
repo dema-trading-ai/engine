@@ -1,9 +1,7 @@
 name: Docker build pipeline
 on:
   push:
-    branches: [main, feature]
-    paths:
-      - 'docs/**'
+    branches: [main, feature/**]
   workflow_dispatch:
 jobs:
   deploy:
