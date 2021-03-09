@@ -1,13 +1,18 @@
+name: Docker build pipeline
+
+on:
+  push:
+    branches: [main, feature]
+    paths:
+      - 'docs/**'
+  workflow_dispatch:
+
 build-and-publish-head:
   runs-on: ubuntu-latest
-  if: github.ref == 'refs/heads/feature'
-
   steps:
     - uses: actions/checkout@v2
-
-    - name: Build and Publish head Docker image
       uses: VaultVulp/gp-docker-action@1.1.7
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }} 
-        image-name: my-cool-service # Provide Docker image name
-        image-tag: head # Provide Docker image tag
+        image-name: dema-engine
+        image-tag: test
