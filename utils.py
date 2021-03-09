@@ -25,3 +25,4 @@ def calculate_worth_of_open_trades(open_trades) -> float:
     for trade in open_trades:
         return_value += (trade.currency_amount * trade.current)
     return return_value
+
