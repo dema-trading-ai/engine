@@ -1,5 +1,4 @@
 name: Docker build pipeline
-
 on:
   push:
     branches: [main, feature]
