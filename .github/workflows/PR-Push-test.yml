@@ -20,11 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: pip install codacy-coverage
       - uses: codacy/codacy-coverage-reporter-action@master
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: cobertura.xml
-      - run: export CODACY_PROJECT_TOKEN=<${{ secrets.CODACY_PROJECT_TOKEN }}>
-      - run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r report.xml
       
