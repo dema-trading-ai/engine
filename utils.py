@@ -7,15 +7,12 @@ def get_project_root():
 
 
 def default_empty_array_dict() -> list:
-    """ :return: list for initializing dictionary :rtype: List """
+    """:return: list for initializing dictionary :rtype: List"""
     return []
 
 
 def default_empty_dict_dict() -> dict:
-    """
-    :return: Dictionary for initializing default dictionary
-    :rtype: Dict
-    """
+    """:return: Dictionary for initializing default dictionary :rtype: Dict"""
     return defaultdict(int)
 
 
