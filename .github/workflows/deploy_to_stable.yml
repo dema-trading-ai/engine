@@ -6,7 +6,7 @@ on:
     - release/stable
 
 jobs:
-  build:
+  generate-new-tag:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -15,7 +15,8 @@ jobs:
         uses: mathieudutour/github-tag-action@v5.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-  docker:
+          default_bump: patch
+  publish_package:
     runs-on: ubuntu-latest
     steps:
       -
