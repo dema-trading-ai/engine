@@ -3,7 +3,7 @@ name: Docker Deployment
 on:
   push:
     branches:
-    - main
+    - release/stable
 
 jobs:
   build:
@@ -36,7 +36,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: artefaxx/engine-test:latest
+          tags: release/stable:stable
       -
         name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
