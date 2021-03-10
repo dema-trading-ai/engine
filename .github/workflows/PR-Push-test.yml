@@ -21,6 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run codacy-coverage-reporter
+      - run: pip install pytest-cov
         uses: codacy/codacy-coverage-reporter-action@master
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
