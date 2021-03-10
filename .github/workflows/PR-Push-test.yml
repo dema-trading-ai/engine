@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: pip install coverage
-      - run:  coveragepy-result pytest
+      - run:  coverage help
       - uses: codacy/codacy-coverage-reporter-action@master
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
