@@ -25,4 +25,6 @@ jobs:
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: cobertura.xml
+      - run: export CODACY_PROJECT_TOKEN=<${{ secrets.CODACY_PROJECT_TOKEN }}>
+      - run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r report.xml
       
