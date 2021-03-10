@@ -15,11 +15,11 @@ jobs:
           python-version: 3.x
       - run: |
           pip install pytest-cov
-          pytest --cov-report xml
+          pytest --cov-report xml:cobertura.xml --cov=.
 
       - name: Run codacy-coverage-reporter
         uses: codacy/codacy-coverage-reporter-action@master
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: coveragerc.xml
+          coverage-reports: cobertura.xml
       
