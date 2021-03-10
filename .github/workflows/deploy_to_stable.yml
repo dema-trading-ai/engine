@@ -1,4 +1,6 @@
-name: Docker Deployment
+# Triggers the Github Workflow to increase the version numher and publish an update to the Github Package.
+
+name: Github Packages Deployment
 
 on:
   push:
@@ -15,7 +17,8 @@ jobs:
         uses: mathieudutour/github-tag-action@v5.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          default_bump: patch
+          default_bump: patch  # If no triggers are found in commit messages, defaults to bumping the last digit (0.0.0 -> 0.0.1). See https://github.com/marketplace/actions/github-tag#bumping for mroe info.
+          dry-run: false  # For testing purposes. Should be set to false by default.
   publish_package:
     runs-on: ubuntu-latest
     steps:
@@ -37,7 +40,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: release/stable:stable
+          tags: dema-trading-ai/engine:stable  # Builds the package with the `stable` tag.
       -
         name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
