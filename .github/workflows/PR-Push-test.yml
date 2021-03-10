@@ -1,4 +1,4 @@
-name: Test PR for Unit test
+name: Test PR/Push
 on:
   push:
     branches: [feature/**, fix/**, development]
@@ -6,7 +6,7 @@ on:
     branches: [development]
    
 jobs:
-  deploy:
+  pytest-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -15,3 +15,13 @@ jobs:
           python-version: 3.x
       - run: pip install pytest
       - run: pytest
+      
+  codacy-coverage-reporter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        uses: codacy/codacy-coverage-reporter-action@master
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: test.xml
+      
