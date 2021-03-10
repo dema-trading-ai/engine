@@ -1,15 +1,15 @@
 from pathlib import Path
 from collections import defaultdict
 
+
 def get_project_root():
     return Path(__file__).parent
 
+
 def default_empty_array_dict() -> list:
-    """
-    :return: list for initializing dictionary
-    :rtype: List
-    """
+    """ :return: list for initializing dictionary :rtype: List """
     return []
+
 
 def default_empty_dict_dict() -> dict:
     """
@@ -17,6 +17,7 @@ def default_empty_dict_dict() -> dict:
     :rtype: Dict
     """
     return defaultdict(int)
+
 
 def calculate_worth_of_open_trades(open_trades) -> float:
     """
