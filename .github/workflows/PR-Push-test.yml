@@ -13,15 +13,11 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: 3.x
+      - run: pip install pytest-cov
       - run: pip install pytest
       - run: pytest
       
-  codacy-coverage-reporter:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
       - name: Run codacy-coverage-reporter
-        run: pip install pytest-cov
       - run: pytest --cov-report xml
       - uses: codacy/codacy-coverage-reporter-action@master
         with:
