@@ -5,11 +5,17 @@ def get_project_root():
     return Path(__file__).parent
 
 def default_empty_array_dict() -> list:
-    """ Helper method for initializing defaultdict containing arrays """
+    """
+    :return: list for initializing dictionary
+    :rtype: List
+    """
     return []
 
 def default_empty_dict_dict() -> dict:
-    """ Helper method for initializing defaultdict """
+    """
+    :return: Dictionary for initializing default dictionary
+    :rtype: Dict
+    """
     return defaultdict(int)
 
 def calculate_worth_of_open_trades(open_trades) -> float:
