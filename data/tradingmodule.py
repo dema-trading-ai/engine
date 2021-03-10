@@ -3,6 +3,7 @@ from backtesting.strategy import Strategy
 from models.trade import Trade
 from datetime import datetime
 from pandas import DataFrame, Series
+import utils
 
 
 # ======================================================================
@@ -181,17 +182,6 @@ class TradingModule:
                 return trade
         return None
 
-    def get_total_value_of_open_trades(self) -> float:
-        """
-        Method calculates the total value of all open trades
-        :return: The total value in base-currency of all open trades
-        :rtype: float
-        """
-        return_value = 0
-        for trade in self.open_trades:
-            return_value += (trade.currency_amount * trade.current)
-        return return_value
-
     def update_value_per_timestamp_tracking(self, trade: Trade, ohlcv: Series) -> None:
         """
         Method is used to be able to track the value change per timestamp per open trade
@@ -232,7 +222,7 @@ class TradingModule:
         if trade.profit_percentage < self.max_drawdown:
             self.max_drawdown = trade.profit_percentage
 
-        current_total_value = self.budget + self.get_total_value_of_open_trades()
+        current_total_value = self.budget + utils.calculate_worth_of_open_trades(self.open_trades)
         perc_of_total_value = ((trade.currency_amount * trade.close) / current_total_value) * 100
         perc_influence = trade.profit_percentage * (perc_of_total_value / 100)
 
