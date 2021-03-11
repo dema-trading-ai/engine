@@ -5,9 +5,9 @@
 Please join our Discord for updates, support, our community & more:
 https://discord.gg/WXxjtNzjEx
 
-## Running
+# Running
 
-### Requirements for running with Docker (recommended)
+## Requirements for running with Docker (recommended)
 
 Running the Engine just takes a few simple things:
 
@@ -15,7 +15,7 @@ Running the Engine just takes a few simple things:
 2. Some code editor (https://www.jetbrains.com/pycharm/)
 3. Abillity to copy + paste and some motivation to figure things out.
 
-### Requirements for running without Docker (alternative)
+## Requirements for running without Docker (alternative)
 
 Running the Engine just takes a few simple things:
 
@@ -24,7 +24,7 @@ Running the Engine just takes a few simple things:
 3. Some code editor (https://www.jetbrains.com/pycharm/)
 4. Install TA-Lib dependencies (see: https://github.com/mrjbq7/ta-lib Installation -> Dependencies)
 
-#### Running without Docker
+## Running without Docker
 
 First run:
 
@@ -38,7 +38,7 @@ After installing, you can run the Engine:
 python3 main.py
 ```
 
-#### Running with Docker
+## Running with Docker
 
 First run:
 
@@ -60,7 +60,7 @@ docker run --rm -v "$(pwd):/engine" dema-engine:alpha
 
 Note: do not forget '--rm' as your Docker will keep the container if you do, which is not necessary and will cause extreme increase in memory usage.
 
-#### Using `make`
+### Using `make`
 
 As the `docker` commands listed above are not so developer friendly, we added a `Makefile` to help you save some tears. You'll need to have `make` installed on your system (check using `make --version`), which is on most computers by default. If you don't, run `brew install make` (homebrew needed), `sudo apt install make` or `choco install make` (chocolately needed) for MacOS, Linux or Windows, respectively.
 
@@ -89,11 +89,7 @@ make
 ```
 
 ## Developing
-
-#### GitFlow
-
-To keep features, versions and fixes organized, we will be using the following gitflow.
-![Our gitflow](https://images.prismic.io/clubhouse/e02ba62c-26e6-4250-acff-1b2c93ecc789_image-32.png)
+For feature requests or suggestions, please create an issue. If you want to work on a certain functionality, please create an issue first.
 
 ## Full Documentation
 
@@ -103,14 +99,4 @@ https://www.docs.DemaTrading.ai
 
 This project is licensed under AGPL-3.0 License. It is not allowed to use this project to run any live trading instances. This project is for strategy testing only, if you want to monetise your strategy you can contact us. We can also help you to optimise your strategy. Any questions regarding this project? Feel free to get in touch using the contact form at https://DemaTrading.ai.
 
-#### New Features
 
-> T.B.A.
-
-#### Improvements
-
-> T.B.A
-
-#### Standard GitFlow
-
-> T.B.A
