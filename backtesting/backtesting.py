@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 from backtesting.results import MainResults, OpenTradeResult, CoinInsights, show_signature
 import utils
-
+from models.trade import Trade
+from config.currencies import get_currency_symbol
 import typing
 from tqdm import tqdm
 
@@ -11,12 +12,9 @@ from tqdm import tqdm
 #
 # © 2021 DemaTrading.AI
 # ======================================================================
-
-
+#
 # These constants are used for displaying and
 # emphasizing in commandline backtestresults
-from models.trade import Trade
-from config.currencies import get_currency_symbol
 
 
 class BackTesting:
@@ -52,7 +50,6 @@ class BackTesting:
 
         pairs = list(data.keys())
         ticks = list(data[pairs[0]].index.values)
-        
         for i, tick in tqdm(enumerate(ticks), total=len(ticks), ncols=75, desc='[TEST] Backtesting'):
             for pair in pairs:
                 # Get df for current pair and retrieve ohlcv for current tick
@@ -93,9 +90,7 @@ class BackTesting:
         OpenTradeResult.show(open_trade_res, self.currency_symbol)
         show_signature()
 
-
     def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float) -> MainResults:
-        
         budget += utils.calculate_worth_of_open_trades(open_trades)
         overall_profit = ((budget - self.starting_capital) / self.starting_capital) * 100
         max_seen_drawdown = self.calculate_max_seen_drawdown()
@@ -165,7 +160,7 @@ class BackTesting:
         """
         all_trades = open_trades + closed_trades
         trades_per_coin = {
-            pair : {
+            pair: {
                 'total_profit_prct' : 0,
                 'total_profit_amount': 0,
                 'amount_of_trades' : 0,

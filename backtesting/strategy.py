@@ -16,7 +16,7 @@ from pandas import DataFrame, Series
 
 class Strategy(abc.ABC):
     min_candles = 21
-    
+
     @abc.abstractmethod
     def generate_indicators(self, dataframe: DataFrame, current_candle: Series) -> DataFrame:
         """
@@ -27,9 +27,8 @@ class Strategy(abc.ABC):
         :return: Dataframe filled with indicator-data
         :rtype: DataFrame
         """
+        return dataframe
 
-        pass 
-    
     @abc.abstractmethod
     def buy_signal(self, dataframe: DataFrame, current_candle: Series) -> Series:
         """

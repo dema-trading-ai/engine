@@ -281,7 +281,7 @@ class DataModule:
             prev_df = self.download_data_for_pair(pair, self.backtesting_from, df_begin, False)
             df = pd.concat([prev_df, df])
             extra_candles += len(prev_df.index)
-        
+
         # Check if new data needs to be downloaded
         if final_timestamp > df_end:
             new_df = self.download_data_for_pair(pair, df_end, self.backtesting_to, False)
