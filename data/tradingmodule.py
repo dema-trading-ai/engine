@@ -66,9 +66,11 @@ class TradingModule:
         :return: None
         :rtype: None
         """
-        indicators = self.strategy.generate_indicators(data, ohlcv)
-        signal = self.strategy.buy_signal(indicators, ohlcv)
-        if signal['buy'] == 1:
+        indicators = self.strategy.generate_indicators(data)
+        filled_ohlcv = indicators.iloc[[-1]].copy()
+        signal = self.strategy.buy_signal(indicators, filled_ohlcv)
+
+        if signal['buy'][0] == 1:
             self.open_trade(ohlcv)
 
     def open_trade_tick(self, ohlcv: Series, data: DataFrame, trade: Trade) -> None:
@@ -94,10 +96,11 @@ class TradingModule:
         if stoploss or roi:
             return
 
-        indicators = self.strategy.generate_indicators(data, ohlcv)
-        signal = self.strategy.sell_signal(indicators, ohlcv, trade)
+        indicators = self.strategy.generate_indicators(data)
+        filled_ohlcv = indicators.iloc[[-1]].copy()
+        signal = self.strategy.sell_signal(indicators, filled_ohlcv, trade)
 
-        if signal['sell'] == 1:
+        if signal['sell'][0] == 1:
             self.close_trade(trade, reason="Sell signal", ohlcv=ohlcv)
 
     def close_trade(self, trade: Trade, reason: str, ohlcv: Series) -> None:
