@@ -1,13 +1,11 @@
 name: Docs Deployment Pipeline
 on:
   push:
-    branches: [feature/**, main, fix/**, development]
+    branches: [main, development]
     paths:
       - 'docs/**'
-  pull_request:
-    branches: [development, main]
-    paths:
-      - 'docs/**'
+  workflow_dispatch:
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
