@@ -1,4 +1,3 @@
-from tabulate import tabulate
 from datetime import datetime, timedelta
 from backtesting.results import MainResults, OpenTradeResult, CoinInsights, show_signature
 import utils
@@ -18,7 +17,6 @@ from tqdm import tqdm
 # emphasizing in commandline backtestresults
 from models.trade import Trade
 from config.currencies import get_currency_symbol
-
 
 
 class BackTesting:
