@@ -90,9 +90,7 @@ class BackTesting:
         OpenTradeResult.show(open_trade_res, self.currency_symbol)
         show_signature()
 
-
     def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float) -> MainResults:
-        
         budget += utils.calculate_worth_of_open_trades(open_trades)
         overall_profit = ((budget - self.starting_capital) / self.starting_capital) * 100
         max_seen_drawdown = self.calculate_max_seen_drawdown()
