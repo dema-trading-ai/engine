@@ -11,7 +11,7 @@ jobs:
   generate-new-tag:
     runs-on: ubuntu-latest
     outputs:
-      new_tag: ${{ steps.tag_version.outputs.new_tag }}
+      new_tag: ${{ steps.tag_version.outputs.new_tag }}  # Allows publish-package to use the new_tag output.
     steps:
       - uses: actions/checkout@v2
       - name: Bump version and push tag
@@ -43,7 +43,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: dema-trading-ai/engine:stable, dema-trading-ai/engine:${{ needs.generate-new-tag.outputs.new_tag }}  # Builds the package with the `stable` tag.
+          tags: dema-trading-ai/engine:stable, dema-trading-ai/engine:${{ needs.generate-new-tag.outputs.new_tag }}  # Builds a package with the `stable` tag, and another with the version as tag.
       -
         name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
