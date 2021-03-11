@@ -10,6 +10,8 @@ on:
 jobs:
   generate-new-tag:
     runs-on: ubuntu-latest
+    outputs:
+      new_tag: ${{ steps.tag_version.outputs.new_tag }}
     steps:
       - uses: actions/checkout@v2
       - name: Bump version and push tag
@@ -21,6 +23,7 @@ jobs:
           dry-run: false  # For testing purposes. Should be set to false by default.
   publish_package:
     runs-on: ubuntu-latest
+    needs: generate-new-tag
     steps:
       -
         name: Set up QEMU
@@ -40,7 +43,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: dema-trading-ai/engine:stable  # Builds the package with the `stable` tag.
+          tags: dema-trading-ai/engine:stable, dema-trading-ai/engine:${{ needs.generate-new-tag.outputs.new_tag }}  # Builds the package with the `stable` tag.
       -
         name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}

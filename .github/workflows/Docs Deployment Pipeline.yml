@@ -1,4 +1,3 @@
-
 name: Docs Deployment Pipeline
 on:
   push:
