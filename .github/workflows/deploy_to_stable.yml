@@ -1,6 +1,6 @@
 # Triggers the Github Workflow to increase the version numher and publish an update to the Github Package.
 
-name: Github Packages Deployment
+name: DockerHub Deployment
 
 on:
   push:
