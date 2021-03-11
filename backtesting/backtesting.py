@@ -142,9 +142,6 @@ class BackTesting:
         # print("| %sLeft open trades %s" % (FONT_BOLD, FONT_RESET))
         open_trade_stats = []
         for trade in open_trades:
-            if trade.max_drawdown is None:
-                trade.max_drawdown = 0.0
-
             open_trade_res = OpenTradeResult(pair=trade.pair,
                                              curr_profit_percentage=trade.profit_percentage,
                                              curr_profit=trade.profit_dollar,
