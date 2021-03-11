@@ -12,7 +12,7 @@ import talib.abstract as ta
 # © 2021 DemaTrading.AI
 # ======================================================================
 
-"""This module defines the abstract base class (abc) that every strategy 
+"""This module defines the abstract base class (abc) that every strategy
 must inherit from, and override all methods"""
 
 
@@ -28,7 +28,7 @@ class Strategy(abc.ABC):
         :rtype: DataFrame
         """
 
-        return dataframe
+        pass
     
     @abc.abstractmethod
     def buy_signal(self, dataframe: DataFrame, current_candle: Series) -> Series:
