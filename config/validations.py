@@ -45,7 +45,7 @@ def set_default_param_values(config: dict):
 
 def validate_single_currency_in_pairs(config: dict):
     """Checks whether every pair (e.g., BTC/USDT) contains
-    the same currency as specified under the name 'currency' 
+    the same currency as specified under the name 'currency'
     in the configuration.
     :param config: json configuration
     :type config: dict

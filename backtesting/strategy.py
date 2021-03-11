@@ -28,7 +28,7 @@ class Strategy(abc.ABC):
         :rtype: DataFrame
         """
         return dataframe
-    
+
     @abc.abstractmethod
     def buy_signal(self, dataframe: DataFrame, current_candle: Series) -> Series:
         """
