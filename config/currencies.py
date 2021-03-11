@@ -5,7 +5,7 @@ def get_currency_symbol(config):
 
 
 def get_currency_symbol_from_code(currency_code: str) -> str:
-    """Could be implemented using a library, but could not find one 
+    """Could be implemented using a library, but could not find one
     that supports the special codes (e.g., USDT instead of USD)''"""
 
     if "EUR" in currency_code:

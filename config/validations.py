@@ -21,7 +21,7 @@ def validate_config(config: dict):
 
 def check_config_required_params(config_json: dict):
     """
-    This function checks the presence of the required params in the provided 
+    This function checks the presence of the required params in the provided
     config file, and throws an error when it's not
 
     :param config_json: the config dictionary
@@ -33,21 +33,20 @@ def check_config_required_params(config_json: dict):
 
 def set_default_param_values(config: dict):
     """
-    This function checks for every config param that has a default whether it is in the 
-    config file, and sets the defaiult value if not. 
+    This function checks for every config param that has a default whether it is in the
+    config file, and sets the defaiult value if not.
 
     :param config: the json config dictionary
     """
     for param, default_value in DEFAULT_PARAMS.items():
         if config.get(param) == None:
-            config[param] = default_value 
+            config[param] = default_value
 
 
 def validate_single_currency_in_pairs(config: dict):
-    """Checks whether every pair (e.g., BTC/USDT) contains 
+    """Checks whether every pair (e.g., BTC/USDT) contains
     the same currency as specified under the name 'currency' 
     in the configuration.
-    
     :param config: json configuration
     :type config: dict
     """

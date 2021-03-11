@@ -53,8 +53,6 @@ class MainResults:
         print("| Seen drawdown from: \t\t%s" % self.drawdown_from)
         print("| Seen drawdown to: \t\t%s" % self.drawdown_to)
 
- 
-
 
 @dataclass
 class CoinInsights:
@@ -75,19 +73,19 @@ class CoinInsights:
 
         stats = []
         for c in instances:
-            stats.append([c.pair, round(c.avg_profit_percentage, 2), round(c.profit, 2), 
-                          c.n_trades, round(c.max_drawdown, 2), 
-                          c.avg_duration, c.roi, c.stoploss, 
+            stats.append([c.pair, round(c.avg_profit_percentage, 2), round(c.profit, 2),
+                          c.n_trades, round(c.max_drawdown, 2),
+                          c.avg_duration, c.roi, c.stoploss,
                           c.sell_signal])
 
         print(tabulate(stats,
-                       headers=['Pair', 
-                                'avg profit (%)', 
-                                f' profit ({currency_symbol})', 
-                                'trades', 
-                                'max drawdown %', 
+                       headers=['Pair',
+                                'avg profit (%)',
+                                f' profit ({currency_symbol})',
+                                'trades',
+                                'max drawdown %',
                                 'avg duration',
-                                'ROI', 'SL', 'Signal'], 
+                                'ROI', 'SL', 'Signal'],
                        tablefmt='pretty'))
 
 
@@ -110,10 +108,7 @@ class OpenTradeResult:
                          round(res.max_drawdown, 2),
                          res.opened_at])
         print(tabulate(rows,
-                       headers=['Pair', 'cur. profit (%)', 
-                                f' cur. profit ({currency_symbol})', 
+                       headers=['Pair', 'cur. profit (%)',
+                                f' cur. profit ({currency_symbol})',
                                 'max drawdown %', 'opened at'],
                        tablefmt='pretty'))
-            
-
-
