@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 from backtesting.results import MainResults, OpenTradeResult, CoinInsights, show_signature
 import utils
-
+from models.trade import Trade
+from config.currencies import get_currency_symbol
 import typing
 from tqdm import tqdm
 
@@ -11,12 +12,9 @@ from tqdm import tqdm
 #
 # © 2021 DemaTrading.AI
 # ======================================================================
-
-
+#
 # These constants are used for displaying and
 # emphasizing in commandline backtestresults
-from models.trade import Trade
-from config.currencies import get_currency_symbol
 
 
 class BackTesting:
@@ -165,7 +163,7 @@ class BackTesting:
         """
         all_trades = open_trades + closed_trades
         trades_per_coin = {
-            pair : {
+            pair: {
                 'total_profit_prct' : 0,
                 'total_profit_amount': 0,
                 'amount_of_trades' : 0,

@@ -1,11 +1,11 @@
 import os
 import utils
-import sys 
+import sys
 from backtesting.strategy import Strategy
 
 
 def load_strategy_from_config(config) -> 'Strategy':
-    """This function loads the correct strategy, a class that inherits from Strategy and 
+    """This function loads the correct strategy, a class that inherits from Strategy and
     made by a user, based on the name and folder specified in the config file"""
 
     strategies_path = get_full_path_to_strategies_folder(config)
@@ -18,13 +18,13 @@ def load_strategy_from_config(config) -> 'Strategy':
             CustomStrategy = getattr(mod, config['strategy-name'])
             check_if_subclass_of_strategy(CustomStrategy)
 
-            try: 
+            try:
                 strategy = CustomStrategy()
             except TypeError:
                 print("[ERROR] Your custom strategy has inherited from the base class Strategy,"
                       "\n[ERROR] but it does not implement all abstract methods")
                 raise SystemExit
-            return strategy 
+            return strategy
 
     # in case it is not found
     print(f"[ERROR] Could not find strategy '{config['strategy-name']}' in the directory '{strategies_path}'.")
