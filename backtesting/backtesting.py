@@ -155,6 +155,9 @@ class BackTesting:
         for trade in open_trades:
             if trade.max_drawdown is None:
                 trade.max_drawdown = 0.0
+            if trade.profit_percentage == None:
+                trade.profit_percentage = 0.0
+                trade.profit_dollar = 0.0
 
             open_trade_res = OpenTradeResult(pair=trade.pair,
                                              curr_profit_percentage=trade.profit_percentage,
