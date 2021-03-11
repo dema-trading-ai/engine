@@ -1,4 +1,3 @@
-import numpy
 import talib as ta
 import abc
 
@@ -10,14 +9,14 @@ from pandas import DataFrame, Series
 #
 # © 2021 DemaTrading.AI
 # ======================================================================
-
-"""This module defines the abstract base class (abc) that every strategie 
-must inherit from, and override all methods"""
+#
+# This module defines the abstract base class (abc) that every strategie
+# must inherit from, and override all methods
 
 
 class Strategy(abc.ABC):
     min_candles = 21
-    
+
     @abc.abstractmethod
     def generate_indicators(self, dataframe: DataFrame, current_candle: Series) -> DataFrame:
         """
@@ -28,9 +27,8 @@ class Strategy(abc.ABC):
         :return: Dataframe filled with indicator-data
         :rtype: DataFrame
         """
+        return dataframe
 
-        pass 
-    
     @abc.abstractmethod
     def buy_signal(self, dataframe: DataFrame, current_candle: Series) -> Series:
         """

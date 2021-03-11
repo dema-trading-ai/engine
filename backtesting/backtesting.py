@@ -1,8 +1,8 @@
-from tabulate import tabulate
 from datetime import datetime, timedelta
-from collections import defaultdict, namedtuple
 from backtesting.results import MainResults, OpenTradeResult, CoinInsights, show_signature
-
+import utils
+from models.trade import Trade
+from config.currencies import get_currency_symbol
 import typing
 from tqdm import tqdm
 
@@ -12,13 +12,9 @@ from tqdm import tqdm
 #
 # © 2021 DemaTrading.AI
 # ======================================================================
-
-
+#
 # These constants are used for displaying and
 # emphasizing in commandline backtestresults
-from models.trade import Trade
-from config.currencies import get_currency_symbol
-
 
 
 class BackTesting:
@@ -54,7 +50,6 @@ class BackTesting:
 
         pairs = list(data.keys())
         ticks = list(data[pairs[0]].index.values)
-        
         for i, tick in tqdm(enumerate(ticks), total=len(ticks), ncols=75, desc='[TEST] Backtesting'):
             for pair in pairs:
                 # Get df for current pair and retrieve ohlcv for current tick
@@ -95,14 +90,10 @@ class BackTesting:
         OpenTradeResult.show(open_trade_res, self.currency_symbol)
         show_signature()
 
-
     def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float) -> MainResults:
-        
-        budget += self.calculate_worth_of_open_trades(open_trades)
-        # starting_capital = self.starting_capital
+        budget += utils.calculate_worth_of_open_trades(open_trades)
         overall_profit = ((budget - self.starting_capital) / self.starting_capital) * 100
         max_seen_drawdown = self.calculate_max_seen_drawdown()
-        # loss = self.calculate_loss_trades(closed_trades)
 
         return MainResults(tested_from=datetime.fromtimestamp(self.backtesting_from / 1000),
                            tested_to=datetime.fromtimestamp(self.backtesting_to / 1000),
@@ -123,28 +114,18 @@ class BackTesting:
         stats = self.calculate_statistics_per_coin(open_trades, closed_trades)
         new_stats = []
         for coin in stats:
-            sell_reasons = {
-                "ROI": 0,
-                "Stoploss": 0,
-                "Sell signal": 0
-            }
             durations = list(stats[coin]['avg_duration'])
             average_timedelta = sum(durations, timedelta(0)) / len(durations)
-            stats[coin]['total_profit_prct'] = (
-                stats[coin]['total_profit_prct'] / stats[coin]['amount_of_trades'])
-            for reason in stats[coin]['sell_reasons']:
-                if reason is not None:
-                    sell_reasons[reason] += stats[coin]['sell_reasons'][reason]
-
+            avg_profit_prct = (stats[coin]['total_profit_prct'] / stats[coin]['amount_of_trades'])
             coin_insight = CoinInsights(pair=coin,
-                                           avg_profit_percentage=stats[coin]['total_profit_prct'],
+                                           avg_profit_percentage=avg_profit_prct,
                                            profit=stats[coin]['total_profit_amount'],
                                            n_trades=stats[coin]['amount_of_trades'],
                                            max_drawdown=stats[coin]['max_drawdown'],
                                            avg_duration=average_timedelta,
-                                           roi=sell_reasons['ROI'],
-                                           stoploss=sell_reasons['Stoploss'],
-                                           sell_signal=sell_reasons['Sell signal'])
+                                           roi=stats[coin]['sell_reasons']['ROI'],
+                                           stoploss=stats[coin]['sell_reasons']['Stoploss'],
+                                           sell_signal=stats[coin]['sell_reasons']['Sell signal'])
             new_stats.append(coin_insight)
 
         return new_stats
@@ -168,22 +149,6 @@ class BackTesting:
             open_trade_stats.append(open_trade_res)
         return open_trade_stats
 
-
-    # Helper method for calculating worth of open trades
-    def calculate_worth_of_open_trades(self, open_trades: [Trade]) -> float:
-        """
-        Method calculates worth of open trades
-
-        :param open_trades: array of open trades
-        :type open_trades: [Trade]
-        :return: returns the total value of all open trades
-        :rtype: float
-        """
-        return_value = 0
-        for trade in open_trades:
-            return_value += (trade.currency_amount * trade.current)
-        return return_value
-
     def calculate_statistics_per_coin(self, open_trades, closed_trades):
         """
         TODO Feel free to optimize this method :)
@@ -198,13 +163,13 @@ class BackTesting:
         """
         all_trades = open_trades + closed_trades
         trades_per_coin = {
-            pair : {
+            pair: {
                 'total_profit_prct' : 0,
                 'total_profit_amount': 0,
                 'amount_of_trades' : 0,
                 'max_drawdown' : 0.0,
                 'avg_duration' : [],
-                'sell_reasons' : defaultdict(int)
+                'sell_reasons' : utils.default_empty_dict_dict()
             } for pair in self.data.keys()
         }
 
@@ -223,8 +188,7 @@ class BackTesting:
                 trades_per_coin[trade.pair]['avg_duration'].append(trade.closed_at - trade.opened_at)
                 trades_per_coin[trade.pair]['sell_reasons'][trade.sell_reason] += 1
             else:
-                trades_per_coin[trade.pair]['avg_duration'].append(
-                    datetime.now() - trade.opened_at)
+                trades_per_coin[trade.pair]['avg_duration'].append(datetime.now() - trade.opened_at)
 
         return trades_per_coin
 
@@ -287,14 +251,3 @@ class BackTesting:
                 loss_trades += 1
         return loss_trades
 
-    def default_empty_array_dict(self) -> list:
-        """
-        Helper method for initializing defaultdict containing arrays
-        """
-        return []
-
-    def default_empty_dict_dict(self) -> dict:
-        """
-        Helper method for initializing defaultdict
-        """
-        return defaultdict()
