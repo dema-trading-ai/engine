@@ -1,4 +1,3 @@
-import numpy
 import talib as ta
 import abc
 
@@ -10,9 +9,9 @@ from pandas import DataFrame, Series
 #
 # © 2021 DemaTrading.AI
 # ======================================================================
-
-"""This module defines the abstract base class (abc) that every strategie 
-must inherit from, and override all methods"""
+#
+# This module defines the abstract base class (abc) that every strategie
+# must inherit from, and override all methods
 
 
 class Strategy(abc.ABC):
