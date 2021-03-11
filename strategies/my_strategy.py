@@ -2,8 +2,9 @@ from backtesting.strategy import Strategy
 from pandas import DataFrame, Series
 from models.trade import Trade
 
-"""This is an example custom strategy, that inherits from 
-the main Strategy class"""
+# This is an example custom strategy, that inherits from
+# the main Strategy class
+
 
 class MyStrategy(Strategy):
 
