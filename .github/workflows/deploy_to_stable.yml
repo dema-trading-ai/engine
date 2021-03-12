@@ -23,6 +23,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BUMP: patch  # If no indicators are found in the commits or the PR, defaults to bumping the right-hand number.
           WITH_V: true  # Adds a `v` in front of the tag
+          RELEASE_BRANCH: release/stable
   publish_package:
     runs-on: ubuntu-latest
     needs: generate-new-tag
@@ -45,7 +46,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: dema-trading-ai/engine:stable, dema-trading-ai/engine:${{ needs.generate-new-tag.outputs.new_tag }}  # Builds a package with the `stable` tag, and another with the version as tag.
+          tags: dematrading/engine:stable, dematrading/engine:${{ needs.generate-new-tag.outputs.new_tag }}  # Builds a package with the `stable` tag, and another with the version as tag.
       -
         name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
