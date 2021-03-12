@@ -1,10 +1,6 @@
-# Mandatory libraries
 import abc
 from pandas import DataFrame, Series
 from models.trade import Trade
-
-# Optional libraries
-import talib.abstract as ta
 
 # ======================================================================
 # Strategy-class is responsible for populating indicators / signals
@@ -12,13 +8,15 @@ import talib.abstract as ta
 # © 2021 DemaTrading.AI
 # ======================================================================
 
-"""This module defines the abstract base class (abc) that every strategy
-must inherit from, and override all methods"""
-
 
 class Strategy(abc.ABC):
+    """
+    This module defines the abstract base class (abc) that every strategy must inherit from.
+    Methods defined in strategies/*.py will overwrite these methods.
+    """
+
     min_candles = 21
-    
+
     @abc.abstractmethod
     def generate_indicators(self, dataframe: DataFrame) -> DataFrame:
         """
@@ -27,11 +25,10 @@ class Strategy(abc.ABC):
         :return: Dataframe filled with indicator-data
         :rtype: DataFrame
         """
+        return
 
-        pass
-    
     @abc.abstractmethod
-    def buy_signal(self, dataframe: DataFrame, current_candle: Series) -> Series:
+    def buy_signal(self, dataframe: DataFrame, current_candle: DataFrame) -> DataFrame:
         """
         :param dataframe: Dataframe filled with indicators from generate_indicators
         :type indicators: DataFrame
@@ -40,11 +37,10 @@ class Strategy(abc.ABC):
         :return: Current candle filled with buy signals
         :rtype: Series
         """
-
-        pass
+        return
 
     @abc.abstractmethod
-    def sell_signal(self, dataframe: DataFrame, current_candle: Series, trade: Trade) -> Series:
+    def sell_signal(self, dataframe: DataFrame, current_candle: DataFrame, trade: Trade) -> DataFrame:
         """
         :param dataframe: Dataframe filled with indicators from generate_indicators
         :type indicators: DataFrame
@@ -55,8 +51,7 @@ class Strategy(abc.ABC):
         :return: Current candle filled with buy signals
         :rtype: Series
         """
-
-        pass
+        return
 
     @staticmethod
     def change_timeframe(dataframe: DataFrame, new_timeframe: str) -> DataFrame:
@@ -76,5 +71,4 @@ class Strategy(abc.ABC):
         :return: Dataframe in new timeframe
         :rtype: DataFrame
         """
-
         return dataframe.resample(new_timeframe, origin='start', label='right').ohlc()

@@ -6,10 +6,12 @@ from models.trade import Trade
 # Optional libraries
 import talib.abstract as ta
 
-"""This is an example custom strategy, that inherits from 
-the main Strategy class"""
 
 class MyStrategy(Strategy):
+    """
+    This is an example custom strategy, that inherits from the main Strategy class
+    """
+
     min_candles = 21
 
     def generate_indicators(self, dataframe: DataFrame) -> DataFrame:
@@ -27,7 +29,7 @@ class MyStrategy(Strategy):
         dataframe['ema21'] = ta.EMA(dataframe, timeperiod=21)
 
         return dataframe
-    
+
     def buy_signal(self, dataframe: DataFrame, current_candle: DataFrame) -> DataFrame:
         """
         :param dataframe: Dataframe filled with indicators from generate_indicators
@@ -47,7 +49,7 @@ class MyStrategy(Strategy):
                     (current_candle['volume'] > 0)
                 ),
                 'buy'] = 1
-        
+
             # END STRATEGY
 
         return current_candle
@@ -72,7 +74,7 @@ class MyStrategy(Strategy):
                     (current_candle['volume'] > 0)
                 ),
                 'sell'] = 1
-        
+
             # END STRATEGY
 
         return current_candle
