@@ -1,53 +1,75 @@
-import numpy
 import talib as ta
+import abc
 
-from models.ohlcv import OHLCV
 from models.trade import Trade
+from pandas import DataFrame, Series
 
 # ======================================================================
 # Strategy-class is responsible for populating indicators / signals
 #
 # © 2021 DemaTrading.AI
 # ======================================================================
+#
+# This module defines the abstract base class (abc) that every strategie
+# must inherit from, and override all methods
 
 
-class Strategy:
+class Strategy(abc.ABC):
     min_candles = 21
 
-    def generate_indicators(self, past_candles: [OHLCV], current_candle: OHLCV) -> {}:
+    @abc.abstractmethod
+    def generate_indicators(self, dataframe: DataFrame, current_candle: Series) -> DataFrame:
         """
-        :param past_candles: Array of candle-data (OHLCV models)
-        :type past_candles: [OHLCV]
+        :param dataframe: All passed candles with OHLCV data
+        :type dataframe: DataFrame
         :param current_candle: Last candle
-        :type current_candle: OHLCV model
-        :return: dictionary filled with indicator-data
-        :rtype: dictionary
+        :type current_candle: Series
+        :return: Dataframe filled with indicator-data
+        :rtype: DataFrame
         """
-        return {}
+        return dataframe
 
-    def buy_signal(self, indicators, current_candle: OHLCV) -> bool:
+    @abc.abstractmethod
+    def buy_signal(self, dataframe: DataFrame, current_candle: Series) -> Series:
         """
-        :param indicators: indicator dictionary created by generate_indicators method
-        :type indicators: dictionary
-        :param current_candle: last candle
-        :type current_candle: OHLCV model
-        :return: returns whether to buy or not buy specified coin (True = buy, False = skip)
-        :rtype: boolean
+        :param dataframe: Dataframe filled with indicators created by generate_indicators method
+        :type indicators: DataFrame
+        :param current_candle: Last candle
+        :type current_candle: Series
+        :return: Dataframe filled with buy signals
+        :rtype: DataFrame
         """
-        return True
+        pass
 
-    def sell_signal(self, indicators, current_candle, trade: Trade) -> bool:
+    @abc.abstractmethod
+    def sell_signal(self, dataframe: DataFrame, current_candle: Series, trade: Trade) -> Series:
         """
-        :param indicators: indicator dictionary created by generate_indicators method
-        :type indicators: dictionary
-        :param current_candle: last candle
-        :type current_candle: OHLCV model
-        :param trade: current open trade
+        :param dataframe: Dataframe filled with indicators created by generate_indicators method
+        :type indicators: DataFrame
+        :param current_candle: Last candle
+        :type current_candle: Series
+        :param trade: Current open trade
         :type trade: Trade model
-        :return: returns whether to close or not close specified trade (True = sell, False = skip)
-        :rtype: boolean
+        :return: Dataframe filled with sell signals
+        :rtype: DataFrame
         """
-        # # print
-        # if trade.profit_percentage > 2:
-        #     return True
-        return False
+        pass
+
+    @staticmethod
+    def change_timeframe(dataframe: DataFrame, new_timeframe: str) -> DataFrame:
+        """
+        Changes the timeframe of the given dataframe
+        Remarks:
+            - Returns only OHLC data (removes columns: 'time', 'volume', 'pair')
+            - 'timeframe' in config.json needs to be smaller than new_timeframe to work correctly.
+            - Values for new_timeframe can be found here:
+            https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#offset-aliases
+        :param dataframe: All passed candles with OHLCV data
+        :type indicators: DataFrame
+        :param timeframe: New timeframe configuration
+        :type timeframe: string
+        :return: Dataframe in new timeframe
+        :rtype: DataFrame
+        """
+
+        return dataframe.resample(new_timeframe, origin='start', label='right').ohlc()

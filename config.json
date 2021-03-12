@@ -8,9 +8,9 @@
   "backtesting-till-now": "False",
   "stoploss": "-0.5",
   "roi": "5",
-  "pairs": [
-    "BTC/USDT",
-    "ETH/USDT",
-    "LTC/USDT"
-  ]
+  "pairs": ["BTC/USDT", "ETH/USDT", "LTC/USDT"],
+  "currency": "USDT",
+  "fee": null,
+  "strategy-name": "MyStrategy",
+  "strategies-folder": "strategies"
 }
