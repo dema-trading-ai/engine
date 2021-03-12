@@ -19,12 +19,15 @@ As the docker commands listed above are not so developer friendly, we added a Ma
 To build the image:
 
 `make build`
+
 To run the container:
 
 `make run`
+
 To run on volume:
 
 `make runv`
+
 To build and run:
 
 `make`
