@@ -1,4 +1,4 @@
-from pandas import DataFrame, Series
+from pandas import Series
 
 # ======================================================================
 # Trade class is used by TradingModule for registering trades and tracking
@@ -7,6 +7,7 @@ from pandas import DataFrame, Series
 # © 2021 DemaTrading.AI
 # ======================================================================
 from datetime import datetime
+
 
 class Trade:
     pair = None
