@@ -3,7 +3,7 @@
 [![Build Status](https://img.shields.io/github/forks/dema-trading-ai/engine.svg)](https://github.com/dema-trading-ai/engine)
 [![Build Status](https://img.shields.io/github/stars/dema-trading-ai/engine.svg)](https://github.com/dema-trading-ai/engine)
 [![License](https://img.shields.io/github/license/dema-trading-ai/engine.svg)](https://github.com/dema-trading-ai/engine)
-[![Test PR for Unit test](https://github.com/dema-trading-ai/engine/actions/workflows/PR%20unit%20test.yml/badge.svg)](https://github.com/dema-trading-ai/engine/actions/workflows/PR%20unit%20test.yml)
+[![Test PR/Push](https://github.com/dema-trading-ai/engine/actions/workflows/PR-Push-test.yml/badge.svg)](https://github.com/dema-trading-ai/engine/actions/workflows/PR-Push-test.yml)
 [![Docs Deployment Pipeline](https://github.com/dema-trading-ai/engine/actions/workflows/Docs%20Deployment%20Pipeline.yml/badge.svg)](https://github.com/dema-trading-ai/engine/actions/workflows/Docs%20Deployment%20Pipeline.yml)
 
 # Discord
