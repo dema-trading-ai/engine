@@ -1,4 +1,4 @@
-## Running
+# Running
 ### Requirements for running with Docker (recommended)
 Running the Engine just takes a few simple things:
 1. Docker installed on your system (https://docs.docker.com/get-docker/)
@@ -11,6 +11,23 @@ Running the Engine just takes a few simple things:
 2. Pip Running on your system (https://pip.pypa.io/en/stable/installing/)
 3. Some code editor (https://www.jetbrains.com/pycharm/)
 4. Install TA-Lib dependencies (see: https://github.com/mrjbq7/ta-lib Installation -> Dependencies)
+
+### Using `make`
+
+As the docker commands listed above are not so developer friendly, we added a Makefile to help you save some tears. You'll need to have make installed on your system (check using make --version), which is on most computers by default. If you don't, run brew install make (homebrew needed), sudo apt install make or choco install make (chocolately needed) for MacOS, Linux or Windows, respectively.
+
+To build the image:
+
+make build
+To run the container:
+
+make run
+To run on volume:
+
+make runv
+To build and run:
+
+make
 
 ***
 
