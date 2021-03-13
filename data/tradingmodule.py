@@ -66,9 +66,11 @@ class TradingModule:
         :return: None
         :rtype: None
         """
-        indicators = self.strategy.generate_indicators(data, ohlcv)
-        signal = self.strategy.buy_signal(indicators, ohlcv)
-        if signal['buy'] == 1:
+        indicators = self.strategy.generate_indicators(data)
+        filled_ohlcv = indicators.iloc[[-1]].copy()
+        signal = self.strategy.buy_signal(indicators, filled_ohlcv)
+
+        if signal['buy'][0] == 1:
             self.open_trade(ohlcv)
 
     def open_trade_tick(self, ohlcv: Series, data: DataFrame, trade: Trade) -> None:
@@ -94,10 +96,11 @@ class TradingModule:
         if stoploss or roi:
             return
 
-        indicators = self.strategy.generate_indicators(data, ohlcv)
-        signal = self.strategy.sell_signal(indicators, ohlcv, trade)
+        indicators = self.strategy.generate_indicators(data)
+        filled_ohlcv = indicators.iloc[[-1]].copy()
+        signal = self.strategy.sell_signal(indicators, filled_ohlcv, trade)
 
-        if signal['sell'] == 1:
+        if signal['sell'][0] == 1:
             self.close_trade(trade, reason="Sell signal", ohlcv=ohlcv)
 
     def close_trade(self, trade: Trade, reason: str, ohlcv: Series) -> None:
@@ -148,10 +151,27 @@ class TradingModule:
         :return: return whether to close the trade based on ROI
         :rtype: boolean
         """
-        if trade.profit_percentage > float(self.config['roi']):
+        time_passed = datetime.fromtimestamp(ohlcv['time'] / 1000) - trade.opened_at
+        if trade.profit_percentage > self.calculate_roi_over_time(time_passed):
             self.close_trade(trade, reason="ROI", ohlcv=ohlcv)
             return True
         return False
+
+    def calculate_roi_over_time(self, time_passed) -> float:
+        """
+        Method that calculates the current ROI over time
+        :param time_passed: Time passed since the trade opened
+        :type time_passed: time in H:M:S
+        :return: return the value of ROI
+        :rtype: float
+        """
+        passed_minutes = time_passed.seconds / 60
+        roi = self.config['roi']['0']
+
+        for key, value in sorted(self.config['roi'].items(), key=lambda item: int(item[0])):
+            if passed_minutes >= int(key):
+                roi = value
+        return roi
 
     def check_stoploss_open_trade(self, trade: Trade, ohlcv: Series) -> bool:
         """
