@@ -7,7 +7,7 @@
   "backtesting-to": "2021-02-10",
   "backtesting-till-now": "False",
   "stoploss": "-0.5",
-  "roi": "5",
+  "roi": {"0": 5, "60": 4, "120": 3},
   "pairs": ["BTC/USDT", "ETH/USDT", "LTC/USDT"],
   "currency": "USDT",
   "fee": null,
