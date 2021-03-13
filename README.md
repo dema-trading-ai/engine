@@ -3,6 +3,8 @@
 [![Build Status](https://img.shields.io/github/forks/dema-trading-ai/engine.svg)](https://github.com/dema-trading-ai/engine)
 [![Build Status](https://img.shields.io/github/stars/dema-trading-ai/engine.svg)](https://github.com/dema-trading-ai/engine)
 [![License](https://img.shields.io/github/license/dema-trading-ai/engine.svg)](https://github.com/dema-trading-ai/engine)
+[![Test PR/Push](https://github.com/dema-trading-ai/engine/actions/workflows/PR-Push-test.yml/badge.svg)](https://github.com/dema-trading-ai/engine/actions/workflows/PR-Push-test.yml)
+[![Docs Deployment Pipeline](https://github.com/dema-trading-ai/engine/actions/workflows/Docs%20Deployment%20Pipeline.yml/badge.svg)](https://github.com/dema-trading-ai/engine/actions/workflows/Docs%20Deployment%20Pipeline.yml)
 
 # Discord
 
@@ -101,6 +103,6 @@ https://www.docs.DemaTrading.ai
 
 ## License
 
-This project is licensed under AGPL-3.0 License. It is not allowed to use this project to run any live trading instances. This project is for strategy testing only, if you want to monetise your strategy you can contact us. We can also help you to optimise your strategy. Any questions regarding this project? Feel free to get in touch using the contact form at https://DemaTrading.ai.
+This project is licensed under AGPL-3.0 License. It is not allowed to use this project to run any live trading instances. This project is for strategy testing only, if you want to monetise your strategy you can contact us. We can also help you to optimise your strategy. Any questions regarding this project? Feel free to get in touch using the contactform at https://DemaTrading.ai. 
 
 
