@@ -5,6 +5,7 @@ from models.trade import Trade
 from config.currencies import get_currency_symbol
 import typing
 from tqdm import tqdm
+import numpy as np
 
 # ======================================================================
 # BackTesting class is responsible for processing the ticks (ohlcv-data)
@@ -57,7 +58,7 @@ class BackTesting:
                 ohlcv_tick = pair_df.loc[tick].copy()
 
                 # Get passed ticks and pass to trading module
-                self.trading_module.tick(ohlcv_tick, pair_df[:i])
+                self.trading_module.tick(ohlcv_tick, pair_df[:i+1].copy())
 
         open_trades = self.trading_module.open_trades
         closed_trades = self.trading_module.closed_trades
@@ -115,8 +116,8 @@ class BackTesting:
         new_stats = []
         for coin in stats:
             durations = list(stats[coin]['avg_duration'])
-            average_timedelta = sum(durations, timedelta(0)) / len(durations)
-            avg_profit_prct = (stats[coin]['total_profit_prct'] / stats[coin]['amount_of_trades'])
+            average_timedelta = sum(durations, timedelta(0)) / np.max([1, len(durations)])
+            avg_profit_prct = (stats[coin]['total_profit_prct'] / np.max([1, stats[coin]['amount_of_trades']]))
             coin_insight = CoinInsights(pair=coin,
                                            avg_profit_percentage=avg_profit_prct,
                                            profit=stats[coin]['total_profit_amount'],
@@ -134,9 +135,6 @@ class BackTesting:
         # print("| %sLeft open trades %s" % (FONT_BOLD, FONT_RESET))
         open_trade_stats = []
         for trade in open_trades:
-            if trade.max_drawdown is None:
-                trade.max_drawdown = 0.0
-
             open_trade_res = OpenTradeResult(pair=trade.pair,
                                              curr_profit_percentage=trade.profit_percentage,
                                              curr_profit=trade.profit_dollar,
@@ -199,13 +197,13 @@ class BackTesting:
         :rtype: dictionary
         """
         max_seen_drawdown = {
-            "from": "",
-            "to": "",
+            "from": 0,
+            "to": 0,
             "drawdown": 0
         }
         temp_seen_drawdown = {
-            "from": "",
-            "to": "",
+            "from": 0,
+            "to": 0,
             "drawdown": 0
         }
         timestamp_value = self.trading_module.open_order_value_per_timestamp
