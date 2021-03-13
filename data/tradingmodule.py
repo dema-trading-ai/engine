@@ -151,10 +151,27 @@ class TradingModule:
         :return: return whether to close the trade based on ROI
         :rtype: boolean
         """
-        if trade.profit_percentage > float(self.config['roi']):
+        time_passed = datetime.fromtimestamp(ohlcv['time'] / 1000) - trade.opened_at
+        if trade.profit_percentage > self.calculate_roi_over_time(time_passed):
             self.close_trade(trade, reason="ROI", ohlcv=ohlcv)
             return True
         return False
+
+    def calculate_roi_over_time(self, time_passed) -> float:
+        """
+        Method that calculates the current ROI over time
+        :param time_passed: Time passed since the trade opened
+        :type time_passed: time in H:M:S
+        :return: return the value of ROI
+        :rtype: float
+        """
+        passed_minutes = time_passed.seconds / 60
+        roi = self.config['roi']['0']
+
+        for key, value in sorted(self.config['roi'].items(), key=lambda item: int(item[0])):
+            if passed_minutes >= int(key):
+                roi = value
+        return roi
 
     def check_stoploss_open_trade(self, trade: Trade, ohlcv: Series) -> bool:
         """
