@@ -99,7 +99,7 @@ For feature requests or suggestions, please create an issue. If you want to work
 
 ## Full Documentation
 
-https://www.docs.DemaTrading.ai
+https://docs.DemaTrading.ai
 
 ## License
 
