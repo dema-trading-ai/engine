@@ -45,7 +45,6 @@ class TradingModule:
         self.max_open_trades = int(self.config['max-open-trades'])
         self.fee = self.verify_fee(self.config['fee']) / 100
 
-    @staticmethod
     def verify_fee(self, fee):
         try:
             input_fee = float(fee)
