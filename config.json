@@ -18,7 +18,7 @@
     "LTC/USDT"
   ],
   "currency": "USDT",
-  "fee": 0.25,
+  "fee": -1.4,
   "strategy-name": "MyStrategy",
   "strategies-folder": "strategies"
 }

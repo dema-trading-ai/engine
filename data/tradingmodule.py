@@ -50,19 +50,20 @@ class TradingModule:
             input_fee = float(fee)
         except ValueError:
             print(
-                f"The imputed value is invalid, the alforithm will use the default value of {DEFAULT_FEE}%")
+                f"[INFO] The inputted value is invalid, the algorithm will use the default value of {DEFAULT_FEE}%")
             return DEFAULT_FEE
 
         if input_fee > MAX_FEE:
             print(
-                "The imputed value is to big, the alforithm will use the default value of {DEFAULT_FEE}%")
-            return DEFAULT_FEE
+                f"[INFO] The inputted value is to big, the algorithm will use the default value of {MAX_FEE}%")
+            return MAX_FEE
         elif input_fee < MIN_FEE:
             print(
-                "The imputed value is to small, the alforithm will use the default value of {DEFAULT_FEE}%")
-            return DEFAULT_FEE
+                f"[INFO] The inputted value is to small, the algorithm will use the default value of {MIN_FEE}%")
+            return MIN_FEE
 
-        print(f"The alforithm will use the imputed value of {input_fee}%")
+        print(
+            f"[INFO] The algorithm will use the inputted value of {input_fee}%")
         return input_fee
 
     def tick(self, ohlcv: Series, data: DataFrame) -> None:
