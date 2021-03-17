@@ -8,6 +8,7 @@ import typing
 FONT_BOLD = "\033[1m"
 FONT_RESET = "\033[0m"
 
+
 def show_signature():
     print("======================================================================")
     print("%s|  DEMA BACKTESTING ENGINE IS SUBJECTED TO THE GNU AGPL-3.0 License %s" %
@@ -15,6 +16,7 @@ def show_signature():
     print("%s|  Copyright © 2021 - DemaTrading.ai%s" %
           (FONT_BOLD, FONT_RESET))
     print("======================================================================")
+
 
 @dataclass
 class MainResults:
@@ -32,6 +34,7 @@ class MainResults:
     drawdown_from: datetime
     drawdown_to: datetime
     configured_stoploss: float
+    total_fee_ammount: float
 
     def show(self, currency_symbol: str):
         print("================================================= \n| %sBacktesting Results%s "
@@ -39,19 +42,26 @@ class MainResults:
         print("| Backtesting from: \t\t%s" % self.tested_from)
         print("| Backtesting to: \t\t%s" % self.tested_to)
         print("| ")
-        print("| Started with: \t\t%s" % round(self.starting_capital, 2) + '\t' + currency_symbol)
-        print("| Ended with: \t\t\t%s" % round(self.end_capital, 2) + '\t' + currency_symbol)
-        print("| Overall profit: \t\t%s" % round(self.overall_profit_percentage, 2) + '\t%')
+        print("| Started with: \t\t%s" %
+              round(self.starting_capital, 2) + '\t' + currency_symbol)
+        print("| Ended with: \t\t\t%s" %
+              round(self.end_capital, 2) + '\t' + currency_symbol)
+        print("| Overall profit: \t\t%s" %
+              round(self.overall_profit_percentage, 2) + '\t%')
         print("| Amount of trades: \t\t%s" % self.n_trades)
         print("| Left-open trades: \t\t%s" % self.n_left_open_trades)
         print("| Trades with loss: \t\t%s" % self.n_trades_with_loss)
         print("| Stoploss: \t\t\t%s" % self.configured_stoploss + "\t%")
         print("| ")
-        print("| Max realized drawdown:\t%s" % round(self.max_realized_drawdown, 2) + '\t%')
-        print("| Max drawdown 1 trade: \t%s" % round(self.max_drawdown_single_trade, 2) + '\t%')
-        print("| Max seen drawdown: \t\t%s" % round(self.max_seen_drawdown, 2) + '\t%')
+        print("| Max realized drawdown:\t%s" %
+              round(self.max_realized_drawdown, 2) + '\t%')
+        print("| Max drawdown 1 trade: \t%s" %
+              round(self.max_drawdown_single_trade, 2) + '\t%')
+        print("| Max seen drawdown: \t\t%s" %
+              round(self.max_seen_drawdown, 2) + '\t%')
         print("| Seen drawdown from: \t\t%s" % self.drawdown_from)
         print("| Seen drawdown to: \t\t%s" % self.drawdown_to)
+        print("| Total fee paid: \t\t%s" % self.total_fee_ammount)
 
 
 @dataclass
