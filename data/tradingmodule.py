@@ -43,7 +43,7 @@ class TradingModule:
         self.strategy = load_strategy_from_config(config)
         self.budget = float(self.config['starting-capital'])
         self.max_open_trades = int(self.config['max-open-trades'])
-        self.fee = self.verify_fee(self.config['fee'])
+        self.fee = self.verify_fee(self.config['fee']) / 100
 
     @staticmethod
     def verify_fee(self, fee):
@@ -146,7 +146,7 @@ class TradingModule:
         date = datetime.fromtimestamp(ohlcv['time'] / 1000)
         trade.close_trade(reason, date)
 
-        fee_amount = ((trade.close * trade.currency_amount) * self.fee) / 100
+        fee_amount = (trade.close * trade.currency_amount) * self.fee
         self.total_fee_amount += fee_amount
 
         self.budget += (trade.close * trade.currency_amount) - fee_amount
@@ -171,7 +171,7 @@ class TradingModule:
         available_spaces = self.max_open_trades - open_trades
         spend_amount = (1. / available_spaces) * self.budget
 
-        fee_amount = (spend_amount * self.fee) / 100
+        fee_amount = spend_amount * self.fee
         spend_amount -= fee_amount
         self.total_fee_amount += fee_amount
 
