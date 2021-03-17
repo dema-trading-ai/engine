@@ -34,7 +34,7 @@ class MainResults:
     drawdown_from: datetime
     drawdown_to: datetime
     configured_stoploss: float
-    total_fee_ammount: float
+    total_fee_amount: float
 
     def show(self, currency_symbol: str):
         print("================================================= \n| %sBacktesting Results%s "
@@ -61,7 +61,7 @@ class MainResults:
               round(self.max_seen_drawdown, 2) + '\t%')
         print("| Seen drawdown from: \t\t%s" % self.drawdown_from)
         print("| Seen drawdown to: \t\t%s" % self.drawdown_to)
-        print("| Total fee paid: \t\t%s" % self.total_fee_ammount)
+        print("| Total fee paid: \t\t%s" % self.total_fee_amount)
 
 
 @dataclass

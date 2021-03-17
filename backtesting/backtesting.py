@@ -116,7 +116,7 @@ class BackTesting:
                            drawdown_to=datetime.fromtimestamp(
                                max_seen_drawdown['to'] / 1000),
                            configured_stoploss=self.config['stoploss'],
-                           total_fee_ammount=self.trading_module.total_fee_ammount)
+                           total_fee_amount=self.trading_module.total_fee_amount)
 
     def generate_coin_results(self, open_trades, closed_trades) -> typing.List[CoinInsights]:
         stats = self.calculate_statistics_per_coin(open_trades, closed_trades)

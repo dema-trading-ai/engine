@@ -34,7 +34,7 @@ class TradingModule:
     realized_drawdown = 0
 
     fee = 0
-    total_fee_ammount = 0
+    total_fee_amount = 0
 
     def __init__(self, config):
         print("[INFO] Initializing trading-module")
@@ -145,10 +145,10 @@ class TradingModule:
         date = datetime.fromtimestamp(ohlcv['time'] / 1000)
         trade.close_trade(reason, date)
 
-        fee_ammount = ((trade.close * trade.currency_amount) * self.fee) / 100
-        self.total_fee_ammount += fee_ammount
+        fee_amount = ((trade.close * trade.currency_amount) * self.fee) / 100
+        self.total_fee_amount += fee_amount
 
-        self.budget += (trade.close * trade.currency_amount) - fee_ammount
+        self.budget += (trade.close * trade.currency_amount) - fee_amount
         self.open_trades.remove(trade)
         self.closed_trades.append(trade)
         self.update_drawdowns_closed_trade(trade)
@@ -170,9 +170,9 @@ class TradingModule:
         available_spaces = self.max_open_trades - open_trades
         spend_amount = (1. / available_spaces) * self.budget
 
-        fee_ammount = (spend_amount * self.fee) / 100
-        spend_amount -= fee_ammount
-        self.total_fee_ammount += fee_ammount
+        fee_amount = (spend_amount * self.fee) / 100
+        spend_amount -= fee_amount
+        self.total_fee_amount += fee_amount
 
         new_trade = Trade(ohlcv, spend_amount, date)
         self.budget -= spend_amount
