@@ -43,12 +43,12 @@ class TradingModule:
         self.strategy = load_strategy_from_config(config)
         self.budget = float(self.config['starting-capital'])
         self.max_open_trades = int(self.config['max-open-trades'])
-        self.fee = self.get_fee(self.config['fee'])
+        self.fee = self.verify_fee(self.config['fee'])
 
-    def get_fee(self, fee):
+    def verify_fee(self, fee):
         try:
             input_fee = float(fee)
-        except:
+        except ValueError:
             print(
                 f"The imputed value is invalid, the alforithm will use the default value of {DEFAULT_FEE}%")
             return DEFAULT_FEE
