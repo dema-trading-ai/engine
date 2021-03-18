@@ -189,14 +189,13 @@ class TradingModule:
         :return: return whether to close the trade based on ROI
         :rtype: boolean
         """
-        time_passed = datetime.fromtimestamp(
-            ohlcv['time'] / 1000) - trade.opened_at
-        if trade.profit_percentage > self.calculate_roi_over_time(time_passed):
+        time_passed = datetime.fromtimestamp(ohlcv['time'] / 1000) - trade.opened_at
+        if trade.profit_percentage > self.get_roi_over_time(time_passed):
             self.close_trade(trade, reason="ROI", ohlcv=ohlcv)
             return True
         return False
 
-    def calculate_roi_over_time(self, time_passed) -> float:
+    def get_roi_over_time(self, time_passed) -> float:
         """
         Method that calculates the current ROI over time
         :param time_passed: Time passed since the trade opened
