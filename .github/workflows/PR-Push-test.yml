@@ -1,0 +1,26 @@
+name: Test PR/Push
+on:
+  push:
+    branches: [feature/**, fix/**, development]
+  pull_request:
+    branches: [development]
+   
+jobs:
+  pytest-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run Pytest and create a coverage report
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - run: |
+          pip install pytest-cov
+          pytest --cov-report xml:cobertura.xml --cov=.
+
+      - name: Run codacy-coverage-reporter
+        uses: codacy/codacy-coverage-reporter-action@master
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: cobertura.xml
+      

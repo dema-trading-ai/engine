@@ -12,6 +12,9 @@ import utils
 #
 # © 2021 DemaTrading.AI
 # ======================================================================
+DEFAULT_FEE = 0.25
+MAX_FEE = 0.5
+MIN_FEE = 0.1
 
 
 class TradingModule:
@@ -30,6 +33,9 @@ class TradingModule:
     current_drawdown = 0.0
     realized_drawdown = 0
 
+    fee = 0
+    total_fee_amount = 0
+
     def __init__(self, config):
         print("[INFO] Initializing trading-module")
         self.config = config
@@ -37,6 +43,28 @@ class TradingModule:
         self.strategy = load_strategy_from_config(config)
         self.budget = float(self.config['starting-capital'])
         self.max_open_trades = int(self.config['max-open-trades'])
+        self.fee = self.verify_fee(self.config['fee']) / 100
+
+    def verify_fee(self, fee):
+        try:
+            input_fee = float(fee)
+        except ValueError:
+            print(
+                f"[INFO] The inputted value is invalid, the algorithm will use the default value of {DEFAULT_FEE}%")
+            return DEFAULT_FEE
+
+        if input_fee > MAX_FEE:
+            print(
+                f"[INFO] The inputted value is to big, the algorithm will use the default value of {MAX_FEE}%")
+            return MAX_FEE
+        elif input_fee < MIN_FEE:
+            print(
+                f"[INFO] The inputted value is to small, the algorithm will use the default value of {MIN_FEE}%")
+            return MIN_FEE
+
+        print(
+            f"[INFO] The algorithm will use the inputted value of {input_fee}%")
+        return input_fee
 
     def tick(self, ohlcv: Series, data: DataFrame) -> None:
         """
@@ -88,7 +116,8 @@ class TradingModule:
         :return: None
         :rtype: None
         """
-        self.update_value_per_timestamp_tracking(trade, ohlcv)  # update total value tracking
+        self.update_value_per_timestamp_tracking(
+            trade, ohlcv)  # update total value tracking
 
         # if current profit is below 0, update drawdown / check SL
         stoploss = self.check_stoploss_open_trade(trade, ohlcv)
@@ -116,7 +145,11 @@ class TradingModule:
         """
         date = datetime.fromtimestamp(ohlcv['time'] / 1000)
         trade.close_trade(reason, date)
-        self.budget += trade.close * trade.currency_amount
+
+        fee_amount = (trade.close * trade.currency_amount) * self.fee
+        self.total_fee_amount += fee_amount
+
+        self.budget += (trade.close * trade.currency_amount) - fee_amount
         self.open_trades.remove(trade)
         self.closed_trades.append(trade)
         self.update_drawdowns_closed_trade(trade)
@@ -137,6 +170,11 @@ class TradingModule:
         open_trades = len(self.open_trades)
         available_spaces = self.max_open_trades - open_trades
         spend_amount = (1. / available_spaces) * self.budget
+
+        fee_amount = spend_amount * self.fee
+        spend_amount -= fee_amount
+        self.total_fee_amount += fee_amount
+
         new_trade = Trade(ohlcv, spend_amount, date)
         self.budget -= spend_amount
         self.open_trades.append(new_trade)
@@ -215,9 +253,11 @@ class TradingModule:
         """
         current_total_price = (trade.currency_amount * ohlcv['low'])
         try:
-            self.open_order_value_per_timestamp[ohlcv['time']] += current_total_price
+            self.open_order_value_per_timestamp[ohlcv['time']
+                                                ] += current_total_price
         except KeyError:
-            self.open_order_value_per_timestamp[ohlcv['time']] = current_total_price
+            self.open_order_value_per_timestamp[ohlcv['time']
+                                                ] = current_total_price
 
     def update_budget_per_timestamp_tracking(self, ohlcv: Series) -> None:
         """
@@ -242,8 +282,10 @@ class TradingModule:
         if trade.profit_percentage < self.max_drawdown:
             self.max_drawdown = trade.profit_percentage
 
-        current_total_value = self.budget + utils.calculate_worth_of_open_trades(self.open_trades)
-        perc_of_total_value = ((trade.currency_amount * trade.close) / current_total_value) * 100
+        current_total_value = self.budget + \
+            utils.calculate_worth_of_open_trades(self.open_trades)
+        perc_of_total_value = (
+            (trade.currency_amount * trade.close) / current_total_value) * 100
         perc_influence = trade.profit_percentage * (perc_of_total_value / 100)
 
         # if the difference is drawdown, and no drawdown is realized at this moment, this is new drawdown.
