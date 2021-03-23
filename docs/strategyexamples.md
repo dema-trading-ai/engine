@@ -22,7 +22,7 @@ current_candle['volume'] > 0
 ```
 
 ### Sell signal
-In our sell signal, we set some conditions for our signal. In our implementation, the pair wil only be sold when all of the following conditions are true. Beside the sell signal, positions can be closed using the [Stop Loss](#Stop_loss) or [Return on Investment](#ROI) configurations in the ``config.json`` file.
+In our sell signal, we set some conditions for our signal. In our implementation, the pair wil only be sold when all of the following conditions are true. Beside the sell signal, positions can be closed using the [Stop Loss](#stop-loss) or [Return on Investment](#ROI) configurations in the ``config.json`` file.
 ```python
 current_candle['rsi'] > 70
 current_candle['volume'] > 0
@@ -34,21 +34,50 @@ On the top of ``my_strategy.py``, ``min_candles`` is defined. This is used as an
 ### Configuration
 In the ``config.json`` file you will find all necessary and important configuration options. 
 #### ROI
+The ROI table in the configuration is used to sell at a certain percentage of profit after a defined time. The `keys` in the dictionary are in minutes, the `values` are the percentages. Keys should always be an `int` with double quotes. Value could be an `int` or a `float`.
+```json
+  "roi": {
+    "0": 5,
+    "60": 4,
+    "120": 3.5
+  }
+```
+This configuration means positions will always be closed if the profit is higher than 5%. After an hour (60 minutes) the position will automatically be closed if the profit is higher than 4%.
+
 #### Stop loss
+The stoploss (SL) function is to prevent extreme loses. The SL value in the configuration file could be a `float` or an `int`.
+```json
+  "stoploss": "-0.5",
+```
+This configuration means positions will always be closed if the profit is lower than -0.5%.
 
 ## Getting started
+Now you've seen how we configured all the basic settings and buy/sell signals. From now on, you can start working on **your very own trading algorithms**. This guide will use a very simple method of finding the right indicators and using them in your strategy. 
+
+???+ note Creating your own strategy might take some time. Don't give up too fast! [On the bottom of the page](#extra-information) we listed some reading and learning material to become more familiar with trading, coding and everything else.
+    
 ### Finding indicators
+1. Go to [TradingView](https://www.tradingview.com/chart/)
+2. Select a view of any coin pair you're interested it (make sure to select 'cryptos').
+3. Have a look at the graph and decide at what moments you'd like to buy / sell.
+4. Add some indicators to the graph.
+5. See whether the indicators could indicate your buy/sell positions.
+6. If you found some sort of pattern, go to the next step.
+ 
 ### Configuring indicators
+1. When you found indicators, make sure they are supported by Ta-lib as well. You can check supported indicators here: [Indicator list](http://mrjbq7.github.io/ta-lib/funcs.html)
+2. 
+3. 
+
 ### Using indicators in sell/buy signal
+1. 
+2. 
+3. 
+
 ### Configuring Stoploss / Return On Investment
 
-Play with Technical Indicators on TradingView
-Find nice Technical Indicators
-Look at for available indicators in TA-lib http://mrjbq7.github.io/ta-lib/funcs.html
-Implement indicators in indicator method
-Implement populated indicators in buy / sell signal
-Make the indicators work better
-Combining with SL / ROI
+Stoploss and ROI are really important when creating an algorithm. These will make sure you get the best from your strategy, while not putting everything is at risk.
 
 ## Extra information
-If you have trouble understanding our engine, the following resources could be useful for increasing your python skills.
+If you have trouble understanding our engine, the following resources could be useful for increasing your python, trading, whatever- skills.
+- [TA-lib functions](http://mrjbq7.github.io/ta-lib/funcs.html) - _all supported indicators by ta-lib_
