@@ -13,3 +13,7 @@ theme:
 repo_url: https://github.com/dema-trading-ai/engine
 extra_css:
     - css/extra.css
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
