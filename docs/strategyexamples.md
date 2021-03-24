@@ -54,7 +54,8 @@ This configuration means positions will always be closed if the profit is lower 
 ## Getting started
 Now you've seen how we configured all the basic settings and buy/sell signals. From now on, you can start working on **your very own trading algorithms**. This guide will use a very simple method of finding the right indicators and using them in your strategy. 
 
-???+ note Creating your own strategy might take some time. Don't give up too fast! [On the bottom of the page](#extra-information) we listed some reading and learning material to become more familiar with trading, coding and everything else.
+!!! note 
+    Creating your own strategy might take some time. Don't give up too fast! [On the bottom of the page](#extra-information) we listed some reading and learning material to become more familiar with trading, coding and everything else.
     
 ### Finding indicators
 1. Go to [TradingView](https://www.tradingview.com/chart/)
