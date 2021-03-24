@@ -70,6 +70,18 @@ You can have a look at the `generate_indicators()` method in the `my_strategy.py
 ### Using indicators in sell/buy signal
 Have a look at the [sell signal](#sell-signal) or [buy signal](#buy-signal) part of the sample strategy. Other python logic and external packages could be applied to the buy/sell signal, as long as it's a condition. 
 
+This means, we can also use the following:
+```python 
+current_candle.loc[
+    (
+            ((current_candle['rsi'] < 30) | (current_candle['rsi'] > 40)) &
+            (current_candle['ema5'] < current_candle['ema21']) &
+            (current_candle['volume'] > 0)
+    ),
+    'buy'] = 1
+```
+In this case, a position opens when RSI is either below 30 **or** above 40. 
+
 ### Configuring Stoploss / Return On Investment
 Stoploss and ROI are really important when creating an algorithm. These will make sure you get the best from your strategy, while not putting everything is at risk.
 
