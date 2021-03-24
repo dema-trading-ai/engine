@@ -12,7 +12,7 @@ import os
 # DataModule is responsible for downloading OHLCV data, preparing it
 # and activating backtesting methods
 #
-# © 2021 DemaTrading.AI
+# © 2021 DemaTrading.ai
 # ======================================================================
 
 msec = 1000

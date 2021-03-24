@@ -10,7 +10,7 @@ import utils
 # TradingModule is responsible for tracking trades, calling strategy methods
 # and virtually opening / closing trades based on strategies' signal.
 #
-# © 2021 DemaTrading.AI
+# © 2021 DemaTrading.ai
 # ======================================================================
 DEFAULT_FEE = 0.25
 MAX_FEE = 0.5

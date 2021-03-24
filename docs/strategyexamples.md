@@ -65,9 +65,7 @@ Now you've seen how we configured all the basic settings and buy/sell signals. F
 6. If you found some sort of pattern, go to the next step.
  
 ### Configuring indicators
-1. When you found indicators, make sure they are supported by Ta-lib as well. You can check supported indicators here: [Indicator list](http://mrjbq7.github.io/ta-lib/funcs.html)
-2. 
-3. 
+You can have a look at the `generate_indicators()` method in the `my_strategy.py` file how to configure indicators for your strategy. 
 
 ### Using indicators in sell/buy signal
 1. 
