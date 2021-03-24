@@ -68,12 +68,9 @@ Now you've seen how we configured all the basic settings and buy/sell signals. F
 You can have a look at the `generate_indicators()` method in the `my_strategy.py` file how to configure indicators for your strategy. 
 
 ### Using indicators in sell/buy signal
-1. 
-2. 
-3. 
+Have a look at the [sell signal](#sell-signal) or [buy signal](#buy-signal) part of the sample strategy. Other python logic and external packages could be applied to the buy/sell signal, as long as it's a condition. 
 
 ### Configuring Stoploss / Return On Investment
-
 Stoploss and ROI are really important when creating an algorithm. These will make sure you get the best from your strategy, while not putting everything is at risk.
 
 ## Extra information
