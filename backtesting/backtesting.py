@@ -11,7 +11,7 @@ import numpy as np
 # BackTesting class is responsible for processing the ticks (ohlcv-data)
 # besides responsible for calculations
 #
-# © 2021 DemaTrading.AI
+# © 2021 DemaTrading.ai
 # ======================================================================
 #
 # These constants are used for displaying and

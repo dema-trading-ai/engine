@@ -5,7 +5,7 @@ from models.trade import Trade
 # ======================================================================
 # Strategy-class is responsible for populating indicators / signals
 #
-# © 2021 DemaTrading.AI
+# © 2021 DemaTrading.ai
 # ======================================================================
 
 
