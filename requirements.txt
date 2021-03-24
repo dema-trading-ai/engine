@@ -4,4 +4,5 @@ pandas==1.2.2
 numpy==1.20.1
 six==1.15.0
 ta-lib==0.4.19
+pytest==6.2.2
 tqdm==4.58.0

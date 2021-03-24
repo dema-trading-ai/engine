@@ -11,17 +11,17 @@ from datetime import datetime
 
 class Trade:
     pair = None
-    open = None
-    current = None
-    close = None
+    open = 0.0
+    current = 0.0
+    close = 0.0
     status = None
-    currency_amount = None
-    profit_dollar = None
-    profit_percentage = None
-    max_drawdown = None
+    currency_amount = 0.0
+    profit_dollar = 0.0
+    profit_percentage = 0.0
+    max_drawdown = 0.0
     sell_reason = None
-    opened_at = None
-    closed_at = None
+    opened_at = 0.0
+    closed_at = 0.0
 
     def __init__(self, ohlcv: Series, trade_amount: float, date: datetime):
         self.status = 'open'

@@ -3,6 +3,8 @@
 [![Build Status](https://img.shields.io/github/forks/dema-trading-ai/engine.svg)](https://github.com/dema-trading-ai/engine)
 [![Build Status](https://img.shields.io/github/stars/dema-trading-ai/engine.svg)](https://github.com/dema-trading-ai/engine)
 [![License](https://img.shields.io/github/license/dema-trading-ai/engine.svg)](https://github.com/dema-trading-ai/engine)
+[![Test PR/Push](https://github.com/dema-trading-ai/engine/actions/workflows/PR-Push-test.yml/badge.svg)](https://github.com/dema-trading-ai/engine/actions/workflows/PR-Push-test.yml)
+[![Docs Deployment Pipeline](https://github.com/dema-trading-ai/engine/actions/workflows/Docs%20Deployment%20Pipeline.yml/badge.svg)](https://github.com/dema-trading-ai/engine/actions/workflows/Docs%20Deployment%20Pipeline.yml)
 
 # Discord
 
@@ -56,17 +58,17 @@ To run the container:
 docker run --rm dema-engine:alpha
 ```
 
-To run the container with a volume (rebuilding not necessary on code changes)
+To run the container with a volume (rebuilding not necessary on code changes):
 
 ```
 docker run --rm -v "$(pwd):/engine" dema-engine:alpha
 ```
 
-Note: do not forget '--rm' as your Docker will keep the container if you do, which is not necessary and will cause extreme increase in memory usage.
+Note: do not forget '--rm' as your Docker will keep the container if you do not. Keeping the container is unnecessary and will cause an extreme increase in memory usage.
 
 ## Using `make`
 
-As the `docker` commands listed above are not so developer friendly, we added a `Makefile` to help you save some tears. You'll need to have `make` installed on your system (check using `make --version`), which is on most computers by default. If you don't, run `brew install make` (homebrew needed), `sudo apt install make` or `choco install make` (chocolately needed) for MacOS, Linux or Windows, respectively.
+As the `docker` commands listed above are not so developer friendly, we added a `Makefile` to help you save some tears. You will need to have `make` installed on your system (check using `make --version`), which is installed on most computers by default. If you do not have `make` installed, run `brew install make` (homebrew needed), `sudo apt install make` or `choco install make` (chocolately needed) for MacOS, Linux or Windows, respectively.
 
 To build the image:
 
@@ -101,6 +103,6 @@ https://docs.DemaTrading.ai
 
 ## License
 
-This project is licensed under AGPL-3.0 License. It is not allowed to use this project to run any live trading instances. This project is for strategy testing only, if you want to monetise your strategy you can contact us. We can also help you to optimise your strategy. Any questions regarding this project? Feel free to get in touch using the contact form at https://DemaTrading.ai.
+This project is licensed under AGPL-3.0 License. It is not allowed to use this project to run any live trading instances. This project is for strategy testing only, if you want to monetise your strategy you can contact us. We can also help you to optimise your strategy. Any questions regarding this project? Feel free to get in touch using the contactform at https://DemaTrading.ai. 
 
 

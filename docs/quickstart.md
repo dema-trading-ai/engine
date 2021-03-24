@@ -1,16 +1,17 @@
 # Running
 ### Requirements for running with Docker (recommended)
 Running the Engine just takes a few simple things:
-1. Docker installed on your system (https://docs.docker.com/get-docker/)
-2. Some code editor (https://www.jetbrains.com/pycharm/)
+1. Have Docker installed on your system ([click here to download Docker](https://docs.docker.com/get-docker/))
+2. A code editor such as [Pycharm](https://www.jetbrains.com/pycharm/) or [VSCode](https://code.visualstudio.com).
 3. Abillity to copy + paste and some motivation to figure things out. 
 
 ### Requirements for running without Docker (alternative)
 Running the Engine just takes a few simple things:
-1. Have Python 3 installed on your system (https://www.python.org/downloads/)
-2. Pip Running on your system (https://pip.pypa.io/en/stable/installing/)
-3. Some code editor (https://www.jetbrains.com/pycharm/)
-4. Install TA-Lib dependencies (see: https://github.com/mrjbq7/ta-lib Installation -> Dependencies)
+1. Have Python 3 installed ([click here to download Python](https://www.python.org/downloads/))
+2. Have pip installed (Pip should be installed automatically on any version of Python that is 2.7 or above. If not installed on your system [click here!](https://pip.pypa.io/en/stable/installing/)).
+3. A code editor such as [Pycharm](https://www.jetbrains.com/pycharm/) or [VSCode](https://code.visualstudio.com).
+4. Install the TA-Lib dependencies ([follow the instructions given underneath the dependencies header](https://github.com/mrjbq7/ta-lib)).
+5. Have this repository cloned on your computer. 
 
 ### Using `make`
 
@@ -19,12 +20,15 @@ As the docker commands listed above are not so developer friendly, we added a Ma
 To build the image:
 
 `make build`
+
 To run the container:
 
 `make run`
+
 To run on volume:
 
 `make runv`
+
 To build and run:
 
 `make`
