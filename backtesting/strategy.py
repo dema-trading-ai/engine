@@ -44,13 +44,13 @@ class Strategy(abc.ABC):
     def sell_signal(self, indicators: DataFrame, current_candle: DataFrame, trade: Trade) -> DataFrame:
         """
         :param indicators: dataframe filled with indicators from generate_indicators
-        :type indicators: dataframe
+        :type indicators: Dataframe
         :param current_candle: last candle filled with indicators from generate_indicators
-        :type current_candle: series
+        :type current_candle: Series
         :param trade: current open trade
-        :type trade: trade model
+        :type trade: Trade model
         :return: current candle filled with buy signals
-        :rtype: series
+        :rtype: Series
         """
         return
 
@@ -61,11 +61,11 @@ class Strategy(abc.ABC):
         be returned.
 
         :param indicators: dataframe filled with indicators from generate_indicators
-        :type indicators: dataframe
+        :type indicators: Dataframe
         :param current_candle: last candle filled with indicators from generate_indicators
-        :type current_candle: series
+        :type current_candle: Series
         :param trade: current open trade
-        :type trade: trade model
+        :type trade: Trade model
         :return: the stoploss
         :rtype: float
         """
