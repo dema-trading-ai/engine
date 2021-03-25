@@ -125,6 +125,7 @@ class TradingModule:
         # if current profit is below 0, update drawdown / check SL
         stoploss = self.strategy.stoploss(indicators, filled_ohlcv, trade)
         stoploss = float(self.config["stoploss"]) if stoploss is None else stoploss
+        trade.stoploss = stoploss
         stoploss_reached = self.check_stoploss_open_trade(trade, ohlcv, stoploss)
         roi_reached = self.check_roi_open_trade(trade, ohlcv)
         if stoploss_reached or roi_reached:
