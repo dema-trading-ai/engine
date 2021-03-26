@@ -6,8 +6,10 @@ from config import validate, read_config, print_pairs, read_spec, adjust_config_
 def main():
     config = read_config()
     config_spec = read_spec()
-    validate(config, config_spec)
     adjust_config_to_cli(config, config_spec) 
+    validate(config, config_spec)
+    print(config)
+    raise SystemExit
     print_pairs(config)
     MainController(config)
 

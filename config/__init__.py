@@ -34,3 +34,5 @@ def print_pairs(config_json):
     for i in config_json['pairs']:
         coins += str(i) + ' '
     print("[INFO] Watching pairs: %s" % coins)
+
+

@@ -5,6 +5,10 @@ from collections import defaultdict
 def get_project_root():
     return Path(__file__).parent
 
+def lower_bar_to_middle_bar(s: str) -> str:
+    """Replaces '_' with '-' """
+    return s.replace("_", "-")
+
 
 def default_empty_array_dict() -> list:
     """

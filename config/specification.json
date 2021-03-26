@@ -19,7 +19,7 @@
   },
   {
     "name": "starting-capital",
-    "min": 1,
+    "min": 1.0,
     "type": "number",
     "cli": {
       "short": "cap"
