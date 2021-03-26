@@ -8,8 +8,6 @@ def main():
     config_spec = read_spec()
     adjust_config_to_cli(config, config_spec) 
     validate(config, config_spec)
-    print(config)
-    raise SystemExit
     print_pairs(config)
     MainController(config)
 
