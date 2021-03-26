@@ -3,9 +3,9 @@
 
 import json
 import sys
-from .validations import validate_config
+from .validations import validate
 from .load_strategy import load_strategy_from_config
-
+from .cli import adjust_config_to_cli
 
 def read_config() -> dict:
     print('====================================== \n Starting up DEMA BACKTESTING \n======================================')
@@ -22,6 +22,11 @@ def read_config() -> dict:
     config = json.loads(data)
 
     return config
+
+def read_spec() -> list:
+    with open("config/specification.json", "r") as f:
+        spec = f.read()
+    return json.loads(spec)
 
 
 def print_pairs(config_json):
