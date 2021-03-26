@@ -1,0 +1,88 @@
+[
+  {
+    "name": "exchange",
+    "default": "binance",
+    "options": ["binance"],
+    "type": "string"
+  },
+  {
+    "name": "timeframe",
+    "default": "5m",
+    "options": ["1m", "5m", "1h"],
+    "type": "string"
+  },
+  {
+    "name": "max-open-trades",
+    "default": "10",
+    "min": 1,
+    "type": "int"
+  },
+  {
+    "name": "starting-capital",
+    "min": 1,
+    "type": "number",
+    "cli": {
+      "short": "cap"
+    }
+  },
+  {
+    "name": "backtesting-from",
+    "type": "datetime"
+  },
+  {
+    "name": "backtesting-to",
+    "type": "datetime"
+  },
+  {
+    "name": "backtesting-till-now",
+    "type": "bool",
+    "default": false
+  },
+  {
+    "name": "stoploss",
+    "type": "number",
+    "default": -0.5,
+    "max": 0,
+    "cli": {
+      "short": "sl"
+    }
+  },
+  {
+    "name": "roi",
+    "type": "dict",
+    "default": {
+      "0": 5,
+      "60": 4,
+      "120": 3
+    }
+  },
+  {
+    "name": "pairs",
+    "type": "list"
+  },
+  {
+    "name": "currency",
+    "default": "USDT",
+    "type": "string",
+    "options": ["USDT"]
+  },
+  {
+    "name": "fee",
+    "type": "number",
+    "default": 0.25,
+    "min": 0,
+    "max": 100
+  },
+  {
+    "name": "strategy-name",
+    "type": "string",
+    "cli": {
+      "short": "s"
+    }
+  },
+  {
+    "name": "strategies-folder",
+    "type": "string",
+    "default": "strategies"
+  }
+]
