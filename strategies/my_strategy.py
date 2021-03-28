@@ -25,8 +25,8 @@ class MyStrategy(Strategy):
         dataframe['rsi'] = ta.RSI(dataframe)
 
         # EMA - Exponential Moving Average
-        dataframe['ema5'] = ta.EMA(dataframe, timeperiod=5)
-        dataframe['ema21'] = ta.EMA(dataframe, timeperiod=21)
+        dataframe['ema5'] = ta.EMA(dataframe, timeperiod=6)
+        dataframe['ema21'] = ta.EMA(dataframe, timeperiod=22)
 
         return dataframe
 
