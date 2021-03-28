@@ -3,7 +3,8 @@ REQUIRED_PARAMS = [
     'max-open-trades',
     'fee',
     'starting-capital',
-    'strategy-name'
+    'strategy-name',
+    'min_candles'
 ]
 
 DEFAULT_PARAMS = {
@@ -17,6 +18,7 @@ def validate_config(config: dict):
     check_config_required_params(config)
     set_default_param_values(config)
     validate_single_currency_in_pairs(config)
+    check_min_candles(config)
 
 
 def check_config_required_params(config_json: dict):
@@ -62,3 +64,7 @@ def validate_single_currency_in_pairs(config: dict):
                             "[ERROR] e.g., if you specified 'USDT' as your currency, you cannot add 'BTC/EUR' as a pair")
 
 
+def check_min_candles(config: dict):
+    min_candles = config['min_candles']
+    if min_candles != 21:
+        print("[WARNING] With the current implementation, we cannot guarantee accurate signals when the min_candles value is changed from its default of 21.\n[WARNING] Change this value at your own risks.")

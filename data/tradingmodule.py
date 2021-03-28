@@ -44,6 +44,7 @@ class TradingModule:
         self.budget = float(self.config['starting-capital'])
         self.max_open_trades = int(self.config['max-open-trades'])
         self.fee = self.verify_fee(self.config['fee']) / 100
+        self.min_candles = self.config['min_candles']
 
     def verify_fee(self, fee):
         try:
@@ -96,10 +97,11 @@ class TradingModule:
         """
         indicators = self.strategy.generate_indicators(data)
         filled_ohlcv = indicators.iloc[[-1]].copy()
-        signal = self.strategy.buy_signal(indicators, filled_ohlcv)
 
-        if signal['buy'][0] == 1:
-            self.open_trade(ohlcv)
+        if len(indicators.index) > self.min_candles:
+            signal = self.strategy.buy_signal(indicators, filled_ohlcv)
+            if signal['buy'][0] == 1:
+                self.open_trade(ohlcv)
 
     def open_trade_tick(self, ohlcv: Series, data: DataFrame, trade: Trade) -> None:
         """
@@ -127,10 +129,11 @@ class TradingModule:
 
         indicators = self.strategy.generate_indicators(data)
         filled_ohlcv = indicators.iloc[[-1]].copy()
-        signal = self.strategy.sell_signal(indicators, filled_ohlcv, trade)
 
-        if signal['sell'][0] == 1:
-            self.close_trade(trade, reason="Sell signal", ohlcv=ohlcv)
+        if len(indicators.index) > self.min_candles:
+            signal = self.strategy.sell_signal(indicators, filled_ohlcv, trade)
+            if signal['sell'][0] == 1:
+                self.close_trade(trade, reason="Sell signal", ohlcv=ohlcv)
 
     def close_trade(self, trade: Trade, reason: str, ohlcv: Series) -> None:
         """

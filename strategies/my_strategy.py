@@ -12,8 +12,6 @@ class MyStrategy(Strategy):
     This is an example custom strategy, that inherits from the main Strategy class
     """
 
-    min_candles = 21
-
     def generate_indicators(self, dataframe: DataFrame) -> DataFrame:
         """
         :param dataframe: All passed candles (current candle included!) with OHLCV data
@@ -39,18 +37,17 @@ class MyStrategy(Strategy):
         :return: Current candle filled with buy signals
         :rtype: Series
         """
-        if len(dataframe.index) > self.min_candles:
-            # BEGIN STRATEGY
+        # BEGIN STRATEGY
 
-            current_candle.loc[
-                (
-                    (current_candle['rsi'] < 30) &
-                    (current_candle['ema5'] < current_candle['ema21']) &
-                    (current_candle['volume'] > 0)
-                ),
-                'buy'] = 1
+        current_candle.loc[
+            (
+                (current_candle['rsi'] < 30) &
+                (current_candle['ema5'] < current_candle['ema21']) &
+                (current_candle['volume'] > 0)
+            ),
+            'buy'] = 1
 
-            # END STRATEGY
+        # END STRATEGY
 
         return current_candle
 
@@ -65,16 +62,15 @@ class MyStrategy(Strategy):
         :return: Current candle filled with buy signals
         :rtype: Series
         """
-        if len(dataframe.index) > self.min_candles:
-            # BEGIN STRATEGY
+        # BEGIN STRATEGY
 
-            current_candle.loc[
-                (
-                    (current_candle['rsi'] > 70) &
-                    (current_candle['volume'] > 0)
-                ),
-                'sell'] = 1
+        current_candle.loc[
+            (
+                (current_candle['rsi'] > 70) &
+                (current_candle['volume'] > 0)
+            ),
+            'sell'] = 1
 
-            # END STRATEGY
+        # END STRATEGY
 
         return current_candle
