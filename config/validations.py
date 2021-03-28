@@ -65,6 +65,13 @@ def validate_single_currency_in_pairs(config: dict):
 
 
 def check_min_candles(config: dict):
+    """
+    Check whether the default value of 21 is set for min_candles. Mostly a placeholder for until we find a way to automatically generate the startup time given the indicators chosen.
+    :param config: json configuration
+    :type config: dict
+    """
     min_candles = config['min_candles']
+    if type(min_candles) != int:
+        raise TypeError("min_candles must be an integer.")
     if min_candles != 21:
         print("[WARNING] With the current implementation, we cannot guarantee accurate signals when the min_candles value is changed from its default of 21.\n[WARNING] Change this value at your own risks.")
