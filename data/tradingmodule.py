@@ -12,10 +12,6 @@ import utils
 #
 # © 2021 DemaTrading.ai
 # ======================================================================
-DEFAULT_FEE = 0.25
-MAX_FEE = 0.5
-MIN_FEE = 0.1
-
 
 class TradingModule:
     starting_budget = 0
@@ -43,28 +39,8 @@ class TradingModule:
         self.strategy = load_strategy_from_config(config)
         self.budget = float(self.config['starting-capital'])
         self.max_open_trades = int(self.config['max-open-trades'])
-        self.fee = self.verify_fee(self.config['fee']) / 100
+        self.fee = config["fee"]
 
-    def verify_fee(self, fee):
-        try:
-            input_fee = float(fee)
-        except ValueError:
-            print(
-                f"[INFO] The inputted value is invalid, the algorithm will use the default value of {DEFAULT_FEE}%")
-            return DEFAULT_FEE
-
-        if input_fee > MAX_FEE:
-            print(
-                f"[INFO] The inputted value is to big, the algorithm will use the default value of {MAX_FEE}%")
-            return MAX_FEE
-        elif input_fee < MIN_FEE:
-            print(
-                f"[INFO] The inputted value is to small, the algorithm will use the default value of {MIN_FEE}%")
-            return MIN_FEE
-
-        print(
-            f"[INFO] The algorithm will use the inputted value of {input_fee}%")
-        return input_fee
 
     def tick(self, ohlcv: Series, data: DataFrame) -> None:
         """
