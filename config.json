@@ -19,6 +19,6 @@
   ],
   "currency": "USDT",
   "fee": 0.125,
-  "strategy-name": "DaanStrategy",
+  "strategy-name": "MyStrategy",
   "strategies-folder": "strategies"
 }
