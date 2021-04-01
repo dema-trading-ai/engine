@@ -8,4 +8,4 @@ services:
       - ".:/usr/src/engine"
     # default command to execute when 'docker-compose up' is ran.
     command: >
-      main.py
+      -u main.py
