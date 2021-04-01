@@ -3,9 +3,6 @@ import abc
 from pandas import DataFrame, Series
 from typing import Optional
 
-# Files
-from models.trade import Trade
-
 # ======================================================================
 # Strategy-class is responsible for populating indicators / signals
 #

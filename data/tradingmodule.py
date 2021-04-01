@@ -5,7 +5,7 @@ from datetime import datetime
 from config.load_strategy import load_strategy_from_config
 from backtesting.strategy import Strategy
 from models.trade import Trade
-from utils import *
+from utils import calculate_worth_of_open_trades
 
 
 # ======================================================================
