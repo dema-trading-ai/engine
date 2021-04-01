@@ -15,7 +15,7 @@
 <a class="github-button" href="https://github.com/dema-trading-ai" data-size="large" aria-label="Follow @dema-trading-ai on GitHub">Follow @dema-trading-ai</a>
 
 Please join our Discord for updates, support, our community & more:
-https://discord.gg/WXxjtNzjEx
+**[https://discord.gg/WXxjtNzjEx](https://discord.gg/WXxjtNzjEx)**
 
 ***
 
