@@ -44,11 +44,8 @@ def df_to_dict(df: DataFrame) -> dict:
     :return: dictionary with OHLCV data
     :rtype: dict
     """
-    df_dict = {}
-    for row in df.iterrows():
-        df_json = row[1].to_dict()
-        df_dict[str(df_json['time'])] = df_json
-    return df_dict
+    df.index = df.index.map(str)
+    return df.to_dict('index')
 
 def dict_to_df(data: dict, indicators: list) -> DataFrame:
     """
@@ -59,8 +56,6 @@ def dict_to_df(data: dict, indicators: list) -> DataFrame:
     :rtype: DataFrame
     """
     json_file = rapidjson.loads(data)
-    ohlcv_dict = {int(tick): list(json_file[tick].values()) for tick in json_file}
-    df = DataFrame.from_dict(ohlcv_dict, orient='index', columns=indicators)
-    df.index = pd.to_datetime(df.index, unit='ms')
-    df.sort_index(inplace=True)
+    df = pd.DataFrame.from_dict(json_file, orient='index', columns=indicators)
+    df.index = df.index.map(int)
     return df

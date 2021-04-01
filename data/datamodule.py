@@ -33,7 +33,7 @@ class DataModule:
     backtesting_to = None
 
     history_data = {}
-    ohlcv_indicators = ['time', 'open', 'high', 'low', 'close', 'volume', 'pair', 'buy', 'sell']
+    ohlcv_indicators = ['time', 'open', 'high', 'low', 'close', 'volume', 'pair']
 
     def __init__(self, config, backtesting_module):
         print('[INFO] Starting DEMA Data-module...')
@@ -143,15 +143,10 @@ class DataModule:
             ohlcv_data += result
             start_date += np.around(asked_ticks * self.timeframe_calc)
 
-        # Create pandas DataFrame and extra info
-        df = DataFrame(ohlcv_data, index=index, columns=self.ohlcv_indicators[:-3])
+        # Create pandas DataFrame and adds pair info
+        df = DataFrame(ohlcv_data, index=index, columns=self.ohlcv_indicators[:-1])
         df['pair'] = pair
-        df['buy'] = 0
-        df['sell'] = 0
 
-        # Update dataframe
-        df.index = pd.to_datetime(df.index, unit='ms')
-        df.sort_index(inplace=True)
         if save:
             print("[INFO] [%s] %s candles downloaded" % (pair, len(index)))
             self.save_dataframe(pair, df)
@@ -254,13 +249,16 @@ class DataModule:
         # Convert json to dataframe
         df = dict_to_df(data, self.ohlcv_indicators)
 
-        # Check bactesting period
-        final_timestamp = self.backtesting_to - self.timeframe_calc   # correct final timestamp
-        df = self.check_backtesting_period(pair, df, final_timestamp)
-
+        # Find correct last tick timestamp
+        n_downloaded_candles = (self.backtesting_to - self.backtesting_from) / self.timeframe_calc
+        timesteps_forward = int(n_downloaded_candles) * self.timeframe_calc
+        final_timestamp = self.backtesting_from + (timesteps_forward - self.timeframe_calc) # last tick is excluded
+        
         # Return correct backtesting period
-        index_list = [pd.to_datetime(time).timestamp() * 1000 for time in list(df.index.values)]
-        df = df[index_list.index(self.backtesting_from):index_list.index(final_timestamp)+1]
+        df = self.check_backtesting_period(pair, df, final_timestamp)
+        begin_index = df.index.get_loc(self.backtesting_from)
+        end_index = df.index.get_loc(final_timestamp)
+        df = df[begin_index:end_index+1]
         self.save_dataframe(pair, df)
         return df
 
@@ -276,8 +274,9 @@ class DataModule:
         :rtype: DataFrame
         """
         # Get backtesting period
-        index_list = [pd.to_datetime(time).timestamp() * 1000 for time in list(df.index.values)]
-        df_begin, df_end = index_list[0], index_list[-1]
+        index_list = df.index.values
+        df_begin = index_list[0]
+        df_end = index_list[-1]
         extra_candles = 0
 
         # Check if previous data needs to be downloaded
@@ -288,7 +287,7 @@ class DataModule:
 
         # Check if new data needs to be downloaded
         if final_timestamp > df_end:
-            new_df = self.download_data_for_pair(pair, df_end, self.backtesting_to, False)
+            new_df = self.download_data_for_pair(pair, df_end + self.timeframe_calc, self.backtesting_to, False)
             df = pd.concat([df, new_df])
             extra_candles += len(new_df.index)
 

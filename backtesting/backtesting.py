@@ -6,7 +6,7 @@ import numpy as np
 
 # Files
 from backtesting.results import MainResults, OpenTradeResult, CoinInsights, show_signature
-from utils import df_to_dict, calculate_worth_of_open_trades, default_empty_dict_dict
+from utils import calculate_worth_of_open_trades, default_empty_dict_dict
 from models.trade import Trade
 from config.currencies import get_currency_symbol
 from config.load_strategy import load_strategy_from_config
@@ -58,7 +58,7 @@ class BackTesting:
         pairs = list(data_dict.keys())
         ticks = list(data_dict[pairs[0]].keys())
 
-        for tick in tqdm(ticks, total=len(ticks), ncols=75, desc='[TEST] Backtesting'):
+        for tick in ticks:
             for pair in pairs:
                 pair_dict = data_dict[pair][tick]
                 self.trading_module.tick(pair_dict)
@@ -86,7 +86,7 @@ class BackTesting:
             indicators = self.strategy.sell_signal(indicators)
             stoploss = self.strategy.stoploss(indicators)
             self.config['stoploss'] = stoploss if stoploss else float(self.config['stoploss'])
-            data_dict[pair] = df_to_dict(indicators)
+            data_dict[pair] = indicators.to_dict('index')
         return data_dict
 
     # This method is called when backtesting method finished processing all OHLCV-data
