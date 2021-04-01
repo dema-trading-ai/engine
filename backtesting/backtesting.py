@@ -1,12 +1,15 @@
+# Libraries
 from datetime import datetime, timedelta
-from backtesting.results import MainResults, OpenTradeResult, CoinInsights, show_signature
-from utils import *
-from models.trade import Trade
-from config.currencies import get_currency_symbol
-from config.load_strategy import load_strategy_from_config
 import typing
 from tqdm import tqdm
 import numpy as np
+
+# Files
+from backtesting.results import MainResults, OpenTradeResult, CoinInsights, show_signature
+from utils import df_to_dict, calculate_worth_of_open_trades, default_empty_dict_dict
+from models.trade import Trade
+from config.currencies import get_currency_symbol
+from config.load_strategy import load_strategy_from_config
 
 # ======================================================================
 # BackTesting class is responsible for processing the ticks (ohlcv-data)
@@ -57,7 +60,6 @@ class BackTesting:
 
         for tick in tqdm(ticks, total=len(ticks), ncols=75, desc='[TEST] Backtesting'):
             for pair in pairs:
-                # Get dict with data for current pair and pass to trading_module
                 pair_dict = data_dict[pair][tick]
                 self.trading_module.tick(pair_dict)
 
@@ -67,6 +69,15 @@ class BackTesting:
         self.generate_backtesting_result(open_trades, closed_trades, budget)
 
     def populate_signals(self) -> dict:
+        """
+        Method used for populating indicators / signals
+        Populates indicators
+        Populates buy signal
+        Populates sell signal
+        Calculates stoploss
+        :return: dictionary with per pair an OHLCV dict
+        :rtype: dict
+        """
         data_dict = {}
         for pair in self.data.keys():
             df = self.data[pair]
@@ -241,7 +252,7 @@ class BackTesting:
             # Check whether profit is negative
             if tick_profit_percentage < 0:
                 # Check if a drawdown is already being tracked
-                if temp_seen_drawdown['drawdown'] >= 0:s
+                if temp_seen_drawdown['drawdown'] >= 0:
                     temp_seen_drawdown['from'] = tick
                     temp_seen_drawdown['drawdown'] = tick_profit_percentage
                     temp_seen_drawdown['to'] = tick

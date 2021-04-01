@@ -1,9 +1,9 @@
-# Mandatory libraries
+# Mandatory Imports
 from pandas import DataFrame, Series
 from backtesting.strategy import Strategy
 from models.trade import Trade
 
-# Optional libraries
+# Optional Imports
 import talib.abstract as ta
 
 
@@ -34,10 +34,10 @@ class MyStrategy(Strategy):
         """
         :param dataframe: Dataframe filled with indicators from generate_indicators
         :type indicators: DataFrame
-        :return: Current candle filled with buy signals
-        :rtype: Series
+        :return: dataframe filled with buy signals
+        :rtype: DataFrame
         """
-        if len(dataframe.index) > self.min_candles:
+        if len(dataframe) > self.min_candles:
             # BEGIN STRATEGY
 
             dataframe.loc[
@@ -56,12 +56,10 @@ class MyStrategy(Strategy):
         """
         :param dataframe: Dataframe filled with indicators from generate_indicators
         :type indicators: DataFrame
-        :param trade: Current open trade
-        :type trade: Trade model
-        :return: Current candle filled with buy signals
-        :rtype: Series
+        :return: dataframe filled with sell signals
+        :rtype: DataFrame
         """
-        if len(dataframe.index) > self.min_candles:
+        if len(dataframe) > self.min_candles:
             # BEGIN STRATEGY
 
             dataframe.loc[

@@ -1,7 +1,10 @@
+# Libraries
 import abc
 from pandas import DataFrame, Series
-from models.trade import Trade
 from typing import Optional
+
+# Files
+from models.trade import Trade
 
 # ======================================================================
 # Strategy-class is responsible for populating indicators / signals
@@ -34,7 +37,7 @@ class Strategy(abc.ABC):
         :param indicators: Dataframe filled with indicators from generate_indicators
         :type indicators: DataFrame
         :return: Current candle filled with buy signals
-        :rtype: Series
+        :rtype: DataFrame
         """
         return
 
@@ -43,8 +46,8 @@ class Strategy(abc.ABC):
         """
         :param indicators: dataframe filled with indicators from generate_indicators
         :type indicators: Dataframe
-        :return: current candle filled with buy signals
-        :rtype: Series
+        :return: current candle filled with sell signals
+        :rtype: DataFrame
         """
         return
 

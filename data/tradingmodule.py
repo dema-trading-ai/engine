@@ -1,9 +1,12 @@
+# Libraries
+from datetime import datetime
+from pandas import DataFrame, Series
+
+# Files
 from config.load_strategy import load_strategy_from_config
 from backtesting.strategy import Strategy
 from models.trade import Trade
-from datetime import datetime
-from pandas import DataFrame, Series
-import utils
+from utils import *
 
 
 # ======================================================================
@@ -39,14 +42,12 @@ class TradingModule:
         self.strategy = load_strategy_from_config(config)
         self.budget = float(self.config['starting-capital'])
         self.max_open_trades = int(self.config['max-open-trades'])
-        self.fee = config["fee"]
+        self.fee = config["fee"] / 100
 
     def tick(self, ohlcv: dict) -> None:
         """
-        :param ohlcv: Series object with OHLCV data for current tick
-        :type ohlcv: Series
-        :param data: All passed ticks with OHLCV data
-        :type data: DataFrame
+        :param ohlcv: dictionary with OHLCV data for current tick
+        :type ohlcv: dict
         :return: None
         :rtype: None
         """
@@ -62,10 +63,8 @@ class TradingModule:
         """
         Method is called when specified pair has no open trades
         populates buy signals
-        :param ohlcv: Series object with OHLCV data for current tick
-        :type ohlcv: Series
-        :param data: All passed ticks with OHLCV data
-        :type data: DataFrame
+        :param ohlcv: dictionary with OHLCV data for current tick
+        :type ohlcv: dict
         :return: None
         :rtype: None
         """
@@ -76,12 +75,8 @@ class TradingModule:
         """
         Method is called when specified pair has open trades.
         checks for ROI
-        checks for SL
-        populates Sell Signal
-        :param ohlcv: Series object with OHLCV data for current tick
-        :type ohlcv: Series
-        :param data: All passed ticks with OHLCV data
-        :type data: DataFrame
+        :param ohlcv: dictionary with OHLCV data for current tick
+        :type ohlcv: dict
         :param trade: Trade corresponding to tick pair
         :type trade: Trade
         :return: None
@@ -105,8 +100,8 @@ class TradingModule:
         :type trade: Trade
         :param reason: Reason for the trade to be closed (SL, ROI, Sell Signal)
         :type reason: string
-        :param ohlcv: Last candle
-        :type ohlcv: Series
+        :param ohlcv: dictionary with OHLCV data for current tick
+        :type ohlcv: dict
         :return: None
         :rtype: None
         """
@@ -121,11 +116,11 @@ class TradingModule:
         self.closed_trades.append(trade)
         self.update_drawdowns_closed_trade(trade)
 
-    def open_trade(self, ohlcv: Series) -> None:
+    def open_trade(self, ohlcv: dict) -> None:
         """
         Method opens a trade for pair in ohlcv
-        :param ohlcv: Last candle
-        :type ohlcv: Series
+        :param ohlcv: dictionary with OHLCV data for current tick
+        :type ohlcv: dict
         :return: None
         :rtype: None
         """
@@ -147,12 +142,12 @@ class TradingModule:
         self.open_trades.append(new_trade)
         self.update_value_per_timestamp_tracking(new_trade, ohlcv)
 
-    def check_roi_open_trade(self, trade: Trade, ohlcv: Series) -> bool:
+    def check_roi_open_trade(self, trade: Trade, ohlcv: dict) -> bool:
         """
         :param trade: Trade model to check
         :type trade: Trade model
-        :param ohlcv: Last candle
-        :type ohlcv: Series
+        :param ohlcv: dictionary with OHLCV data for current tick
+        :type ohlcv: dict
         :return: return whether to close the trade based on ROI
         :rtype: boolean
         """
@@ -178,12 +173,12 @@ class TradingModule:
                 roi = value
         return roi
 
-    def check_stoploss_open_trade(self, trade: Trade, ohlcv: Series, stoploss: float) -> bool:
+    def check_stoploss_open_trade(self, trade: Trade, ohlcv: dict, stoploss: float) -> bool:
         """
         :param trade: Trade model to check
         :type trade: Trade model
-        :param ohlcv: Last candle
-        :type ohlcv: Series
+        :param ohlcv: dictionary with OHLCV data for current tick
+        :type ohlcv: dict
         :return: return whether to close the trade based on Stop Loss
         :rtype: boolean
         """
@@ -207,14 +202,14 @@ class TradingModule:
                 return trade
         return None
 
-    def update_value_per_timestamp_tracking(self, trade: Trade, ohlcv: Series) -> None:
+    def update_value_per_timestamp_tracking(self, trade: Trade, ohlcv: dict) -> None:
         """
         Method is used to be able to track the value change per timestamp per open trade
         next, this is used for calculating max seen drawdown
         :param trade: Any open trade
         :type trade: Trade
-        :param ohlcv: Last candle
-        :type ohlcv: Series
+        :param ohlcv: dictionary with OHLCV data for current tick
+        :type ohlcv: dict
         :return: None
         :rtype: None
         """
@@ -226,12 +221,12 @@ class TradingModule:
             self.open_order_value_per_timestamp[ohlcv['time']
                                                 ] = current_total_price
 
-    def update_budget_per_timestamp_tracking(self, ohlcv: Series) -> None:
+    def update_budget_per_timestamp_tracking(self, ohlcv: dict) -> None:
         """
         Used for tracking total budget per timestamp, used to be able to calculate
         max seen drawdown
-        :param ohlcv: Last candle
-        :type ohlcv: Series
+        :param ohlcv: dictionary with OHLCV data for current tick
+        :type ohlcv: dict
         :return: None
         :rtype: None
         """
@@ -250,7 +245,7 @@ class TradingModule:
             self.max_drawdown = trade.profit_percentage
 
         current_total_value = self.budget + \
-            utils.calculate_worth_of_open_trades(self.open_trades)
+            calculate_worth_of_open_trades(self.open_trades)
         perc_of_total_value = (
             (trade.currency_amount * trade.close) / current_total_value) * 100
         perc_influence = trade.profit_percentage * (perc_of_total_value / 100)

@@ -1,14 +1,16 @@
+# Libraries
 import numpy as np
 from pandas import DataFrame
 import pandas as pd
 import ccxt
 import re
-import json
+import rapidjson
 import sys
 from os import path
 import os
 
-from utils import *
+# Files
+from utils import df_to_dict, dict_to_df
 
 # ======================================================================
 # DataModule is responsible for downloading OHLCV data, preparing it
@@ -141,11 +143,13 @@ class DataModule:
             ohlcv_data += result
             start_date += np.around(asked_ticks * self.timeframe_calc)
 
-        # Create pandas DataFrame and add pair info
+        # Create pandas DataFrame and extra info
         df = DataFrame(ohlcv_data, index=index, columns=self.ohlcv_indicators[:-3])
         df['pair'] = pair
         df['buy'] = 0
         df['sell'] = 0
+
+        # Update dataframe
         df.index = pd.to_datetime(df.index, unit='ms')
         df.sort_index(inplace=True)
         if save:
@@ -243,7 +247,7 @@ class DataModule:
         except FileNotFoundError:
             print("[ERROR] Backtesting datafile was not found.")
             return False
-        except:
+        except EnvironmentError:
             print("[ERROR] Something went wrong loading datafile", sys.exc_info()[0])
             return False
 
@@ -312,7 +316,7 @@ class DataModule:
 
         # Save json file
         with open(filepath, 'w') as outfile:
-            json.dump(df_dict, outfile, indent=4)
+            rapidjson.dump(df_dict, outfile, indent=4)
 
     def generate_datafile_name(self, pair: str) -> str:
         """

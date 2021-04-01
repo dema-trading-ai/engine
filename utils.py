@@ -1,13 +1,13 @@
+# Libraries
 from pathlib import Path
 from collections import defaultdict
 from pandas import DataFrame
 import pandas as pd
-import json
+import rapidjson
 
 
 def get_project_root():
     return Path(__file__).parent
-
 
 def default_empty_array_dict() -> list:
     """
@@ -16,14 +16,12 @@ def default_empty_array_dict() -> list:
     """
     return []
 
-
 def default_empty_dict_dict() -> dict:
     """
     :return: Dictionary for initializing default dictionary
     :rtype: Dict.
     """
     return defaultdict(int)
-
 
 def calculate_worth_of_open_trades(open_trades) -> float:
     """
@@ -38,7 +36,6 @@ def calculate_worth_of_open_trades(open_trades) -> float:
         return_value += (trade.currency_amount * trade.current)
     return return_value
 
-
 def df_to_dict(df: DataFrame) -> dict:
     """
     Method turns dataframe into dictionary
@@ -50,7 +47,7 @@ def df_to_dict(df: DataFrame) -> dict:
     df_dict = {}
     for row in df.iterrows():
         df_json = row[1].to_dict()
-        df_dict[df_json['time']] = df_json
+        df_dict[str(df_json['time'])] = df_json
     return df_dict
 
 def dict_to_df(data: dict, indicators: list) -> DataFrame:
@@ -61,8 +58,8 @@ def dict_to_df(data: dict, indicators: list) -> DataFrame:
     :return: dataframe with OHLCV data
     :rtype: DataFrame
     """
-    json_file = json.loads(data)
-    ohlcv_dict = {tick: list(json_file[tick].values()) for tick in json_file}
+    json_file = rapidjson.loads(data)
+    ohlcv_dict = {int(tick): list(json_file[tick].values()) for tick in json_file}
     df = DataFrame.from_dict(ohlcv_dict, orient='index', columns=indicators)
     df.index = pd.to_datetime(df.index, unit='ms')
     df.sort_index(inplace=True)
