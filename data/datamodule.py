@@ -86,7 +86,7 @@ class DataModule:
         """
         for pair in self.config['pairs']:
             if not self.check_datafolder(pair):
-                print("[INFO] Did not find datafile for %s" % pair)
+                print("[INFO] Did not find datafile for %s, starting download..." % pair)
                 df = self.download_data_for_pair(pair, self.backtesting_from, self.backtesting_to)
             else:
                 print("[INFO] Reading datafile for %s" % pair)

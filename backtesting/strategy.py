@@ -8,6 +8,11 @@ from models.trade import Trade
 # © 2021 DemaTrading.ai
 # ======================================================================
 
+"""
+ATTENTION: 
+
+DO NOT USE THIS FILE TO IMPLEMENT YOUR STRATEGY. INSTEAD, USE my_strategy.py IN THE "strategies" FOLDER!
+"""
 
 class Strategy(abc.ABC):
     """

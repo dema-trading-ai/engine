@@ -11,7 +11,7 @@ FONT_RESET = "\033[0m"
 
 def show_signature():
     print("======================================================================")
-    print("%s|  DEMA BACKTESTING ENGINE IS SUBJECTED TO THE GNU AGPL-3.0 License %s" %
+    print("%s|  DemaTrading.ai BACKTESTING ENGINE IS SUBJECTED TO THE GNU AGPL-3.0 License %s" %
           (FONT_BOLD, FONT_RESET))
     print("%s|  Copyright © 2021 - DemaTrading.ai%s" %
           (FONT_BOLD, FONT_RESET))
