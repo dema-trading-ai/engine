@@ -95,14 +95,18 @@ class TradingModule:
         self.update_value_per_timestamp_tracking(
             trade, ohlcv)  # update total value tracking
 
-        # if current profit is below 0, update drawdown / check SL
-        stoploss = self.check_stoploss_open_trade(trade, ohlcv)
-        roi = self.check_roi_open_trade(trade, ohlcv)
-        if stoploss or roi:
-            return
-
         indicators = self.strategy.generate_indicators(data)
         filled_ohlcv = indicators.iloc[[-1]].copy()
+
+        # if current profit is below 0, update drawdown / check SL
+        stoploss = self.strategy.stoploss(indicators, filled_ohlcv, trade)
+        stoploss = float(self.config["stoploss"]) if stoploss is None else stoploss
+        trade.stoploss = stoploss
+        stoploss_reached = self.check_stoploss_open_trade(trade, ohlcv, stoploss)
+        roi_reached = self.check_roi_open_trade(trade, ohlcv)
+        if stoploss_reached or roi_reached:
+            return
+
         signal = self.strategy.sell_signal(indicators, filled_ohlcv, trade)
 
         if signal['sell'][0] == 1:
@@ -187,7 +191,7 @@ class TradingModule:
                 roi = value
         return roi
 
-    def check_stoploss_open_trade(self, trade: Trade, ohlcv: Series) -> bool:
+    def check_stoploss_open_trade(self, trade: Trade, ohlcv: Series, stoploss: float) -> bool:
         """
         :param trade: Trade model to check
         :type trade: Trade model
@@ -199,7 +203,7 @@ class TradingModule:
         if trade.profit_percentage < 0:
             if trade.max_drawdown is None or trade.max_drawdown > trade.profit_percentage:
                 trade.max_drawdown = trade.profit_percentage
-            if trade.profit_percentage < float(self.config['stoploss']):
+            if trade.profit_percentage < stoploss:
                 self.close_trade(trade, reason="Stoploss", ohlcv=ohlcv)
                 return True
         return False
