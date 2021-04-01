@@ -1,4 +1,5 @@
 import numpy as np
+from datetime import datetime, timedelta
 from pandas import DataFrame
 import pandas as pd
 import ccxt
@@ -345,8 +346,30 @@ class DataModule:
         os.remove(filepath)
 
     def check_for_missing_ticks(self):
+        """Test whether any tick has a null/NaN value, and whether every
+        tick (time) exists"""
+
+        # all the dates that the data should have, times one million
+        # because of the date conventions of pandas
+        daterange = np.arange(self.backtesting_from * 1000000,
+                              self.backtesting_to * 1000000,
+                              self.timeframe_calc * 1000000)
+
         for pair, data in self.history_data.items():
-            n_missing = data.isnull().any(axis="columns").sum()
-            if n_missing > 0:
-                print(f"[WARNING] Pair '{pair}' contains {n_missing} missing ticks")
+
+            # any NaN?
+            n_nan = data.isnull().any(axis="columns").sum()
+            
+            # missing dates?
+            index = data.index.to_numpy().astype(int)
+            diff = np.setdiff1d(daterange, index)
+            n_missing = len(diff)
+
+            if n_nan > 0 or n_missing > 0:
+                print(f"[WARNING] Pair '{pair}' contains {n_nan} rows with Nan values\n"
+                      f"[WARNING] and {n_missing} missing ticks")
+
+            
+
+
         
