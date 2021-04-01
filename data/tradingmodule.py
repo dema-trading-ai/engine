@@ -12,10 +12,6 @@ import utils
 #
 # © 2021 DemaTrading.ai
 # ======================================================================
-DEFAULT_FEE = 0.25
-MAX_FEE = 0.5
-MIN_FEE = 0.1
-
 
 class TradingModule:
     starting_budget = 0
@@ -43,28 +39,8 @@ class TradingModule:
         self.strategy = load_strategy_from_config(config)
         self.budget = float(self.config['starting-capital'])
         self.max_open_trades = int(self.config['max-open-trades'])
-        self.fee = self.verify_fee(self.config['fee']) / 100
+        self.fee = config["fee"]
 
-    def verify_fee(self, fee):
-        try:
-            input_fee = float(fee)
-        except ValueError:
-            print(
-                f"[INFO] The inputted value is invalid, the algorithm will use the default value of {DEFAULT_FEE}%")
-            return DEFAULT_FEE
-
-        if input_fee > MAX_FEE:
-            print(
-                f"[INFO] The inputted value is to big, the algorithm will use the default value of {MAX_FEE}%")
-            return MAX_FEE
-        elif input_fee < MIN_FEE:
-            print(
-                f"[INFO] The inputted value is to small, the algorithm will use the default value of {MIN_FEE}%")
-            return MIN_FEE
-
-        print(
-            f"[INFO] The algorithm will use the inputted value of {input_fee}%")
-        return input_fee
 
     def tick(self, ohlcv: Series, data: DataFrame) -> None:
         """
@@ -119,14 +95,18 @@ class TradingModule:
         self.update_value_per_timestamp_tracking(
             trade, ohlcv)  # update total value tracking
 
-        # if current profit is below 0, update drawdown / check SL
-        stoploss = self.check_stoploss_open_trade(trade, ohlcv)
-        roi = self.check_roi_open_trade(trade, ohlcv)
-        if stoploss or roi:
-            return
-
         indicators = self.strategy.generate_indicators(data)
         filled_ohlcv = indicators.iloc[[-1]].copy()
+
+        # if current profit is below 0, update drawdown / check SL
+        stoploss = self.strategy.stoploss(indicators, filled_ohlcv, trade)
+        stoploss = float(self.config["stoploss"]) if stoploss is None else stoploss
+        trade.stoploss = stoploss
+        stoploss_reached = self.check_stoploss_open_trade(trade, ohlcv, stoploss)
+        roi_reached = self.check_roi_open_trade(trade, ohlcv)
+        if stoploss_reached or roi_reached:
+            return
+
         signal = self.strategy.sell_signal(indicators, filled_ohlcv, trade)
 
         if signal['sell'][0] == 1:
@@ -211,7 +191,7 @@ class TradingModule:
                 roi = value
         return roi
 
-    def check_stoploss_open_trade(self, trade: Trade, ohlcv: Series) -> bool:
+    def check_stoploss_open_trade(self, trade: Trade, ohlcv: Series, stoploss: float) -> bool:
         """
         :param trade: Trade model to check
         :type trade: Trade model
@@ -223,7 +203,7 @@ class TradingModule:
         if trade.profit_percentage < 0:
             if trade.max_drawdown is None or trade.max_drawdown > trade.profit_percentage:
                 trade.max_drawdown = trade.profit_percentage
-            if trade.profit_percentage < float(self.config['stoploss']):
+            if trade.profit_percentage < stoploss:
                 self.close_trade(trade, reason="Stoploss", ohlcv=ohlcv)
                 return True
         return False

@@ -4,6 +4,7 @@ from config.spec import spec_type_to_python_type
 def validate(config: dict, spec: list):
     validate_by_spec(config, spec)
     validate_single_currency_in_pairs(config)
+    validate_fee(config)
 
 def validate_by_spec(config, config_spec):
     for param_spec in config_spec:
@@ -73,3 +74,32 @@ def config_error(*msgs: str):
     for m in msgs:
         print("[CONFIG ERROR] " + m)
     raise SystemExit
+
+
+
+DEFAULT_FEE = 0.25
+MAX_FEE = 0.5
+MIN_FEE = 0.1
+
+def validate_fee(config):
+    try:
+        input_fee = float(config["fee"])
+    except ValueError:
+        print(
+            f"[INFO] The inputted value is invalid, the algorithm will use the default value of {DEFAULT_FEE}%")
+        return DEFAULT_FEE
+
+    if input_fee > MAX_FEE:
+        print(
+            f"[INFO] The inputted value is to big, the algorithm will use the default value of {MAX_FEE}%")
+        return MAX_FEE
+    elif input_fee < MIN_FEE:
+        print(
+            f"[INFO] The inputted value is to small, the algorithm will use the default value of {MIN_FEE}%")
+        return MIN_FEE
+
+    print(
+        f"[INFO] The algorithm will use the inputted value of {input_fee}%")
+
+    config["fee"] = input_fee # make sure its a float
+
