@@ -61,7 +61,6 @@ class TradingModule:
     def no_trade_tick(self, ohlcv: dict) -> None:
         """
         Method is called when specified pair has no open trades
-        populates buy signals
         :param ohlcv: dictionary with OHLCV data for current tick
         :type ohlcv: dict
         :return: None
@@ -74,6 +73,7 @@ class TradingModule:
         """
         Method is called when specified pair has open trades.
         checks for ROI
+        checks for stoploss
         :param ohlcv: dictionary with OHLCV data for current tick
         :type ohlcv: dict
         :param trade: Trade corresponding to tick pair
@@ -88,9 +88,8 @@ class TradingModule:
         stoploss_reached = self.check_stoploss_open_trade(trade, ohlcv, self.config['stoploss'])
         roi_reached = self.check_roi_open_trade(trade, ohlcv)
         if stoploss_reached or roi_reached:
-            return
-
-        if ohlcv['sell'] == 1:
+            return  # trade is closed by stoploss or ROI
+        elif ohlcv['sell'] == 1:
             self.close_trade(trade, reason="Sell signal", ohlcv=ohlcv)
 
     def close_trade(self, trade: Trade, reason: str, ohlcv: dict) -> None:
