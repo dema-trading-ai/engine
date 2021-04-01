@@ -8,6 +8,8 @@ import sys
 from os import path
 import os
 
+from utils import *
+
 # ======================================================================
 # DataModule is responsible for downloading OHLCV data, preparing it
 # and activating backtesting methods
@@ -246,11 +248,7 @@ class DataModule:
             return False
 
         # Convert json to dataframe
-        json_file = json.loads(data)
-        ohlcv_dict = {tick: list(json_file[tick].values()) for tick in json_file}
-        df = DataFrame.from_dict(ohlcv_dict, orient='index', columns=self.ohlcv_indicators)
-        df.index = pd.to_datetime(df.index, unit='ms')
-        df.sort_index(inplace=True)
+        df = dict_to_df(data, self.ohlcv_indicators)
 
         # Check bactesting period
         final_timestamp = self.backtesting_to - self.timeframe_calc   # correct final timestamp
@@ -310,10 +308,7 @@ class DataModule:
         filepath = os.path.join("data/backtesting-data/", self.config["exchange"], filename)
 
         # Convert pandas dataframe to json
-        df_dict = {}
-        for row in df.iterrows():
-            df_json = row[1].to_dict()
-            df_dict[df_json['time']] = df_json
+        df_dict = df_to_dict(df)
 
         # Save json file
         with open(filepath, 'w') as outfile:

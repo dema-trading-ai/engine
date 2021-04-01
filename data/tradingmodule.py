@@ -41,8 +41,7 @@ class TradingModule:
         self.max_open_trades = int(self.config['max-open-trades'])
         self.fee = config["fee"]
 
-
-    def tick(self, ohlcv: Series, data: DataFrame) -> None:
+    def tick(self, ohlcv: dict) -> None:
         """
         :param ohlcv: Series object with OHLCV data for current tick
         :type ohlcv: Series
@@ -54,12 +53,12 @@ class TradingModule:
         trade = self.find_open_trade(ohlcv['pair'])
         if trade:
             trade.update_stats(ohlcv)
-            self.open_trade_tick(ohlcv, data, trade)
+            self.open_trade_tick(ohlcv, trade)
         else:
-            self.no_trade_tick(ohlcv, data)
+            self.no_trade_tick(ohlcv)
         self.update_budget_per_timestamp_tracking(ohlcv)
 
-    def no_trade_tick(self, ohlcv: Series, data: DataFrame) -> None:
+    def no_trade_tick(self, ohlcv: dict) -> None:
         """
         Method is called when specified pair has no open trades
         populates buy signals
@@ -70,14 +69,10 @@ class TradingModule:
         :return: None
         :rtype: None
         """
-        indicators = self.strategy.generate_indicators(data)
-        filled_ohlcv = indicators.iloc[[-1]].copy()
-        signal = self.strategy.buy_signal(indicators, filled_ohlcv)
-
-        if signal['buy'][0] == 1:
+        if ohlcv['buy'] == 1:
             self.open_trade(ohlcv)
 
-    def open_trade_tick(self, ohlcv: Series, data: DataFrame, trade: Trade) -> None:
+    def open_trade_tick(self, ohlcv: dict, trade: Trade) -> None:
         """
         Method is called when specified pair has open trades.
         checks for ROI
@@ -92,27 +87,19 @@ class TradingModule:
         :return: None
         :rtype: None
         """
-        self.update_value_per_timestamp_tracking(
-            trade, ohlcv)  # update total value tracking
-
-        indicators = self.strategy.generate_indicators(data)
-        filled_ohlcv = indicators.iloc[[-1]].copy()
+        self.update_value_per_timestamp_tracking(trade, ohlcv)  # update total value tracking
 
         # if current profit is below 0, update drawdown / check SL
-        stoploss = self.strategy.stoploss(indicators, filled_ohlcv, trade)
-        stoploss = float(self.config["stoploss"]) if stoploss is None else stoploss
-        trade.stoploss = stoploss
-        stoploss_reached = self.check_stoploss_open_trade(trade, ohlcv, stoploss)
+        trade.stoploss = self.config['stoploss']
+        stoploss_reached = self.check_stoploss_open_trade(trade, ohlcv, self.config['stoploss'])
         roi_reached = self.check_roi_open_trade(trade, ohlcv)
         if stoploss_reached or roi_reached:
             return
 
-        signal = self.strategy.sell_signal(indicators, filled_ohlcv, trade)
-
-        if signal['sell'][0] == 1:
+        if ohlcv['sell'] == 1:
             self.close_trade(trade, reason="Sell signal", ohlcv=ohlcv)
 
-    def close_trade(self, trade: Trade, reason: str, ohlcv: Series) -> None:
+    def close_trade(self, trade: Trade, reason: str, ohlcv: dict) -> None:
         """
         :param trade: Trade model, trade to close
         :type trade: Trade

@@ -1,5 +1,8 @@
 from pathlib import Path
 from collections import defaultdict
+from pandas import DataFrame
+import pandas as pd
+import json
 
 
 def get_project_root():
@@ -34,3 +37,33 @@ def calculate_worth_of_open_trades(open_trades) -> float:
     for trade in open_trades:
         return_value += (trade.currency_amount * trade.current)
     return return_value
+
+
+def df_to_dict(df: DataFrame) -> dict:
+    """
+    Method turns dataframe into dictionary
+    :param df: dataframe with OHLCV data
+    :type df: DataFrame
+    :return: dictionary with OHLCV data
+    :rtype: dict
+    """
+    df_dict = {}
+    for row in df.iterrows():
+        df_json = row[1].to_dict()
+        df_dict[df_json['time']] = df_json
+    return df_dict
+
+def dict_to_df(data: dict, indicators: list) -> DataFrame:
+    """
+    Method turns dictionary into dataframe
+    :param data: json with OHLCV data
+    :type data: json
+    :return: dataframe with OHLCV data
+    :rtype: DataFrame
+    """
+    json_file = json.loads(data)
+    ohlcv_dict = {tick: list(json_file[tick].values()) for tick in json_file}
+    df = DataFrame.from_dict(ohlcv_dict, orient='index', columns=indicators)
+    df.index = pd.to_datetime(df.index, unit='ms')
+    df.sort_index(inplace=True)
+    return df
