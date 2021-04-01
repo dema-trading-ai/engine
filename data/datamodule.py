@@ -366,7 +366,7 @@ class DataModule:
             n_missing = len(diff)
 
             if n_nan > 0 or n_missing > 0:
-                print(f"[WARNING] Pair '{pair}' contains {n_nan} rows with Nan values\n"
+                print(f"[WARNING] Pair '{pair}' contains {n_nan} rows with NaN values\n"
                       f"[WARNING] and {n_missing} missing ticks")
 
             
