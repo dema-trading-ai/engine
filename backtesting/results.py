@@ -1,9 +1,8 @@
-
+# Libraries
 from dataclasses import dataclass
 from datetime import datetime
 from tabulate import tabulate
 import typing
-
 
 FONT_BOLD = "\033[1m"
 FONT_RESET = "\033[0m"
