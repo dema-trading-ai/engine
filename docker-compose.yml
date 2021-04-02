@@ -1,5 +1,13 @@
 version: '3'
 services:
   dema-engine:
-    build: .
-    image: dema-engine:alpha
+    image: dematrading/engine:stable
+    restart: unless-stopped
+    container_name: dema-engine
+    volumes:
+      - "./strategies:/usr/src/engine/strategies"
+      - "./config.json:/usr/src/engine/config.json"
+      - "./data/backtesting-data:/usr/src/engine/data/backtesting-data"
+    # default command to execute when 'docker-compose up' is ran.
+    command: >
+      -u main.py

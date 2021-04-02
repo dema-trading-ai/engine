@@ -1,6 +1,9 @@
+# Libraries
 import os
 import utils
 import sys
+
+# Files
 from backtesting.strategy import Strategy
 
 

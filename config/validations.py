@@ -17,6 +17,7 @@ def validate_config(config: dict):
     check_config_required_params(config)
     set_default_param_values(config)
     validate_single_currency_in_pairs(config)
+    validate_fee(config)
 
 
 def check_config_required_params(config_json: dict):
@@ -60,5 +61,32 @@ def validate_single_currency_in_pairs(config: dict):
 
             raise Exception("[ERROR] You can only use pairs that have the base currency you specified\n"
                             "[ERROR] e.g., if you specified 'USDT' as your currency, you cannot add 'BTC/EUR' as a pair")
+
+
+DEFAULT_FEE = 0.25
+MAX_FEE = 0.5
+MIN_FEE = 0.1
+
+def validate_fee(config):
+    try:
+        input_fee = float(config["fee"])
+    except ValueError:
+        print(
+            f"[INFO] The inputted fee value is invalid, the algorithm will use the default value of {DEFAULT_FEE}% fee")
+        return DEFAULT_FEE
+
+    if input_fee > MAX_FEE:
+        print(
+            f"[INFO] The inputted fee value is to big, the algorithm will use the default value of {MAX_FEE}% fee")
+        return MAX_FEE
+    elif input_fee < MIN_FEE:
+        print(
+            f"[INFO] The inputted fee value is to small, the algorithm will use the default value of {MIN_FEE}% fee")
+        return MIN_FEE
+
+    print(
+        f"[INFO] The algorithm will use the inputted value of {input_fee}% as fee percentage.")
+
+    config["fee"] = input_fee # make sure its a float
 
 
