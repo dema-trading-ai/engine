@@ -97,6 +97,8 @@ class DataModule:
                 df = self.read_data_from_datafile(pair)
             self.history_data[pair] = df
 
+        self.check_for_missing_ticks()
+
         if self.same_backtesting_period():
             self.backtesting_module.start_backtesting(self.history_data, self.backtesting_from, self.backtesting_to)
         else:
@@ -339,3 +341,31 @@ class DataModule:
         filename = self.generate_datafile_name(pair)
         filepath = os.path.join("data/backtesting-data/", self.config["exchange"], filename)
         os.remove(filepath)
+
+    def check_for_missing_ticks(self):
+        """Test whether any tick has a null/NaN value, and whether every
+        tick (time) exists"""
+
+        daterange = np.arange(self.backtesting_from,
+                              self.backtesting_to,
+                              self.timeframe_calc)
+
+        for pair, data in self.history_data.items():
+
+            # any NaN?
+            n_nan = data.isnull().any(axis="columns").sum()
+            
+            # missing dates?
+            index = data.index.to_numpy().astype(int)
+            diff = np.setdiff1d(daterange, index)
+            n_missing = len(diff)
+
+            if n_nan > 0:
+                print(f"[WARNING] Pair '{pair}' contains {n_nan} rows with NaN values")
+            if n_missing > 0:
+                print(f"[WARNING] Pair '{pair}' is missing {n_missing} ticks (rows)")
+
+            
+
+
+        
