@@ -1,13 +1,17 @@
+# Libraries
 import numpy as np
 from datetime import datetime, timedelta
 from pandas import DataFrame
 import pandas as pd
 import ccxt
 import re
-import json
+import rapidjson
 import sys
 from os import path
 import os
+
+# Files
+from utils import df_to_dict, dict_to_df
 
 # ======================================================================
 # DataModule is responsible for downloading OHLCV data, preparing it
@@ -30,7 +34,7 @@ class DataModule:
     backtesting_to = None
 
     history_data = {}
-    ohlcv_indicators = ['time', 'open', 'high', 'low', 'close', 'volume', 'pair', 'buy', 'sell']
+    ohlcv_indicators = ['time', 'open', 'high', 'low', 'close', 'volume', 'pair']
 
     def __init__(self, config, backtesting_module):
         print('[INFO] Starting DEMA Data-module...')
@@ -142,13 +146,10 @@ class DataModule:
             ohlcv_data += result
             start_date += np.around(asked_ticks * self.timeframe_calc)
 
-        # Create pandas DataFrame and add pair info
-        df = DataFrame(ohlcv_data, index=index, columns=self.ohlcv_indicators[:-3])
+        # Create pandas DataFrame and adds pair info
+        df = DataFrame(ohlcv_data, index=index, columns=self.ohlcv_indicators[:-1])
         df['pair'] = pair
-        df['buy'] = 0
-        df['sell'] = 0
-        df.index = pd.to_datetime(df.index, unit='ms')
-        df.sort_index(inplace=True)
+
         if save:
             print("[INFO] [%s] %s candles downloaded" % (pair, len(index)))
             self.save_dataframe(pair, df)
@@ -244,24 +245,23 @@ class DataModule:
         except FileNotFoundError:
             print("[ERROR] Backtesting datafile was not found.")
             return False
-        except:
+        except EnvironmentError:
             print("[ERROR] Something went wrong loading datafile", sys.exc_info()[0])
             return False
 
         # Convert json to dataframe
-        json_file = json.loads(data)
-        ohlcv_dict = {tick: list(json_file[tick].values()) for tick in json_file}
-        df = DataFrame.from_dict(ohlcv_dict, orient='index', columns=self.ohlcv_indicators)
-        df.index = pd.to_datetime(df.index, unit='ms')
-        df.sort_index(inplace=True)
+        df = dict_to_df(data, self.ohlcv_indicators)
 
-        # Check bactesting period
-        final_timestamp = self.backtesting_to - self.timeframe_calc   # correct final timestamp
-        df = self.check_backtesting_period(pair, df, final_timestamp)
-
+        # Find correct last tick timestamp
+        n_downloaded_candles = (self.backtesting_to - self.backtesting_from) / self.timeframe_calc
+        timesteps_forward = int(n_downloaded_candles) * self.timeframe_calc
+        final_timestamp = self.backtesting_from + (timesteps_forward - self.timeframe_calc) # last tick is excluded
+        
         # Return correct backtesting period
-        index_list = [pd.to_datetime(time).timestamp() * 1000 for time in list(df.index.values)]
-        df = df[index_list.index(self.backtesting_from):index_list.index(final_timestamp)+1]
+        df = self.check_backtesting_period(pair, df, final_timestamp)
+        begin_index = df.index.get_loc(self.backtesting_from)
+        end_index = df.index.get_loc(final_timestamp)
+        df = df[begin_index:end_index+1]
         self.save_dataframe(pair, df)
         return df
 
@@ -277,8 +277,9 @@ class DataModule:
         :rtype: DataFrame
         """
         # Get backtesting period
-        index_list = [pd.to_datetime(time).timestamp() * 1000 for time in list(df.index.values)]
-        df_begin, df_end = index_list[0], index_list[-1]
+        index_list = df.index.values
+        df_begin = index_list[0]
+        df_end = index_list[-1]
         extra_candles = 0
 
         # Check if previous data needs to be downloaded
@@ -289,7 +290,7 @@ class DataModule:
 
         # Check if new data needs to be downloaded
         if final_timestamp > df_end:
-            new_df = self.download_data_for_pair(pair, df_end, self.backtesting_to, False)
+            new_df = self.download_data_for_pair(pair, df_end + self.timeframe_calc, self.backtesting_to, False)
             df = pd.concat([df, new_df])
             extra_candles += len(new_df.index)
 
@@ -313,14 +314,11 @@ class DataModule:
         filepath = os.path.join("data/backtesting-data/", self.config["exchange"], filename)
 
         # Convert pandas dataframe to json
-        df_dict = {}
-        for row in df.iterrows():
-            df_json = row[1].to_dict()
-            df_dict[df_json['time']] = df_json
+        df_dict = df_to_dict(df)
 
         # Save json file
         with open(filepath, 'w') as outfile:
-            json.dump(df_dict, outfile, indent=4)
+            rapidjson.dump(df_dict, outfile, indent=4)
 
     def generate_datafile_name(self, pair: str) -> str:
         """
