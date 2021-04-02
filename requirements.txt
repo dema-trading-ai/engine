@@ -6,4 +6,7 @@ six==1.15.0
 ta-lib==0.4.19
 pytest==6.2.2
 tqdm==4.58.0
+
+# qtpylib==1.5.82
+
 python-rapidjson==1.0

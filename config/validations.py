@@ -86,20 +86,20 @@ def validate_fee(config):
         input_fee = float(config["fee"])
     except ValueError:
         print(
-            f"[INFO] The inputted value is invalid, the algorithm will use the default value of {DEFAULT_FEE}%")
+            f"[INFO] The inputted fee value is invalid, the algorithm will use the default value of {DEFAULT_FEE}% fee")
         return DEFAULT_FEE
 
     if input_fee > MAX_FEE:
         print(
-            f"[INFO] The inputted value is to big, the algorithm will use the default value of {MAX_FEE}%")
+            f"[INFO] The inputted fee value is to big, the algorithm will use the default value of {MAX_FEE}% fee")
         return MAX_FEE
     elif input_fee < MIN_FEE:
         print(
-            f"[INFO] The inputted value is to small, the algorithm will use the default value of {MIN_FEE}%")
+            f"[INFO] The inputted fee value is to small, the algorithm will use the default value of {MIN_FEE}% fee")
         return MIN_FEE
 
     print(
-        f"[INFO] The algorithm will use the inputted value of {input_fee}%")
+        f"[INFO] The algorithm will use the inputted value of {input_fee}% as fee percentage.")
 
     config["fee"] = input_fee # make sure its a float
 

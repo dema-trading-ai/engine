@@ -16,6 +16,7 @@ jobs:
           python-version: 3.x
       - run: |
           pip install pytest-cov
+          pip install pandas
           pytest --cov-report xml:cobertura.xml --cov=.
 
       - name: Run codacy-coverage-reporter

@@ -58,7 +58,7 @@ class BackTesting:
         pairs = list(data_dict.keys())
         ticks = list(data_dict[pairs[0]].keys())
 
-        for tick in ticks:
+        for tick in tqdm(ticks, desc='[INFO] Backtesting', total=len(ticks), ncols=75):
             for pair in pairs:
                 pair_dict = data_dict[pair][tick]
                 self.trading_module.tick(pair_dict)
@@ -79,7 +79,8 @@ class BackTesting:
         :rtype: dict
         """
         data_dict = {}
-        for pair in self.data.keys():
+        for pair in tqdm(self.data.keys(), desc="[INFO] Populating Indicators",
+                            total=len(self.data.keys()), ncols=75):
             df = self.data[pair]
             indicators = self.strategy.generate_indicators(df)
             indicators = self.strategy.buy_signal(indicators)
