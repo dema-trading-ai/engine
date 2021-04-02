@@ -1,6 +1,6 @@
+# Libraries
 import abc
 from pandas import DataFrame, Series
-from models.trade import Trade
 from typing import Optional
 
 # ======================================================================
@@ -9,6 +9,11 @@ from typing import Optional
 # © 2021 DemaTrading.ai
 # ======================================================================
 
+"""
+ATTENTION: 
+
+DO NOT USE THIS FILE TO IMPLEMENT YOUR STRATEGY. INSTEAD, USE my_strategy.py IN THE "strategies" FOLDER!
+"""
 
 class Strategy(abc.ABC):
     """
@@ -29,32 +34,26 @@ class Strategy(abc.ABC):
         return
 
     @abc.abstractmethod
-    def buy_signal(self, indicators: DataFrame, current_candle: DataFrame) -> DataFrame:
+    def buy_signal(self, indicators: DataFrame) -> DataFrame:
         """
         :param indicators: Dataframe filled with indicators from generate_indicators
         :type indicators: DataFrame
-        :param current_candle: Last candle filled with indicators from generate_indicators
-        :type current_candle: Series
         :return: Current candle filled with buy signals
-        :rtype: Series
+        :rtype: DataFrame
         """
         return
 
     @abc.abstractmethod
-    def sell_signal(self, indicators: DataFrame, current_candle: DataFrame, trade: Trade) -> DataFrame:
+    def sell_signal(self, indicators: DataFrame) -> DataFrame:
         """
         :param indicators: dataframe filled with indicators from generate_indicators
         :type indicators: Dataframe
-        :param current_candle: last candle filled with indicators from generate_indicators
-        :type current_candle: Series
-        :param trade: current open trade
-        :type trade: Trade model
-        :return: current candle filled with buy signals
-        :rtype: Series
+        :return: current candle filled with sell signals
+        :rtype: DataFrame
         """
         return
 
-    def stoploss(self, indicators: DataFrame, current_candle: DataFrame, trade: Trade) -> Optional[float]:
+    def stoploss(self, indicators: DataFrame) -> Optional[float]:
         """
         Override this method if you want to dynamically change the stoploss 
         for every trade. If not, the stoploss provided in config.json will
@@ -69,7 +68,7 @@ class Strategy(abc.ABC):
         :return: the stoploss
         :rtype: float
         """
-        return None
+        return
 
     @staticmethod
     def change_timeframe(candle_data: DataFrame, new_timeframe: str) -> DataFrame:

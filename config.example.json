@@ -4,9 +4,9 @@
   "max-open-trades": "3",
   "starting-capital": "1000",
   "backtesting-from": "2021-03-11",
-  "backtesting-to": "2021-03-15",
+  "backtesting-to": "2021-03-22",
   "backtesting-till-now": "False",
-  "stoploss": "-5.5",
+  "stoploss": "-20",
   "roi": {
     "0": 5,
     "60": 4,
@@ -14,11 +14,11 @@
   },
   "pairs": [
     "BTC/USDT",
-    "LTC/USDT",
-    "ETH/USDT"
+    "ETH/USDT",
+    "LTC/USDT"
   ],
   "currency": "USDT",
-  "fee": 0.25,
+  "fee": 0.125,
   "strategy-name": "MyStrategy",
   "strategies-folder": "strategies"
 }
