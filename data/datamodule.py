@@ -361,9 +361,10 @@ class DataModule:
             diff = np.setdiff1d(daterange, index)
             n_missing = len(diff)
 
-            if n_nan > 0 or n_missing > 0:
-                print(f"[WARNING] Pair '{pair}' contains {n_nan} rows with NaN values\n"
-                      f"[WARNING] and {n_missing} missing ticks")
+            if n_nan > 0:
+                print(f"[WARNING] Pair '{pair}' contains {n_nan} rows with NaN values")
+            if n_missing > 0:
+                print(f"[WARNING] Pair '{pair}' is missing {n_missing} ticks (rows)")
 
             
 
