@@ -1,11 +1,15 @@
+# Libraries
 from datetime import datetime, timedelta
-from backtesting.results import MainResults, OpenTradeResult, CoinInsights, show_signature
-import utils
-from models.trade import Trade
-from config.currencies import get_currency_symbol
 import typing
 from tqdm import tqdm
 import numpy as np
+
+# Files
+from backtesting.results import MainResults, OpenTradeResult, CoinInsights, show_signature
+from utils import calculate_worth_of_open_trades, default_empty_dict_dict
+from models.trade import Trade
+from config.currencies import get_currency_symbol
+from config.load_strategy import load_strategy_from_config
 
 # ======================================================================
 # BackTesting class is responsible for processing the ticks (ohlcv-data)
@@ -28,6 +32,7 @@ class BackTesting:
         self.config = config
         self.starting_capital = float(self.config['starting-capital'])
         self.currency_symbol = get_currency_symbol(config)
+        self.strategy = load_strategy_from_config(config)
 
     # This method is called by DataModule when all data is gathered from chosen exchange
     def start_backtesting(self, data: dict, backtesting_from: int, backtesting_to: int) -> None:
@@ -49,21 +54,40 @@ class BackTesting:
         self.backtesting_to = backtesting_to
         print('[INFO] Starting backtest...')
 
-        pairs = list(data.keys())
-        ticks = list(data[pairs[0]].index.values)
-        for i, tick in tqdm(enumerate(ticks), total=len(ticks), ncols=75, desc='[TEST] Backtesting'):
-            for pair in pairs:
-                # Get df for current pair and retrieve ohlcv for current tick
-                pair_df = data[pair]
-                ohlcv_tick = pair_df.loc[tick].copy()
+        data_dict = self.populate_signals()
+        pairs = list(data_dict.keys())
+        ticks = list(data_dict[pairs[0]].keys())
 
-                # Get passed ticks and pass to trading module
-                self.trading_module.tick(ohlcv_tick, pair_df[:i+1].copy())
+        for tick in ticks:
+            for pair in pairs:
+                pair_dict = data_dict[pair][tick]
+                self.trading_module.tick(pair_dict)
 
         open_trades = self.trading_module.open_trades
         closed_trades = self.trading_module.closed_trades
         budget = self.trading_module.budget
         self.generate_backtesting_result(open_trades, closed_trades, budget)
+
+    def populate_signals(self) -> dict:
+        """
+        Method used for populating indicators / signals
+        Populates indicators
+        Populates buy signal
+        Populates sell signal
+        Calculates stoploss
+        :return: dictionary with per pair an OHLCV dict
+        :rtype: dict
+        """
+        data_dict = {}
+        for pair in self.data.keys():
+            df = self.data[pair]
+            indicators = self.strategy.generate_indicators(df)
+            indicators = self.strategy.buy_signal(indicators)
+            indicators = self.strategy.sell_signal(indicators)
+            stoploss = self.strategy.stoploss(indicators)
+            self.config['stoploss'] = stoploss if stoploss else float(self.config['stoploss'])
+            data_dict[pair] = indicators.to_dict('index')
+        return data_dict
 
     # This method is called when backtesting method finished processing all OHLCV-data
     def generate_backtesting_result(self, open_trades: [Trade], closed_trades: [Trade], budget: float) -> None:
@@ -93,7 +117,7 @@ class BackTesting:
         show_signature()
 
     def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float) -> MainResults:
-        budget += utils.calculate_worth_of_open_trades(open_trades)
+        budget += calculate_worth_of_open_trades(open_trades)
         overall_profit = ((budget - self.starting_capital) /
                           self.starting_capital) * 100
         max_seen_drawdown = self.calculate_max_seen_drawdown()
@@ -173,7 +197,7 @@ class BackTesting:
                 'amount_of_trades': 0,
                 'max_drawdown': 0.0,
                 'avg_duration': [],
-                'sell_reasons': utils.default_empty_dict_dict()
+                'sell_reasons': default_empty_dict_dict()
             } for pair in self.data.keys()
         }
 
