@@ -278,15 +278,20 @@ class DataModule:
         df_begin = index_list[0]
         df_end = index_list[-1]
         extra_candles = 0
+        notify = True   # Used for printing message once (improved readibility)
 
         # Check if previous data needs to be downloaded
         if self.backtesting_from < df_begin:
+            print("[INFO] Incomplete datafile. Downloading extra candle(s)...")
+            notify = False
             prev_df = self.download_data_for_pair(pair, self.backtesting_from, df_begin, False)
             df = pd.concat([prev_df, df])
             extra_candles += len(prev_df.index)
 
         # Check if new data needs to be downloaded
         if final_timestamp > df_end:
+            if notify:
+                print("[INFO] Incomplete datafile. Downloading extra candle(s)...")
             new_df = self.download_data_for_pair(pair, df_end + self.timeframe_calc, self.backtesting_to, False)
             df = pd.concat([df, new_df])
             extra_candles += len(new_df.index)
