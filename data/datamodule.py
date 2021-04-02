@@ -347,11 +347,9 @@ class DataModule:
         """Test whether any tick has a null/NaN value, and whether every
         tick (time) exists"""
 
-        # all the dates that the data should have, times one million
-        # because of the date conventions of pandas
-        daterange = np.arange(self.backtesting_from * 1000000,
-                              self.backtesting_to * 1000000,
-                              self.timeframe_calc * 1000000)
+        daterange = np.arange(self.backtesting_from,
+                              self.backtesting_to,
+                              self.timeframe_calc)
 
         for pair, data in self.history_data.items():
 
