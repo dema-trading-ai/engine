@@ -1,6 +1,7 @@
+# Libraries
 import abc
 from pandas import DataFrame, Series
-from models.trade import Trade
+from typing import Optional
 
 # ======================================================================
 # Strategy-class is responsible for populating indicators / signals
@@ -8,6 +9,11 @@ from models.trade import Trade
 # © 2021 DemaTrading.ai
 # ======================================================================
 
+"""
+ATTENTION: 
+
+DO NOT USE THIS FILE TO IMPLEMENT YOUR STRATEGY. INSTEAD, USE my_strategy.py IN THE "strategies" FOLDER!
+"""
 
 class Strategy(abc.ABC):
     """
@@ -18,43 +24,54 @@ class Strategy(abc.ABC):
     min_candles = 21
 
     @abc.abstractmethod
-    def generate_indicators(self, dataframe: DataFrame) -> DataFrame:
+    def generate_indicators(self, candle_data: DataFrame) -> DataFrame:
         """
-        :param dataframe: All passed candles (current candle included!) with OHLCV data
-        :type dataframe: DataFrame
+        :param candle_data: All passed candles (current candle included!) with OHLCV data
+        :type candle_data: DataFrame
         :return: Dataframe filled with indicator-data
         :rtype: DataFrame
         """
         return
 
     @abc.abstractmethod
-    def buy_signal(self, dataframe: DataFrame, current_candle: DataFrame) -> DataFrame:
+    def buy_signal(self, indicators: DataFrame) -> DataFrame:
         """
-        :param dataframe: Dataframe filled with indicators from generate_indicators
+        :param indicators: Dataframe filled with indicators from generate_indicators
         :type indicators: DataFrame
-        :param current_candle: Last candle filled with indicators from generate_indicators
-        :type current_candle: Series
         :return: Current candle filled with buy signals
-        :rtype: Series
+        :rtype: DataFrame
         """
         return
 
     @abc.abstractmethod
-    def sell_signal(self, dataframe: DataFrame, current_candle: DataFrame, trade: Trade) -> DataFrame:
+    def sell_signal(self, indicators: DataFrame) -> DataFrame:
         """
-        :param dataframe: Dataframe filled with indicators from generate_indicators
-        :type indicators: DataFrame
-        :param current_candle: Last candle filled with indicators from generate_indicators
+        :param indicators: dataframe filled with indicators from generate_indicators
+        :type indicators: Dataframe
+        :return: current candle filled with sell signals
+        :rtype: DataFrame
+        """
+        return
+
+    def stoploss(self, indicators: DataFrame) -> Optional[float]:
+        """
+        Override this method if you want to dynamically change the stoploss 
+        for every trade. If not, the stoploss provided in config.json will
+        be returned.
+
+        :param indicators: dataframe filled with indicators from generate_indicators
+        :type indicators: Dataframe
+        :param current_candle: last candle filled with indicators from generate_indicators
         :type current_candle: Series
-        :param trade: Current open trade
+        :param trade: current open trade
         :type trade: Trade model
-        :return: Current candle filled with buy signals
-        :rtype: Series
+        :return: the stoploss
+        :rtype: float
         """
         return
 
     @staticmethod
-    def change_timeframe(dataframe: DataFrame, new_timeframe: str) -> DataFrame:
+    def change_timeframe(candle_data: DataFrame, new_timeframe: str) -> DataFrame:
         """
         ### WORK IN PROGRESS ###
 
@@ -64,11 +81,11 @@ class Strategy(abc.ABC):
             - 'timeframe' in config.json needs to be smaller than new_timeframe to work correctly.
             - Values for new_timeframe can be found here:
             https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#offset-aliases
-        :param dataframe: All passed candles with OHLCV data
-        :type indicators: DataFrame
+        :param candle_data: All passed candles with OHLCV data
+        :type candle_data: DataFrame
         :param timeframe: New timeframe configuration
         :type timeframe: string
         :return: Dataframe in new timeframe
         :rtype: DataFrame
         """
-        return dataframe.resample(new_timeframe, origin='start', label='right').ohlc()
+        return candle_data.resample(new_timeframe, origin='start', label='right').ohlc()

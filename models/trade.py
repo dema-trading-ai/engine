@@ -1,4 +1,7 @@
+# Libraries
 from pandas import Series
+from datetime import datetime
+
 
 # ======================================================================
 # Trade class is used by TradingModule for registering trades and tracking
@@ -6,7 +9,6 @@ from pandas import Series
 #
 # © 2021 DemaTrading.AI
 # ======================================================================
-from datetime import datetime
 
 
 class Trade:
@@ -22,6 +24,7 @@ class Trade:
     sell_reason = None
     opened_at = 0.0
     closed_at = 0.0
+    stoploss = 0.0
 
     def __init__(self, ohlcv: Series, trade_amount: float, date: datetime):
         self.status = 'open'
