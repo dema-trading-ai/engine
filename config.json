@@ -18,7 +18,7 @@
     "ETH/USDT"
   ],
   "currency": "USDT",
-  "fee": 0.125,
+  "fee": 0.25,
   "strategy-name": "MyStrategy",
   "strategies-folder": "strategies"
 }
