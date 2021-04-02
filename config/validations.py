@@ -25,11 +25,11 @@ def assert_type(config, spec):
     param_value = config.get(spec["name"])
     t = spec["type"]
     pt = spec_type_to_python_type(t)
-    good = type(param_value) is pt
+    good = isinstance(param_value, pt)
     if t == "datetime":
         # TODO implement datetime validation
         good = True
-    elif t == "number" and type(param_value) is int:
+    elif t == "number" and isinstance(param_value, int):
         # int also count as number / not only float allowed
         good = True
     
