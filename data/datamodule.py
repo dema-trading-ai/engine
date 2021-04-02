@@ -1,6 +1,5 @@
 # Libraries
 import numpy as np
-from datetime import datetime, timedelta
 from pandas import DataFrame
 import pandas as pd
 import ccxt
