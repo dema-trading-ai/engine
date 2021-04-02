@@ -5,7 +5,9 @@ services:
     restart: unless-stopped
     container_name: dema-engine
     volumes:
-      - ".:/usr/src/engine"
+      - "./strategies:/usr/src/engine/strategies"
+      - "./config.json:/usr/src/engine/config.json"
+      - "./data/backtesting-data:/usr/src/engine/data/backtesting-data"
     # default command to execute when 'docker-compose up' is ran.
     command: >
       -u main.py
