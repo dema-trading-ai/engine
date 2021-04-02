@@ -1,4 +1,7 @@
+# Libraries
 from pandas import Series
+from datetime import datetime
+
 
 # ======================================================================
 # Trade class is used by TradingModule for registering trades and tracking
@@ -6,7 +9,6 @@ from pandas import Series
 #
 # © 2021 DemaTrading.AI
 # ======================================================================
-from datetime import datetime
 
 
 class Trade:

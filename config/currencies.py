@@ -1,5 +1,3 @@
-
-
 def get_currency_symbol(config):
     return get_currency_symbol_from_code(config["currency"])
 
