@@ -16,7 +16,7 @@
     "BTC/USDT"
   ],
   "currency": "USDT",
-  "fee": 0.15,
+  "fee": 0.25,
   "strategy-name": "MyStrategy",
   "strategies-folder": "strategies"
 }
