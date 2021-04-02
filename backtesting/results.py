@@ -10,7 +10,7 @@ FONT_RESET = "\033[0m"
 
 def show_signature():
     print("======================================================================")
-    print("%s|  DEMA BACKTESTING ENGINE IS SUBJECTED TO THE GNU AGPL-3.0 License %s" %
+    print("%s|  DemaTrading.ai BACKTESTING ENGINE IS SUBJECTED TO THE GNU AGPL-3.0 License %s" %
           (FONT_BOLD, FONT_RESET))
     print("%s|  Copyright © 2021 - DemaTrading.ai%s" %
           (FONT_BOLD, FONT_RESET))
@@ -60,7 +60,7 @@ class MainResults:
               round(self.max_seen_drawdown, 2) + '\t%')
         print("| Seen drawdown from: \t\t%s" % self.drawdown_from)
         print("| Seen drawdown to: \t\t%s" % self.drawdown_to)
-        print("| Total fee paid: \t\t%s" % self.total_fee_amount)
+        print("| Total fee paid: \t\t%s" % round(self.total_fee_amount, 2) + "\t" + currency_symbol)
 
 
 @dataclass
