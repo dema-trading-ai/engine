@@ -44,7 +44,7 @@ class TradingModule:
         self.budget = float(self.config['starting-capital'])
         self.max_open_trades = int(self.config['max-open-trades'])
         self.fee = self.verify_fee(self.config['fee']) / 100
-        self.min_candles = self.config['min_candles']
+        self.startup_count = self.config['startup_count']
 
     def verify_fee(self, fee):
         try:
@@ -98,7 +98,7 @@ class TradingModule:
         indicators = self.strategy.generate_indicators(data)
         filled_ohlcv = indicators.iloc[[-1]].copy()
 
-        if len(indicators.index) > self.min_candles:
+        if len(indicators.index) > self.startup_count:
             signal = self.strategy.buy_signal(indicators, filled_ohlcv)
             if signal['buy'][0] == 1:
                 self.open_trade(ohlcv)
@@ -130,7 +130,7 @@ class TradingModule:
         indicators = self.strategy.generate_indicators(data)
         filled_ohlcv = indicators.iloc[[-1]].copy()
 
-        if len(indicators.index) > self.min_candles:
+        if len(indicators.index) > self.startup_count:
             signal = self.strategy.sell_signal(indicators, filled_ohlcv, trade)
             if signal['sell'][0] == 1:
                 self.close_trade(trade, reason="Sell signal", ohlcv=ohlcv)

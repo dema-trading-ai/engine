@@ -4,7 +4,7 @@ REQUIRED_PARAMS = [
     'fee',
     'starting-capital',
     'strategy-name',
-    'min_candles'
+    'startup_count'
 ]
 
 DEFAULT_PARAMS = {
@@ -18,7 +18,7 @@ def validate_config(config: dict):
     check_config_required_params(config)
     set_default_param_values(config)
     validate_single_currency_in_pairs(config)
-    check_min_candles(config)
+    check_startup_count(config)
 
 
 def check_config_required_params(config_json: dict):
@@ -64,14 +64,16 @@ def validate_single_currency_in_pairs(config: dict):
                             "[ERROR] e.g., if you specified 'USDT' as your currency, you cannot add 'BTC/EUR' as a pair")
 
 
-def check_min_candles(config: dict):
+def check_startup_count(config: dict) -> None:
     """
-    Check whether the default value of 21 is set for min_candles. Mostly a placeholder for until we find a way to automatically generate the startup time given the indicators chosen.
+    Check whether the default value of 21 is set for startup_count. Mostly a placeholder for until we find a way to automatically generate the startup time given the indicators chosen.
     :param config: json configuration
     :type config: dict
     """
-    min_candles = config['min_candles']
-    if type(min_candles) != int:
-        raise TypeError("min_candles must be an integer.")
-    if min_candles != 21:
-        print("[WARNING] With the current implementation, we cannot guarantee accurate signals when the min_candles value is changed from its default of 21.\n[WARNING] Change this value at your own risks.")
+    startup_count = config['startup_count']
+
+    if type(startup_count) != int:
+        raise TypeError("startup_count must be an integer.")
+
+    if startup_count != 200:
+        print("[WARNING] With the current implementation, we cannot guarantee accurate signals when the startup_count value is changed from its default of 200.\n[WARNING] Change this value at your own risks.")
