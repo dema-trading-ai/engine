@@ -43,10 +43,23 @@ class Trade:
         self.close = self.current
         self.closed_at = date
 
-    def update_stats(self, ohlcv: Series):
+    def update_stats(self, ohlcv: Series) -> None:
         """
         Updates states according to latest data.
         """
         self.current = ohlcv['close']
         self.profit_percentage = ((ohlcv['close'] - self.open) / self.open) * 100
+        self.profit_dollar = (self.currency_amount * self.current) - (self.currency_amount * self.open)
+
+    def update_current_for_sl(self, stoploss: float) -> None:
+        """
+        Method fixes issue when closing trade based on stoploss
+        :param stoploss: stoploss for this trade
+        :type stoploss: float
+        :return: None
+        :rtype: None
+        """
+        new_price = self.open - (self.open * (abs(stoploss) / 100))
+        self.current = new_price
+        self.profit_percentage = ((self.current - self.open) / self.open) * 100
         self.profit_dollar = (self.currency_amount * self.current) - (self.currency_amount * self.open)

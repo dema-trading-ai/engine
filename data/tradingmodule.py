@@ -184,6 +184,7 @@ class TradingModule:
             if trade.max_drawdown is None or trade.max_drawdown > trade.profit_percentage:
                 trade.max_drawdown = trade.profit_percentage
             if trade.profit_percentage < stoploss:
+                trade.update_current_for_sl(stoploss)
                 self.close_trade(trade, reason="Stoploss", ohlcv=ohlcv)
                 return True
         return False
