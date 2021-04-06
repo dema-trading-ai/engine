@@ -363,7 +363,7 @@ class DataModule:
             n_nan = data.isnull().any(axis="columns").sum()
             
             # missing dates?
-            index = data.index.to_numpy().astype(int)
+            index = data.index.to_numpy().astype(np.int64)
             diff = np.setdiff1d(daterange, index)
             n_missing = len(diff)
 
@@ -372,7 +372,3 @@ class DataModule:
             if n_missing > 0:
                 print(f"[WARNING] Pair '{pair}' is missing {n_missing} ticks (rows)")
 
-            
-
-
-        
