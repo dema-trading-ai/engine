@@ -148,6 +148,8 @@ class DataModule:
         # Create pandas DataFrame and adds pair info
         df = DataFrame(ohlcv_data, index=index, columns=self.ohlcv_indicators[:-1])
         df['pair'] = pair
+        df['buy'] = 0
+        df['sell'] = 0
 
         if save:
             print("[INFO] [%s] %s candles downloaded" % (pair, len(index)))
