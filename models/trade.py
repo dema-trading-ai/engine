@@ -88,7 +88,8 @@ class Trade:
         elif self.sl_type == 'trailing':
             self.sl_dict = self.trailing_stoploss(data_df)
         elif self.sl_type == 'dynamic':
-            self.sl_dict = strategy.stoploss(data_df)
+            dynamic_df = strategy.stoploss(data_df)
+            self.sl_dict = dynamic_df.to_dict('index')
 
     def update_max_drawdown(self) -> None:
         """

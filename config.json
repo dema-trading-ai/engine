@@ -20,6 +20,6 @@
   ],
   "currency": "USDT",
   "fee": 0.25,
-  "strategy-name": "MyStrategy",
+  "strategy-name": "MyStrategyAdvanced",
   "strategies-folder": "strategies"
 }
