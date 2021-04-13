@@ -54,41 +54,39 @@ class BackTesting:
         self.backtesting_to = backtesting_to
         print('[INFO] Starting backtest...')
 
-        data_dict = self.populate_signals()
+        data_df, data_dict = self.populate_signals()
         pairs = list(data_dict.keys())
         ticks = list(data_dict[pairs[0]].keys())
 
         for tick in tqdm(ticks, desc='[INFO] Backtesting', total=len(ticks), ncols=75):
             for pair in pairs:
-                pair_dict = data_dict[pair][tick]
-                self.trading_module.tick(pair_dict)
+                tick_dict = data_dict[pair][tick]
+                self.trading_module.tick(tick_dict, data_df[pair])
 
         open_trades = self.trading_module.open_trades
         closed_trades = self.trading_module.closed_trades
         budget = self.trading_module.budget
         self.generate_backtesting_result(open_trades, closed_trades, budget)
 
-    def populate_signals(self) -> dict:
+    def populate_signals(self) -> [dict, dict]:
         """
         Method used for populating indicators / signals
         Populates indicators
         Populates buy signal
         Populates sell signal
-        Calculates stoploss
-        :return: dictionary with per pair an OHLCV dict
-        :rtype: dict
+        :return: list of dictionaries, either OHLCV dict or OHLCV dataframe per pair
+        :rtype: list
         """
-        data_dict = {}
+        data_df, data_dict = {}, {}
         for pair in tqdm(self.data.keys(), desc="[INFO] Populating Indicators",
                             total=len(self.data.keys()), ncols=75):
             df = self.data[pair]
             indicators = self.strategy.generate_indicators(df)
             indicators = self.strategy.buy_signal(indicators)
             indicators = self.strategy.sell_signal(indicators)
-            stoploss = self.strategy.stoploss(indicators)
-            self.config['stoploss'] = stoploss if stoploss else float(self.config['stoploss'])
+            data_df[pair] = indicators
             data_dict[pair] = indicators.to_dict('index')
-        return data_dict
+        return [data_df, data_dict]
 
     # This method is called when backtesting method finished processing all OHLCV-data
     def generate_backtesting_result(self, open_trades: [Trade], closed_trades: [Trade], budget: float) -> None:

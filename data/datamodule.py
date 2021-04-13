@@ -10,7 +10,7 @@ from os import path
 import os
 
 # Files
-from utils import df_to_dict, dict_to_df
+from utils import df_to_dict, dict_to_df, get_ohlcv_indicators
 
 # ======================================================================
 # DataModule is responsible for downloading OHLCV data, preparing it
@@ -33,7 +33,6 @@ class DataModule:
     backtesting_to = None
 
     history_data = {}
-    ohlcv_indicators = ['time', 'open', 'high', 'low', 'close', 'volume', 'pair']
 
     def __init__(self, config, backtesting_module):
         print('[INFO] Starting DEMA Data-module...')
@@ -145,11 +144,10 @@ class DataModule:
             ohlcv_data += result
             start_date += np.around(asked_ticks * self.timeframe_calc)
 
-        # Create pandas DataFrame and adds pair info
-        df = DataFrame(ohlcv_data, index=index, columns=self.ohlcv_indicators[:-1])
+        # Create pandas DataFrame and adds extra info
+        df = DataFrame(ohlcv_data, index=index, columns=get_ohlcv_indicators()[:-4])
         df['pair'] = pair
-        df['buy'] = 0
-        df['sell'] = 0
+        df['buy'], df['sell'], df['stoploss'] = 0, 0, np.NaN    # default values
 
         if save:
             print("[INFO] [%s] %s candles downloaded" % (pair, len(index)))
@@ -251,7 +249,7 @@ class DataModule:
             return False
 
         # Convert json to dataframe
-        df = dict_to_df(data, self.ohlcv_indicators)
+        df = dict_to_df(data)
 
         # Find correct last tick timestamp
         n_downloaded_candles = (self.backtesting_to - self.backtesting_from) / self.timeframe_calc
@@ -358,17 +356,11 @@ class DataModule:
                               self.timeframe_calc)
 
         for pair, data in self.history_data.items():
-
-            # any NaN?
-            n_nan = data.isnull().any(axis="columns").sum()
-            
-            # missing dates?
+            # Check if dates are missing dates
             index = data.index.to_numpy().astype(np.int64)
             diff = np.setdiff1d(daterange, index)
             n_missing = len(diff)
 
-            if n_nan > 0:
-                print(f"[WARNING] Pair '{pair}' contains {n_nan} rows with NaN values")
             if n_missing > 0:
                 print(f"[WARNING] Pair '{pair}' is missing {n_missing} ticks (rows)")
 

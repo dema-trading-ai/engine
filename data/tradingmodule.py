@@ -1,4 +1,5 @@
 # Libraries
+from pandas import DataFrame
 from datetime import datetime
 
 # Files
@@ -6,6 +7,7 @@ from config.load_strategy import load_strategy_from_config
 from backtesting.strategy import Strategy
 from models.trade import Trade
 from utils import calculate_worth_of_open_trades
+
 
 
 # ======================================================================
@@ -41,12 +43,16 @@ class TradingModule:
         self.strategy = load_strategy_from_config(config)
         self.budget = float(self.config['starting-capital'])
         self.max_open_trades = int(self.config['max-open-trades'])
-        self.fee = config["fee"] / 100
+        self.fee = config['fee'] / 100
+        self.sl_type = config['stoploss-type']
+        self.sl_perc = float(config['stoploss'])
 
-    def tick(self, ohlcv: dict) -> None:
+    def tick(self, ohlcv: dict, data_df: DataFrame) -> None:
         """
         :param ohlcv: dictionary with OHLCV data for current tick
         :type ohlcv: dict
+        :param data_df: dataframe containing OHLCV data of current pair
+        :type data_df: DataFrame
         :return: None
         :rtype: None
         """
@@ -55,19 +61,21 @@ class TradingModule:
             trade.update_stats(ohlcv)
             self.open_trade_tick(ohlcv, trade)
         else:
-            self.no_trade_tick(ohlcv)
+            self.no_trade_tick(ohlcv, data_df)
         self.update_budget_per_timestamp_tracking(ohlcv)
 
-    def no_trade_tick(self, ohlcv: dict) -> None:
+    def no_trade_tick(self, ohlcv: dict, data_df: DataFrame) -> None:
         """
         Method is called when specified pair has no open trades
         :param ohlcv: dictionary with OHLCV data for current tick
         :type ohlcv: dict
+        :param data_df: dataframe containing OHLCV data of current pair
+        :type data_df: DataFrame
         :return: None
         :rtype: None
         """
         if ohlcv['buy'] == 1:
-            self.open_trade(ohlcv)
+            self.open_trade(ohlcv, data_df)
 
     def open_trade_tick(self, ohlcv: dict, trade: Trade) -> None:
         """
@@ -82,11 +90,11 @@ class TradingModule:
         :rtype: None
         """
         self.update_value_per_timestamp_tracking(trade, ohlcv)  # update total value tracking
+        trade.update_max_drawdown()
 
-        # if current profit is below 0, update drawdown / check SL
-        trade.stoploss = self.config['stoploss']
-        stoploss_reached = self.check_stoploss_open_trade(trade, ohlcv, self.config['stoploss'])
+        stoploss_reached = self.check_stoploss_open_trade(trade, ohlcv)
         roi_reached = self.check_roi_open_trade(trade, ohlcv)
+
         if stoploss_reached or roi_reached:
             return  # trade is closed by stoploss or ROI
         elif ohlcv['sell'] == 1:
@@ -114,11 +122,13 @@ class TradingModule:
         self.closed_trades.append(trade)
         self.update_drawdowns_closed_trade(trade)
 
-    def open_trade(self, ohlcv: dict) -> None:
+    def open_trade(self, ohlcv: dict, data_df: DataFrame) -> None:
         """
         Method opens a trade for pair in ohlcv
         :param ohlcv: dictionary with OHLCV data for current tick
         :type ohlcv: dict
+        :param data_df: dataframe containing OHLCV data of current pair
+        :type data_df: DataFrame
         :return: None
         :rtype: None
         """
@@ -134,8 +144,11 @@ class TradingModule:
         fee_amount = spend_amount * self.fee
         spend_amount -= fee_amount
         self.total_fee_amount += fee_amount
+        
+        new_trade = \
+            Trade(ohlcv, spend_amount, date, self.sl_type, self.sl_perc)
+        new_trade.configure_stoploss(data_df, self.strategy)
 
-        new_trade = Trade(ohlcv, spend_amount, date)
         self.budget -= spend_amount
         self.open_trades.append(new_trade)
         self.update_value_per_timestamp_tracking(new_trade, ohlcv)
@@ -171,22 +184,19 @@ class TradingModule:
                 roi = value
         return roi
 
-    def check_stoploss_open_trade(self, trade: Trade, ohlcv: dict, stoploss: float) -> bool:
+    def check_stoploss_open_trade(self, trade: Trade, ohlcv: dict) -> bool:
         """
         :param trade: Trade model to check
         :type trade: Trade model
         :param ohlcv: dictionary with OHLCV data for current tick
         :type ohlcv: dict
-        :return: return whether to close the trade based on Stop Loss
+        :return: return whether the trade is closed or not
         :rtype: boolean
         """
-        if trade.profit_percentage < 0:
-            if trade.max_drawdown is None or trade.max_drawdown > trade.profit_percentage:
-                trade.max_drawdown = trade.profit_percentage
-            if trade.profit_percentage < stoploss:
-                trade.update_current_for_sl(stoploss)
-                self.close_trade(trade, reason="Stoploss", ohlcv=ohlcv)
-                return True
+        sl_signal = trade.check_for_sl(ohlcv)
+        if sl_signal:
+            self.close_trade(trade, reason="Stoploss", ohlcv=ohlcv)
+            return True
         return False
 
     def find_open_trade(self, pair: str) -> Trade:
@@ -214,11 +224,11 @@ class TradingModule:
         """
         current_total_price = (trade.currency_amount * ohlcv['low'])
         try:
-            self.open_order_value_per_timestamp[ohlcv['time']
-                                                ] += current_total_price
+            self.open_order_value_per_timestamp[ohlcv['time']] += \
+                current_total_price
         except KeyError:
-            self.open_order_value_per_timestamp[ohlcv['time']
-                                                ] = current_total_price
+            self.open_order_value_per_timestamp[ohlcv['time']] = \
+                current_total_price
 
     def update_budget_per_timestamp_tracking(self, ohlcv: dict) -> None:
         """

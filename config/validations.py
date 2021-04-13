@@ -1,5 +1,6 @@
 REQUIRED_PARAMS = [
     'stoploss',
+    'stoploss-type',
     'max-open-trades',
     'fee',
     'starting-capital',
