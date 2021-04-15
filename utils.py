@@ -4,6 +4,8 @@ from collections import defaultdict
 from pandas import DataFrame
 import pandas as pd
 import rapidjson
+from datetime import datetime
+import plotly.graph_objects as go
 
 CURRENT_VERSION = "v0.3.1"
 
@@ -66,3 +68,36 @@ def dict_to_df(data: dict, indicators: list) -> DataFrame:
     df = pd.DataFrame.from_dict(json_file, orient='index', columns=indicators)
     df.index = df.index.map(int)
     return df
+
+
+def plot_dataframe(pair: str, df: DataFrame, indicator: str):
+    """
+    Plot dataframe of a certain coin pair with given indicator
+    :param pair: Certain coin pair in "AAA/BBB" format
+    :type pair: string
+    :param df: Downloaded data to write to the datafile
+    :type df: DataFrame
+    :param indicator: certain indicator to plot
+    :type indicator: string
+    :return: None
+    :rtype: None
+    """
+
+    dates = [datetime.fromtimestamp(time / 1000) for time in df["time"]]
+
+    fig = go.Figure(data=go.Ohlc(x=dates,
+                                 open=df["open"],
+                                 high=df["high"],
+                                 low=df["low"],
+                                 close=df["close"],
+                                 name='OHLC'))
+
+    fig.add_trace(go.Scatter(x=dates, y=df[indicator], name=indicator, line=dict(color='royalblue', width=2, dash='dot')))
+
+    fig.update_layout(
+        title='OHLC Chart',
+        yaxis_title=pair)
+
+    fig.show()
+
+

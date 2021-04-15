@@ -2,6 +2,7 @@
 from pandas import DataFrame, Series
 from backtesting.strategy import Strategy
 from models.trade import Trade
+from utils import plot_dataframe
 
 # Optional Imports
 import talib.abstract as ta
@@ -14,10 +15,12 @@ class MyStrategy(Strategy):
 
     min_candles = 21
 
-    def generate_indicators(self, dataframe: DataFrame) -> DataFrame:
+    def generate_indicators(self, pair: str, dataframe: DataFrame) -> DataFrame:
         """
         :param dataframe: All passed candles (current candle included!) with OHLCV data
         :type dataframe: DataFrame
+        :param pair: Certain coin pair in "AAA/BBB" format
+        :type pair: string
         :return: Dataframe filled with indicator-data
         :rtype: DataFrame
         """
@@ -27,6 +30,9 @@ class MyStrategy(Strategy):
         # EMA - Exponential Moving Average
         dataframe['ema5'] = ta.EMA(dataframe, timeperiod=5)
         dataframe['ema21'] = ta.EMA(dataframe, timeperiod=21)
+
+        indicator_plot = 'ema5'
+        plot_dataframe(pair, dataframe, indicator_plot)
 
         return dataframe
 

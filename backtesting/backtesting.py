@@ -82,7 +82,7 @@ class BackTesting:
         for pair in tqdm(self.data.keys(), desc="[INFO] Populating Indicators",
                             total=len(self.data.keys()), ncols=75):
             df = self.data[pair]
-            indicators = self.strategy.generate_indicators(df)
+            indicators = self.strategy.generate_indicators(pair, df)
             indicators = self.strategy.buy_signal(indicators)
             indicators = self.strategy.sell_signal(indicators)
             stoploss = self.strategy.stoploss(indicators)
