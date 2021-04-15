@@ -6,7 +6,7 @@
   "backtesting-from": "2021-03-11",
   "backtesting-to": "2021-03-15",
   "backtesting-till-now": false,
-  "stoploss": 0.5,
+  "stoploss": -0.5,
   "roi": {
     "0": 5,
     "60": 4,
