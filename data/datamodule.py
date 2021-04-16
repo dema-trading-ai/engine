@@ -148,6 +148,8 @@ class DataModule:
         # Create pandas DataFrame and adds pair info
         df = DataFrame(ohlcv_data, index=index, columns=self.ohlcv_indicators[:-1])
         df['pair'] = pair
+        df['buy'] = 0
+        df['sell'] = 0
 
         if save:
             print("[INFO] [%s] %s candles downloaded" % (pair, len(index)))
@@ -186,10 +188,10 @@ class DataModule:
         test_till_now = self.config['backtesting-till-now']
 
         self.backtesting_from = self.exchange.parse8601("%sT00:00:00Z" % test_from)
-        if test_till_now == 'True':
+        if test_till_now:
             print('[INFO] Gathering data from %s until now' % test_from)
             self.backtesting_to = self.exchange.milliseconds()
-        elif test_till_now == 'False':
+        elif not test_till_now:
             print('[INFO] Gathering data from %s until %s' % (test_from, test_to))
             self.backtesting_to = self.exchange.parse8601("%sT00:00:00Z" % test_to)
         else:
@@ -361,7 +363,7 @@ class DataModule:
             n_nan = data.isnull().any(axis="columns").sum()
             
             # missing dates?
-            index = data.index.to_numpy().astype(int)
+            index = data.index.to_numpy().astype(np.int64)
             diff = np.setdiff1d(daterange, index)
             n_missing = len(diff)
 
@@ -370,7 +372,3 @@ class DataModule:
             if n_missing > 0:
                 print(f"[WARNING] Pair '{pair}' is missing {n_missing} ticks (rows)")
 
-            
-
-
-        
