@@ -1,25 +1,25 @@
 {
   "exchange": "binance",
-  "timeframe": "5m",
+  "timeframe": "15m",
   "max-open-trades": "3",
-  "starting-capital": "1000",
-  "backtesting-from": "2021-03-11",
-  "backtesting-to": "2021-03-15",
+  "starting-capital": "100",
+  "backtesting-from": "2021-01-01",
+  "backtesting-to": "2021-03-20",
   "backtesting-till-now": "False",
   "stoploss-type": "standard",
-  "stoploss": "-5.5",
+  "stoploss": "-10",
   "roi": {
-    "0": 5,
-    "60": 4,
-    "120": 3
+    "0": 30,
+    "120":25,
+    "240":20
   },
   "pairs": [
-    "BTC/USDT",
-    "LTC/USDT",
-    "ETH/USDT"
+   "BTC/USDT",
+   "ETH/USDT",
+   "LTC/USDT"
   ],
-  "currency": "USDT",
+  "currency":"USDT",
   "fee": 0.25,
-  "strategy-name": "MyStrategyAdvanced",
+  "strategy-name": "MyStrategy",
   "strategies-folder": "strategies"
 }

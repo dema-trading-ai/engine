@@ -114,7 +114,7 @@ class Trade:
         candle = self.sl_dict[timestamp]
         if candle['stoploss'] == 1:
             if self.sl_type == 'standard':
-                self.current = self.open - (self.open * (abs(self.stoploss_perc) / 100))
+                self.current = self.open - (self.open * (abs(self.sl_perc) / 100))
             elif self.sl_type == 'trailing':
                 self.current = candle['trailing_value']
             elif self.sl_type == 'dynamic':
