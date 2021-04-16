@@ -188,10 +188,10 @@ class DataModule:
         test_till_now = self.config['backtesting-till-now']
 
         self.backtesting_from = self.exchange.parse8601("%sT00:00:00Z" % test_from)
-        if test_till_now == 'True':
+        if test_till_now:
             print('[INFO] Gathering data from %s until now' % test_from)
             self.backtesting_to = self.exchange.milliseconds()
-        elif test_till_now == 'False':
+        elif not test_till_now:
             print('[INFO] Gathering data from %s until %s' % (test_from, test_to))
             self.backtesting_to = self.exchange.parse8601("%sT00:00:00Z" % test_to)
         else:

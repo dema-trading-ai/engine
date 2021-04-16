@@ -1,48 +1,58 @@
-REQUIRED_PARAMS = [
-    'stoploss',
-    'max-open-trades',
-    'fee',
-    'starting-capital',
-    'strategy-name'
-]
-
-DEFAULT_PARAMS = {
-    "strategies-folder": "./strategies"
-}
+from config.spec import spec_type_to_python_type
 
 
-def validate_config(config: dict):
-    """Validates the configuration file"""
-
-    check_config_required_params(config)
-    set_default_param_values(config)
+def validate(config: dict, spec: list):
+    validate_by_spec(config, spec)
     validate_single_currency_in_pairs(config)
     validate_fee(config)
 
+def validate_by_spec(config, config_spec):
+    for param_spec in config_spec:
+        assert_given_else_default(config, param_spec)
+        assert_type(config, param_spec)
+        assert_in_options(config, param_spec)
+        assert_min_max(config, param_spec)
 
-def check_config_required_params(config_json: dict):
-    """
-    This function checks the presence of the required params in the provided
-    config file, and throws an error when it's not
+def assert_given_else_default(config, spec):
+    param_value = config.get(spec["name"])
+    default = spec.get("default")
+    if param_value is None and default is None:
+        config_error(f"You must specify the '{spec['name']}' parameter")
+    if param_value is None:
+        config[spec["name"]] = default
 
-    :param config_json: the config dictionary
-    :return: None
-    """
-    for param in REQUIRED_PARAMS:
-        if param not in config_json:
-            raise KeyError(f"[ERROR] {param} should be defined in the config-file")
+def assert_type(config, spec):
+    param_value = config.get(spec["name"])
+    t = spec["type"]
+    pt = spec_type_to_python_type(t)
+    good = isinstance(param_value, pt)
+    if t == "datetime":
+        # TODO implement datetime validation
+        good = True
+    elif t == "number" and isinstance(param_value, int):
+        # int also count as number / not only float allowed
+        good = True
+    
+    if not good:
+        config_error(f"You passed an invalid type to the '{spec['name']}' parameter",
+                     f"This type should be a(n) {t}, it is {type(param_value)}")
 
-def set_default_param_values(config: dict):
-    """
-    This function checks for every config param that has a default whether it is in the
-    config file, and sets the defaiult value if not.
+def assert_min_max(config, spec):
+    param_value = config.get(spec["name"])
+    min_ = spec.get("min")
+    max_ = spec.get("max")
+    if min_ is not None and param_value < min_:
+        config_error(f"{spec['name']} = {param_value} is under the minimum value {min_}")
+    if max_ is not None and param_value > max_:
+        config_error(f"{spec['name']} = {param_value} is above the maximum value {max_}")
 
-    :param config: the json config dictionary
-    """
-    for param, default_value in DEFAULT_PARAMS.items():
-        if config.get(param) == None:
-            config[param] = default_value
-
+def assert_in_options(config, spec):
+    param_value = config.get(spec["name"])
+    options = spec.get("options")
+    if options is None:
+        return
+    if param_value not in options:
+        config_error(f"spec['name'] = {param_value} is not a valid option, choose one from: ", str(options)) 
 
 def validate_single_currency_in_pairs(config: dict):
     """Checks whether every pair (e.g., BTC/USDT) contains
@@ -51,16 +61,20 @@ def validate_single_currency_in_pairs(config: dict):
     :param config: json configuration
     :type config: dict
     """
-
     pairs = config["pairs"]
     currency = config["currency"]
     for pair in pairs:
         pair = pair.split("/")
         assert len(pair) == 2
         if not pair[1] == currency:
+            config_error("You can only use pairs that have the base currency you specified",
+                         "e.g., if you specified 'USDT' as your currency, you cannot add 'BTC/EUR' as a pair")
 
-            raise Exception("[ERROR] You can only use pairs that have the base currency you specified\n"
-                            "[ERROR] e.g., if you specified 'USDT' as your currency, you cannot add 'BTC/EUR' as a pair")
+def config_error(*msgs: str):
+    for m in msgs:
+        print("[CONFIG ERROR] " + m)
+    raise SystemExit
+
 
 
 DEFAULT_FEE = 0.25
@@ -88,5 +102,4 @@ def validate_fee(config):
         f"[INFO] The algorithm will use the inputted value of {input_fee}% as fee percentage.")
 
     config["fee"] = input_fee # make sure its a float
-
 

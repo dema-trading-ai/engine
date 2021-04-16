@@ -12,6 +12,11 @@ def get_project_root():
     return Path(__file__).parent
 
 
+def lower_bar_to_middle_bar(s: str) -> str:
+    """Replaces '_' with '-' """
+    return s.replace("_", "-")
+
+  
 def default_empty_array_dict() -> list:
     """
     :return: list for initializing dictionary
@@ -66,3 +71,4 @@ def dict_to_df(data: dict, indicators: list) -> DataFrame:
     df = pd.DataFrame.from_dict(json_file, orient='index', columns=indicators)
     df.index = df.index.map(int)
     return df
+
