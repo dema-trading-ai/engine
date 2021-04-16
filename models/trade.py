@@ -28,10 +28,12 @@ class Trade:
     sell_reason = None
     opened_at = 0.0
     closed_at = 0.0
+
     sl_dict = None
     sl_type = None
     sl_perc = 0.0
-    trail = 0.0
+    sl_price = 0.0
+    sl_sell_time = 0
 
     def __init__(self, ohlcv: dict, trade_amount: float, date: datetime, sl_type: str, sl_perc: float):
         self.status = 'open'
@@ -69,10 +71,16 @@ class Trade:
         :rtype: None
         """
         self.current = ohlcv['close']
-        self.profit_percentage = ((ohlcv['close'] - self.open) / self.open) * 100
+        self.set_profits()
+
+    def set_profits(self):
+        """
+        Sets profits corresponding to current info
+        """
+        self.profit_percentage = ((self.current - self.open) / self.open) * 100
         self.profit_dollar = (self.currency_amount * self.current) - (self.currency_amount * self.open)
 
-    def configure_stoploss(self, data_df: DataFrame, strategy: Strategy) -> None:
+    def configure_stoploss(self, ohlcv: dict, data_df: DataFrame, strategy: Strategy) -> None:
         """
         Configures stoploss based on configured type.
 
@@ -84,12 +92,15 @@ class Trade:
         :rtype: None
         """
         if self.sl_type == 'standard':
-            self.sl_dict = self.standard_stoploss(data_df)
-        elif self.sl_type == 'trailing':
-            self.sl_dict = self.trailing_stoploss(data_df)
-        elif self.sl_type == 'dynamic':
-            dynamic_df = strategy.stoploss(data_df)
-            self.sl_dict = dynamic_df.to_dict('index')
+            sl_price = self.open - (self.open * (abs(self.sl_perc) / 100))
+        else:
+            time = str(ohlcv['time'])
+            if self.sl_type == 'trailing':
+                sl_sell_time, sl_price = self.trailing_stoploss(data_df, time)
+            elif self.sl_type == 'dynamic':
+                sl_sell_time, sl_price = self.dynamic_stoploss(data_df[time:])
+            self.sl_sell_time = sl_sell_time
+        self.sl_price = sl_price
 
     def update_max_drawdown(self) -> None:
         """
@@ -110,41 +121,19 @@ class Trade:
         :return: boolean whether trade is clossed because of stoploss
         :rtype: boolean
         """
-        timestamp = str(ohlcv['time'])
-        candle = self.sl_dict[timestamp]
-        if candle['stoploss'] == 1:
-            if self.sl_type == 'standard':
-                self.current = self.open - (self.open * (abs(self.sl_perc) / 100))
-            elif self.sl_type == 'trailing':
-                self.current = candle['trailing_value']
-            elif self.sl_type == 'dynamic':
-                self.current = candle['low']
-
-            self.profit_percentage = ((self.current - self.open) / self.open) * 100
-            self.profit_dollar = (self.currency_amount * self.current) - (self.currency_amount * self.open)
-            return True
+        if self.sl_type == 'standard':
+            if self.current < self.sl_price:
+                self.current = self.sl_price
+                self.set_profits()
+                return True
+        elif self.sl_type == 'trailing' or self.sl_type == 'dynamic':
+            if self.sl_sell_time == ohlcv['time']:
+                self.current = self.sl_price
+                self.set_profits()
+                return True
         return False
 
-    def standard_stoploss(self, data_df: DataFrame) -> dict:
-        """
-        Calculated stoploss based on the opening price. If the price is x% under the
-        trade opening price, the stoploss is triggered. 
-
-        :param data_df: dataframe containing OHLCV data of current pair
-        :type data_df: DataFrame
-        :return: dict filled with stoploss signals
-        :rtype: dict
-        """
-        stoploss_value = self.open - (self.open * (abs(self.sl_perc) / 100))
-        data_df.loc[
-            (
-                (data_df['low'] < stoploss_value)
-            ),
-            'stoploss'] = 1
-
-        return data_df.to_dict('index')
-
-    def trailing_stoploss(self, data_df: DataFrame) -> dict:
+    def trailing_stoploss(self, data_df: DataFrame, time: str) -> [int, float]:
         """
         Calculates the trailing stoploss (TSL) for each tick, applying the standard definition:
         - stoploss (SL) for a tick is calculated using: candle_open * (1 - trailing_percentage)
@@ -159,35 +148,53 @@ class Trade:
 
         :param data_df: dataframe containing OHLCV data of current pair
         :type data_df: DataFrame
-        :param trailing_perc: trailing percentage
-        :type trailing_perc: float
-        :return: dict filled with stoploss signals
-        :rtype: dict
+        :param time: time of current tick
+        :type time: string
+        :return: timestamp and price of first stoploss signal
+        :rtype: list
         """
 
         def validate(value: float) -> float:
             """
             Extra function to determine the correct TSL value.
             """
-            if value > self.trail:
-                self.trail = value
+            stoploss = value * self.stoploss_perc
+            if stoploss > self.trail:
+                self.trail = stoploss
             return self.trail
 
         # Calculates correct TSL% and adds TSL value for each tick
-        stoploss_perc = 1 - (abs(self.sl_perc) / 100)
-        data_df['stoploss_value'] = data_df['open'] * stoploss_perc
-        data_df['trailing_value'] = np.NaN
+        self.stoploss_perc = 1 - (abs(self.sl_perc) / 100)
+        self.trail = -np.inf
+        data_df.loc[time:, 'trailing_value'] = data_df.loc[time:, 'open'].map(validate)
 
-        # Gets first TSL value and finds trailing value at each timestamp
-        self.trail = data_df['stoploss_value'].iloc[0]
-        opened_at_ms = int(self.opened_at.timestamp() * 1000)   # datetime to ms
-        data_df['trailing_value'] = data_df['stoploss_value'].map(lambda value: validate(value))
+        # Finds first occurence where TSL is crossed
+        np_time = np.array(data_df['time'])
+        np_low = np.array(data_df['low'])
+        np_trail = np.array(data_df['trailing_value'])
+        index_list = np.argwhere(np_low <= np_trail)
+        if index_list.any():  # stoploss is triggered somewhere
+            index = index_list[0][0]
+            return np_time[index], np_trail[index]
+        return np.NaN, np.NaN
 
-        # Checks if TSL is crossed
-        data_df.loc[
-            (
-                (data_df['low'] <= data_df['trailing_value'])
-            ),
-            'stoploss'] = 1
+    def dynamic_stoploss(self, data_df: DataFrame) -> [int, float]:
+        """
+        Finds the first occurence where the dynamic stoploss (defined in strategy)
+        is triggered.
 
-        return data_df.to_dict('index')
+        :param data_df: dataframe containing OHLCV data of current pair
+        :type data_df: DataFrame
+        :return: timestamp and price of first stoploss signal
+        :rtype: list
+        """
+        np_time = np.array(data_df['time'])
+        np_low = np.array(data_df['low'])
+        np_stoploss = np.array(data_df['stoploss'])
+        index_list = np.argwhere(np_stoploss == 1)
+        if index_list.any():  # stoploss is triggered somewhere
+            index = index_list[0][0]
+            return np_time[index], np_low[index]
+        return np.NaN, np.NaN
+
+

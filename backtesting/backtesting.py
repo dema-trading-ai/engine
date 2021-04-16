@@ -84,6 +84,8 @@ class BackTesting:
             indicators = self.strategy.generate_indicators(df)
             indicators = self.strategy.buy_signal(indicators)
             indicators = self.strategy.sell_signal(indicators)
+            if self.config['stoploss-type'] == 'dynamic':
+                indicators = self.strategy.stoploss(indicators)
             data_df[pair] = indicators
             data_dict[pair] = indicators.to_dict('index')
         return [data_df, data_dict]

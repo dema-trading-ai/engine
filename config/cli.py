@@ -18,6 +18,3 @@ def adjust_config_to_cli(config: dict, spec: [dict]):
         if val is not None:
             arg = utils.lower_bar_to_middle_bar(arg)
             config[arg] = val
-    
-
-

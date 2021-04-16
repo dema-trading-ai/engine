@@ -3,7 +3,7 @@
   "timeframe": "15m",
   "max-open-trades": 3,
   "starting-capital": 100,
-  "backtesting-from": "2021-03-01",
+  "backtesting-from": "2019-01-01",
   "backtesting-to": "2021-03-20",
   "backtesting-till-now": false,
   "stoploss-type": "standard",

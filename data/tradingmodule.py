@@ -147,7 +147,7 @@ class TradingModule:
         
         new_trade = \
             Trade(ohlcv, spend_amount, date, self.sl_type, self.sl_perc)
-        new_trade.configure_stoploss(data_df, self.strategy)
+        new_trade.configure_stoploss(ohlcv, data_df, self.strategy)
 
         self.budget -= spend_amount
         self.open_trades.append(new_trade)
