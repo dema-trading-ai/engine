@@ -5,15 +5,18 @@ from pandas import DataFrame
 import pandas as pd
 import rapidjson
 
+CURRENT_VERSION = "v0.3.1"
+
 
 def get_project_root():
     return Path(__file__).parent
+
 
 def lower_bar_to_middle_bar(s: str) -> str:
     """Replaces '_' with '-' """
     return s.replace("_", "-")
 
-
+  
 def default_empty_array_dict() -> list:
     """
     :return: list for initializing dictionary
@@ -21,12 +24,14 @@ def default_empty_array_dict() -> list:
     """
     return []
 
+
 def default_empty_dict_dict() -> dict:
     """
     :return: Dictionary for initializing default dictionary
     :rtype: Dict.
     """
     return defaultdict(int)
+
 
 def calculate_worth_of_open_trades(open_trades) -> float:
     """
@@ -41,6 +46,7 @@ def calculate_worth_of_open_trades(open_trades) -> float:
         return_value += (trade.currency_amount * trade.current)
     return return_value
 
+
 def df_to_dict(df: DataFrame) -> dict:
     """
     Method turns dataframe into dictionary
@@ -51,6 +57,7 @@ def df_to_dict(df: DataFrame) -> dict:
     """
     df.index = df.index.map(str)
     return df.to_dict('index')
+
 
 def dict_to_df(data: dict, indicators: list) -> DataFrame:
     """
