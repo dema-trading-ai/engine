@@ -79,4 +79,3 @@ def dict_to_df(data: dict) -> DataFrame:
     df = pd.DataFrame.from_dict(json_file, orient='index', columns=indicators)
     df.index = df.index.map(int)
     return df
-
