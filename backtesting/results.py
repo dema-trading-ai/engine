@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from tabulate import tabulate
+from utils import CURRENT_VERSION
 import typing
 
 FONT_BOLD = "\033[1m"
@@ -38,6 +39,8 @@ class MainResults:
     def show(self, currency_symbol: str):
         print("================================================= \n| %sBacktesting Results%s "
               "\n=================================================" % (FONT_BOLD, FONT_RESET))
+        print("| Engine version \t\t%s" % CURRENT_VERSION)
+        print("| ")
         print("| Backtesting from: \t\t%s" % self.tested_from)
         print("| Backtesting to: \t\t%s" % self.tested_to)
         print("| ")
