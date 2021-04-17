@@ -54,21 +54,22 @@ class BackTesting:
         self.backtesting_to = backtesting_to
         print('[INFO] Starting backtest...')
 
-        data_df, data_dict = self.populate_signals()
+        data_dict = self.populate_signals()
         pairs = list(data_dict.keys())
         ticks = list(data_dict[pairs[0]].keys())
 
         for tick in tqdm(ticks, desc='[INFO] Backtesting', total=len(ticks), ncols=75):
             for pair in pairs:
-                tick_dict = data_dict[pair][tick]
-                self.trading_module.tick(tick_dict, data_df[pair])
+                pair_dict = data_dict[pair]
+                tick_dict = pair_dict[tick]
+                self.trading_module.tick(tick_dict, pair_dict)
 
         open_trades = self.trading_module.open_trades
         closed_trades = self.trading_module.closed_trades
         budget = self.trading_module.budget
         self.generate_backtesting_result(open_trades, closed_trades, budget)
 
-    def populate_signals(self) -> [dict, dict]:
+    def populate_signals(self) -> dict:
         """
         Method used for populating indicators / signals
         Populates indicators
@@ -86,9 +87,8 @@ class BackTesting:
             indicators = self.strategy.sell_signal(indicators)
             if self.config['stoploss-type'] == 'dynamic':
                 indicators = self.strategy.stoploss(indicators)
-            data_df[pair] = indicators
             data_dict[pair] = indicators.to_dict('index')
-        return [data_df, data_dict]
+        return data_dict
 
     # This method is called when backtesting method finished processing all OHLCV-data
     def generate_backtesting_result(self, open_trades: [Trade], closed_trades: [Trade], budget: float) -> None:

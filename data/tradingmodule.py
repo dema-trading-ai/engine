@@ -47,12 +47,12 @@ class TradingModule:
         self.sl_type = config['stoploss-type']
         self.sl_perc = float(config['stoploss'])
 
-    def tick(self, ohlcv: dict, data_df: DataFrame) -> None:
+    def tick(self, ohlcv: dict, data_dict: dict) -> None:
         """
         :param ohlcv: dictionary with OHLCV data for current tick
         :type ohlcv: dict
-        :param data_df: dataframe containing OHLCV data of current pair
-        :type data_df: DataFrame
+        :param data_dict: dict containing OHLCV data of current pair
+        :type data_dict: dict
         :return: None
         :rtype: None
         """
@@ -61,21 +61,21 @@ class TradingModule:
             trade.update_stats(ohlcv)
             self.open_trade_tick(ohlcv, trade)
         else:
-            self.no_trade_tick(ohlcv, data_df)
+            self.no_trade_tick(ohlcv, data_dict)
         self.update_budget_per_timestamp_tracking(ohlcv)
 
-    def no_trade_tick(self, ohlcv: dict, data_df: DataFrame) -> None:
+    def no_trade_tick(self, ohlcv: dict, data_dict: dict) -> None:
         """
         Method is called when specified pair has no open trades
         :param ohlcv: dictionary with OHLCV data for current tick
         :type ohlcv: dict
-        :param data_df: dataframe containing OHLCV data of current pair
-        :type data_df: DataFrame
+        :param data_dict: dict containing OHLCV data of current pair
+        :type data_dict: dict
         :return: None
         :rtype: None
         """
         if ohlcv['buy'] == 1:
-            self.open_trade(ohlcv, data_df)
+            self.open_trade(ohlcv, data_dict)
 
     def open_trade_tick(self, ohlcv: dict, trade: Trade) -> None:
         """
@@ -122,13 +122,13 @@ class TradingModule:
         self.closed_trades.append(trade)
         self.update_drawdowns_closed_trade(trade)
 
-    def open_trade(self, ohlcv: dict, data_df: DataFrame) -> None:
+    def open_trade(self, ohlcv: dict, data_dict: dict) -> None:
         """
         Method opens a trade for pair in ohlcv
         :param ohlcv: dictionary with OHLCV data for current tick
         :type ohlcv: dict
-        :param data_df: dataframe containing OHLCV data of current pair
-        :type data_df: DataFrame
+        :param data_dict: dict containing OHLCV data of current pair
+        :type data_dict: dict
         :return: None
         :rtype: None
         """
@@ -147,7 +147,7 @@ class TradingModule:
         
         new_trade = \
             Trade(ohlcv, spend_amount, date, self.sl_type, self.sl_perc)
-        new_trade.configure_stoploss(ohlcv, data_df, self.strategy)
+        new_trade.configure_stoploss(ohlcv, data_dict, self.strategy)
 
         self.budget -= spend_amount
         self.open_trades.append(new_trade)
