@@ -87,6 +87,7 @@ class BackTesting:
             indicators = self.strategy.sell_signal(indicators)
             stoploss = self.strategy.stoploss(indicators)
             self.config['stoploss'] = stoploss if stoploss else float(self.config['stoploss'])
+            indicators.dropna(inplace=True, axis=0)
             data_dict[pair] = indicators.to_dict('index')
         return data_dict
 
