@@ -123,6 +123,8 @@ class BackTesting:
                           self.starting_capital) * 100
         max_seen_drawdown = self.calculate_max_seen_drawdown()
 
+        max_drawdown_trades = 99
+
         return MainResults(tested_from=datetime.fromtimestamp(self.backtesting_from / 1000),
                            tested_to=datetime.fromtimestamp(
                                self.backtesting_to / 1000),
@@ -135,6 +137,7 @@ class BackTesting:
                                closed_trades),
                            max_realized_drawdown=self.trading_module.realized_drawdown,
                            max_drawdown_single_trade=self.trading_module.max_drawdown,
+                           max_drawdown_trades=self.trading_module.realized_drawdown_trades,
                            max_seen_drawdown=max_seen_drawdown["drawdown"],
                            drawdown_from=datetime.fromtimestamp(
                                max_seen_drawdown['from'] / 1000),

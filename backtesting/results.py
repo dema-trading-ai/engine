@@ -31,6 +31,7 @@ class MainResults:
     max_realized_drawdown: float
     max_drawdown_single_trade: float
     max_seen_drawdown: float
+    max_drawdown_trades: int
     drawdown_from: datetime
     drawdown_to: datetime
     configured_stoploss: float
@@ -59,6 +60,7 @@ class MainResults:
               round(self.max_realized_drawdown, 2) + '\t%')
         print("| Max drawdown 1 trade: \t%s" %
               round(self.max_drawdown_single_trade, 2) + '\t%')
+        print("| Max drawdown trades: \t\t%s" % self.max_drawdown_trades)
         print("| Max seen drawdown: \t\t%s" %
               round(self.max_seen_drawdown, 2) + '\t%')
         print("| Seen drawdown from: \t\t%s" % self.drawdown_from)
