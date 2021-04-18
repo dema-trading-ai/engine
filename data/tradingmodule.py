@@ -29,9 +29,12 @@ class TradingModule:
     open_order_value_per_timestamp = {}
     budget_per_timestamp = {}
     current_drawdown = 0.0
-    current_drawdown_trades = 0
     realized_drawdown = 0
+    current_drawdown_trades = 0
     realized_drawdown_trades = 0
+    current_drawdown_chain_bad_trades = 0
+    temp_chain_bad_trades = 0
+    realized_drawdown_chain_bad_trades = 0
 
     fee = 0
     total_fee_amount = 0
@@ -255,11 +258,23 @@ class TradingModule:
         if perc_influence < 0 and self.current_drawdown >= 0:
             self.current_drawdown = perc_influence
             self.current_drawdown_trades = 1
+            self.temp_chain_bad_trades = 1
         else:
+            if perc_influence < 0:
+                self.temp_chain_bad_trades += 1
+            else:
+                # positive trade in drawdown period - chain broken, restart temp chain
+                self.temp_chain_bad_trades = 0
             self.current_drawdown += perc_influence
             self.current_drawdown_trades += 1
+
+        # if temp chain bad trades is bigger than the previously seen chain bad trades, update it
+        if self.temp_chain_bad_trades > self.current_drawdown_chain_bad_trades:
+            self.current_drawdown_chain_bad_trades = self.temp_chain_bad_trades
+
 
         # if the current drawdown is bigger than the last realized drawdown, update it
         if self.current_drawdown < self.realized_drawdown:
             self.realized_drawdown = self.current_drawdown
             self.realized_drawdown_trades = self.current_drawdown_trades
+            self.realized_drawdown_chain_bad_trades = self.current_drawdown_chain_bad_trades
