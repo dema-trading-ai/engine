@@ -29,7 +29,6 @@ class Trade:
     opened_at = 0.0
     closed_at = 0.0
 
-    sl_dict = None
     sl_type = None
     sl_perc = 0.0
     sl_price = 0.0
