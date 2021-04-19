@@ -99,5 +99,6 @@ def plot_dataframe(pair: str, df: DataFrame, indicator: str):
         yaxis_title=pair)
 
     fig.show()
+    fig.write_html("data/backtesting-data/binance/plot%s.html" % pair.replace("/", ""))
 
 
