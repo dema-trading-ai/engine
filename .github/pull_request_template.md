@@ -1,4 +1,4 @@
-# Fixes
+# Results of merging this
 <!-- Link the corresponding issue number  -->
 Fixes #
 
@@ -21,9 +21,14 @@ Fixes #
 <!-- Which security measures did you take when developing? Think of exception handling, logging etc -->
 
 
-# Potential Issues/Future considerations
+# Potential Issues / Future considerations
 <!--  Did you encounter anything that could potentially cause problems in the future? Or how could this PR be improved in the future?-->
 
 
+# Assumptions made / Things to add to the wiki
+<!-- Did you make any assumptions during this development? Certain flows or logic? This could be quite broad, but it's
+ very crucial to avoid misconceptions regarding the working of the engine --> 
+
 # Additional Info
 <!-- Write anything here that wasn't mentioned above -->
+
