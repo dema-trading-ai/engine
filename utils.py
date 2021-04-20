@@ -14,6 +14,11 @@ def get_project_root():
     return Path(__file__).parent
 
 
+def lower_bar_to_middle_bar(s: str) -> str:
+    """Replaces '_' with '-' """
+    return s.replace("_", "-")
+
+  
 def default_empty_array_dict() -> list:
     """
     :return: list for initializing dictionary
@@ -69,7 +74,7 @@ def dict_to_df(data: dict, indicators: list) -> DataFrame:
     df.index = df.index.map(int)
     return df
 
-
+  
 def plot_dataframe(pair: str, df: DataFrame, indicator: str):
     """
     Plot dataframe of a certain coin pair with given indicator
