@@ -4,10 +4,6 @@ from collections import defaultdict
 from pandas import DataFrame
 import pandas as pd
 import rapidjson
-from datetime import datetime
-import plotly.graph_objects as go
-import plotly.express as px
-import os
 
 CURRENT_VERSION = "v0.3.1"
 
@@ -75,3 +71,4 @@ def dict_to_df(data: dict, indicators: list) -> DataFrame:
     df = pd.DataFrame.from_dict(json_file, orient='index', columns=indicators)
     df.index = df.index.map(int)
     return df
+
