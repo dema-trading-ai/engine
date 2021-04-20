@@ -8,6 +8,8 @@ import rapidjson
 import sys
 from os import path
 import os
+from datetime import date
+import datetime
 
 # Files
 from utils import df_to_dict, dict_to_df
@@ -186,13 +188,13 @@ class DataModule:
         test_from = self.config['backtesting-from']
         test_to = self.config['backtesting-to']
         test_till_now = self.config['backtesting-till-now']
+        today_ms = self.exchange.milliseconds()
 
         self.backtesting_from = self.exchange.parse8601("%sT00:00:00Z" % test_from)
         if test_till_now:
-            print('[INFO] Gathering data from %s until now' % test_from)
             self.backtesting_to = self.exchange.milliseconds()
+            print('[INFO] Gathering data from %s until now' % test_from)
         elif not test_till_now:
-            print('[INFO] Gathering data from %s until %s' % (test_from, test_to))
             self.backtesting_to = self.exchange.parse8601("%sT00:00:00Z" % test_to)
         else:
             print(
@@ -200,6 +202,16 @@ class DataModule:
 
         if self.backtesting_from >= self.backtesting_to:
             raise Exception("[ERROR] Backtesting periods are configured incorrectly.")
+        elif today_ms < self.backtesting_to:
+            today_ms = self.exchange.milliseconds()
+            today_ms_str = datetime.datetime.fromtimestamp(today_ms / 1000.0).strftime("%Y-%m-%d")
+
+            self.config['backtesting-to'] = today_ms_str
+            self.backtesting_to = today_ms
+            print('[INFO] Changed %s to %s' % (test_to, today_ms_str))
+            test_to = today_ms_str
+        print('[INFO] Gathering data from %s until %s' % (test_from, test_to))
+        
 
     def check_datafolder(self, pair: str) -> bool:
         """
