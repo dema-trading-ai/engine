@@ -3,6 +3,9 @@ from datetime import datetime, timedelta
 import typing
 from tqdm import tqdm
 import numpy as np
+from datetime import datetime
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 # Files
 from backtesting.results import MainResults, OpenTradeResult, CoinInsights, show_signature
@@ -26,6 +29,9 @@ class BackTesting:
     backtesting_from = None
     backtesting_to = None
     data = {}
+    buypoints = {}
+    sellpoints = {}
+    df = {}
 
     def __init__(self, trading_module, config):
         self.trading_module = trading_module
@@ -82,9 +88,10 @@ class BackTesting:
         for pair in tqdm(self.data.keys(), desc="[INFO] Populating Indicators",
                             total=len(self.data.keys()), ncols=75):
             df = self.data[pair]
-            indicators = self.strategy.generate_indicators(pair, df)
+            indicators = self.strategy.generate_indicators(df)
             indicators = self.strategy.buy_signal(indicators)
             indicators = self.strategy.sell_signal(indicators)
+            self.df[pair] = indicators.copy()
             stoploss = self.strategy.stoploss(indicators)
             self.config['stoploss'] = stoploss if stoploss else float(self.config['stoploss'])
             data_dict[pair] = indicators.to_dict('index')
@@ -116,6 +123,10 @@ class BackTesting:
         CoinInsights.show(coin_res, self.currency_symbol)
         OpenTradeResult.show(open_trade_res, self.currency_symbol)
         show_signature()
+
+        #plot graphs
+        if self.config["plots"] == "True":
+            self.plot_per_coin()
 
     def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float) -> MainResults:
         budget += calculate_worth_of_open_trades(open_trades)
@@ -202,7 +213,12 @@ class BackTesting:
             } for pair in self.data.keys()
         }
 
+        self.buypoints = {pair: [] for pair in self.data.keys()}
+        self.sellpoints = {pair: [] for pair in self.data.keys()}
+
         for trade in all_trades:
+            self.buypoints[trade.pair].append(trade.opened_at)
+            self.sellpoints[trade.pair].append(trade.closed_at)
             if trade.profit_percentage is not None:
                 trades_per_coin[trade.pair]['total_profit_prct'] += trade.profit_percentage
             trades_per_coin[trade.pair]['total_profit_amount'] += (trade.currency_amount * trade.current) - (
@@ -282,3 +298,92 @@ class BackTesting:
             if trade.profit_percentage < 0:
                 loss_trades += 1
         return loss_trades
+
+    def plot_per_coin(self):
+        """
+        Plot dataframe of a all coin pairs
+        :return: None
+        :rtype: None
+        """
+        for pair in self.df.keys():
+
+            outside_ohlc = ['rsi']
+            rows = 1
+
+            for x in self.df[pair].columns.values[7:-2]:
+                if x in outside_ohlc:
+                    rows += 1
+
+            fig = make_subplots(rows=rows, cols=1)
+            dates = [datetime.fromtimestamp(time / 1000) for time in self.df[pair]["time"]]
+
+            ohlc = go.Ohlc(
+                x=dates,
+                open=self.df[pair]["open"],
+                high=self.df[pair]["high"],
+                low=self.df[pair]["low"],
+                close=self.df[pair]["close"],
+                name='OHLC')
+
+            fig.add_trace(ohlc, row=1, col=1)
+
+            # add buy and sell signals
+            buysignal = [self.df[pair]["buy"][x] * ((self.df[pair]["high"][x] + self.df[pair]["low"][x]) / 2) for x in
+                   range(len(self.df[pair]["sell"]))]
+
+            sellsignal = [self.df[pair]["sell"][x] * ((self.df[pair]["high"][x] + self.df[pair]["low"][x]) / 2) for x in
+                    range(len(self.df[pair]["sell"]))]
+
+            fig.add_trace((go.Scatter(x=dates, y=buysignal,
+                                      mode='markers', name='buysignal', line_color='rgb(0,255,0)')), row=1, col=1)
+            fig.add_trace((go.Scatter(x=dates, y=sellsignal,
+                                      mode='markers', name='sellsignal', line_color='rgb(128,0,0)')), row=1, col=1)
+
+            # add actual buy and sell moments
+            buy = []
+            sell = []
+
+            for x in range(len(self.df[pair]["high"])):
+                if dates[x] in self.buypoints[pair]:
+                    buy.append((self.df[pair]["high"][x] + self.df[pair]["low"][x]) / 2)
+                else:
+                    buy.append(np.NaN)
+
+            for x in range(len(self.df[pair]["high"])):
+                if dates[x] in self.sellpoints[pair]:
+                    sell.append((self.df[pair]["high"][x] + self.df[pair]["low"][x]) / 2)
+                else:
+                    sell.append(np.NaN)
+
+            fig.add_trace((go.Scatter(x=dates, y=buy,
+                                     mode='markers',
+                                     name='buy',
+                                     marker=dict(symbol='triangle-up-dot',
+                                                 size=12,
+                                                 line=dict(width=1),
+                                                 color='rgb(173,255,47)'))), row=1, col=1)
+
+            fig.add_trace((go.Scatter(x=dates, y=sell,
+                                     mode='markers', name='sell',
+                                     marker=dict(symbol='triangle-down-dot',
+                                                 size=12,
+                                                 line=dict(width=1),
+                                                 color='rgb(220,20,60)'))), row=1, col=1)
+
+            # add indicators
+            plots = 2
+            for x in self.df[pair].columns.values[7:-2]:
+                if x not in outside_ohlc:
+                    fig.add_trace((go.Scatter(x=dates, y=self.df[pair][x], name=x,
+                                             line=dict(width=2, dash='dot'))), row=1, col=1)
+                else:
+                    fig.add_trace((go.Scatter(x=dates, y=self.df[pair][x], name=x,
+                                             line=dict(width=2, dash='dot'))), row=plots, col=1)
+                    plots += 1
+
+            fig.update_layout(
+                title='%s Chart' % pair,
+                yaxis_title=pair)
+
+            fig.show()
+            fig.write_html("data/backtesting-data/binance/plot%s.html" % pair.replace("/", ""))
