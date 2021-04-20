@@ -38,9 +38,9 @@ class MyStrategy(Strategy):
         :rtype: DataFrame
         """
         if len(dataframe) > self.min_candles:
-         # BEGIN STRATEGY
+            # BEGIN STRATEGY
 
-         dataframe.loc[
+            dataframe.loc[
              (
                  (dataframe['rsi'] < 30) &
                  (dataframe['ema5'] < dataframe['ema21']) &
@@ -48,7 +48,7 @@ class MyStrategy(Strategy):
              ),
              'buy'] = 1
 
-         # END STRATEGY
+            # END STRATEGY
 
         return dataframe
 
@@ -60,15 +60,15 @@ class MyStrategy(Strategy):
         :rtype: DataFrame
         """
         if len(dataframe) > self.min_candles:
-         # BEGIN STRATEGY
+            # BEGIN STRATEGY
 
-         dataframe.loc[
+            dataframe.loc[
              (
                  (dataframe['rsi'] > 70) &
                  (dataframe['volume'] > 0)
              ),
              'sell'] = 1
 
-         # END STRATEGY
+            # END STRATEGY
 
         return dataframe
