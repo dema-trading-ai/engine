@@ -180,6 +180,6 @@ class Trade:
         for timestamp in data_dict.keys():
             if int(timestamp) > time:
                 ohlcv = data_dict[timestamp]
-                if ohlcv['stoploss'] == 1:
-                    return ohlcv['time'], ohlcv['low']
+                if ohlcv['low'] < ohlcv['stoploss']:
+                    return ohlcv['time'], ohlcv['stoploss']
         return np.NaN, np.NaN

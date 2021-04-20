@@ -66,23 +66,3 @@ class Strategy(abc.ABC):
         :rtype: DataFrame
         """
         return
-
-    @staticmethod
-    def change_timeframe(dataframe: DataFrame, new_timeframe: str) -> DataFrame:
-        """
-        ### WORK IN PROGRESS ###
-
-        Changes the timeframe of the given dataframe
-        Remarks:
-            - Returns only OHLC data (removes columns: 'time', 'volume', 'pair')
-            - 'timeframe' in config.json needs to be smaller than new_timeframe to work correctly.
-            - Values for new_timeframe can be found here:
-            https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#offset-aliases
-        :param candle_data: All passed candles with OHLCV data
-        :type candle_data: DataFrame
-        :param timeframe: New timeframe configuration
-        :type timeframe: string
-        :return: Dataframe in new timeframe
-        :rtype: DataFrame
-        """
-        return dataframe.resample(new_timeframe, origin='start', label='right').ohlc()

@@ -87,13 +87,9 @@ class MyStrategyAdvanced(Strategy):
         :rtype: DataFrame
         """
         if len(dataframe) > self.MIN_CANDLES:
-            # BEGIN STRATEGY            
+            # BEGIN STRATEGY
 
-            dataframe.loc[
-                (
-                    (dataframe['low'] < dataframe['ema5'])
-                ),
-                'stoploss'] = 1
+            dataframe['stoploss'] = dataframe['ema5']
 
             # END STRATEGY
 
