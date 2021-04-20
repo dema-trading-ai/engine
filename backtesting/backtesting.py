@@ -122,6 +122,10 @@ class BackTesting:
         overall_profit = ((budget - self.starting_capital) /
                           self.starting_capital) * 100
         max_seen_drawdown = self.calculate_max_seen_drawdown()
+        drawdown_from = datetime.fromtimestamp(max_seen_drawdown['from'] / 1000) \
+            if max_seen_drawdown['from'] != 0 else '-'
+        drawdown_to = datetime.fromtimestamp(max_seen_drawdown['to'] / 1000) \
+            if max_seen_drawdown['to'] != 0 else '-'
 
         return MainResults(tested_from=datetime.fromtimestamp(self.backtesting_from / 1000),
                            tested_to=datetime.fromtimestamp(
@@ -136,10 +140,8 @@ class BackTesting:
                            max_realized_drawdown=self.trading_module.realized_drawdown,
                            max_drawdown_single_trade=self.trading_module.max_drawdown,
                            max_seen_drawdown=max_seen_drawdown["drawdown"],
-                           drawdown_from=datetime.fromtimestamp(
-                               max_seen_drawdown['from'] / 1000),
-                           drawdown_to=datetime.fromtimestamp(
-                               max_seen_drawdown['to'] / 1000),
+                           drawdown_from=drawdown_from,
+                           drawdown_to=drawdown_to,
                            configured_stoploss=self.config['stoploss'],
                            total_fee_amount=self.trading_module.total_fee_amount)
 

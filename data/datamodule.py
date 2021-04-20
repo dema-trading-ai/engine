@@ -198,6 +198,9 @@ class DataModule:
             print(
                 "[ERROR] Something went wrong parsing config. Please use yyyy-mm-dd format at 'backtesting-from', 'backtesting-to'")
 
+        if self.backtesting_from >= self.backtesting_to:
+            raise Exception("[ERROR] Backtesting periods are configured incorrectly.")
+
     def check_datafolder(self, pair: str) -> bool:
         """
         :param pair: Certain coin pair in "AAA/BBB" format
