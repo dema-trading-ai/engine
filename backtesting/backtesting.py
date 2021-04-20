@@ -93,7 +93,6 @@ class BackTesting:
     # This method is called when backtesting method finished processing all OHLCV-data
     def generate_backtesting_result(self, open_trades: [Trade], closed_trades: [Trade], budget: float) -> None:
         """
-        TODO Feel free to optimize this method :)
         Oversized method for generating backtesting results
 
         :param open_trades: array of open trades
@@ -180,9 +179,6 @@ class BackTesting:
 
     def calculate_statistics_per_coin(self, open_trades, closed_trades):
         """
-        TODO Feel free to optimize this method :)
-        TODO This method does not work fully anymore. Issue will be made.
-
         :param open_trades: array of open trades
         :type open_trades: [Trade]
         :param closed_trades: array of closed trades
