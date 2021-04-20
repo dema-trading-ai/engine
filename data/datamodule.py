@@ -35,7 +35,7 @@ class DataModule:
     backtesting_to = None
 
     history_data = {}
-    ohlcv_indicators = ['time', 'open', 'high', 'low', 'close', 'volume', 'pair']
+    ohlcv_indicators = ['time', 'open', 'high', 'low', 'close', 'volume', 'pair', 'buy', 'sell']
 
     def __init__(self, config, backtesting_module):
         print('[INFO] Starting DEMA Data-module...')
@@ -148,7 +148,7 @@ class DataModule:
             start_date += np.around(asked_ticks * self.timeframe_calc)
 
         # Create pandas DataFrame and adds pair info
-        df = DataFrame(ohlcv_data, index=index, columns=self.ohlcv_indicators[:-1])
+        df = DataFrame(ohlcv_data, index=index, columns=self.ohlcv_indicators[:-3])
         df['pair'] = pair
         df['buy'] = 0
         df['sell'] = 0
