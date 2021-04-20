@@ -1,12 +1,12 @@
 {
   "exchange": "binance",
   "timeframe": "5m",
-  "max-open-trades": "3",
-  "starting-capital": "1000",
+  "max-open-trades": 3,
+  "starting-capital": 1000,
   "backtesting-from": "2021-03-11",
   "backtesting-to": "2021-03-15",
-  "backtesting-till-now": "False",
-  "stoploss": "-5.5",
+  "backtesting-till-now": false,
+  "stoploss": -5.5,
   "roi": {
     "0": 5,
     "60": 4,

@@ -1,10 +1,13 @@
 all: build run
 
-build: 
+help:
+	docker run --rm dema-engine:alpha main.py --help
+
+build:
 	docker build . -t dema-engine:alpha
 
 run:
 	docker run --rm dema-engine:alpha
 
-runv: 
+runv:
 	docker run --rm -v "$(shell pwd):/usr/src/engine/" dema-engine:alpha
