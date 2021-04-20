@@ -82,6 +82,8 @@ class Trade:
         """
         Configures stoploss based on configured type.
 
+        :param ohlcv: dictionary with OHLCV data for current tick
+        :type ohlcv: dict
         :param data_dict: dict containing OHLCV data of current pair
         :type data_dict: dict
         :param strategy: strategy class
@@ -89,16 +91,15 @@ class Trade:
         :return: None
         :rtype: None
         """
-        if self.sl_type == 'standard':
+        if self.sl_type == 'dynamic':
+            if 'stoploss' in ohlcv:
+                self.sl_sell_time, self.sl_price = self.dynamic_stoploss(data_dict, ohlcv['time'])
+            else:
+                self.sl_type = 'standard'   # when dynamic not configured use normal stoploss
+        elif self.sl_type == 'standard':
             sl_price = self.open - (self.open * (abs(self.sl_perc) / 100))
-        else:
-            time = ohlcv['time']
-            if self.sl_type == 'trailing':
-                sl_sell_time, sl_price = self.trailing_stoploss(data_dict, time)
-            elif self.sl_type == 'dynamic':
-                sl_sell_time, sl_price = self.dynamic_stoploss(data_dict, time)
-            self.sl_sell_time = sl_sell_time
-        self.sl_price = sl_price
+        elif self.sl_type == 'trailing':
+            self.sl_sell_time, self.sl_price = self.trailing_stoploss(data_dict, ohlcv['time'])
 
     def update_max_drawdown(self) -> None:
         """

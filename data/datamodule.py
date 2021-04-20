@@ -145,9 +145,9 @@ class DataModule:
             start_date += np.around(asked_ticks * self.timeframe_calc)
 
         # Create pandas DataFrame and adds extra info
-        df = DataFrame(ohlcv_data, index=index, columns=get_ohlcv_indicators()[:-4])
+        df = DataFrame(ohlcv_data, index=index, columns=get_ohlcv_indicators()[:-3])
         df['pair'] = pair
-        df['buy'], df['sell'], df['stoploss'] = 0, 0, 0     # default values
+        df['buy'], df['sell'] = 0, 0    # default values
 
         if save:
             print("[INFO] [%s] %s candles downloaded" % (pair, len(index)))

@@ -12,12 +12,12 @@ def get_project_root():
     return Path(__file__).parent
 
 
-def get_ohlcv_indicators():
+def get_ohlcv_indicators() -> [str]:
     """
     :return: list with ohlcv indicator names
     :rtype: List.
     """
-    return ['time', 'open', 'high', 'low', 'close', 'volume', 'pair', 'buy', 'sell', 'stoploss']
+    return ['time', 'open', 'high', 'low', 'close', 'volume', 'pair', 'buy', 'sell']
 
 
 def lower_bar_to_middle_bar(s: str) -> str:

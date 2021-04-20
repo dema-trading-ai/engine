@@ -93,4 +93,4 @@ class MyStrategyAdvanced(Strategy):
 
             # END STRATEGY
 
-        return dataframe
+        return dataframe['stoploss']
