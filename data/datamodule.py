@@ -147,7 +147,7 @@ class DataModule:
         # Create pandas DataFrame and adds extra info
         df = DataFrame(ohlcv_data, index=index, columns=get_ohlcv_indicators()[:-4])
         df['pair'] = pair
-        df['buy'], df['sell'], df['stoploss'] = 0, 0, np.NaN    # default values
+        df['buy'], df['sell'], df['stoploss'] = 0, 0, 0     # default values
 
         if save:
             print("[INFO] [%s] %s candles downloaded" % (pair, len(index)))

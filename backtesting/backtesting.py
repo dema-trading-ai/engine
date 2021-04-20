@@ -78,7 +78,7 @@ class BackTesting:
         :return: list of dictionaries, either OHLCV dict or OHLCV dataframe per pair
         :rtype: list
         """
-        data_df, data_dict = {}, {}
+        data_dict = {}
         for pair in tqdm(self.data.keys(), desc="[INFO] Populating Indicators",
                             total=len(self.data.keys()), ncols=75):
             df = self.data[pair]
