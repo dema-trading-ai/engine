@@ -5,7 +5,7 @@ from models.trade import Trade
 
 # Optional Imports
 import talib.abstract as ta
-
+from config import qtpylib_methods as qtpylib
 
 class MyStrategy(Strategy):
     """
