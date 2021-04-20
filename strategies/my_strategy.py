@@ -41,12 +41,12 @@ class MyStrategy(Strategy):
             # BEGIN STRATEGY
 
             dataframe.loc[
-             (
-                 (dataframe['rsi'] < 30) &
-                 (dataframe['ema5'] < dataframe['ema21']) &
-                 (dataframe['volume'] > 0)
-             ),
-             'buy'] = 1
+                (
+                    (dataframe['rsi'] < 30) &
+                    (dataframe['ema5'] < dataframe['ema21']) &
+                    (dataframe['volume'] > 0)
+                ),
+                'buy'] = 1
 
             # END STRATEGY
 
@@ -63,11 +63,11 @@ class MyStrategy(Strategy):
             # BEGIN STRATEGY
 
             dataframe.loc[
-             (
-                 (dataframe['rsi'] > 70) &
-                 (dataframe['volume'] > 0)
-             ),
-             'sell'] = 1
+                (
+                    (dataframe['rsi'] > 70) &
+                    (dataframe['volume'] > 0)
+                ),
+                'sell'] = 1
 
             # END STRATEGY
 
