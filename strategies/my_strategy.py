@@ -15,29 +15,29 @@ class MyStrategy(Strategy):
     min_candles = 21
 
     def generate_indicators(self, dataframe: DataFrame) -> DataFrame:
-     """
-     :param dataframe: All passed candles (current candle included!) with OHLCV data
-     :type dataframe: DataFrame
-     :return: Dataframe filled with indicator-data
-     :rtype: DataFrame
-     """
-     # RSI - Relative Strength Index
-     dataframe['rsi'] = ta.RSI(dataframe, timeperiod=14)
+        """
+        :param dataframe: All passed candles (current candle included!) with OHLCV data
+        :type dataframe: DataFrame
+        :return: Dataframe filled with indicator-data
+        :rtype: DataFrame
+        """
+        # RSI - Relative Strength Index
+        dataframe['rsi'] = ta.RSI(dataframe, timeperiod=14)
 
-     # EMA - Exponential Moving Average
-     dataframe['ema5'] = ta.EMA(dataframe, timeperiod=5)
-     dataframe['ema21'] = ta.EMA(dataframe, timeperiod=21)
+        # EMA - Exponential Moving Average
+        dataframe['ema5'] = ta.EMA(dataframe, timeperiod=5)
+        dataframe['ema21'] = ta.EMA(dataframe, timeperiod=21)
 
-     return dataframe
+        return dataframe
 
     def buy_signal(self, dataframe: DataFrame) -> DataFrame:
-     """
-     :param dataframe: Dataframe filled with indicators from generate_indicators
-     :type indicators: DataFrame
-     :return: dataframe filled with buy signals
-     :rtype: DataFrame
-     """
-     if len(dataframe) > self.min_candles:
+        """
+        :param dataframe: Dataframe filled with indicators from generate_indicators
+        :type indicators: DataFrame
+        :return: dataframe filled with buy signals
+        :rtype: DataFrame
+        """
+        if len(dataframe) > self.min_candles:
          # BEGIN STRATEGY
 
          dataframe.loc[
@@ -50,16 +50,16 @@ class MyStrategy(Strategy):
 
          # END STRATEGY
 
-     return dataframe
+        return dataframe
 
     def sell_signal(self, dataframe: DataFrame) -> DataFrame:
-     """
-     :param dataframe: Dataframe filled with indicators from generate_indicators
-     :type indicators: DataFrame
-     :return: dataframe filled with sell signals
-     :rtype: DataFrame
-     """
-     if len(dataframe) > self.min_candles:
+        """
+        :param dataframe: Dataframe filled with indicators from generate_indicators
+        :type indicators: DataFrame
+        :return: dataframe filled with sell signals
+        :rtype: DataFrame
+        """
+        if len(dataframe) > self.min_candles:
          # BEGIN STRATEGY
 
          dataframe.loc[
@@ -71,4 +71,4 @@ class MyStrategy(Strategy):
 
          # END STRATEGY
 
-     return dataframe
+        return dataframe
