@@ -1,6 +1,4 @@
-# Triggers the Github Workflow to increase the version numher and publish an update to the Github Package.
-
-name: DockerHub Deployment
+name: DockerHub Development Deployment
 
 on:
   push:
@@ -10,7 +8,6 @@ on:
 jobs:
   publish_package:
     runs-on: ubuntu-latest
-    needs: generate-new-tag
     steps:
       -
         name: Set up QEMU
