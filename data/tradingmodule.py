@@ -126,15 +126,20 @@ class TradingModule:
             print("[INFO] Budget is running low, cannot buy")
             return
 
-        date = datetime.fromtimestamp(ohlcv['time'] / 1000)
         open_trades = len(self.open_trades)
         available_spaces = self.max_open_trades - open_trades
+
+        if available_spaces == 0:
+            print("[INFO] No more trades available, cannot buy")
+            return
+
         spend_amount = (1. / available_spaces) * self.budget
 
         fee_amount = spend_amount * self.fee
         spend_amount -= fee_amount
         self.total_fee_amount += fee_amount
 
+        date = datetime.fromtimestamp(ohlcv['time'] / 1000)
         new_trade = Trade(ohlcv, spend_amount, date)
         self.budget -= spend_amount
         self.open_trades.append(new_trade)
