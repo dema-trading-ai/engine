@@ -1,6 +1,6 @@
 # Files
 from main_controller import MainController
-from config import validate, read_config, print_pairs, read_spec, adjust_config_to_cli
+from config import read_config, print_pairs, read_spec, validate, adjust_config_to_cli
 
 
 def main():
