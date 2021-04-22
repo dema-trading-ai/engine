@@ -12,6 +12,19 @@ def get_project_root():
     return Path(__file__).parent
 
 
+def get_ohlcv_indicators() -> [str]:
+    """
+    :return: list with ohlcv indicator names
+    :rtype: List.
+    """
+    return ['time', 'open', 'high', 'low', 'close', 'volume', 'pair', 'buy', 'sell']
+
+
+def lower_bar_to_middle_bar(s: str) -> str:
+    """Replaces '_' with '-' """
+    return s.replace("_", "-")
+
+  
 def default_empty_array_dict() -> list:
     """
     :return: list for initializing dictionary
@@ -53,8 +66,7 @@ def df_to_dict(df: DataFrame) -> dict:
     df.index = df.index.map(str)
     return df.to_dict('index')
 
-
-def dict_to_df(data: dict, indicators: list) -> DataFrame:
+def dict_to_df(data: dict) -> DataFrame:
     """
     Method turns dictionary into dataframe
     :param data: json with OHLCV data
@@ -62,6 +74,7 @@ def dict_to_df(data: dict, indicators: list) -> DataFrame:
     :return: dataframe with OHLCV data
     :rtype: DataFrame
     """
+    indicators = get_ohlcv_indicators()
     json_file = rapidjson.loads(data)
     df = pd.DataFrame.from_dict(json_file, orient='index', columns=indicators)
     df.index = df.index.map(int)

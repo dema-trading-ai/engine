@@ -10,6 +10,7 @@ from utils import calculate_worth_of_open_trades, default_empty_dict_dict
 from models.trade import Trade
 from config.currencies import get_currency_symbol
 from config.load_strategy import load_strategy_from_config
+from backtesting.plots import plot_per_coin
 
 # ======================================================================
 # BackTesting class is responsible for processing the ticks (ohlcv-data)
@@ -26,6 +27,9 @@ class BackTesting:
     backtesting_from = None
     backtesting_to = None
     data = {}
+    buypoints = {}
+    sellpoints = {}
+    df = {}
 
     def __init__(self, trading_module, config):
         self.trading_module = trading_module
@@ -60,8 +64,9 @@ class BackTesting:
 
         for tick in tqdm(ticks, desc='[INFO] Backtesting', total=len(ticks), ncols=75):
             for pair in pairs:
-                pair_dict = data_dict[pair][tick]
-                self.trading_module.tick(pair_dict)
+                pair_dict = data_dict[pair]
+                tick_dict = pair_dict[tick]
+                self.trading_module.tick(tick_dict, pair_dict)
 
         open_trades = self.trading_module.open_trades
         closed_trades = self.trading_module.closed_trades
@@ -74,26 +79,32 @@ class BackTesting:
         Populates indicators
         Populates buy signal
         Populates sell signal
-        Calculates stoploss
-        :return: dictionary with per pair an OHLCV dict
-        :rtype: dict
+        :return: list of dictionaries, either OHLCV dict or OHLCV dataframe per pair
+        :rtype: list
         """
         data_dict = {}
+        notify = False
         for pair in tqdm(self.data.keys(), desc="[INFO] Populating Indicators",
                             total=len(self.data.keys()), ncols=75):
             df = self.data[pair]
             indicators = self.strategy.generate_indicators(df)
             indicators = self.strategy.buy_signal(indicators)
             indicators = self.strategy.sell_signal(indicators)
-            stoploss = self.strategy.stoploss(indicators)
-            self.config['stoploss'] = stoploss if stoploss else float(self.config['stoploss'])
+            self.df[pair] = indicators.copy()
+            if self.config['stoploss-type'] == 'dynamic':
+                stoploss = self.strategy.stoploss(indicators)
+                if stoploss is not None:
+                    indicators['stoploss'] = stoploss
+                else:
+                    notify = True
             data_dict[pair] = indicators.to_dict('index')
+        if notify:
+            print(f"[WARNING] Dynamic stoploss not configured. Using standard stoploss of {self.config['stoploss']}%")
         return data_dict
 
     # This method is called when backtesting method finished processing all OHLCV-data
     def generate_backtesting_result(self, open_trades: [Trade], closed_trades: [Trade], budget: float) -> None:
         """
-        TODO Feel free to optimize this method :)
         Oversized method for generating backtesting results
 
         :param open_trades: array of open trades
@@ -117,11 +128,19 @@ class BackTesting:
         OpenTradeResult.show(open_trade_res, self.currency_symbol)
         show_signature()
 
+        #plot graphs
+        if self.config["plots"] == "True":
+            plot_per_coin(self)
+
     def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float) -> MainResults:
         budget += calculate_worth_of_open_trades(open_trades)
         overall_profit = ((budget - self.starting_capital) /
                           self.starting_capital) * 100
         max_seen_drawdown = self.calculate_max_seen_drawdown()
+        drawdown_from = datetime.fromtimestamp(max_seen_drawdown['from'] / 1000) \
+            if max_seen_drawdown['from'] != 0 else '-'
+        drawdown_to = datetime.fromtimestamp(max_seen_drawdown['to'] / 1000) \
+            if max_seen_drawdown['to'] != 0 else '-'
 
         return MainResults(tested_from=datetime.fromtimestamp(self.backtesting_from / 1000),
                            tested_to=datetime.fromtimestamp(
@@ -135,11 +154,11 @@ class BackTesting:
                                closed_trades),
                            max_realized_drawdown=self.trading_module.realized_drawdown,
                            max_drawdown_single_trade=self.trading_module.max_drawdown,
+                           max_drawdown_trades=self.trading_module.realized_drawdown_trades,
+                           max_drawdown_chain_bad_trades=self.trading_module.realized_drawdown_chain_bad_trades,
                            max_seen_drawdown=max_seen_drawdown["drawdown"],
-                           drawdown_from=datetime.fromtimestamp(
-                               max_seen_drawdown['from'] / 1000),
-                           drawdown_to=datetime.fromtimestamp(
-                               max_seen_drawdown['to'] / 1000),
+                           drawdown_from=drawdown_from,
+                           drawdown_to=drawdown_to,
                            configured_stoploss=self.config['stoploss'],
                            total_fee_amount=self.trading_module.total_fee_amount)
 
@@ -180,9 +199,6 @@ class BackTesting:
 
     def calculate_statistics_per_coin(self, open_trades, closed_trades):
         """
-        TODO Feel free to optimize this method :)
-        TODO This method does not work fully anymore. Issue will be made.
-
         :param open_trades: array of open trades
         :type open_trades: [Trade]
         :param closed_trades: array of closed trades
@@ -202,7 +218,12 @@ class BackTesting:
             } for pair in self.data.keys()
         }
 
+        self.buypoints = {pair: [] for pair in self.data.keys()}
+        self.sellpoints = {pair: [] for pair in self.data.keys()}
+
         for trade in all_trades:
+            self.buypoints[trade.pair].append(trade.opened_at)
+            self.sellpoints[trade.pair].append(trade.closed_at)
             if trade.profit_percentage is not None:
                 trades_per_coin[trade.pair]['total_profit_prct'] += trade.profit_percentage
             trades_per_coin[trade.pair]['total_profit_amount'] += (trade.currency_amount * trade.current) - (
