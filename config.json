@@ -6,7 +6,8 @@
   "backtesting-from": "2021-03-11",
   "backtesting-to": "2021-03-15",
   "backtesting-till-now": false,
-  "stoploss": -5.5,
+  "stoploss-type": "standard",
+  "stoploss": -10,
   "roi": {
     "0": 5,
     "60": 4,
@@ -20,5 +21,13 @@
   "currency": "USDT",
   "fee": 0.25,
   "strategy-name": "MyStrategy",
-  "strategies-folder": "strategies"
+  "strategies-folder": "strategies",
+  "plots": "True",
+  "plot_indicators1": [
+    "ema5",
+    "ema21"
+  ],
+  "plot_indicators2": [
+    "rsi"
+  ]
 }

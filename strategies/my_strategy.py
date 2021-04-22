@@ -12,8 +12,6 @@ class MyStrategy(Strategy):
     This is an example custom strategy, that inherits from the main Strategy class
     """
 
-    min_candles = 21
-
     def generate_indicators(self, dataframe: DataFrame) -> DataFrame:
         """
         :param dataframe: All passed candles (current candle included!) with OHLCV data
@@ -33,42 +31,40 @@ class MyStrategy(Strategy):
     def buy_signal(self, dataframe: DataFrame) -> DataFrame:
         """
         :param dataframe: Dataframe filled with indicators from generate_indicators
-        :type indicators: DataFrame
+        :type dataframe: DataFrame
         :return: dataframe filled with buy signals
         :rtype: DataFrame
         """
-        if len(dataframe) > self.min_candles:
-            # BEGIN STRATEGY
+        # BEGIN STRATEGY
 
-            dataframe.loc[
-                (
-                    (dataframe['rsi'] < 30) &
-                    (dataframe['ema5'] < dataframe['ema21']) &
-                    (dataframe['volume'] > 0)
-                ),
-                'buy'] = 1
+        dataframe.loc[
+            (
+                (dataframe['rsi'] < 30) &
+                (dataframe['ema5'] < dataframe['ema21']) &
+                (dataframe['volume'] > 0)
+            ),
+            'buy'] = 1
 
-            # END STRATEGY
+        # END STRATEGY
 
         return dataframe
 
     def sell_signal(self, dataframe: DataFrame) -> DataFrame:
         """
         :param dataframe: Dataframe filled with indicators from generate_indicators
-        :type indicators: DataFrame
+        :type dataframe: DataFrame
         :return: dataframe filled with sell signals
         :rtype: DataFrame
         """
-        if len(dataframe) > self.min_candles:
-            # BEGIN STRATEGY
+        # BEGIN STRATEGY
 
-            dataframe.loc[
-                (
-                    (dataframe['rsi'] > 70) &
-                    (dataframe['volume'] > 0)
-                ),
-                'sell'] = 1
+        dataframe.loc[
+            (
+                (dataframe['rsi'] > 70) &
+                (dataframe['volume'] > 0)
+            ),
+            'sell'] = 1
 
-            # END STRATEGY
+        # END STRATEGY
 
         return dataframe
