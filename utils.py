@@ -5,7 +5,7 @@ from pandas import DataFrame
 import pandas as pd
 import rapidjson
 
-CURRENT_VERSION = "v0.3.1"
+CURRENT_VERSION = "v0.4.1"
 
 
 def get_project_root():
