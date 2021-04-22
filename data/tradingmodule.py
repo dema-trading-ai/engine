@@ -139,7 +139,7 @@ class TradingModule:
         if self.budget <= 0:
             print("[INFO] Budget is running low, cannot buy")
             return
-        
+
         date = datetime.fromtimestamp(ohlcv['time'] / 1000)
         open_trades = len(self.open_trades)
         available_spaces = self.max_open_trades - open_trades
