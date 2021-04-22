@@ -31,7 +31,7 @@ class MyStrategy(Strategy):
     def buy_signal(self, dataframe: DataFrame) -> DataFrame:
         """
         :param dataframe: Dataframe filled with indicators from generate_indicators
-        :type indicators: DataFrame
+        :type dataframe: DataFrame
         :return: dataframe filled with buy signals
         :rtype: DataFrame
         """
@@ -52,7 +52,7 @@ class MyStrategy(Strategy):
     def sell_signal(self, dataframe: DataFrame) -> DataFrame:
         """
         :param dataframe: Dataframe filled with indicators from generate_indicators
-        :type indicators: DataFrame
+        :type dataframe: DataFrame
         :return: dataframe filled with sell signals
         :rtype: DataFrame
         """

@@ -131,6 +131,9 @@ dmypy.json
 # Code editor files
 .vscode
 
+# .DS_Store
+.DS_Store
+
 **/.idea/**
 .idea/**
 .idea
