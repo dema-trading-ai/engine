@@ -21,71 +21,48 @@ class Strategy(abc.ABC):
     Methods defined in strategies/*.py will overwrite these methods.
     """
 
-    min_candles = 21
+    MIN_CANDLES = 21
 
     @abc.abstractmethod
-    def generate_indicators(self, candle_data: DataFrame) -> DataFrame:
+    def generate_indicators(self, dataframe: DataFrame) -> DataFrame:
         """
-        :param candle_data: All passed candles (current candle included!) with OHLCV data
-        :type candle_data: DataFrame
+        :param dataframe: All passed candles (current candle included!) with OHLCV data
+        :type dataframe: DataFrame
         :return: Dataframe filled with indicator-data
         :rtype: DataFrame
         """
         return
 
-    @abc.abstractmethod
-    def buy_signal(self, indicators: DataFrame) -> DataFrame:
+    def buy_signal(self, dataframe: DataFrame) -> DataFrame:
         """
-        :param indicators: Dataframe filled with indicators from generate_indicators
-        :type indicators: DataFrame
-        :return: Current candle filled with buy signals
+        :param dataframe: Dataframe filled with indicators from generate_indicators
+        :type dataframe: DataFrame
+        :return: dataframe filled with buy signals
         :rtype: DataFrame
         """
         return
 
-    @abc.abstractmethod
-    def sell_signal(self, indicators: DataFrame) -> DataFrame:
+    def sell_signal(self, dataframe: DataFrame) -> DataFrame:
         """
-        :param indicators: dataframe filled with indicators from generate_indicators
-        :type indicators: Dataframe
-        :return: current candle filled with sell signals
+        :param dataframe: Dataframe filled with indicators from generate_indicators
+        :type dataframe: DataFrame
+        :return: dataframe filled with sell signals
         :rtype: DataFrame
         """
         return
 
-    def stoploss(self, indicators: DataFrame) -> Optional[float]:
+    def stoploss(self, dataframe: DataFrame) -> DataFrame:
         """
         Override this method if you want to dynamically change the stoploss 
         for every trade. If not, the stoploss provided in config.json will
         be returned.
 
-        :param indicators: dataframe filled with indicators from generate_indicators
-        :type indicators: Dataframe
-        :param current_candle: last candle filled with indicators from generate_indicators
-        :type current_candle: Series
-        :param trade: current open trade
-        :type trade: Trade model
-        :return: the stoploss
-        :rtype: float
-        """
-        return
+        IMPORTANT: this function is only called when in the config.json "stoploss-type" is:
+            ->  "stoploss-type": "dynamic"
 
-    @staticmethod
-    def change_timeframe(candle_data: DataFrame, new_timeframe: str) -> DataFrame:
-        """
-        ### WORK IN PROGRESS ###
-
-        Changes the timeframe of the given dataframe
-        Remarks:
-            - Returns only OHLC data (removes columns: 'time', 'volume', 'pair')
-            - 'timeframe' in config.json needs to be smaller than new_timeframe to work correctly.
-            - Values for new_timeframe can be found here:
-            https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#offset-aliases
-        :param candle_data: All passed candles with OHLCV data
-        :type candle_data: DataFrame
-        :param timeframe: New timeframe configuration
-        :type timeframe: string
-        :return: Dataframe in new timeframe
+        :param dataframe: dataframe filled with indicators from generate_indicators
+        :type dataframe: Dataframe
+        :return: dataframe filled with dynamic stoploss signals
         :rtype: DataFrame
         """
-        return candle_data.resample(new_timeframe, origin='start', label='right').ohlc()
+        return

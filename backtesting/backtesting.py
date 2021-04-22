@@ -64,8 +64,9 @@ class BackTesting:
 
         for tick in tqdm(ticks, desc='[INFO] Backtesting', total=len(ticks), ncols=75):
             for pair in pairs:
-                pair_dict = data_dict[pair][tick]
-                self.trading_module.tick(pair_dict)
+                pair_dict = data_dict[pair]
+                tick_dict = pair_dict[tick]
+                self.trading_module.tick(tick_dict, pair_dict)
 
         open_trades = self.trading_module.open_trades
         closed_trades = self.trading_module.closed_trades
@@ -78,11 +79,11 @@ class BackTesting:
         Populates indicators
         Populates buy signal
         Populates sell signal
-        Calculates stoploss
-        :return: dictionary with per pair an OHLCV dict
-        :rtype: dict
+        :return: list of dictionaries, either OHLCV dict or OHLCV dataframe per pair
+        :rtype: list
         """
         data_dict = {}
+        notify = False
         for pair in tqdm(self.data.keys(), desc="[INFO] Populating Indicators",
                             total=len(self.data.keys()), ncols=75):
             df = self.data[pair]
@@ -90,15 +91,20 @@ class BackTesting:
             indicators = self.strategy.buy_signal(indicators)
             indicators = self.strategy.sell_signal(indicators)
             self.df[pair] = indicators.copy()
-            stoploss = self.strategy.stoploss(indicators)
-            self.config['stoploss'] = stoploss if stoploss else float(self.config['stoploss'])
+            if self.config['stoploss-type'] == 'dynamic':
+                stoploss = self.strategy.stoploss(indicators)
+                if stoploss is not None:
+                    indicators['stoploss'] = stoploss
+                else:
+                    notify = True
             data_dict[pair] = indicators.to_dict('index')
+        if notify:
+            print(f"[WARNING] Dynamic stoploss not configured. Using standard stoploss of {self.config['stoploss']}%")
         return data_dict
 
     # This method is called when backtesting method finished processing all OHLCV-data
     def generate_backtesting_result(self, open_trades: [Trade], closed_trades: [Trade], budget: float) -> None:
         """
-        TODO Feel free to optimize this method :)
         Oversized method for generating backtesting results
 
         :param open_trades: array of open trades
@@ -144,6 +150,8 @@ class BackTesting:
                                closed_trades),
                            max_realized_drawdown=self.trading_module.realized_drawdown,
                            max_drawdown_single_trade=self.trading_module.max_drawdown,
+                           max_drawdown_trades=self.trading_module.realized_drawdown_trades,
+                           max_drawdown_chain_bad_trades=self.trading_module.realized_drawdown_chain_bad_trades,
                            max_seen_drawdown=max_seen_drawdown["drawdown"],
                            drawdown_from=datetime.fromtimestamp(
                                max_seen_drawdown['from'] / 1000),
@@ -189,9 +197,6 @@ class BackTesting:
 
     def calculate_statistics_per_coin(self, open_trades, closed_trades):
         """
-        TODO Feel free to optimize this method :)
-        TODO This method does not work fully anymore. Issue will be made.
-
         :param open_trades: array of open trades
         :type open_trades: [Trade]
         :param closed_trades: array of closed trades
