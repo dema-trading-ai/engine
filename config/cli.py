@@ -4,7 +4,7 @@ from config.spec import spec_type_to_python_type
 
 CLI_DESCR = "Dema Trading Engine"
 
-def adjust_config_to_cli(config: dict, spec: list[dict]):
+def adjust_config_to_cli(config: dict, spec: [dict]):
     parser = argparse.ArgumentParser(description=CLI_DESCR)
     for p in spec:
         cli = p.get("cli")
@@ -18,6 +18,3 @@ def adjust_config_to_cli(config: dict, spec: list[dict]):
         if val is not None:
             arg = utils.lower_bar_to_middle_bar(arg)
             config[arg] = val
-    
-
-

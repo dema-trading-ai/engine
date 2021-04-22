@@ -47,6 +47,15 @@
     }
   },
   {
+    "name": "stoploss-type",
+    "default": "standard",
+    "options": ["standard", "trailing", "dynamic"],
+    "type": "string",
+    "cli": {
+      "short": "sl_type"
+    }
+  },
+  {
     "name": "roi",
     "type": "dict",
     "default": {
