@@ -1,27 +1,18 @@
-# Libraries
-import abc
-from pandas import DataFrame, Series
-from typing import Optional
+# Mandatory Imports
+from pandas import DataFrame
+from backtesting.strategy import Strategy
 
-# ======================================================================
-# Strategy-class is responsible for populating indicators / signals
-#
-# © 2021 DemaTrading.ai
-# ======================================================================
+# Optional Imports
+import talib.abstract as ta
 
-"""
-ATTENTION: 
 
-DO NOT USE THIS FILE TO IMPLEMENT YOUR STRATEGY. INSTEAD, USE my_strategy.py IN THE "strategies" FOLDER!
-"""
-
-class Strategy(abc.ABC):
+class MyStrategyAdvanced(Strategy):
     """
-    This module defines the abstract base class (abc) that every strategy must inherit from.
-    Methods defined in strategies/*.py will overwrite these methods.
+    This is an example custom strategy for advanced users, that inherits from the main Strategy class
     """
 
-    @abc.abstractmethod
+    MIN_CANDLES = 21
+
     def generate_indicators(self, dataframe: DataFrame) -> DataFrame:
         """
         :param dataframe: All passed candles (current candle included!) with OHLCV data
@@ -29,7 +20,14 @@ class Strategy(abc.ABC):
         :return: Dataframe filled with indicator-data
         :rtype: DataFrame
         """
-        return
+        # RSI - Relative Strength Index
+        dataframe['rsi'] = ta.RSI(dataframe, timeperiod=14)
+
+        # EMA - Exponential Moving Average
+        dataframe['ema5'] = ta.EMA(dataframe, timeperiod=5)
+        dataframe['ema21'] = ta.EMA(dataframe, timeperiod=21)
+
+        return dataframe
 
     def buy_signal(self, dataframe: DataFrame) -> DataFrame:
         """
@@ -38,7 +36,20 @@ class Strategy(abc.ABC):
         :return: dataframe filled with buy signals
         :rtype: DataFrame
         """
-        return
+        if len(dataframe) > self.MIN_CANDLES:
+            # BEGIN STRATEGY
+
+            dataframe.loc[
+                (
+                    (dataframe['rsi'] < 30) &
+                    (dataframe['ema5'] < dataframe['ema21']) &
+                    (dataframe['volume'] > 0)
+                ),
+                'buy'] = 1
+
+            # END STRATEGY
+
+        return dataframe
 
     def sell_signal(self, dataframe: DataFrame) -> DataFrame:
         """
@@ -47,7 +58,19 @@ class Strategy(abc.ABC):
         :return: dataframe filled with sell signals
         :rtype: DataFrame
         """
-        return
+        if len(dataframe) > self.MIN_CANDLES:
+            # BEGIN STRATEGY
+
+            dataframe.loc[
+                (
+                    (dataframe['rsi'] > 70) &
+                    (dataframe['volume'] > 0)
+                ),
+                'sell'] = 1
+
+            # END STRATEGY
+
+        return dataframe
 
     def stoploss(self, dataframe: DataFrame) -> DataFrame:
         """
@@ -63,4 +86,11 @@ class Strategy(abc.ABC):
         :return: dataframe filled with dynamic stoploss signals
         :rtype: DataFrame
         """
-        return
+        if len(dataframe) > self.MIN_CANDLES:
+            # BEGIN STRATEGY
+
+            dataframe['stoploss'] = dataframe['ema5']
+
+            # END STRATEGY
+
+        return dataframe['stoploss']

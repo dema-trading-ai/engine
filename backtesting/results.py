@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from tabulate import tabulate
+from utils import CURRENT_VERSION
 import typing
 
 FONT_BOLD = "\033[1m"
@@ -29,6 +30,8 @@ class MainResults:
     n_trades_with_loss: int
     max_realized_drawdown: float
     max_drawdown_single_trade: float
+    max_drawdown_trades: int
+    max_drawdown_chain_bad_trades: int
     max_seen_drawdown: float
     drawdown_from: datetime
     drawdown_to: datetime
@@ -38,6 +41,8 @@ class MainResults:
     def show(self, currency_symbol: str):
         print("================================================= \n| %sBacktesting Results%s "
               "\n=================================================" % (FONT_BOLD, FONT_RESET))
+        print("| Engine version \t\t%s" % CURRENT_VERSION)
+        print("| ")
         print("| Backtesting from: \t\t%s" % self.tested_from)
         print("| Backtesting to: \t\t%s" % self.tested_to)
         print("| ")
@@ -56,6 +61,8 @@ class MainResults:
               round(self.max_realized_drawdown, 2) + '\t%')
         print("| Max drawdown 1 trade: \t%s" %
               round(self.max_drawdown_single_trade, 2) + '\t%')
+        print("| Max drawdown trades: \t\t%s" % self.max_drawdown_trades)
+        print("| Max drawdown bad trade chain:\t%s" % self.max_drawdown_chain_bad_trades)
         print("| Max seen drawdown: \t\t%s" %
               round(self.max_seen_drawdown, 2) + '\t%')
         print("| Seen drawdown from: \t\t%s" % self.drawdown_from)
