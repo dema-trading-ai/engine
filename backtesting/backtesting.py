@@ -141,6 +141,8 @@ class BackTesting:
                                closed_trades),
                            max_realized_drawdown=self.trading_module.realized_drawdown,
                            max_drawdown_single_trade=self.trading_module.max_drawdown,
+                           max_drawdown_trades=self.trading_module.realized_drawdown_trades,
+                           max_drawdown_chain_bad_trades=self.trading_module.realized_drawdown_chain_bad_trades,
                            max_seen_drawdown=max_seen_drawdown["drawdown"],
                            drawdown_from=datetime.fromtimestamp(
                                max_seen_drawdown['from'] / 1000),
