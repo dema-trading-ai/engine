@@ -10,6 +10,7 @@ from utils import calculate_worth_of_open_trades, default_empty_dict_dict
 from models.trade import Trade
 from config.currencies import get_currency_symbol
 from config.load_strategy import load_strategy_from_config
+from backtesting.plots import plot_per_coin
 
 # ======================================================================
 # BackTesting class is responsible for processing the ticks (ohlcv-data)
@@ -26,6 +27,9 @@ class BackTesting:
     backtesting_from = None
     backtesting_to = None
     data = {}
+    buypoints = {}
+    sellpoints = {}
+    df = {}
 
     def __init__(self, trading_module, config):
         self.trading_module = trading_module
@@ -86,6 +90,7 @@ class BackTesting:
             indicators = self.strategy.generate_indicators(df)
             indicators = self.strategy.buy_signal(indicators)
             indicators = self.strategy.sell_signal(indicators)
+            self.df[pair] = indicators.copy()
             if self.config['stoploss-type'] == 'dynamic':
                 stoploss = self.strategy.stoploss(indicators)
                 if stoploss is not None:
@@ -122,6 +127,10 @@ class BackTesting:
         CoinInsights.show(coin_res, self.currency_symbol)
         OpenTradeResult.show(open_trade_res, self.currency_symbol)
         show_signature()
+
+        #plot graphs
+        if self.config["plots"] == "True":
+            plot_per_coin(self)
 
     def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float) -> MainResults:
         budget += calculate_worth_of_open_trades(open_trades)
@@ -207,7 +216,12 @@ class BackTesting:
             } for pair in self.data.keys()
         }
 
+        self.buypoints = {pair: [] for pair in self.data.keys()}
+        self.sellpoints = {pair: [] for pair in self.data.keys()}
+
         for trade in all_trades:
+            self.buypoints[trade.pair].append(trade.opened_at)
+            self.sellpoints[trade.pair].append(trade.closed_at)
             if trade.profit_percentage is not None:
                 trades_per_coin[trade.pair]['total_profit_prct'] += trade.profit_percentage
             trades_per_coin[trade.pair]['total_profit_amount'] += (trade.currency_amount * trade.current) - (

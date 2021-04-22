@@ -21,5 +21,13 @@
   "currency": "USDT",
   "fee": 0.25,
   "strategy-name": "MyStrategy",
-  "strategies-folder": "strategies"
+  "strategies-folder": "strategies",
+  "plots": "True",
+  "plot_indicators1": [
+    "ema5",
+    "ema21"
+  ],
+  "plot_indicators2": [
+    "rsi"
+  ]
 }
