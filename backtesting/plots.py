@@ -3,6 +3,32 @@ from datetime import datetime
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+
+def calculate_buy_sell_moments(pair, dates, df, points, list):
+    """
+    Method that lists buy or sell points over time
+    :param pair: pair of coins
+    :type pair: str
+    :param dates: points in time
+    :type dates: list
+    :param df: dataframe
+    :type df: df
+    :param points: buy/sell points in time
+    :type points: dict
+    :param list: empty list
+    :type list: list
+    :return: list that contains all buy/sell points over time
+    :rtype: list
+    """
+
+    for x in range(len(df[pair]["high"])):
+        if dates[x] in points[pair]:
+            list.append((df[pair]["high"][x] + df[pair]["low"][x]) / 2)
+        else:
+            list.append(np.NaN)
+
+    return list
+
 def plot_per_coin(self):
     """
     Plot dataframe of a all coin pairs
@@ -67,20 +93,9 @@ def plot_per_coin(self):
                                   mode='markers', name='sellsignal', line_color='rgb(128,0,0)')), row=1, col=1)
 
         # add actual buy and sell moments
-        buy = []
-        sell = []
 
-        for x in range(len(self.df[pair]["high"])):
-            if dates[x] in self.buypoints[pair]:
-                buy.append((self.df[pair]["high"][x] + self.df[pair]["low"][x]) / 2)
-            else:
-                buy.append(np.NaN)
-
-        for x in range(len(self.df[pair]["high"])):
-            if dates[x] in self.sellpoints[pair]:
-                sell.append((self.df[pair]["high"][x] + self.df[pair]["low"][x]) / 2)
-            else:
-                sell.append(np.NaN)
+        buy = calculate_buy_sell_moments(pair, dates, self.df, self.buypoints, [])
+        sell = calculate_buy_sell_moments(pair, dates, self.df, self.sellpoints, [])
 
         fig.add_trace((go.Scatter(x=dates, y=buy,
                                   mode='markers',
@@ -122,3 +137,5 @@ def plot_per_coin(self):
 
         fig.show()
         fig.write_html("data/backtesting-data/binance/plot%s.html" % pair.replace("/", ""))
+
+
