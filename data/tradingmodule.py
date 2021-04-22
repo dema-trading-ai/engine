@@ -130,7 +130,6 @@ class TradingModule:
         available_spaces = self.max_open_trades - open_trades
 
         if available_spaces == 0:
-            print("[INFO] No more trades available, cannot buy")
             return
 
         spend_amount = (1. / available_spaces) * self.budget
