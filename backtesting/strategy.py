@@ -21,8 +21,6 @@ class Strategy(abc.ABC):
     Methods defined in strategies/*.py will overwrite these methods.
     """
 
-    MIN_CANDLES = 21
-
     @abc.abstractmethod
     def generate_indicators(self, dataframe: DataFrame) -> DataFrame:
         """

@@ -8,6 +8,7 @@ import rapidjson
 import sys
 from os import path
 import os
+import datetime
 
 # Files
 from utils import df_to_dict, dict_to_df, get_ohlcv_indicators
@@ -33,6 +34,7 @@ class DataModule:
     backtesting_to = None
 
     history_data = {}
+    ohlcv_indicators = ['time', 'open', 'high', 'low', 'close', 'volume', 'pair', 'buy', 'sell']
 
     def __init__(self, config, backtesting_module):
         print('[INFO] Starting DEMA Data-module...')
@@ -144,8 +146,9 @@ class DataModule:
             ohlcv_data += result
             start_date += np.around(asked_ticks * self.timeframe_calc)
 
-        # Create pandas DataFrame and adds extra info
-        df = DataFrame(ohlcv_data, index=index, columns=get_ohlcv_indicators()[:-3])
+        # Create pandas DataFrame and adds pair info
+        df = DataFrame(ohlcv_data, index=index, columns=self.ohlcv_indicators[:-3])
+
         df['pair'] = pair
         df['buy'], df['sell'] = 0, 0    # default values
 
@@ -184,17 +187,20 @@ class DataModule:
         test_from = self.config['backtesting-from']
         test_to = self.config['backtesting-to']
         test_till_now = self.config['backtesting-till-now']
+        today_ms = self.exchange.milliseconds()
 
         self.backtesting_from = self.exchange.parse8601("%sT00:00:00Z" % test_from)
-        if test_till_now:
-            print('[INFO] Gathering data from %s until now' % test_from)
-            self.backtesting_to = self.exchange.milliseconds()
-        elif not test_till_now:
-            print('[INFO] Gathering data from %s until %s' % (test_from, test_to))
-            self.backtesting_to = self.exchange.parse8601("%sT00:00:00Z" % test_to)
-        else:
-            print(
-                "[ERROR] Something went wrong parsing config. Please use yyyy-mm-dd format at 'backtesting-from', 'backtesting-to'")
+        self.backtesting_to = self.exchange.parse8601("%sT00:00:00Z" % test_to)
+
+        if test_till_now or today_ms < self.backtesting_to:
+            test_to = datetime.datetime.fromtimestamp(today_ms / 1000.0).strftime("%Y-%m-%d")
+            print('[INFO] Changed %s to %s' % (self.config['backtesting-to'], test_to))
+            self.config['backtesting-to'] = test_to
+            self.backtesting_to = today_ms
+
+        if self.backtesting_from >= self.backtesting_to:
+            raise Exception("[ERROR] Backtesting periods are configured incorrectly.")
+        print('[INFO] Gathering data from %s until %s' % (test_from, test_to))
 
     def check_datafolder(self, pair: str) -> bool:
         """
