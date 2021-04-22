@@ -143,8 +143,11 @@ class TradingModule:
         date = datetime.fromtimestamp(ohlcv['time'] / 1000)
         open_trades = len(self.open_trades)
         available_spaces = self.max_open_trades - open_trades
-        spend_amount = (1. / available_spaces) * self.budget
 
+        if available_spaces == 0:
+            return
+
+        spend_amount = (1. / available_spaces) * self.budget
         fee_amount = spend_amount * self.fee
         spend_amount -= fee_amount
         self.total_fee_amount += fee_amount
