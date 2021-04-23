@@ -266,8 +266,8 @@ class DataModule:
         df = self.check_backtesting_period(pair, df, final_timestamp)
         begin_index = df.index.get_loc(self.backtesting_from)
         end_index = df.index.get_loc(final_timestamp)
-        df = df[begin_index:end_index+1]
         self.save_dataframe(pair, df)
+        df = df[begin_index:end_index+1]
         return df
 
     def check_backtesting_period(self, pair: str, df: DataFrame, final_timestamp: int) -> DataFrame:
