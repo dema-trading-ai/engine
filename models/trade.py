@@ -23,10 +23,13 @@ class Trade:
     currency_amount = 0.0
     profit_dollar = 0.0
     profit_percentage = 0.0
-    max_drawdown = 0.0
     sell_reason = None
     opened_at = 0.0
     closed_at = 0.0
+
+    lowest_seen_price = 0.0
+    max_seen_drawdown = 0.0
+    realised_drawdown = 0.0
 
     sl_type = None
     sl_perc = 0.0
@@ -58,6 +61,7 @@ class Trade:
         self.sell_reason = reason
         self.close = self.current
         self.closed_at = date
+        self.realised_drawdown = self.profit_percentage
 
     def update_stats(self, ohlcv: dict) -> None:
         """
@@ -70,6 +74,7 @@ class Trade:
         """
         self.current = ohlcv['close']
         self.set_profits()
+        self.update_max_drawdown()
 
     def set_profits(self):
         """
@@ -108,8 +113,9 @@ class Trade:
         :return: None
         :rtype: None
         """
-        if self.profit_percentage < self.max_drawdown:
-            self.max_drawdown = self.profit_percentage
+        if self.lowest_seen_price == 0 or self.current < self.lowest_seen_price:
+            self.lowest_seen_price = self.current
+            self.max_seen_drawdown = self.profit_percentage
 
     def check_for_sl(self, ohlcv: dict) -> bool:
         """

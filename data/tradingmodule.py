@@ -1,5 +1,6 @@
 # Libraries
 from datetime import datetime
+import numpy as np
 
 # Files
 from config.load_strategy import load_strategy_from_config
@@ -24,11 +25,12 @@ class TradingModule:
     config = None
     closed_trades = []
     open_trades = []
-    max_drawdown = 0
     strategy = None
 
     open_order_value_per_timestamp = {}
     budget_per_timestamp = {}
+
+    max_drawdown = 0
     current_drawdown = 0.0
     realized_drawdown = 0
     current_drawdown_trades = 0
@@ -36,6 +38,12 @@ class TradingModule:
     current_drawdown_chain_bad_trades = 0
     temp_chain_bad_trades = 0
     realized_drawdown_chain_bad_trades = 0
+
+    # pf_high = 0
+    # pf_low_seen = np.inf
+    # pf_low_realised = 0
+    # pf_realised_drawdown = 0
+    # pf_seen_drawdown = 0
 
     fee = 0
     total_fee_amount = 0
@@ -94,7 +102,6 @@ class TradingModule:
         :rtype: None
         """
         self.update_value_per_timestamp_tracking(trade, ohlcv)  # update total value tracking
-        trade.update_max_drawdown()
 
         stoploss_reached = self.check_stoploss_open_trade(trade, ohlcv)
         roi_reached = self.check_roi_open_trade(trade, ohlcv)
@@ -155,6 +162,7 @@ class TradingModule:
         new_trade = \
             Trade(ohlcv, spend_amount, date, self.sl_type, self.sl_perc)
         new_trade.configure_stoploss(ohlcv, data_dict, self.strategy)
+        new_trade.update_max_drawdown()
 
         self.budget -= spend_amount
         self.open_trades.append(new_trade)
@@ -247,6 +255,27 @@ class TradingModule:
         :rtype: None
         """
         self.budget_per_timestamp[ohlcv['time']] = self.budget
+        # current_total_value = self.budget + \
+        #     calculate_worth_of_open_trades(self.open_trades)
+        # if current_total_value < self.pf_low_seen:
+        #     self.pf_low_seen = self.budget
+
+    # def update_drawdowns_closed_trade(self, trade: Trade) -> None:
+    #     """
+    #     This method updates realized drawdown tracking after closing a trade
+    #     :param trade: last closed Trade
+    #     :type trade: Trade
+    #     :return: None
+    #     :rtype: None
+    #     """
+    #     pf_high = 0
+    #     pf_low_seen = 0
+    #     pf_low_realised = 0
+    #     pf_realised_drawdown = 0
+    #     pf_seen_drawdown = 0
+
+    #     if self.budget > self.pf_high:
+    #         self.pf_high = self.budget
 
     def update_drawdowns_closed_trade(self, trade: Trade) -> None:
         """

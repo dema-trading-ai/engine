@@ -166,17 +166,14 @@ class BackTesting:
         stats = self.calculate_statistics_per_coin(open_trades, closed_trades)
         new_stats = []
         for coin in stats:
-            durations = list(stats[coin]['avg_duration'])
-            average_timedelta = sum(durations, timedelta(
-                0)) / np.max([1, len(durations)])
-            avg_profit_prct = (
-                stats[coin]['total_profit_prct'] / np.max([1, stats[coin]['amount_of_trades']]))
             coin_insight = CoinInsights(pair=coin,
-                                        avg_profit_percentage=avg_profit_prct,
+                                        avg_profit_percentage=stats[coin]['avg_profit_prct'],
+                                        total_profit_percentage=stats[coin]['total_profit_prct'],
                                         profit=stats[coin]['total_profit_amount'],
                                         n_trades=stats[coin]['amount_of_trades'],
-                                        max_drawdown=stats[coin]['max_drawdown'],
-                                        avg_duration=average_timedelta,
+                                        max_seen_drawdown=stats[coin]['max_seen_drawdown'],
+                                        max_realised_drawdown=stats[coin]['max_realised_drawdown'],
+                                        avg_duration=stats[coin]['avg_duration'],
                                         roi=stats[coin]['sell_reasons']['ROI'],
                                         stoploss=stats[coin]['sell_reasons']['Stoploss'],
                                         sell_signal=stats[coin]['sell_reasons']['Sell signal'])
@@ -185,13 +182,12 @@ class BackTesting:
         return new_stats
 
     def generate_open_trades_results(self, open_trades: [Trade]) -> typing.List[OpenTradeResult]:
-        # print("| %sLeft open trades %s" % (FONT_BOLD, FONT_RESET))
         open_trade_stats = []
         for trade in open_trades:
             open_trade_res = OpenTradeResult(pair=trade.pair,
                                              curr_profit_percentage=trade.profit_percentage,
                                              curr_profit=trade.profit_dollar,
-                                             max_drawdown=trade.max_drawdown,
+                                             max_seen_drawdown=trade.max_seen_drawdown,
                                              opened_at=trade.opened_at)
 
             open_trade_stats.append(open_trade_res)
@@ -209,39 +205,75 @@ class BackTesting:
         all_trades = open_trades + closed_trades
         trades_per_coin = {
             pair: {
+                'avg_profit_prct': 0,
                 'total_profit_prct': 0,
-                'total_profit_amount': 0,
+                'total_profit_amount': 0.0,
                 'amount_of_trades': 0,
-                'max_drawdown': 0.0,
-                'avg_duration': [],
+                'consecutive_losses': 0,
+                'curr_realised_drawdown': 0.0,
+                'curr_seen_drawdown': 0.0,
+                'max_seen_drawdown': 0.0,
+                'max_realised_drawdown': 0.0,
+                'avg_duration': None,
                 'sell_reasons': default_empty_dict_dict()
             } for pair in self.data.keys()
         }
 
+        # Used for plotting
         self.buypoints = {pair: [] for pair in self.data.keys()}
         self.sellpoints = {pair: [] for pair in self.data.keys()}
 
         for trade in all_trades:
+            # Save buy/sell signals
             self.buypoints[trade.pair].append(trade.opened_at)
             self.sellpoints[trade.pair].append(trade.closed_at)
-            if trade.profit_percentage is not None:
-                trades_per_coin[trade.pair]['total_profit_prct'] += trade.profit_percentage
-            trades_per_coin[trade.pair]['total_profit_amount'] += (trade.currency_amount * trade.current) - (
-                trade.currency_amount * trade.open)
+
+            # Update average profit
+            trades_per_coin[trade.pair]['avg_profit_prct'] += trade.profit_percentage
+
+            # Update total profit percentage and amount
+            if trades_per_coin[trade.pair]['total_profit_prct'] == 0:
+                trades_per_coin[trade.pair]['total_profit_prct'] = 1 + trade.profit_percentage/100
+            else:
+                trades_per_coin[trade.pair]['total_profit_prct'] = \
+                    trades_per_coin[trade.pair]['total_profit_prct'] * (1 + trade.profit_percentage/100)
+
+            
+            trades_per_coin[trade.pair]['total_profit_amount'] += \
+                (trade.currency_amount * trade.current) - (trade.currency_amount * trade.open)
             trades_per_coin[trade.pair]['amount_of_trades'] += 1
 
             if trade.status == 'closed':
-                if trade.profit_percentage < 0:
-                    if trade.profit_percentage < trades_per_coin[trade.pair]['max_drawdown']:
-                        trades_per_coin[trade.pair]['max_drawdown'] = trade.profit_percentage
-
-                trades_per_coin[trade.pair]['avg_duration'].append(
-                    trade.closed_at - trade.opened_at)
                 trades_per_coin[trade.pair]['sell_reasons'][trade.sell_reason] += 1
-            else:
-                trades_per_coin[trade.pair]['avg_duration'].append(
-                    datetime.now() - trade.opened_at)
+                # If current trade had drawdown
+                if trade.realised_drawdown < 0:
+                    # If first drawdown
+                    if trades_per_coin[trade.pair]['consecutive_losses'] == 0:
+                        trades_per_coin[trade.pair]['curr_seen_drawdown'] = abs(trade.max_seen_drawdown)
+                        trades_per_coin[trade.pair]['curr_realised_drawdown'] = abs(trade.realised_drawdown)
+                    # Combine drawdowns of consecutive losses
+                    else:
+                        trades_per_coin[trade.pair]['curr_seen_drawdown'] = (1 - ((1 - abs(trades_per_coin[trade.pair]['curr_seen_drawdown']/100)) * (1 - abs(trade.max_seen_drawdown/100)))) * 100
+                        trades_per_coin[trade.pair]['curr_realised_drawdown'] = (1 - ((1 - abs(trades_per_coin[trade.pair]['curr_realised_drawdown']/100)) * (1 - abs(trade.realised_drawdown/100)))) * 100
+                    trades_per_coin[trade.pair]['consecutive_losses'] += 1
 
+                    # Update max seen drawdown
+                    if trades_per_coin[trade.pair]['curr_seen_drawdown'] > trades_per_coin[trade.pair]['max_seen_drawdown']:
+                        trades_per_coin[trade.pair]['max_seen_drawdown'] = trades_per_coin[trade.pair]['curr_seen_drawdown']
+                    
+                    # Update max realised drawdown
+                    if trades_per_coin[trade.pair]['curr_realised_drawdown'] > trades_per_coin[trade.pair]['max_realised_drawdown']:
+                        trades_per_coin[trade.pair]['max_realised_drawdown'] = trades_per_coin[trade.pair]['curr_realised_drawdown']
+                # If current trade had no drawdown
+                else:
+                    trades_per_coin[trade.pair]['consecutive_losses'] = 0
+                    trades_per_coin[trade.pair]['curr_seen_drawdown'] = 0
+                    trades_per_coin[trade.pair]['curr_realised_drawdown'] = 0
+
+                if trades_per_coin[trade.pair]['avg_duration'] is None:
+                    trades_per_coin[trade.pair]['avg_duration'] = trade.closed_at - trade.opened_at
+                else:
+                    trades_per_coin[trade.pair]['avg_duration'] += trade.closed_at - trade.opened_at
         return trades_per_coin
 
     # Method for calculating max seen drawdown
