@@ -129,7 +129,7 @@ class BackTesting:
         show_signature()
 
         #plot graphs
-        if self.config["plots"] == "True":
+        if self.config["plots"]:
             plot_per_coin(self)
 
     def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float) -> MainResults:

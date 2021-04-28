@@ -22,7 +22,7 @@
   "fee": 0.25,
   "strategy-name": "MyStrategy",
   "strategies-folder": "strategies",
-  "plots": "False",
+  "plots": true,
   "plot_indicators1": [
     "ema5",
     "ema21"
