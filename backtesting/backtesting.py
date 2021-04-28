@@ -72,7 +72,8 @@ class BackTesting:
         open_trades = self.trading_module.open_trades
         closed_trades = self.trading_module.closed_trades
         budget = self.trading_module.budget
-        self.generate_backtesting_result(open_trades, closed_trades, budget)
+        market_change = self.get_market_change(ticks, pairs, data_dict)
+        self.generate_backtesting_result(open_trades, closed_trades, budget, market_change)
 
     def populate_signals(self) -> dict:
         """
@@ -80,8 +81,8 @@ class BackTesting:
         Populates indicators
         Populates buy signal
         Populates sell signal
-        :return: list of dictionaries, either OHLCV dict or OHLCV dataframe per pair
-        :rtype: list
+        :return: dict containing OHLCV data per pair
+        :rtype: dict
         """
         data_dict = {}
         notify = False
@@ -103,8 +104,32 @@ class BackTesting:
             print(f"[WARNING] Dynamic stoploss not configured. Using standard stoploss of {self.config['stoploss']}%")
         return data_dict
 
+    def get_market_change(self, ticks: list, pairs: list, data_dict: dict) -> dict:
+        """
+        Calculates the market change for every coin if bought at start and sold at end.
+
+        :param ticks: list with all ticks
+        :type ticks: list
+        :param pairs: list of traded pairs
+        :type pairs: list
+        :param data_dict: dict containing OHLCV data per pair
+        :type data_dict: dict
+        :return: dict with market change per pair
+        :rtype: dict
+        """
+        market_change = {}
+        total_change = 0
+        for pair in pairs:
+            begin_value = data_dict[pair][ticks[0]]['close']
+            end_value = data_dict[pair][ticks[-1]]['close']
+            coin_change = end_value / begin_value
+            market_change[pair] = coin_change
+            total_change += coin_change
+        market_change['all'] = total_change / len(pairs)
+        return market_change
+
     # This method is called when backtesting method finished processing all OHLCV-data
-    def generate_backtesting_result(self, open_trades: [Trade], closed_trades: [Trade], budget: float) -> None:
+    def generate_backtesting_result(self, open_trades: [Trade], closed_trades: [Trade], budget: float, market_change: dict) -> None:
         """
         Oversized method for generating backtesting results
 
@@ -114,13 +139,15 @@ class BackTesting:
         :type closed_trades: [Trade]
         :param budget: Budget at the moment backtests end
         :type budget: float
+        :param market_change: dict with market change per pair
+        :type market_change: dict
         :return: None
         :rtype: None
         """
         # generate results
         main_results = self.generate_main_results(
-            open_trades, closed_trades, budget)
-        coin_res = self.generate_coin_results(closed_trades)
+            open_trades, closed_trades, budget, market_change)
+        coin_res = self.generate_coin_results(closed_trades, market_change)
         open_trade_res = self.generate_open_trades_results(open_trades)
 
         # print tables
@@ -133,7 +160,7 @@ class BackTesting:
         if self.config["plots"] == "True":
             plot_per_coin(self)
 
-    def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float) -> MainResults:
+    def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float, market_change: dict) -> MainResults:
         # Get total budget and calculate overall profit
         budget += calculate_worth_of_open_trades(open_trades)
         overall_profit = ((budget - self.starting_capital) / self.starting_capital) * 100
@@ -147,33 +174,35 @@ class BackTesting:
             if max_seen_drawdown['to'] != 0 else '-'
 
         return MainResults(tested_from=datetime.fromtimestamp(self.backtesting_from / 1000),
-                           tested_to=datetime.fromtimestamp(
+                            tested_to=datetime.fromtimestamp(
                                self.backtesting_to / 1000),
-                           starting_capital=self.starting_capital,
-                           end_capital=budget,
-                           overall_profit_percentage=overall_profit,
-                           n_trades=len(open_trades)+len(closed_trades),
-                           n_left_open_trades=len(open_trades),
-                           n_trades_with_loss=max_realised_drawdown['drawdown_trades'],
-                           n_consecutive_losses=max_realised_drawdown['max_consecutive_losses'],
-                           max_realised_drawdown=(max_realised_drawdown['max_drawdown'] - 1) * 100,
-                           max_drawdown_single_trade=(max_realised_drawdown['max_drawdown_one'] - 1) * 100,
-                           max_seen_drawdown=(max_seen_drawdown["drawdown"] - 1) * 100,
-                           drawdown_from=drawdown_from,
-                           drawdown_to=drawdown_to,
-                           configured_stoploss=self.config['stoploss'],
-                           total_fee_amount=self.trading_module.total_fee_amount)
+                            market_change=(market_change['all'] - 1) * 100,
+                            starting_capital=self.starting_capital,
+                            end_capital=budget,
+                            overall_profit_percentage=overall_profit,
+                            n_trades=len(open_trades)+len(closed_trades),
+                            n_left_open_trades=len(open_trades),
+                            n_trades_with_loss=max_realised_drawdown['drawdown_trades'],
+                            n_consecutive_losses=max_realised_drawdown['max_consecutive_losses'],
+                            max_realised_drawdown=(max_realised_drawdown['max_drawdown'] - 1) * 100,
+                            max_drawdown_single_trade=(max_realised_drawdown['max_drawdown_one'] - 1) * 100,
+                            max_seen_drawdown=(max_seen_drawdown["drawdown"] - 1) * 100,
+                            drawdown_from=drawdown_from,
+                            drawdown_to=drawdown_to,
+                            configured_stoploss=self.config['stoploss'],
+                            total_fee_amount=self.trading_module.total_fee_amount)
 
-    def generate_coin_results(self, closed_trades) -> typing.List[CoinInsights]:
+    def generate_coin_results(self, closed_trades: [Trade], market_change: dict) -> typing.List[CoinInsights]:
         stats = self.calculate_statistics_per_coin(closed_trades)
         
         new_stats = []
         for coin in stats:
             coin_insight = CoinInsights(pair=coin,
+                                        n_trades=stats[coin]['amount_of_trades'],
+                                        market_change=(market_change[coin] - 1) * 100,
                                         cum_profit_percentage=stats[coin]['cum_profit_prct'],
                                         total_profit_percentage=(stats[coin]['total_profit_ratio'] - 1) * 100,
                                         profit=stats[coin]['total_profit_amount'],
-                                        n_trades=stats[coin]['amount_of_trades'],
                                         max_seen_drawdown=(stats[coin]['max_seen_ratio'] - 1) * 100,
                                         max_realised_drawdown=(stats[coin]['max_realised_ratio'] - 1) * 100,
                                         total_duration=stats[coin]['total_duration'],
@@ -370,7 +399,7 @@ class BackTesting:
 
         return max_realised_drawdown
 
-    def find_total_value(self, value, budget, tick) -> float:
+    def find_total_value(self, value: dict, budget: dict, tick: int) -> float:
         """
         Finds the total value of given dictionaries at given tick time
         :param value: total value of open trades per tick

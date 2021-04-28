@@ -1,6 +1,5 @@
 # Libraries
 from datetime import datetime
-import numpy as np
 
 # Files
 from config.load_strategy import load_strategy_from_config

@@ -24,6 +24,7 @@ def show_signature():
 class MainResults:
     tested_from: datetime
     tested_to: datetime
+    market_change: float
     starting_capital: float
     end_capital: float
     overall_profit_percentage: float
@@ -33,8 +34,6 @@ class MainResults:
     n_consecutive_losses: int
     max_realised_drawdown: float
     max_drawdown_single_trade: float
-#     max_drawdown_trades: int
-#     max_drawdown_chain_bad_trades: int
     max_seen_drawdown: float
     drawdown_from: datetime
     drawdown_to: datetime
@@ -48,6 +47,7 @@ class MainResults:
         print("| ")
         print("| Backtesting from: \t\t%s" % self.tested_from)
         print("| Backtesting to: \t\t%s" % self.tested_to)
+        print("| Market change: \t\t%s" % round(self.market_change, 2) + '\t%')
         print("| ")
         print("| Started with: \t\t%s" %
               round(self.starting_capital, 2) + '\t' + currency_symbol)
@@ -79,6 +79,7 @@ class CoinInsights:
     total_profit_percentage: float
     profit: float
     n_trades: int
+    market_change: float
     max_seen_drawdown: float
     max_realised_drawdown: float
     total_duration: datetime
@@ -95,6 +96,7 @@ class CoinInsights:
         for c in instances:
             stats.append([c.pair,
                         c.n_trades, 
+                        round(c.market_change, 2),
                         round(c.cum_profit_percentage / c.n_trades, 2),
                         round(c.cum_profit_percentage, 2),
                         round(c.total_profit_percentage, 2),
@@ -109,6 +111,7 @@ class CoinInsights:
         print(tabulate(stats,
                        headers=['Pair',
                               'trades',
+                              'market change (%)',
                               'avg profit (%)',
                               'cum profit (%)',
                               'total profit (%)',
