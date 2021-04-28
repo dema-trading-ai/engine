@@ -24,6 +24,7 @@ def show_signature():
 class MainResults:
     tested_from: datetime
     tested_to: datetime
+    max_open_trades: int
     market_change: float
     starting_capital: float
     end_capital: float
@@ -34,10 +35,12 @@ class MainResults:
     n_consecutive_losses: int
     max_realised_drawdown: float
     max_drawdown_single_trade: float
+    max_win_single_trade: float
     max_seen_drawdown: float
     drawdown_from: datetime
     drawdown_to: datetime
     configured_stoploss: float
+    fee: float
     total_fee_amount: float
 
     def show(self, currency_symbol: str):
@@ -47,7 +50,8 @@ class MainResults:
         print("| ")
         print("| Backtesting from: \t\t%s" % self.tested_from)
         print("| Backtesting to: \t\t%s" % self.tested_to)
-        print("| Market change: \t\t%s" % round(self.market_change, 2) + '\t%')
+        print("| Max open trades: \t\t%s" % self.max_open_trades)
+        print("| Stoploss: \t\t\t%s" % self.configured_stoploss + "\t%")
         print("| ")
         print("| Started with: \t\t%s" %
               round(self.starting_capital, 2) + '\t' + currency_symbol)
@@ -55,20 +59,24 @@ class MainResults:
               round(self.end_capital, 2) + '\t' + currency_symbol)
         print("| Overall profit: \t\t%s" %
               round(self.overall_profit_percentage, 2) + '\t%')
+        print("| Market change: \t\t%s" % round(self.market_change, 2) + '\t%')
         print("| Amount of trades: \t\t%s" % self.n_trades)
         print("| Left-open trades: \t\t%s" % self.n_left_open_trades)
         print("| Trades with loss: \t\t%s" % self.n_trades_with_loss)
         print("| Most consecutive losses: \t%s" % self.n_consecutive_losses)
-        print("| Stoploss: \t\t\t%s" % self.configured_stoploss + "\t%")
         print("| ")
-        print("| Max realised drawdown:\t%s" %
-              round(self.max_realised_drawdown, 2) + '\t%')
+        print("| Best trade: \t\t\t%s" %
+              round(self.max_win_single_trade, 2) + '\t%')
         print("| Worst trade: \t\t\t%s" %
               round(self.max_drawdown_single_trade, 2) + '\t%')
+        print("| Max realised drawdown:\t%s" %
+              round(self.max_realised_drawdown, 2) + '\t%')
         print("| Max seen drawdown: \t\t%s" %
               round(self.max_seen_drawdown, 2) + '\t%')
         print("| Max seen drawdown from: \t%s" % self.drawdown_from)
         print("| Max seen drawdown to: \t%s" % self.drawdown_to)
+        print("| ")
+        print("| Fee percentage: \t\t%s" % self.fee + '\t%')
         print("| Total fee paid: \t\t%s" % round(self.total_fee_amount, 2) + "\t" + currency_symbol)
 
 

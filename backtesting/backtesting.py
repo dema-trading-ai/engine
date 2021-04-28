@@ -176,6 +176,7 @@ class BackTesting:
         return MainResults(tested_from=datetime.fromtimestamp(self.backtesting_from / 1000),
                             tested_to=datetime.fromtimestamp(
                                self.backtesting_to / 1000),
+                            max_open_trades=self.config['max-open-trades'],
                             market_change=(market_change['all'] - 1) * 100,
                             starting_capital=self.starting_capital,
                             end_capital=budget,
@@ -186,10 +187,12 @@ class BackTesting:
                             n_consecutive_losses=max_realised_drawdown['max_consecutive_losses'],
                             max_realised_drawdown=(max_realised_drawdown['max_drawdown'] - 1) * 100,
                             max_drawdown_single_trade=(max_realised_drawdown['max_drawdown_one'] - 1) * 100,
+                            max_win_single_trade=(max_realised_drawdown['max_win_one'] - 1) * 100,
                             max_seen_drawdown=(max_seen_drawdown["drawdown"] - 1) * 100,
                             drawdown_from=drawdown_from,
                             drawdown_to=drawdown_to,
                             configured_stoploss=self.config['stoploss'],
+                            fee = self.config['fee'],
                             total_fee_amount=self.trading_module.total_fee_amount)
 
     def generate_coin_results(self, closed_trades: [Trade], market_change: dict) -> typing.List[CoinInsights]:
@@ -356,6 +359,7 @@ class BackTesting:
             "curr_drawdown": 1,     # ratio 
             "max_drawdown": 1,      # ratio
             "max_drawdown_one": 1,  # ratio
+            "max_win_one": 1,       # ratio
             "curr_consecutive_losses": 0,
             "max_consecutive_losses": 0,
             "drawdown_trades": 0
@@ -373,6 +377,9 @@ class BackTesting:
                 max_realised_drawdown['drawdown_trades'] += 1
             else:
                 max_realised_drawdown['curr_consecutive_losses'] = 0
+                # Update max win for 1 trade
+                if profit_ratio > max_realised_drawdown['max_win_one']:
+                    max_realised_drawdown['max_win_one'] = profit_ratio
 
             # Check if max consecutive losses is beaten
             if max_realised_drawdown['curr_consecutive_losses'] > max_realised_drawdown['max_consecutive_losses']:

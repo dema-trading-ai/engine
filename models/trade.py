@@ -91,7 +91,7 @@ class Trade:
                 self.sl_sell_time, self.sl_price = self.dynamic_stoploss(data_dict, ohlcv['time'])
             else:
                 self.sl_type = 'standard'   # when dynamic not configured use normal stoploss
-        elif self.sl_type == 'standard':
+        if self.sl_type == 'standard':
             self.sl_price = self.open - (self.open * (abs(self.sl_perc) / 100))
         elif self.sl_type == 'trailing':
             self.sl_sell_time, self.sl_price = self.trailing_stoploss(data_dict, ohlcv['time'])
