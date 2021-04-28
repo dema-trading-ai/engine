@@ -24,6 +24,7 @@ class TradingModule:
 
     open_order_value_per_timestamp = {}
     budget_per_timestamp = {}
+    realised_profits = []
     total_fee_amount = 0
 
     def __init__(self, config):
@@ -32,7 +33,6 @@ class TradingModule:
         self.strategy = load_strategy_from_config(config)
         self.budget = float(self.config['starting-capital'])
         self.realised_profit = self.budget
-        self.realised_profits = [self.realised_profit]
 
         self.max_open_trades = int(self.config['max-open-trades'])
         self.amount_of_pairs = len(self.config['pairs'])

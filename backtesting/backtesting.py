@@ -333,9 +333,9 @@ class BackTesting:
         }
 
         realised_profits = self.trading_module.realised_profits
-        prev_profit = realised_profits[0]
+        prev_profit = self.starting_capital
 
-        for new_profit in realised_profits[1:]:
+        for new_profit in realised_profits:
             profit_ratio = new_profit / prev_profit
 
             # Update consecutive losses
