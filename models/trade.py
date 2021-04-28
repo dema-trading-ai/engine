@@ -15,34 +15,20 @@ from backtesting.strategy import Strategy
 
 
 class Trade:
-    pair = None
-    open = 0.0
-    current = 0.0
-    close = 0.0
-    status = None
-    currency_amount = 0.0
-    profit_dollar = 0.0
-    profit_percentage = 0.0
-    sell_reason = None
-    opened_at = 0.0
-    closed_at = 0.0
+    closed_at = None
 
-    lowest_seen_price = 0.0
-    max_seen_drawdown = 0.0
-    realised_drawdown = 0.0
-
-    sl_type = None
-    sl_perc = 0.0
-    sl_price = 0.0
-    sl_sell_time = 0
-
-    def __init__(self, ohlcv: dict, trade_amount: float, date: datetime, sl_type: str, sl_perc: float):
+    def __init__(self, ohlcv: dict, spend_amount: float, fee: float, date: datetime, sl_type: str, sl_perc: float):
         self.status = 'open'
         self.pair = ohlcv['pair']
         self.open = ohlcv['close']
-        self.current = ohlcv['close']
-        self.currency_amount = (trade_amount / ohlcv['close'])
         self.opened_at = date
+
+        self.fee = fee
+        self.starting_amount = spend_amount
+        self.lowest_seen_price = spend_amount
+        self.capital = spend_amount - (spend_amount * fee)  # apply fee
+        self.currency_amount = (self.capital / ohlcv['close'])
+        
         self.sl_type = sl_type
         self.sl_perc = sl_perc
 
@@ -61,7 +47,9 @@ class Trade:
         self.sell_reason = reason
         self.close = self.current
         self.closed_at = date
-        self.realised_drawdown = self.profit_percentage
+        self.close_fee_amount = self.capital * self.fee   # final issued fee
+        self.capital -= self.close_fee_amount
+        self.set_profits(update_capital=False)
 
     def update_stats(self, ohlcv: dict) -> None:
         """
@@ -76,12 +64,14 @@ class Trade:
         self.set_profits()
         self.update_max_drawdown()
 
-    def set_profits(self):
+    def set_profits(self, update_capital: bool = True):
         """
         Sets profits corresponding to current info
         """
-        self.profit_percentage = ((self.current - self.open) / self.open) * 100
-        self.profit_dollar = (self.currency_amount * self.current) - (self.currency_amount * self.open)
+        if update_capital:  # always triggers except when a trade is closed
+            self.capital = self.currency_amount * self.current
+        self.profit_ratio = self.capital / self.starting_amount
+        self.profit_dollar = self.capital - self.starting_amount
 
     def configure_stoploss(self, ohlcv: dict, data_dict: dict, strategy: Strategy) -> None:
         """
@@ -113,9 +103,9 @@ class Trade:
         :return: None
         :rtype: None
         """
-        if self.lowest_seen_price == 0 or self.current < self.lowest_seen_price:
-            self.lowest_seen_price = self.current
-            self.max_seen_drawdown = self.profit_percentage
+        if self.capital < self.lowest_seen_price:
+            self.lowest_seen_price = self.capital
+            self.max_seen_drawdown = self.profit_ratio
 
     def check_for_sl(self, ohlcv: dict) -> bool:
         """
@@ -129,12 +119,10 @@ class Trade:
         if self.sl_type == 'standard':
             if self.current < self.sl_price:
                 self.current = self.sl_price
-                self.set_profits()
                 return True
         elif self.sl_type == 'trailing' or self.sl_type == 'dynamic':
             if self.sl_sell_time == ohlcv['time']:
                 self.current = self.sl_price
-                self.set_profits()
                 return True
         return False
 

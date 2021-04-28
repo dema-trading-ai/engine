@@ -2,8 +2,10 @@
 from dataclasses import dataclass
 from datetime import datetime
 from tabulate import tabulate
-from utils import CURRENT_VERSION
 import typing
+
+# Files
+from utils import CURRENT_VERSION
 
 FONT_BOLD = "\033[1m"
 FONT_RESET = "\033[0m"
@@ -28,10 +30,11 @@ class MainResults:
     n_trades: int
     n_left_open_trades: int
     n_trades_with_loss: int
-    max_realized_drawdown: float
+    n_consecutive_losses: int
+    max_realised_drawdown: float
     max_drawdown_single_trade: float
-    max_drawdown_trades: int
-    max_drawdown_chain_bad_trades: int
+#     max_drawdown_trades: int
+#     max_drawdown_chain_bad_trades: int
     max_seen_drawdown: float
     drawdown_from: datetime
     drawdown_to: datetime
@@ -55,31 +58,30 @@ class MainResults:
         print("| Amount of trades: \t\t%s" % self.n_trades)
         print("| Left-open trades: \t\t%s" % self.n_left_open_trades)
         print("| Trades with loss: \t\t%s" % self.n_trades_with_loss)
+        print("| Most consecutive losses: \t%s" % self.n_consecutive_losses)
         print("| Stoploss: \t\t\t%s" % self.configured_stoploss + "\t%")
         print("| ")
-        print("| Max realized drawdown:\t%s" %
-              round(self.max_realized_drawdown, 2) + '\t%')
-        print("| Max drawdown 1 trade: \t%s" %
+        print("| Max realised drawdown:\t%s" %
+              round(self.max_realised_drawdown, 2) + '\t%')
+        print("| Worst trade: \t\t\t%s" %
               round(self.max_drawdown_single_trade, 2) + '\t%')
-        print("| Max drawdown trades: \t\t%s" % self.max_drawdown_trades)
-        print("| Max drawdown bad trade chain:\t%s" % self.max_drawdown_chain_bad_trades)
         print("| Max seen drawdown: \t\t%s" %
               round(self.max_seen_drawdown, 2) + '\t%')
-        print("| Seen drawdown from: \t\t%s" % self.drawdown_from)
-        print("| Seen drawdown to: \t\t%s" % self.drawdown_to)
+        print("| Max seen drawdown from: \t%s" % self.drawdown_from)
+        print("| Max seen drawdown to: \t%s" % self.drawdown_to)
         print("| Total fee paid: \t\t%s" % round(self.total_fee_amount, 2) + "\t" + currency_symbol)
 
 
 @dataclass
 class CoinInsights:
     pair: str
-    avg_profit_percentage: float
+    cum_profit_percentage: float
     total_profit_percentage: float
     profit: float
     n_trades: int
     max_seen_drawdown: float
     max_realised_drawdown: float
-    avg_duration: datetime
+    total_duration: datetime
     roi: int
     stoploss: int
     sell_signal: int
@@ -91,33 +93,33 @@ class CoinInsights:
 
         stats = []
         for c in instances:
-            seen = round(c.max_seen_drawdown, 2)
-            realised = round(c.max_realised_drawdown, 2)
-            stats.append([c.pair, 
-                        round(c.avg_profit_percentage, 2), 
-                        round((c.total_profit_percentage - 1)*100, 2),
-                        round(c.profit, 2),
+            stats.append([c.pair,
                         c.n_trades, 
-                        seen * -1 if seen else 0.0,
-                        realised * -1 if realised else 0.0,
-                        c.avg_duration / c.n_trades, 
+                        round(c.cum_profit_percentage / c.n_trades, 2),
+                        round(c.cum_profit_percentage, 2),
+                        round(c.total_profit_percentage, 2),
+                        round(c.profit, 2),
+                        round(c.max_seen_drawdown, 2),
+                        round(c.max_realised_drawdown, 2),
+                        c.total_duration / c.n_trades, 
                         c.roi, 
                         c.stoploss,
                         c.sell_signal])
 
         print(tabulate(stats,
                        headers=['Pair',
-                                'avg profit (%)',
-                                'total profit (%)',
-                                f' profit ({currency_symbol})',
-                                'trades',
-                                'max seen drawdown %',
-                                'max realised drawdown %',
-                                'avg trade duration',
-                                'ROI', 
-                                'SL', 
-                                'Signal'],
-                       tablefmt='pretty'))
+                              'trades',
+                              'avg profit (%)',
+                              'cum profit (%)',
+                              'total profit (%)',
+                              f' profit ({currency_symbol})',
+                              'max seen drawdown %',
+                              'max realised drawdown %',
+                              'avg trade duration',
+                              'ROI', 
+                              'SL', 
+                              'Signal'],
+                        tablefmt='pretty'))
 
 
 @dataclass
