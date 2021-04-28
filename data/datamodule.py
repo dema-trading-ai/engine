@@ -94,7 +94,7 @@ class DataModule:
                 print("[INFO] Did not find datafile for %s, starting download..." % pair)
                 df = self.download_data_for_pair(pair, self.backtesting_from, self.backtesting_to)
             else:
-                print("[INFO] Reading datafile for %s" % pair)
+                print("[INFO] Reading datafile for %s." % pair)
                 df = self.read_data_from_datafile(pair)
             self.history_data[pair] = df
 
@@ -153,7 +153,7 @@ class DataModule:
         df['buy'], df['sell'] = 0, 0    # default values
 
         if save:
-            print("[INFO] [%s] %s candles downloaded" % (pair, len(index)))
+            print("[INFO] [%s] %s candles downloaded." % (pair, len(index)))
             self.save_dataframe(pair, df)
         return df
 
@@ -165,7 +165,7 @@ class DataModule:
         so:
         self.timeframe_calc * 10 candles passed = milliseconds passed
         """
-        print('[INFO] Configuring timeframe')
+        print('[INFO] Configuring timeframe...')
 
         timeframe = self.config['timeframe']
         match = re.match(r"([0-9]+)([mdh])", timeframe, re.I)
@@ -194,13 +194,13 @@ class DataModule:
 
         if test_till_now or today_ms < self.backtesting_to:
             test_to = datetime.datetime.fromtimestamp(today_ms / 1000.0).strftime("%Y-%m-%d")
-            print('[INFO] Changed %s to %s' % (self.config['backtesting-to'], test_to))
+            print('[INFO] Changed %s to %s.' % (self.config['backtesting-to'], test_to))
             self.config['backtesting-to'] = test_to
             self.backtesting_to = today_ms
 
         if self.backtesting_from >= self.backtesting_to:
             raise Exception("[ERROR] Backtesting periods are configured incorrectly.")
-        print('[INFO] Gathering data from %s until %s' % (test_from, test_to))
+        print('[INFO] Gathering data from %s until %s.' % (test_from, test_to))
 
     def check_datafolder(self, pair: str) -> bool:
         """
@@ -306,7 +306,7 @@ class DataModule:
 
         # Check if new candles were downloaded
         if extra_candles > 0:
-            print("[INFO] [%s] %s extra candle(s) downloaded" % (pair, extra_candles))
+            print("[INFO] [%s] %s extra candle(s) downloaded." % (pair, extra_candles))
 
         return df
 
