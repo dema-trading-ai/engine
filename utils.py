@@ -5,6 +5,9 @@ from pandas import DataFrame
 import pandas as pd
 import rapidjson
 
+# Files
+from models.trade import Trade
+
 CURRENT_VERSION = "v0.4.1"
 
 
@@ -15,43 +18,49 @@ def get_project_root():
 def get_ohlcv_indicators() -> [str]:
     """
     :return: list with ohlcv indicator names
-    :rtype: List.
+    :rtype: list
     """
     return ['time', 'open', 'high', 'low', 'close', 'volume', 'pair', 'buy', 'sell']
 
 
 def lower_bar_to_middle_bar(s: str) -> str:
-    """Replaces '_' with '-' """
+    """
+    Replaces '_' with '-'
+    :param s: string that needs to be changed
+    :type s: string
+    :return: changed string
+    :rtype: string
+    """
     return s.replace("_", "-")
 
   
 def default_empty_array_dict() -> list:
     """
     :return: list for initializing dictionary
-    :rtype: List.
+    :rtype: list
     """
     return []
 
 
 def default_empty_dict_dict() -> dict:
     """
-    :return: Dictionary for initializing default dictionary
-    :rtype: Dict.
+    :return: dictionary for initializing default dictionary
+    :rtype: dict
     """
     return defaultdict(int)
 
 
-def calculate_worth_of_open_trades(open_trades) -> float:
+def calculate_worth_of_open_trades(open_trades: [Trade]) -> float:
     """
     Method calculates worth of open trades
     :param open_trades: array of open trades
     :type open_trades: [Trade]
     :return: returns the total value of all open trades
-    :rtype: float.
+    :rtype: float
     """
     return_value = 0
     for trade in open_trades:
-        return_value += (trade.currency_amount * trade.current)
+        return_value += trade.capital
     return return_value
 
 
