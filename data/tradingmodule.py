@@ -8,7 +8,6 @@ from models.trade import Trade
 from utils import calculate_worth_of_open_trades
 
 
-
 # ======================================================================
 # TradingModule is responsible for tracking trades, calling strategy methods
 # and virtually opening / closing trades based on strategies' signal.
@@ -17,36 +16,25 @@ from utils import calculate_worth_of_open_trades
 # ======================================================================
 
 class TradingModule:
-    starting_budget = 0
-    budget = 0
     max_open_trades = None
-
-    config = None
     closed_trades = []
     open_trades = []
-    max_drawdown = 0
     strategy = None
 
     open_order_value_per_timestamp = {}
     budget_per_timestamp = {}
-    current_drawdown = 0.0
-    realized_drawdown = 0
-    current_drawdown_trades = 0
-    realized_drawdown_trades = 0
-    current_drawdown_chain_bad_trades = 0
-    temp_chain_bad_trades = 0
-    realized_drawdown_chain_bad_trades = 0
-
-    fee = 0
+    realised_profits = []
     total_fee_amount = 0
 
     def __init__(self, config):
-        print("[INFO] Initializing trading-module")
+        print("[INFO] Initializing trading-module...")
         self.config = config
-
         self.strategy = load_strategy_from_config(config)
         self.budget = float(self.config['starting-capital'])
+        self.realised_profit = self.budget
+
         self.max_open_trades = int(self.config['max-open-trades'])
+        self.amount_of_pairs = len(self.config['pairs'])
         self.fee = config['fee'] / 100
         self.sl_type = config['stoploss-type']
         self.sl_perc = float(config['stoploss'])
@@ -93,9 +81,6 @@ class TradingModule:
         :return: None
         :rtype: None
         """
-        self.update_value_per_timestamp_tracking(trade, ohlcv)  # update total value tracking
-        trade.update_max_drawdown()
-
         stoploss_reached = self.check_stoploss_open_trade(trade, ohlcv)
         roi_reached = self.check_roi_open_trade(trade, ohlcv)
 
@@ -103,6 +88,8 @@ class TradingModule:
             return  # trade is closed by stoploss or ROI
         elif ohlcv['sell'] == 1:
             self.close_trade(trade, reason="Sell signal", ohlcv=ohlcv)
+        else:   # trade is not closed
+            self.update_value_per_timestamp_tracking(trade, ohlcv)
 
     def close_trade(self, trade: Trade, reason: str, ohlcv: dict) -> None:
         """
@@ -118,13 +105,12 @@ class TradingModule:
         date = datetime.fromtimestamp(ohlcv['time'] / 1000)
         trade.close_trade(reason, date)
 
-        fee_amount = (trade.close * trade.currency_amount) * self.fee
-        self.total_fee_amount += fee_amount
+        self.total_fee_amount += trade.close_fee_amount
+        self.budget += trade.capital
 
-        self.budget += (trade.close * trade.currency_amount) - fee_amount
         self.open_trades.remove(trade)
         self.closed_trades.append(trade)
-        self.update_drawdowns_closed_trade(trade)
+        self.update_realised_profit(trade)
 
     def open_trade(self, ohlcv: dict, data_dict: dict) -> None:
         """
@@ -140,22 +126,26 @@ class TradingModule:
             print("[INFO] Budget is running low, cannot buy")
             return
 
-        date = datetime.fromtimestamp(ohlcv['time'] / 1000)
+        # Find available trade spaces
         open_trades = len(self.open_trades)
         available_spaces = self.max_open_trades - open_trades
-
         if available_spaces == 0:
             return
 
-        spend_amount = (1. / available_spaces) * self.budget
-        fee_amount = spend_amount * self.fee
-        spend_amount -= fee_amount
-        self.total_fee_amount += fee_amount
-        
-        new_trade = \
-            Trade(ohlcv, spend_amount, date, self.sl_type, self.sl_perc)
-        new_trade.configure_stoploss(ohlcv, data_dict, self.strategy)
+        # Define spend amount based on realised profit
+        spend_amount = (1. / self.amount_of_pairs) * self.realised_profit
+        if spend_amount > self.budget:
+            spend_amount = self.budget
 
+        # Create new trade class
+        date = datetime.fromtimestamp(ohlcv['time'] / 1000)
+        new_trade = \
+            Trade(ohlcv, spend_amount, self.fee, date, self.sl_type, self.sl_perc)
+        new_trade.configure_stoploss(ohlcv, data_dict, self.strategy)
+        new_trade.update_stats(ohlcv)
+
+        # Update total budget with configured spend amount and fee
+        self.total_fee_amount += spend_amount * self.fee
         self.budget -= spend_amount
         self.open_trades.append(new_trade)
         self.update_value_per_timestamp_tracking(new_trade, ohlcv)
@@ -170,16 +160,17 @@ class TradingModule:
         :rtype: boolean
         """
         time_passed = datetime.fromtimestamp(ohlcv['time'] / 1000) - trade.opened_at
-        if trade.profit_percentage > self.get_roi_over_time(time_passed):
+        profit_percentage = (trade.profit_ratio - 1) * 100
+        if profit_percentage > self.get_roi_over_time(time_passed):
             self.close_trade(trade, reason="ROI", ohlcv=ohlcv)
             return True
         return False
 
-    def get_roi_over_time(self, time_passed) -> float:
+    def get_roi_over_time(self, time_passed: datetime) -> float:
         """
         Method that calculates the current ROI over time
         :param time_passed: Time passed since the trade opened
-        :type time_passed: time in H:M:S
+        :type time_passed: datetime in H:M:S
         :return: return the value of ROI
         :rtype: float
         """
@@ -220,8 +211,7 @@ class TradingModule:
 
     def update_value_per_timestamp_tracking(self, trade: Trade, ohlcv: dict) -> None:
         """
-        Method is used to be able to track the value change per timestamp per open trade
-        next, this is used for calculating max seen drawdown
+        Method is used to be able to track the open trades value per timestamp
         :param trade: Any open trade
         :type trade: Trade
         :param ohlcv: dictionary with OHLCV data for current tick
@@ -229,13 +219,10 @@ class TradingModule:
         :return: None
         :rtype: None
         """
-        current_total_price = (trade.currency_amount * ohlcv['low'])
         try:
-            self.open_order_value_per_timestamp[ohlcv['time']] += \
-                current_total_price
+            self.open_order_value_per_timestamp[ohlcv['time']] += trade.capital
         except KeyError:
-            self.open_order_value_per_timestamp[ohlcv['time']] = \
-                current_total_price
+            self.open_order_value_per_timestamp[ohlcv['time']] = trade.capital
 
     def update_budget_per_timestamp_tracking(self, ohlcv: dict) -> None:
         """
@@ -248,46 +235,13 @@ class TradingModule:
         """
         self.budget_per_timestamp[ohlcv['time']] = self.budget
 
-    def update_drawdowns_closed_trade(self, trade: Trade) -> None:
+    def update_realised_profit(self, trade: Trade) -> None:
         """
-        This method updates realized drawdown tracking after closing a trade
+        This method updates realised profit after closing a trade
         :param trade: last closed Trade
         :type trade: Trade
         :return: None
         :rtype: None
         """
-        # this part is for setting the max_drawdown for 1 trade
-        if trade.profit_percentage < self.max_drawdown:
-            self.max_drawdown = trade.profit_percentage
-
-        current_total_value = self.budget + \
-            calculate_worth_of_open_trades(self.open_trades)
-        perc_of_total_value = (
-            (trade.currency_amount * trade.close) / current_total_value) * 100
-        perc_influence = trade.profit_percentage * (perc_of_total_value / 100)
-
-        # if the difference is drawdown, and no drawdown is realized at this moment, this is new drawdown.
-        # else update the current drawdown with the profit percentage difference
-        if perc_influence < 0 and self.current_drawdown >= 0:
-            self.current_drawdown = perc_influence
-            self.current_drawdown_trades = 1
-            self.temp_chain_bad_trades = 1
-        else:
-            if perc_influence < 0:
-                self.temp_chain_bad_trades += 1
-            else:
-                # positive trade in drawdown period - chain broken, restart temp chain
-                self.temp_chain_bad_trades = 0
-            self.current_drawdown += perc_influence
-            self.current_drawdown_trades += 1
-
-        # if temp chain bad trades is bigger than the previously seen chain bad trades, update it
-        if self.temp_chain_bad_trades > self.current_drawdown_chain_bad_trades:
-            self.current_drawdown_chain_bad_trades = self.temp_chain_bad_trades
-
-
-        # if the current drawdown is bigger than the last realized drawdown, update it
-        if self.current_drawdown < self.realized_drawdown:
-            self.realized_drawdown = self.current_drawdown
-            self.realized_drawdown_trades = self.current_drawdown_trades
-            self.realized_drawdown_chain_bad_trades = self.current_drawdown_chain_bad_trades
+        self.realised_profit += trade.profit_dollar
+        self.realised_profits.append(self.realised_profit)
