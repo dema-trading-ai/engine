@@ -40,7 +40,7 @@ class BackTesting:
         self.strategy = load_strategy_from_config(config)
 
     # This method is called by DataModule when all data is gathered from chosen exchange
-    def start_backtesting(self, data: dict, backtesting_from: int, backtesting_to: int) -> None:
+    def start_backtesting(self, data: dict, backtesting_from: int, backtesting_to: int, btc_marketchange_ratio: float) -> None:
         """
         Method formats received data.
         Method calls tradingmodule for each tick/candle (OHLCV).
@@ -51,12 +51,15 @@ class BackTesting:
         :type backtesting_from: int
         :param backtesting_to: 8601 timestamp
         :type backtesting_to: int
+        :param btc_marketchange_ratio: marketchange of BTC
+        :type btc_marketchange_ratio: float
         :return: None
         :rtype: None
         """
         self.data = data
         self.backtesting_from = backtesting_from
         self.backtesting_to = backtesting_to
+        self.btc_marketchange_ratio = btc_marketchange_ratio
         print('[INFO] Starting backtest...')
 
         data_dict = self.populate_signals()
@@ -177,7 +180,8 @@ class BackTesting:
                             tested_to=datetime.fromtimestamp(
                                self.backtesting_to / 1000),
                             max_open_trades=self.config['max-open-trades'],
-                            market_change=(market_change['all'] - 1) * 100,
+                            market_change_coins=(market_change['all'] - 1) * 100,
+                            market_change_btc=(self.btc_marketchange_ratio - 1) * 100,
                             starting_capital=self.starting_capital,
                             end_capital=budget,
                             overall_profit_percentage=overall_profit,

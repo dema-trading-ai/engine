@@ -34,7 +34,6 @@ class DataModule:
     backtesting_to = None
 
     history_data = {}
-    ohlcv_indicators = ['time', 'open', 'high', 'low', 'close', 'volume', 'pair', 'buy', 'sell']
 
     def __init__(self, config, backtesting_module):
         print('[INFO] Starting DEMA Data-module...')
@@ -81,6 +80,7 @@ class DataModule:
         """
         self.exchange.load_markets()
         self.config_from_to()
+        self.load_btc_marketchange()
         self.load_historical_data()
 
     def load_historical_data(self) -> None:
@@ -101,7 +101,8 @@ class DataModule:
         self.check_for_missing_ticks()
 
         if self.same_backtesting_period():
-            self.backtesting_module.start_backtesting(self.history_data, self.backtesting_from, self.backtesting_to)
+            self.backtesting_module.start_backtesting(self.history_data, self.backtesting_from, \
+                                                        self.backtesting_to, self.btc_marketchange_ratio)
         else:
             raise Exception("[ERROR] Dataframes don't have equal backtesting periods.")
 
@@ -147,8 +148,7 @@ class DataModule:
             start_date += np.around(asked_ticks * self.timeframe_calc)
 
         # Create pandas DataFrame and adds pair info
-        df = DataFrame(ohlcv_data, index=index, columns=self.ohlcv_indicators[:-3])
-
+        df = DataFrame(ohlcv_data, index=index, columns=get_ohlcv_indicators()[:-3])
         df['pair'] = pair
         df['buy'], df['sell'] = 0, 0    # default values
 
@@ -353,10 +353,13 @@ class DataModule:
         filepath = os.path.join("data/backtesting-data/", self.config["exchange"], filename)
         os.remove(filepath)
 
-    def check_for_missing_ticks(self):
-        """Test whether any tick has a null/NaN value, and whether every
-        tick (time) exists"""
-
+    def check_for_missing_ticks(self) -> None:
+        """
+        Test whether any tick has a null/NaN value, and whether every
+        tick (time) exists
+        :return: None
+        :rtype: None
+        """
         daterange = np.arange(self.backtesting_from,
                               self.backtesting_to,
                               self.timeframe_calc)
@@ -370,3 +373,19 @@ class DataModule:
             if n_missing > 0:
                 print(f"[WARNING] Pair '{pair}' is missing {n_missing} ticks (rows)")
 
+    def load_btc_marketchange(self) -> None:
+        """
+        Finds the marketchange of BTC to be used as a benchmark
+        :return: None
+        :rtype: None
+        """
+        print("[INFO] Fetching marketchange of BTC/USDT...")
+        begin_data = self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe='1m', \
+                                            since=self.backtesting_from, limit=1)
+        end_timestamp = int(np.floor(self.backtesting_to / self.timeframe_calc) * self.timeframe_calc)
+        end_data = self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe='1m', \
+                                            since=end_timestamp, limit=1)
+
+        begin_close_value = begin_data[0][4]
+        end_close_value = end_data[0][4]
+        self.btc_marketchange_ratio = end_close_value / begin_close_value
