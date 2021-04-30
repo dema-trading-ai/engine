@@ -84,7 +84,7 @@ class MyStrategyAdvanced(Strategy):
         """
         # BEGIN STRATEGY
 
-        dataframe['test'] = dataframe['ema5']
+        dataframe['stoploss'] = dataframe['ema5']
 
         # END STRATEGY
 
