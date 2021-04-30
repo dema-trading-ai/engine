@@ -11,8 +11,6 @@ class MyStrategyAdvanced(Strategy):
     This is an example custom strategy for advanced users, that inherits from the main Strategy class
     """
 
-    MIN_CANDLES = 21
-
     def generate_indicators(self, dataframe: DataFrame) -> DataFrame:
         """
         :param dataframe: All passed candles (current candle included!) with OHLCV data
@@ -36,18 +34,17 @@ class MyStrategyAdvanced(Strategy):
         :return: dataframe filled with buy signals
         :rtype: DataFrame
         """
-        if len(dataframe) > self.MIN_CANDLES:
-            # BEGIN STRATEGY
+        # BEGIN STRATEGY
 
-            dataframe.loc[
-                (
-                    (dataframe['rsi'] < 30) &
-                    (dataframe['ema5'] < dataframe['ema21']) &
-                    (dataframe['volume'] > 0)
-                ),
-                'buy'] = 1
+        dataframe.loc[
+            (
+                (dataframe['rsi'] < 30) &
+                (dataframe['ema5'] < dataframe['ema21']) &
+                (dataframe['volume'] > 0)
+            ),
+            'buy'] = 1
 
-            # END STRATEGY
+        # END STRATEGY
 
         return dataframe
 
@@ -58,17 +55,16 @@ class MyStrategyAdvanced(Strategy):
         :return: dataframe filled with sell signals
         :rtype: DataFrame
         """
-        if len(dataframe) > self.MIN_CANDLES:
-            # BEGIN STRATEGY
+        # BEGIN STRATEGY
 
-            dataframe.loc[
-                (
-                    (dataframe['rsi'] > 70) &
-                    (dataframe['volume'] > 0)
-                ),
-                'sell'] = 1
+        dataframe.loc[
+            (
+                (dataframe['rsi'] > 70) &
+                (dataframe['volume'] > 0)
+            ),
+            'sell'] = 1
 
-            # END STRATEGY
+        # END STRATEGY
 
         return dataframe
 
@@ -86,11 +82,10 @@ class MyStrategyAdvanced(Strategy):
         :return: dataframe filled with dynamic stoploss signals
         :rtype: DataFrame
         """
-        if len(dataframe) > self.MIN_CANDLES:
-            # BEGIN STRATEGY
+        # BEGIN STRATEGY
 
-            dataframe['stoploss'] = dataframe['ema5']
+        dataframe['stoploss'] = dataframe['ema5']
 
-            # END STRATEGY
+        # END STRATEGY
 
-        return dataframe['stoploss']
+        return dataframe

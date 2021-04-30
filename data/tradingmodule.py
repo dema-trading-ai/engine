@@ -27,7 +27,7 @@ class TradingModule:
     total_fee_amount = 0
 
     def __init__(self, config):
-        print("[INFO] Initializing trading-module")
+        print("[INFO] Initializing trading-module...")
         self.config = config
         self.strategy = load_strategy_from_config(config)
         self.budget = float(self.config['starting-capital'])

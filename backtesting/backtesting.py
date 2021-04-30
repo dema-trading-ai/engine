@@ -89,6 +89,7 @@ class BackTesting:
         """
         data_dict = {}
         notify = False
+        notify_reason = ""
         for pair in tqdm(self.data.keys(), desc="[INFO] Populating Indicators",
                             total=len(self.data.keys()), ncols=75):
             df = self.data[pair]
@@ -98,13 +99,17 @@ class BackTesting:
             self.df[pair] = indicators.copy()
             if self.config['stoploss-type'] == 'dynamic':
                 stoploss = self.strategy.stoploss(indicators)
-                if stoploss is not None:
-                    indicators['stoploss'] = stoploss
-                else:
+                if stoploss is None:    # stoploss not configured
                     notify = True
+                    notify_reason = "not configured"
+                elif 'stoploss' in stoploss.columns:
+                    indicators['stoploss'] = stoploss['stoploss']
+                else:   # stoploss wrongly configured
+                    notify = True
+                    notify_reason = "configured incorrectly"
             data_dict[pair] = indicators.to_dict('index')
         if notify:
-            print(f"[WARNING] Dynamic stoploss not configured. Using standard stoploss of {self.config['stoploss']}%")
+            print(f"[WARNING] Dynamic stoploss {notify_reason}. Using standard stoploss of {self.config['stoploss']}%.")
         return data_dict
 
     def get_market_change(self, ticks: list, pairs: list, data_dict: dict) -> dict:
@@ -160,7 +165,7 @@ class BackTesting:
         show_signature()
 
         #plot graphs
-        if self.config["plots"] == "True":
+        if self.config["plots"]:
             plot_per_coin(self)
 
     def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float, market_change: dict) -> MainResults:
