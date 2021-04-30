@@ -2,8 +2,10 @@
 from dataclasses import dataclass
 from datetime import datetime
 from tabulate import tabulate
-from utils import CURRENT_VERSION
 import typing
+
+# Files
+from utils import CURRENT_VERSION
 
 FONT_BOLD = "\033[1m"
 FONT_RESET = "\033[0m"
@@ -22,20 +24,24 @@ def show_signature():
 class MainResults:
     tested_from: datetime
     tested_to: datetime
+    max_open_trades: int
+    market_change_coins: float
+    market_change_btc: float
     starting_capital: float
     end_capital: float
     overall_profit_percentage: float
     n_trades: int
     n_left_open_trades: int
     n_trades_with_loss: int
-    max_realized_drawdown: float
+    n_consecutive_losses: int
+    max_realised_drawdown: float
     max_drawdown_single_trade: float
-    max_drawdown_trades: int
-    max_drawdown_chain_bad_trades: int
+    max_win_single_trade: float
     max_seen_drawdown: float
     drawdown_from: datetime
     drawdown_to: datetime
     configured_stoploss: float
+    fee: float
     total_fee_amount: float
 
     def show(self, currency_symbol: str):
@@ -45,6 +51,8 @@ class MainResults:
         print("| ")
         print("| Backtesting from: \t\t%s" % self.tested_from)
         print("| Backtesting to: \t\t%s" % self.tested_to)
+        print("| Max open trades: \t\t%s" % self.max_open_trades)
+        print("| Stoploss: \t\t\t%s" % self.configured_stoploss + "\t%")
         print("| ")
         print("| Started with: \t\t%s" %
               round(self.starting_capital, 2) + '\t' + currency_symbol)
@@ -55,29 +63,36 @@ class MainResults:
         print("| Amount of trades: \t\t%s" % self.n_trades)
         print("| Left-open trades: \t\t%s" % self.n_left_open_trades)
         print("| Trades with loss: \t\t%s" % self.n_trades_with_loss)
-        print("| Stoploss: \t\t\t%s" % self.configured_stoploss + "\t%")
+        print("| Most consecutive losses: \t%s" % self.n_consecutive_losses)
         print("| ")
-        print("| Max realized drawdown:\t%s" %
-              round(self.max_realized_drawdown, 2) + '\t%')
-        print("| Max drawdown 1 trade: \t%s" %
+        print("| Best trade: \t\t\t%s" %
+              round(self.max_win_single_trade, 2) + '\t%')
+        print("| Worst trade: \t\t\t%s" %
               round(self.max_drawdown_single_trade, 2) + '\t%')
-        print("| Max drawdown trades: \t\t%s" % self.max_drawdown_trades)
-        print("| Max drawdown bad trade chain:\t%s" % self.max_drawdown_chain_bad_trades)
+        print("| Max realised drawdown:\t%s" %
+              round(self.max_realised_drawdown, 2) + '\t%')
         print("| Max seen drawdown: \t\t%s" %
               round(self.max_seen_drawdown, 2) + '\t%')
-        print("| Seen drawdown from: \t\t%s" % self.drawdown_from)
-        print("| Seen drawdown to: \t\t%s" % self.drawdown_to)
+        print("| Max seen drawdown from: \t%s" % self.drawdown_from)
+        print("| Max seen drawdown to: \t%s" % self.drawdown_to)
+        print("| Market change coins: \t\t%s" % round(self.market_change_coins, 2) + '\t%')
+        print("| Market change BTC: \t\t%s" % round(self.market_change_btc, 2) + '\t%')
+        print("| ")
+        print("| Fee percentage: \t\t%s" % self.fee + '\t%')
         print("| Total fee paid: \t\t%s" % round(self.total_fee_amount, 2) + "\t" + currency_symbol)
 
 
 @dataclass
 class CoinInsights:
     pair: str
-    avg_profit_percentage: float
+    cum_profit_percentage: float
+    total_profit_percentage: float
     profit: float
     n_trades: int
-    max_drawdown: float
-    avg_duration: datetime
+    market_change: float
+    max_seen_drawdown: float
+    max_realised_drawdown: float
+    total_duration: datetime
     roi: int
     stoploss: int
     sell_signal: int
@@ -89,20 +104,35 @@ class CoinInsights:
 
         stats = []
         for c in instances:
-            stats.append([c.pair, round(c.avg_profit_percentage, 2), round(c.profit, 2),
-                          c.n_trades, round(c.max_drawdown, 2),
-                          c.avg_duration, c.roi, c.stoploss,
-                          c.sell_signal])
+            stats.append([c.pair,
+                        c.n_trades, 
+                        round(c.market_change, 2),
+                        round(c.cum_profit_percentage / c.n_trades, 2),
+                        round(c.cum_profit_percentage, 2),
+                        round(c.total_profit_percentage, 2),
+                        round(c.profit, 2),
+                        round(c.max_seen_drawdown, 2),
+                        round(c.max_realised_drawdown, 2),
+                        c.total_duration / c.n_trades, 
+                        c.roi, 
+                        c.stoploss,
+                        c.sell_signal])
 
         print(tabulate(stats,
                        headers=['Pair',
-                                'avg profit (%)',
-                                f' profit ({currency_symbol})',
-                                'trades',
-                                'max drawdown %',
-                                'avg duration',
-                                'ROI', 'SL', 'Signal'],
-                       tablefmt='pretty'))
+                              'trades',
+                              'market change (%)',
+                              'avg profit (%)',
+                              'cum profit (%)',
+                              'total profit (%)',
+                              f' profit ({currency_symbol})',
+                              'max seen drawdown %',
+                              'max realised drawdown %',
+                              'avg trade duration',
+                              'ROI', 
+                              'SL', 
+                              'Signal'],
+                        tablefmt='pretty'))
 
 
 @dataclass
@@ -110,7 +140,7 @@ class OpenTradeResult:
     pair: str
     curr_profit_percentage: float
     curr_profit: float
-    max_drawdown: float
+    max_seen_drawdown: float
     opened_at: datetime
 
     @staticmethod
@@ -121,10 +151,12 @@ class OpenTradeResult:
             rows.append([res.pair,
                          round(res.curr_profit_percentage, 2),
                          round(res.curr_profit, 2),
-                         round(res.max_drawdown, 2),
+                         round(res.max_seen_drawdown, 2),
                          res.opened_at])
         print(tabulate(rows,
-                       headers=['Pair', 'cur. profit (%)',
-                                f' cur. profit ({currency_symbol})',
-                                'max drawdown %', 'opened at'],
+                       headers=['Pair', 
+                              'cur. profit (%)',
+                              f' cur. profit ({currency_symbol})',
+                              'max seen drawdown %', 
+                              'opened at'],
                        tablefmt='pretty'))
