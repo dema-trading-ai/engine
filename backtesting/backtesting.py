@@ -235,6 +235,10 @@ class BackTesting:
                                              opened_at=trade.opened_at)
 
             open_trade_stats.append(open_trade_res)
+
+            # Save buy signals
+            self.buypoints[trade.pair].append(trade.opened_at)
+
         return open_trade_stats
 
     def calculate_statistics_per_coin(self, closed_trades):
