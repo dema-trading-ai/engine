@@ -2,15 +2,14 @@
 import numpy as np
 from pandas import DataFrame
 import pandas as pd
-import ccxt
-import re
 import rapidjson
 import sys
 from os import path
 import os
-import datetime
 
 # Files
+from modules.setup.config import ConfigModule
+from modules.setup.config.cctx_adapter import create_cctx_exchange
 from utils import df_to_dict, dict_to_df, get_ohlcv_indicators
 
 # ======================================================================
@@ -27,50 +26,13 @@ day = 24 * hour
 
 
 class DataModule:
-    exchange = None
-    timeframe_calc = None
-
-    backtesting_from = None
-    backtesting_to = None
-
-    history_data = {}
-
-    def __init__(self, config, backtesting_module):
+    def __init__(self, config: ConfigModule):
         print('[INFO] Starting DEMA Data-module...')
         self.config = config
-        self.backtesting_module = backtesting_module
-        self.config_timeframe_calc()
-        self.load_exchange()
-
-    def load_exchange(self) -> None:
-        """
-        Method checks for requested exchange existence
-        checks for exchange OHLCV compatibility
-        checks for timeframe support
-        loads markets if no errors occur
-        :return: None
-        :rtype: None
-        """
-        print('[INFO] Connecting to exchange...')
-        exchange_id = self.config['exchange']
-
-        # Try to get exchange based on config param 'exchange'
-        try:
-            self.exchange = getattr(ccxt, exchange_id)
-            self.exchange = self.exchange()
-            print("[INFO] Connected to exchange: %s." % self.config['exchange'])
-        except AttributeError:
-            raise AttributeError("[ERROR] Exchange %s could not be found!" % exchange_id)
-
-        # Check whether exchange supports OHLC
-        if not self.exchange.has["fetchOHLCV"]:
-            raise KeyError("[ERROR] Cannot load data from %s because it doesn't support OHLCV-data" % self.config['exchange'])
-
-        # Check whether exchange supports requested timeframe
-        if (not hasattr(self.exchange, 'timeframes')) or (self.config['timeframe'] not in self.exchange.timeframes):
-            raise Exception("[ERROR] Requested timeframe is not available from %s" % self.config['exchange'])
-
+        self.exchange = config.exchange
         self.load_markets()
+        if not self.is_same_backtesting_period():
+            raise Exception("[ERROR] Dataframes don't have equal backtesting periods.")
 
     def load_markets(self) -> None:
         """
@@ -79,8 +41,6 @@ class DataModule:
         :rtype: None
         """
         self.exchange.load_markets()
-        self.config_from_to()
-        self.load_btc_marketchange()
         self.load_historical_data()
 
     def load_historical_data(self) -> None:
@@ -89,45 +49,25 @@ class DataModule:
         :return: None
         :rtype: None
         """
-        for pair in self.config['pairs']:
-            if not self.check_datafolder(pair):
-                print("[INFO] Did not find datafile for %s, starting download..." % pair)
-                df = self.download_data_for_pair(pair, self.backtesting_from, self.backtesting_to)
-            else:
+        for pair in self.config.pairs:
+            if self.is_datafolder_exist(pair):
                 print("[INFO] Reading datafile for %s." % pair)
                 df = self.read_data_from_datafile(pair)
+            else:
+                print("[INFO] Did not find datafile for %s, starting download..." % pair)
+                df = self.download_data_for_pair(pair, self.config.backtesting_from, self.config.backtesting_to)
             self.history_data[pair] = df
 
-        self.check_for_missing_ticks()
+        self.warn_if_missing_ticks()
 
-        if self.same_backtesting_period():
-            self.backtesting_module.start_backtesting(self.history_data, self.backtesting_from, \
-                                                        self.backtesting_to, self.btc_marketchange_ratio)
-        else:
-            raise Exception("[ERROR] Dataframes don't have equal backtesting periods.")
-
-    def same_backtesting_period(self) -> bool:
+    def is_same_backtesting_period(self) -> bool:
         """
         Check whether dataframes cover the same time period.
-        :return: Returns whether dataframes have equal lengths
-        :rtype: boolean
         """
         df_lengths = [len(df.index.values) for df in self.history_data.values()]
         return all(length == df_lengths[0] for length in df_lengths)
 
-    def download_data_for_pair(self, pair: str, data_from: str, data_to: str, save: bool = True) -> DataFrame:
-        """
-        :param pair: Certain coin pair in "AAA/BBB" format
-        :type pair: string
-        :param data_from: Starting point for collecting data
-        :type data_from: string
-        :param data_to: Ending point for collecting data
-        :type data_to: string
-        :param save: If dataframe needs to be saved within function
-        :type save: boolean
-        :return: downloaded dataframe
-        :rtype: DataFrame
-        """
+    def download_data_for_pair(self, pair: str, data_from: int, data_to: int, save: bool = True) -> DataFrame:
         start_date = data_from
         fetch_ohlcv_limit = 1000
 
@@ -140,69 +80,24 @@ class DataModule:
             remaining_ticks = (data_to - start_date) / self.timeframe_calc
             asked_ticks = min(remaining_ticks, fetch_ohlcv_limit)
             result = self.exchange.fetch_ohlcv(symbol=pair, timeframe=self.config['timeframe'], \
-                                                since=int(start_date), limit=int(asked_ticks))
+                                               since=int(start_date), limit=int(asked_ticks))
 
             # Save timestamps and ohlcv info
-            index += [candle[0] for candle in result]   # timestamps
+            index += [candle[0] for candle in result]  # timestamps
             ohlcv_data += result
             start_date += np.around(asked_ticks * self.timeframe_calc)
 
         # Create pandas DataFrame and adds pair info
         df = DataFrame(ohlcv_data, index=index, columns=get_ohlcv_indicators()[:-3])
         df['pair'] = pair
-        df['buy'], df['sell'] = 0, 0    # default values
+        df['buy'], df['sell'] = 0, 0  # default values
 
         if save:
             print("[INFO] [%s] %s candles downloaded." % (pair, len(index)))
             self.save_dataframe(pair, df)
         return df
 
-    def config_timeframe_calc(self) -> None:
-        """
-        Method checks for valid timeframe input in config file.
-        Besides sets self.timeframe_calc property, which is used
-        to calculate how much time has passed based on an amount of candles
-        so:
-        self.timeframe_calc * 10 candles passed = milliseconds passed
-        """
-        print('[INFO] Configuring timeframe...')
-
-        timeframe = self.config['timeframe']
-        match = re.match(r"([0-9]+)([mdh])", timeframe, re.I)
-        if not match:
-            raise Exception("[ERROR] Error whilst parsing timeframe")
-        items = re.split(r'([0-9]+)', timeframe)
-        if items[2] == 'm':
-            self.timeframe_calc = int(items[1]) * minute
-        elif items[2] == 'h':
-            self.timeframe_calc = int(items[1]) * hour
-
-    def config_from_to(self) -> None:
-        """
-        This method sets the self.backtesting_to / backtesting_from properties
-        with 8601 parsed timestamp
-        :return: None
-        :rtype: None
-        """
-        test_from = self.config['backtesting-from']
-        test_to = self.config['backtesting-to']
-        test_till_now = self.config['backtesting-till-now']
-        today_ms = self.exchange.milliseconds()
-
-        self.backtesting_from = self.exchange.parse8601("%sT00:00:00Z" % test_from)
-        self.backtesting_to = self.exchange.parse8601("%sT00:00:00Z" % test_to)
-
-        if test_till_now or today_ms < self.backtesting_to:
-            test_to = datetime.datetime.fromtimestamp(today_ms / 1000.0).strftime("%Y-%m-%d")
-            print('[INFO] Changed %s to %s.' % (self.config['backtesting-to'], test_to))
-            self.config['backtesting-to'] = test_to
-            self.backtesting_to = today_ms
-
-        if self.backtesting_from >= self.backtesting_to:
-            raise Exception("[ERROR] Backtesting periods are configured incorrectly.")
-        print('[INFO] Gathering data from %s until %s.' % (test_from, test_to))
-
-    def check_datafolder(self, pair: str) -> bool:
+    def is_datafolder_exist(self, pair: str) -> bool:
         """
         :param pair: Certain coin pair in "AAA/BBB" format
         :type pair: string
@@ -260,14 +155,14 @@ class DataModule:
         # Find correct last tick timestamp
         n_downloaded_candles = (self.backtesting_to - self.backtesting_from) / self.timeframe_calc
         timesteps_forward = int(n_downloaded_candles) * self.timeframe_calc
-        final_timestamp = self.backtesting_from + (timesteps_forward - self.timeframe_calc) # last tick is excluded
-        
+        final_timestamp = self.backtesting_from + (timesteps_forward - self.timeframe_calc)  # last tick is excluded
+
         # Return correct backtesting period
         df = self.check_backtesting_period(pair, df, final_timestamp)
         begin_index = df.index.get_loc(self.backtesting_from)
         end_index = df.index.get_loc(final_timestamp)
         self.save_dataframe(pair, df)
-        df = df[begin_index:end_index+1]
+        df = df[begin_index:end_index + 1]
         return df
 
     def check_backtesting_period(self, pair: str, df: DataFrame, final_timestamp: int) -> DataFrame:
@@ -286,7 +181,7 @@ class DataModule:
         df_begin = index_list[0]
         df_end = index_list[-1]
         extra_candles = 0
-        notify = True   # Used for printing message once (improved readibility)
+        notify = True  # Used for printing message once (improved readibility)
 
         # Check if previous data needs to be downloaded
         if self.backtesting_from < df_begin:
@@ -350,10 +245,10 @@ class DataModule:
         :rtype: None
         """
         filename = self.generate_datafile_name(pair)
-        filepath = os.path.join("data/backtesting-data/", self.config["exchange"], filename)
+        filepath = os.path.join("data/backtesting-data/", self.config.exchange, filename)
         os.remove(filepath)
 
-    def check_for_missing_ticks(self) -> None:
+    def warn_if_missing_ticks(self) -> None:
         """
         Test whether any tick has a null/NaN value, and whether every
         tick (time) exists
@@ -366,26 +261,11 @@ class DataModule:
 
         for pair, data in self.history_data.items():
             # Check if dates are missing dates
-            index = data.index.to_numpy().astype(np.int64)
-            diff = np.setdiff1d(daterange, index)
+            index_column = data.index.to_numpy().astype(np.int64)
+            diff = np.setdiff1d(daterange, index_column)
             n_missing = len(diff)
 
             if n_missing > 0:
                 print(f"[WARNING] Pair '{pair}' is missing {n_missing} ticks (rows)")
 
-    def load_btc_marketchange(self) -> None:
-        """
-        Finds the marketchange of BTC to be used as a benchmark
-        :return: None
-        :rtype: None
-        """
-        print("[INFO] Fetching marketchange of BTC/USDT...")
-        begin_data = self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe='1m', \
-                                            since=self.backtesting_from, limit=1)
-        end_timestamp = int(np.floor(self.backtesting_to / self.timeframe_calc) * self.timeframe_calc)
-        end_data = self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe='1m', \
-                                            since=end_timestamp, limit=1)
 
-        begin_close_value = begin_data[0][4]
-        end_close_value = end_data[0][4]
-        self.btc_marketchange_ratio = end_close_value / begin_close_value

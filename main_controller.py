@@ -1,13 +1,20 @@
 # Files
-from backtesting.backtesting import BackTesting
-from data.datamodule import DataModule
-from data.tradingmodule import TradingModule
+from modules.algo.algo import AlgoModule
+from modules.output.output import OutputModule
+from modules.setup.setup import SetupModule
+from modules.stats.stats import StatsModule
 
 
 class MainController:
 
-    def __init__(self, config):
-        self.config = config
-        self.trading_module = TradingModule(config)
-        self.backtesting_module = BackTesting(self.trading_module, config)
-        self.data_module = DataModule(config, self.backtesting_module)
+    def __init__(self):
+        self.setup_module = SetupModule()
+        self.algo_module = AlgoModule()
+        self.stats_module = StatsModule()
+        self.output_module = OutputModule()
+
+    def run(self) -> None:
+        ohlcv_pair_frames = self.setup_module.setup()
+        frame_with_signals = self.algo_module.run(ohlcv_pair_frames)
+        stats = self.stats_module.analyze(frame_with_signals)
+        self.output_module.output(stats)
