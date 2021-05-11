@@ -1,12 +1,12 @@
 from backtesting.backtesting import BackTesting
 from data.datamodule import DataModule
 from modules.algo import AlgoModule
-from modules.setup.config import print_pairs, load_strategy_from_config
+from modules.setup.config import print_pairs, load_strategy_from_config, ConfigModule
 
 
 class SetupModule(object):
 
-    def __init__(self, config_module):
+    def __init__(self, config_module: ConfigModule):
         self.config = config_module
 
     def setup(self) -> AlgoModule:

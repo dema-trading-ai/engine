@@ -1,9 +1,11 @@
+from dataclasses import dataclass
 from typing import Literal, NamedTuple
 
 from modules.setup.config import ConfigModule
 
 
-class StatsConfig(NamedTuple):
+@dataclass
+class StatsConfig:
     plot_indicators1: list[Literal["ema5", "ema21"]]
     plot_indicators2: list[Literal["rsi"]]
     fee: float

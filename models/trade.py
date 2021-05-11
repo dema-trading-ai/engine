@@ -14,6 +14,7 @@ import numpy as np
 
 
 class Trade:
+    max_seen_drawdown: int = 0
     closed_at = None
 
     def __init__(self, ohlcv: dict, spend_amount: float, fee: float, date: datetime, sl_type: str, sl_perc: float):
@@ -21,7 +22,6 @@ class Trade:
         self.pair = ohlcv['pair']
         self.open = ohlcv['close']
         self.opened_at = date
-
         self.fee = fee
         self.starting_amount = spend_amount
         self.lowest_seen_price = spend_amount
