@@ -5,8 +5,6 @@ from datetime import datetime
 from typing import Any
 
 from models.trade import Trade
-from utils import calculate_worth_of_open_trades
-
 
 # ======================================================================
 # TradingModule is responsible for tracking trades, calling strategy methods

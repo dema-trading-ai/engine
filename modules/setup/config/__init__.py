@@ -4,26 +4,24 @@
 import json
 import re
 import sys
-from collections import namedtuple
 from datetime import datetime
 
 import numpy as np
 
+from .StrategyDefinition import StrategyDefinition
 from .cctx_adapter import create_cctx_exchange
 from .currencies import get_currency_symbol
 from .validations import validate
 from .load_strategy import load_strategy_from_config
 from .cli import adjust_config_to_cli
 
-StrategyDefinition = namedtuple('StrategyDefinition', 'strategy_name strategies_directory')
-
 msec = 1000
 minute = 60 * msec
 hour = 60 * minute
 day = 24 * hour
 
-class ConfigModule(object):
 
+class ConfigModule(object):
     raw_config: dict
     timeframe: str
     timeframe_ms: int
@@ -77,7 +75,6 @@ def read_config() -> dict:
         raise Exception("[ERROR] Something went wrong parsing config file.",
                         sys.exc_info()[0])
     return json.loads(data)
-
 
 
 def print_pairs(config_json):
