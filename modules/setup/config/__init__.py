@@ -79,11 +79,6 @@ def read_config() -> dict:
     return json.loads(data)
 
 
-def read_spec() -> list:
-    with open("config/specification.json", "r") as f:
-        spec = f.read()
-    return json.loads(spec)
-
 
 def print_pairs(config_json):
     coins = ''

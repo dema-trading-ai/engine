@@ -13,4 +13,4 @@ def test_dataframe():
 	self.setup_module = SetupModule()
 	ohlcv_pair_frames = self.setup_module.setup()
 
-	print(type(ohlcv_pair_framess))
+	print(type(ohlcv_pair_frames))

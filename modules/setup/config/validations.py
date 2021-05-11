@@ -1,4 +1,4 @@
-from modules.setup.config import read_spec, adjust_config_to_cli
+from modules.setup.config.cli import adjust_config_to_cli
 from modules.setup.config.spec import spec_type_to_python_type
 
 
@@ -8,6 +8,12 @@ def validate(config: dict):
     validate_by_spec(config, config_spec)
     validate_single_currency_in_pairs(config)
     validate_fee(config)
+
+
+def read_spec() -> list:
+    with open("config/specification.json", "r") as f:
+        spec = f.read()
+    return json.loads(spec)
 
 
 def validate_by_spec(config, config_spec):
