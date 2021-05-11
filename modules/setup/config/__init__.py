@@ -37,7 +37,7 @@ class ConfigModule(object):
         self.timeframe_ms = parse_timeframe(self.timeframe)
         self.strategy_definition = StrategyDefinition(config['strategy-name'], config['strategies-folder'])
         self.exchange_name = exchange_str
-        self.exchange = create_cctx_exchange(self.exchange_name, self.exchange_name)
+        self.exchange = create_cctx_exchange(self.exchange_name, self.timeframe)
         backtesting_till_now = config["backtesting-till-now"]
         backtesting_from = config["backtesting-from"]
         backtesting_to = config["backtesting-to"]

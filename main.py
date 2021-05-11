@@ -1,11 +1,11 @@
 # Files
 from main_controller import MainController
 
-def main2():
+def main():
     controller = MainController()
     controller.run()
 
 
 
 if __name__ == "__main__":
-    main2()
+    main()

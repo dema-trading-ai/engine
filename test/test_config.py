@@ -2,8 +2,6 @@
 from os import path
 import sys
 
-sys.path.append('.')
-
 def test_config():
     assert (path.exists("config.json"))
  
