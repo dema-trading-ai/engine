@@ -1,3 +1,4 @@
+from backtesting.backtesting import BackTesting
 from data.datamodule import DataModule
 from modules.algo import AlgoModule
 from modules.setup.config import print_pairs, load_strategy_from_config
@@ -13,5 +14,6 @@ class SetupModule(object):
         ohlcv_pair_frames = DataModule(self.config).load_historical_data()
 
         strategy = load_strategy_from_config(self.config.strategy_definition)
+        backtesting_module = BackTesting(ohlcv_pair_frames, self.config, strategy)
 
-        return AlgoModule(ohlcv_pair_frames, self.config, strategy)
+        return AlgoModule(self.config, backtesting_module)

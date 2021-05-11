@@ -2,9 +2,11 @@
 from datetime import datetime
 
 # Files
-from typing import Any
+from typing import Optional
 
+from data.tradingmodule_config import TradingModuleConfig
 from models.trade import Trade
+
 
 # ======================================================================
 # TradingModule is responsible for tracking trades, calling strategy methods
@@ -12,6 +14,7 @@ from models.trade import Trade
 #
 # © 2021 DemaTrading.ai
 # ======================================================================
+
 
 class TradingModule:
     max_open_trades = None
@@ -23,17 +26,17 @@ class TradingModule:
     realised_profits = []
     total_fee_amount = 0
 
-    def __init__(self, config: dict[str, Any]):
+    def __init__(self, config: TradingModuleConfig):
         print("[INFO] Initializing trading-module...")
         self.config = config
-        self.budget = float(self.config['starting-capital'])
+        self.budget = float(self.config.starting_capital)
         self.realised_profit = self.budget
 
-        self.max_open_trades = int(self.config['max-open-trades'])
-        self.amount_of_pairs = len(self.config['pairs'])
-        self.fee = config['fee'] / 100
-        self.sl_type = config['stoploss-type']
-        self.sl_perc = float(config['stoploss'])
+        self.max_open_trades = int(self.config.max_open_trades)
+        self.amount_of_pairs = len(self.config.pairs)
+        self.fee = config.fee / 100
+        self.sl_type = config.stoploss_type
+        self.sl_perc = float(config.stoploss)
 
     def tick(self, ohlcv: dict, data_dict: dict) -> None:
         trade = self.find_open_trade(ohlcv['pair'])
@@ -76,7 +79,7 @@ class TradingModule:
             return  # trade is closed by stoploss or ROI
         elif ohlcv['sell'] == 1:
             self.close_trade(trade, reason="Sell signal", ohlcv=ohlcv)
-        else:   # trade is not closed
+        else:  # trade is not closed
             self.update_value_per_timestamp_tracking(trade, ohlcv)
 
     def close_trade(self, trade: Trade, reason: str, ohlcv: dict) -> None:
@@ -163,9 +166,9 @@ class TradingModule:
         :rtype: float
         """
         passed_minutes = time_passed.seconds / 60
-        roi = self.config['roi']['0']
+        roi = self.config.roi['0']
 
-        for key, value in sorted(self.config['roi'].items(), key=lambda item: int(item[0])):
+        for key, value in sorted(self.config.roi.items(), key=lambda item: int(item[0])):
             if passed_minutes >= int(key):
                 roi = value
         return roi
@@ -185,7 +188,7 @@ class TradingModule:
             return True
         return False
 
-    def find_open_trade(self, pair: str) -> Trade:
+    def find_open_trade(self, pair: str) -> Optional[Trade]:
         """
         :param pair: pair to check in "AAA/BBB" format
         :type pair: string

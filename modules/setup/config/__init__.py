@@ -50,7 +50,8 @@ class ConfigModule(object):
         self.btc_marketchange_ratio = self.load_btc_marketchange()
         self.fee = config["fee"]
         self.stoploss = config["stoploss"]
-        self.max_open_trades = ["max_open_trades"]
+        self.stoploss_type = config["stoploss-type"]
+        self.max_open_trades = config["max-open-trades"]
         self.plots = config["plots"]
         self.currency_symbol = get_currency_symbol(self.raw_config)
 

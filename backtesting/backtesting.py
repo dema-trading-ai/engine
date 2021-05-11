@@ -5,7 +5,6 @@ from tqdm import tqdm
 
 # Files
 from backtesting.strategy import Strategy
-from data.tradingmodule import TradingModule
 from modules.pairs_data import PairsData
 from modules.setup.config import ConfigModule
 
@@ -28,7 +27,6 @@ class BackTesting:
     df = {}
 
     def __init__(self, data: dict[str, DataFrame], config_module: ConfigModule, strategy: Strategy):
-        self.trading_module = TradingModule(config_module.raw_config)
         self.config = config_module
         self.starting_capital = config_module.starting_capital
         self.currency_symbol = config_module.currency_symbol
@@ -76,5 +74,5 @@ class BackTesting:
             data_dict[pair] = indicators.to_dict('index')
         if notify:
             print(
-                f"[WARNING] Dynamic stoploss {notify_reason}. Using standard stoploss of {self.config.raw_config['stoploss']}%.")
+                f"[WARNING] Dynamic stoploss {notify_reason}. Using standard stoploss of {self.config.stoploss}%.")
         return data_dict

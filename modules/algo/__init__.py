@@ -3,8 +3,8 @@ from modules.setup.config import ConfigModule
 
 
 class AlgoModule(object):
-    def __init__(self, history_data, config_module: ConfigModule, strategy):
-        self.backtesting_module = BackTesting(history_data, config_module, strategy)
+    def __init__(self, config_module: ConfigModule, backtesting_module: BackTesting):
+        self.backtesting_module = backtesting_module
         self.config_module = config_module
 
     def run(self):

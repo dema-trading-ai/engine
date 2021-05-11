@@ -1,5 +1,6 @@
 # Files
 from data.tradingmodule import TradingModule
+from data.tradingmodule_config import create_trading_module_config
 from modules.output import OutputModule
 from modules.setup.config import ConfigModule
 from modules.setup import SetupModule
@@ -20,6 +21,8 @@ class MainController:
 
         stats_config = to_stats_config(self.config)
 
-        stats_module = StatsModule(stats_config, dict_with_signals, TradingModule(self.config.raw_config), df)
+        trading_module_config = create_trading_module_config(self.config)
+        trading_module = TradingModule(trading_module_config)
+        stats_module = StatsModule(stats_config, dict_with_signals, trading_module, df)
 
         stats_module.analyze()
