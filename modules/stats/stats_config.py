@@ -16,4 +16,8 @@ class StatsConfig(TypedDict):
 
 
 def toStatsConfig(config: ConfigModule):
-    statsConfig = StatsConfig()
+    statsConfig = StatsConfig(
+        fee=config.raw_config["fee"],
+        backtesting_to=config.backtesting_to
+    )
+
