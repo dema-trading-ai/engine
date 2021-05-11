@@ -12,7 +12,7 @@ max_open_trades = 1
 starting_capital = 1
 fee = 0
 
-stoploss = -float("inf")
+stoploss = -10
 
 stats_config = StatsConfig(
     max_open_trades=1,
@@ -48,9 +48,8 @@ trading_module_config = TradingModuleConfig(
 
 btc_ohlcv_with_indicators = {}
 
-btc_ohlcv_with_indicators |= create_entry(time=1, open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0)
-btc_ohlcv_with_indicators |= create_entry(time=2, open=1, high=1, low=1, close=1, volume=1, buy=0, sell=0)
-btc_ohlcv_with_indicators |= create_entry(time=3, open=1, high=1, low=1, close=1, volume=1, buy=0, sell=0)
+btc_ohlcv_with_indicators |= create_entry(time=1, open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0)
+btc_ohlcv_with_indicators |= create_entry(time=2, open=2, high=2, low=1, close=1, volume=1, buy=0, sell=0)
 
 frame_with_signals: PairsData = {
     "BTC/USDT": btc_ohlcv_with_indicators
