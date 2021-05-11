@@ -1,9 +1,10 @@
 from datetime import datetime
 
+
 def spec_type_to_python_type(t: str) -> type:
     if t == "string":
         return str
-    elif t == "int": 
+    elif t == "int":
         return int
     elif t == "number":
         return float
@@ -16,4 +17,4 @@ def spec_type_to_python_type(t: str) -> type:
     elif t == "datetime":
         return datetime
     else:
-       raise Exception
+        raise Exception

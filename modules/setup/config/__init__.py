@@ -8,7 +8,7 @@ from datetime import datetime
 
 import numpy as np
 
-from .StrategyDefinition import StrategyDefinition
+from .strategy_definition import StrategyDefinition
 from .cctx_adapter import create_cctx_exchange
 from .currencies import get_currency_symbol
 from .validations import validate
