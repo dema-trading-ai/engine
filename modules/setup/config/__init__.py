@@ -46,6 +46,11 @@ class ConfigModule(object):
 
         self.pairs = config["pairs"]
         self.btc_marketchange_ratio = self.load_btc_marketchange()
+        self.fee = config["fee"]
+        self.stoploss = config["stoploss"]
+        self.max_open_trades = ["max_open_trades"]
+        self.plots = config["plots"]
+        self.currency_symbol = get_currency_symbol()
 
     def load_btc_marketchange(self):
         print("[INFO] Fetching marketchange of BTC/USDT...")
@@ -58,7 +63,7 @@ class ConfigModule(object):
         return end_close_value / begin_close_value
 
     def get_currency_symbol(self):
-        return get_currency_symbol(self.raw_config)
+        return self.raw_config["currency"]
 
 
 def read_config() -> dict:

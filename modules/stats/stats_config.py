@@ -16,4 +16,14 @@ class StatsConfig(TypedDict):
 
 
 def toStatsConfig(config: ConfigModule):
-    statsConfig = StatsConfig()
+    statsConfig = StatsConfig(
+        fee = config.fee,
+        stoploss = config.stoploss,
+        max_open_trades = config.max_open_trades,
+        btc_marketchange_ratio = config.btc_marketchange_ratio,
+        backtesting_to = config.backtesting_to,
+        backtesting_from = config.backtesting_from,
+        plots = config.plots,
+        starting_capital = config.starting_capital,
+        currency_symbol = config.currency_symbol
+        )
