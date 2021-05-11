@@ -1,8 +1,8 @@
 # Files
 from data.tradingmodule import TradingModule
-from modules.output.output import OutputModule
+from modules.output import OutputModule
 from modules.setup.config import ConfigModule
-from modules.setup.setup import SetupModule
+from modules.setup import SetupModule
 from modules.stats.stats import StatsModule
 from modules.stats.stats_config import to_stats_config
 
