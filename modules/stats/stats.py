@@ -12,13 +12,15 @@ from modules.stats.stats_config import StatsConfig
 from utils import default_empty_dict_dict, calculate_worth_of_open_trades
 
 
-class StatsModule(object):
-    def __init__(self, config: StatsConfig, frame_with_signals: PairsData, trading_module: TradingModule):
+class StatsModule:
+
+    def __init__(self, config: StatsConfig, frame_with_signals: PairsData, trading_module: TradingModule, df):
+        self.df = df
         self.config = config
         self.trading_module = trading_module
         self.frame_with_signals = frame_with_signals
 
-    def analyze(self, ):
+    def analyze(self) -> None:
         pairs = list(self.frame_with_signals.keys())
         ticks = list(self.frame_with_signals[pairs[0]].keys())
 
@@ -51,6 +53,7 @@ class StatsModule(object):
         :rtype: None
         """
         # generate results
+
         main_results = self.generate_main_results(
             open_trades, closed_trades, budget, market_change)
         coin_res = self.generate_coin_results(closed_trades, market_change)
@@ -361,9 +364,3 @@ def get_market_change(ticks: list, pairs: list, data_dict: dict) -> dict:
         total_change += coin_change
     market_change['all'] = total_change / len(pairs)
     return market_change
-
-
-
-
-
-

@@ -59,7 +59,7 @@ class DataModule:
         :return: None
         :rtype: None
         """
-        self.exchange.__load_markets()
+        self.exchange.load_markets()
         self.load_historical_data()
 
     def download_data_for_pair(self, pair: str, data_from: int, data_to: int, save: bool = True) -> DataFrame:

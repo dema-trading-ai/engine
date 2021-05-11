@@ -1,6 +1,6 @@
 # Libraries
 from os import path
-import sys
+
 
 def test_config():
     assert (path.exists("config.json"))

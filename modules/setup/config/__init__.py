@@ -30,6 +30,8 @@ class ConfigModule(object):
         config = read_config()
         validate(config)
 
+        self.plot_indicators1 = config["plot_indicators1"]
+        self.plot_indicators2 = config["plot_indicators2"]
         self.starting_capital = float(config["starting-capital"])
         self.raw_config = config  # TODO remove, should be typed
         exchange_str = config["exchange"]
@@ -119,4 +121,4 @@ def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtes
     if backtesting_from >= backtesting_to:
         raise Exception("[ERROR] Backtesting periods are configured incorrectly.")
     print('[INFO] Gathering data from %s until %s.' % (test_from, test_to))
-    return backtesting_to, backtesting_from
+    return backtesting_from, backtesting_to

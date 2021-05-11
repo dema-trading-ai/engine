@@ -31,7 +31,7 @@ class BackTesting:
         self.trading_module = TradingModule(config_module.raw_config)
         self.config = config_module
         self.starting_capital = config_module.starting_capital
-        self.currency_symbol = config_module.get_currency_symbol()
+        self.currency_symbol = config_module.currency_symbol
         self.strategy = strategy
         self.data = data
         self.backtesting_from = config_module.backtesting_from

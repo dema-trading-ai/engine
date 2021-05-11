@@ -4,6 +4,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 
+
 def calculate_buy_sell_moments(pair, dates, df, points, list):
     """
     Method that lists buy or sell points over time
@@ -29,29 +30,30 @@ def calculate_buy_sell_moments(pair, dates, df, points, list):
 
     return list
 
+
 def plot_per_coin(self):
     """
     Plot dataframe of a all coin pairs
     :return: None
     :rtype: None
     """
-    for pair in self.df.keys():
+    for pair in self.frame_with_signals:
 
         # fix the given indicators
         outside_ohlc = ['rsi', 'macd', 'mfi', 'adx/dmi', 'stoch rsi', 'cci', 'volume']
         default_ind1 = ['ema5', 'ema21']
 
-        if len(self.config["plot_indicators1"]) == 0:
-            self.config["plot_indicators1"] = default_ind1
+        if len(self.config.plot_indicators1) == 0:
+            self.config.replace(plot_indicators1 =default_ind1)
 
         for x in outside_ohlc:
-            if x in self.config["plot_indicators1"]:
-                self.config["plot_indicators1"].remove(x)
-                self.config["plot_indicators2"].append(x)
+            if x in self.config.plot_indicators1:
+                self.config.plot_indicators1.remove(x)
+                self.config.plot_indicators2.append(x)
 
         # calculates subplots
         rows = 1
-        for ind in self.config["plot_indicators2"]:
+        for ind in self.config.plot_indicators2:
             if ind in self.df[pair].columns.values:
                 rows += 1
 
@@ -113,7 +115,7 @@ def plot_per_coin(self):
                                               color='rgb(220,20,60)'))), row=1, col=1)
 
         # add indicators1
-        for ind in self.config["plot_indicators1"]:
+        for ind in self.config.plot_indicators1:
             if ind in self.df[pair].columns.values:
                 fig.add_trace((go.Scatter(x=dates, y=self.df[pair][ind], name=ind,
                                           line=dict(width=2, dash='dot'))), row=1, col=1)
@@ -122,7 +124,7 @@ def plot_per_coin(self):
 
         # add indicators2
         plots = 2
-        for ind in self.config["plot_indicators2"]:
+        for ind in self.config.plot_indicators2:
             if ind in self.df[pair].columns.values:
                 fig.add_trace((go.Scatter(x=dates, y=self.df[pair][ind], name=ind,
                                           line=dict(width=2, dash='dot'))), row=plots, col=1)
@@ -137,5 +139,3 @@ def plot_per_coin(self):
 
         fig.show()
         fig.write_html("data/backtesting-data/binance/plot%s.html" % pair.replace("/", ""))
-
-

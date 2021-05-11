@@ -1,8 +1,6 @@
-from pandas import DataFrame
-
 from data.datamodule import DataModule
 from modules.algo.algo import AlgoModule
-from modules.setup.config import ConfigModule, print_pairs, load_strategy_from_config
+from modules.setup.config import print_pairs, load_strategy_from_config
 
 
 class SetupModule(object):

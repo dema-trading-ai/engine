@@ -3,7 +3,6 @@ from datetime import datetime
 import numpy as np
 
 # Files
-from backtesting.strategy import Strategy
 
 
 # ======================================================================

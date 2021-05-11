@@ -1,14 +1,5 @@
-import typing
-from datetime import datetime
-
-from pandas import DataFrame
-
 from backtesting.backtesting import BackTesting
-from backtesting.plots import plot_per_coin
-from backtesting.results import CoinInsights, OpenTradeResult, show_signature, MainResults
-from models.trade import Trade
 from modules.setup.config import ConfigModule
-from utils import calculate_worth_of_open_trades, default_empty_dict_dict
 
 
 class AlgoModule(object):
@@ -18,4 +9,6 @@ class AlgoModule(object):
         self.config_module = config_module
 
     def run(self):
-        return self.backtesting_module.start_backtesting()
+        dict_with_signals = self.backtesting_module.start_backtesting()
+        df = self.backtesting_module.df
+        return df, dict_with_signals
