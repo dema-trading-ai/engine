@@ -1,8 +1,8 @@
 # Files
-from modules.algo.algo import AlgoModule
-from modules.output.output import OutputModule
 from modules.setup.setup import SetupModule
+from modules.algo.algo import AlgoModule
 from modules.stats.stats import StatsModule
+from modules.output.output import OutputModule
 
 
 class MainController:

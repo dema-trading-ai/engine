@@ -73,7 +73,7 @@ class Trade:
         self.profit_ratio = self.capital / self.starting_amount
         self.profit_dollar = self.capital - self.starting_amount
 
-    def configure_stoploss(self, ohlcv: dict, data_dict: dict, strategy: Strategy) -> None:
+    def configure_stoploss(self, ohlcv: dict, data_dict: dict) -> None:
         """
         Configures stoploss based on configured type.
 
@@ -81,8 +81,6 @@ class Trade:
         :type ohlcv: dict
         :param data_dict: dict containing OHLCV data of current pair
         :type data_dict: dict
-        :param strategy: strategy class
-        :type strategy: Strategy
         :return: None
         :rtype: None
         """

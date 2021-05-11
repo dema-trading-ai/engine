@@ -4,8 +4,6 @@ from datetime import datetime
 # Files
 from typing import Any
 
-from config.load_strategy import load_strategy_from_config
-from backtesting.strategy import Strategy
 from models.trade import Trade
 from utils import calculate_worth_of_open_trades
 
@@ -21,7 +19,6 @@ class TradingModule:
     max_open_trades = None
     closed_trades = []
     open_trades = []
-    strategy = None
 
     open_order_value_per_timestamp = {}
     budget_per_timestamp = {}
@@ -31,7 +28,6 @@ class TradingModule:
     def __init__(self, config: dict[str, Any]):
         print("[INFO] Initializing trading-module...")
         self.config = config
-        self.strategy = load_strategy_from_config(config)
         self.budget = float(self.config['starting-capital'])
         self.realised_profit = self.budget
 
@@ -42,14 +38,6 @@ class TradingModule:
         self.sl_perc = float(config['stoploss'])
 
     def tick(self, ohlcv: dict, data_dict: dict) -> None:
-        """
-        :param ohlcv: dictionary with OHLCV data for current tick
-        :type ohlcv: dict
-        :param data_dict: dict containing OHLCV data of current pair
-        :type data_dict: dict
-        :return: None
-        :rtype: None
-        """
         trade = self.find_open_trade(ohlcv['pair'])
         if trade:
             trade.update_stats(ohlcv)
@@ -143,7 +131,7 @@ class TradingModule:
         date = datetime.fromtimestamp(ohlcv['time'] / 1000)
         new_trade = \
             Trade(ohlcv, spend_amount, self.fee, date, self.sl_type, self.sl_perc)
-        new_trade.configure_stoploss(ohlcv, data_dict, self.strategy)
+        new_trade.configure_stoploss(ohlcv, data_dict)
         new_trade.update_stats(ohlcv)
 
         # Update total budget with configured spend amount and fee
