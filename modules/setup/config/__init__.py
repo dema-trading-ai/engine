@@ -4,28 +4,38 @@
 import json
 import re
 import sys
+from collections import namedtuple
 from datetime import datetime
 
 import numpy as np
-from numpy.distutils.command.config import config
 
 from data.datamodule import minute, hour
 from .cctx_adapter import create_cctx_exchange
+from .currencies import get_currency_symbol
 from .validations import validate
 from .load_strategy import load_strategy_from_config
 from .cli import adjust_config_to_cli
 
+StrategyDefinition = namedtuple('StrategyDefinition', 'strategy_name strategies_directory')
 
 class ConfigModule(object):
+
+    raw_config: dict
+    timeframe: str
+    timeframe_ms: int
 
     def __init__(self):
         config = read_config()
         validate(config)
-        self.config = config
-        timeframe = config["timeframe"]
+
+        self.starting_capital = float(config["starting-capital"])
+        self.raw_config = config  # TODO remove, should be typed
         exchange_str = config["exchange"]
-        self.timeframe = parse_timeframe(timeframe)
-        self.exchange = create_cctx_exchange(exchange_str, exchange_str)
+        self.timeframe = config["timeframe"]
+        self.timeframe_ms = parse_timeframe(self.timeframe)
+        self.strategy_definition = StrategyDefinition(config['strategy-name'], config['strategies-folder'])
+        self.exchange_name = exchange_str
+        self.exchange = create_cctx_exchange(self.exchange_name, self.exchange_name)
         backtesting_till_now = config["backtesting-till-now"]
         backtesting_from = config["backtesting-from"]
         backtesting_to = config["backtesting-to"]
@@ -38,15 +48,15 @@ class ConfigModule(object):
     def load_btc_marketchange(self):
         print("[INFO] Fetching marketchange of BTC/USDT...")
         begin_data = self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe='1m', since=self.backtesting_from, limit=1)
-        end_timestamp = int(np.floor(self.backtesting_to / self.timeframe) * self.timeframe)
+        end_timestamp = int(np.floor(self.backtesting_to / self.timeframe_ms) * self.timeframe_ms)
         end_data = self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe='1m', since=end_timestamp, limit=1)
 
         begin_close_value = begin_data[0][4]
         end_close_value = end_data[0][4]
         return end_close_value / begin_close_value
 
-    def get(self) -> dict:
-        pass
+    def get_currency_symbol(self):
+        return get_currency_symbol(self.raw_config)
 
 
 def read_config() -> dict:

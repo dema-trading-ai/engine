@@ -1,15 +1,16 @@
 # Libraries
-import numpy as np
-from pandas import DataFrame
-import pandas as pd
-import rapidjson
+import os
 import sys
 from os import path
-import os
+from typing import Optional
+
+import numpy as np
+import pandas as pd
+import rapidjson
+from pandas import DataFrame
 
 # Files
 from modules.setup.config import ConfigModule
-from modules.setup.config.cctx_adapter import create_cctx_exchange
 from utils import df_to_dict, dict_to_df, get_ohlcv_indicators
 
 # ======================================================================
@@ -30,25 +31,15 @@ class DataModule:
         print('[INFO] Starting DEMA Data-module...')
         self.config = config
         self.exchange = config.exchange
-        self.load_markets()
-        if not self.is_same_backtesting_period():
-            raise Exception("[ERROR] Dataframes don't have equal backtesting periods.")
+        self.__load_markets()
 
-    def load_markets(self) -> None:
-        """
-        Loads data using arguments specified in the config
-        :return: None
-        :rtype: None
-        """
-        self.exchange.load_markets()
-        self.load_historical_data()
-
-    def load_historical_data(self) -> None:
+    def load_historical_data(self) -> dict[str, DataFrame]:
         """
         Method checks for datafile existence, if not existing, download data and save to file
         :return: None
         :rtype: None
         """
+        history_data = {}
         for pair in self.config.pairs:
             if self.is_datafolder_exist(pair):
                 print("[INFO] Reading datafile for %s." % pair)
@@ -56,16 +47,20 @@ class DataModule:
             else:
                 print("[INFO] Did not find datafile for %s, starting download..." % pair)
                 df = self.download_data_for_pair(pair, self.config.backtesting_from, self.config.backtesting_to)
-            self.history_data[pair] = df
+            history_data[pair] = df
+        self.warn_if_missing_ticks(history_data)
+        if not is_same_backtesting_period(history_data):
+            raise Exception("[ERROR] Dataframes don't have equal backtesting periods.")
+        return history_data
 
-        self.warn_if_missing_ticks()
-
-    def is_same_backtesting_period(self) -> bool:
+    def __load_markets(self) -> None:
         """
-        Check whether dataframes cover the same time period.
+        Loads data using arguments specified in the config
+        :return: None
+        :rtype: None
         """
-        df_lengths = [len(df.index.values) for df in self.history_data.values()]
-        return all(length == df_lengths[0] for length in df_lengths)
+        self.exchange.__load_markets()
+        self.load_historical_data()
 
     def download_data_for_pair(self, pair: str, data_from: int, data_to: int, save: bool = True) -> DataFrame:
         start_date = data_from
@@ -77,15 +72,17 @@ class DataModule:
         index, ohlcv_data = [], []
         while start_date < data_to:
             # Request ticks for given pair (maximum = 1000)
-            remaining_ticks = (data_to - start_date) / self.timeframe_calc
+            remaining_ticks = (data_to - start_date) / self.config.timeframe_ms
             asked_ticks = min(remaining_ticks, fetch_ohlcv_limit)
-            result = self.exchange.fetch_ohlcv(symbol=pair, timeframe=self.config['timeframe'], \
-                                               since=int(start_date), limit=int(asked_ticks))
+            result = self.exchange.fetch_ohlcv(symbol=pair,
+                                               timeframe=self.config.timeframe,
+                                               since=int(start_date),
+                                               limit=int(asked_ticks))
 
             # Save timestamps and ohlcv info
             index += [candle[0] for candle in result]  # timestamps
             ohlcv_data += result
-            start_date += np.around(asked_ticks * self.timeframe_calc)
+            start_date += np.around(asked_ticks * self.config.timeframe_ms)
 
         # Create pandas DataFrame and adds pair info
         df = DataFrame(ohlcv_data, index=index, columns=get_ohlcv_indicators()[:-3])
@@ -106,7 +103,7 @@ class DataModule:
         """
         # Check if datafolder exists
         filename = self.generate_datafile_name(pair)
-        exchange_path = os.path.join("data/backtesting-data", self.config["exchange"])
+        exchange_path = os.path.join("data/backtesting-data", self.config.exchange_name)
         if not path.exists(exchange_path):
             self.create_directory(exchange_path)
 
@@ -128,7 +125,7 @@ class DataModule:
         else:
             print("Successfully created the directory %s " % path)
 
-    def read_data_from_datafile(self, pair: str) -> DataFrame:
+    def read_data_from_datafile(self, pair: str) -> Optional[DataFrame]:
         """
         When datafile is covering requested backtesting period,
         this method reads the data from the files.
@@ -138,28 +135,29 @@ class DataModule:
         :rtype: None
         """
         filename = self.generate_datafile_name(pair)
-        filepath = os.path.join("data/backtesting-data/", self.config["exchange"], filename)
+        filepath = os.path.join("data/backtesting-data/", self.config.exchange_name, filename)
         try:
             with open(filepath, 'r') as datafile:
                 data = datafile.read()
         except FileNotFoundError:
             print("[ERROR] Backtesting datafile was not found.")
-            return False
+            return None
         except EnvironmentError:
             print("[ERROR] Something went wrong loading datafile", sys.exc_info()[0])
-            return False
+            return None
 
         # Convert json to dataframe
         df = dict_to_df(data)
 
         # Find correct last tick timestamp
-        n_downloaded_candles = (self.backtesting_to - self.backtesting_from) / self.timeframe_calc
-        timesteps_forward = int(n_downloaded_candles) * self.timeframe_calc
-        final_timestamp = self.backtesting_from + (timesteps_forward - self.timeframe_calc)  # last tick is excluded
+        n_downloaded_candles = (self.config.backtesting_to - self.config.backtesting_from) / self.config.timeframe_ms
+        timesteps_forward = int(n_downloaded_candles) * self.config.timeframe_ms
+        final_timestamp = self.config.backtesting_from + (
+                    timesteps_forward - self.config.timeframe_ms)  # last tick is excluded
 
         # Return correct backtesting period
         df = self.check_backtesting_period(pair, df, final_timestamp)
-        begin_index = df.index.get_loc(self.backtesting_from)
+        begin_index = df.index.get_loc(self.config.backtesting_from)
         end_index = df.index.get_loc(final_timestamp)
         self.save_dataframe(pair, df)
         df = df[begin_index:end_index + 1]
@@ -184,10 +182,10 @@ class DataModule:
         notify = True  # Used for printing message once (improved readibility)
 
         # Check if previous data needs to be downloaded
-        if self.backtesting_from < df_begin:
+        if self.config.backtesting_from < df_begin:
             print("[INFO] Incomplete datafile. Downloading extra candle(s)...")
             notify = False
-            prev_df = self.download_data_for_pair(pair, self.backtesting_from, df_begin, False)
+            prev_df = self.download_data_for_pair(pair, self.config.backtesting_from, df_begin, False)
             df = pd.concat([prev_df, df])
             extra_candles += len(prev_df.index)
 
@@ -195,7 +193,8 @@ class DataModule:
         if final_timestamp > df_end:
             if notify:
                 print("[INFO] Incomplete datafile. Downloading extra candle(s)...")
-            new_df = self.download_data_for_pair(pair, df_end + self.timeframe_calc, self.backtesting_to, False)
+            new_df = self.download_data_for_pair(pair, df_end + self.config.timeframe_ms, self.config.backtesting_to,
+                                                 False)
             df = pd.concat([df, new_df])
             extra_candles += len(new_df.index)
 
@@ -216,7 +215,7 @@ class DataModule:
         :rtype: None
         """
         filename = self.generate_datafile_name(pair)
-        filepath = os.path.join("data/backtesting-data/", self.config["exchange"], filename)
+        filepath = os.path.join("data/backtesting-data/", self.config.exchange_name, filename)
 
         # Convert pandas dataframe to json
         df_dict = df_to_dict(df)
@@ -233,7 +232,7 @@ class DataModule:
         :rtype: string
         """
         coin, base = pair.split('/')
-        return "data-{}{}{}.json".format(coin, base, self.config['timeframe'])
+        return "data-{}{}{}.json".format(coin, base, self.config.timeframe)
 
     def remove_backtesting_file(self, pair: str) -> None:
         """
@@ -248,18 +247,18 @@ class DataModule:
         filepath = os.path.join("data/backtesting-data/", self.config.exchange, filename)
         os.remove(filepath)
 
-    def warn_if_missing_ticks(self) -> None:
+    def warn_if_missing_ticks(self, history_data: dict[str, DataFrame]) -> None:
         """
         Test whether any tick has a null/NaN value, and whether every
         tick (time) exists
         :return: None
         :rtype: None
         """
-        daterange = np.arange(self.backtesting_from,
-                              self.backtesting_to,
-                              self.timeframe_calc)
+        daterange = np.arange(self.config.backtesting_from,
+                              self.config.backtesting_to,
+                              self.config.timeframe_ms)
 
-        for pair, data in self.history_data.items():
+        for pair, data in history_data.items():
             # Check if dates are missing dates
             index_column = data.index.to_numpy().astype(np.int64)
             diff = np.setdiff1d(daterange, index_column)
@@ -269,3 +268,9 @@ class DataModule:
                 print(f"[WARNING] Pair '{pair}' is missing {n_missing} ticks (rows)")
 
 
+def is_same_backtesting_period(history_data) -> bool:
+    """
+    Check whether dataframes cover the same time period.
+    """
+    df_lengths = [len(df.index.values) for df in history_data.values()]
+    return all(length == df_lengths[0] for length in df_lengths)

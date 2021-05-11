@@ -2,6 +2,8 @@
 from datetime import datetime
 
 # Files
+from typing import Any
+
 from config.load_strategy import load_strategy_from_config
 from backtesting.strategy import Strategy
 from models.trade import Trade
@@ -26,7 +28,7 @@ class TradingModule:
     realised_profits = []
     total_fee_amount = 0
 
-    def __init__(self, config):
+    def __init__(self, config: dict[str, Any]):
         print("[INFO] Initializing trading-module...")
         self.config = config
         self.strategy = load_strategy_from_config(config)
