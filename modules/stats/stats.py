@@ -3,16 +3,31 @@ from datetime import datetime
 
 from tqdm import tqdm
 
-from backtesting.plots import plot_per_coin
-from backtesting.results import OpenTradeResult, CoinInsights, MainResults, show_signature
+from backtesting.results import OpenTradeResult, CoinInsights, MainResults
 from data.tradingmodule import TradingModule
 from models.trade import Trade
 from modules.pairs_data import PairsData
 from modules.stats.stats_config import StatsConfig
+from modules.stats.trading_stats import TradingStats
 from utils import default_empty_dict_dict, calculate_worth_of_open_trades
 
 
+def generate_open_trades_results(open_trades: [Trade]) -> typing.List[OpenTradeResult]:
+    open_trade_stats = []
+    for trade in open_trades:
+        open_trade_res = OpenTradeResult(pair=trade.pair,
+                                         curr_profit_percentage=(trade.profit_ratio - 1) * 100,
+                                         curr_profit=trade.profit_dollar,
+                                         max_seen_drawdown=(trade.max_seen_drawdown - 1) * 100,
+                                         opened_at=trade.opened_at)
+
+        open_trade_stats.append(open_trade_res)
+    return open_trade_stats
+
+
 class StatsModule:
+    buypoints = None
+    sellpoints = None
 
     def __init__(self, config: StatsConfig, frame_with_signals: PairsData, trading_module: TradingModule, df):
         self.df = df
@@ -20,7 +35,7 @@ class StatsModule:
         self.trading_module = trading_module
         self.frame_with_signals = frame_with_signals
 
-    def analyze(self) -> None:
+    def analyze(self) -> TradingStats:
         pairs = list(self.frame_with_signals.keys())
         ticks = list(self.frame_with_signals[pairs[0]].keys())
 
@@ -30,44 +45,30 @@ class StatsModule:
                 tick_dict = pair_dict[tick]
                 self.trading_module.tick(tick_dict, pair_dict)
 
-        open_trades = self.trading_module.open_trades
-        closed_trades = self.trading_module.closed_trades
-        budget = self.trading_module.budget
         market_change = get_market_change(ticks, pairs, self.frame_with_signals)
-        self.generate_backtesting_result(open_trades, closed_trades, budget, market_change)
+        return self.generate_backtesting_result(market_change)
 
-    def generate_backtesting_result(self, open_trades: [Trade], closed_trades: [Trade], budget: float,
-                                    market_change: dict) -> None:
-        """
-        Oversized method for generating backtesting results
+    def generate_backtesting_result(self,
+                                    market_change: dict) -> TradingStats:
 
-        :param open_trades: array of open trades
-        :type open_trades: [Trade]
-        :param closed_trades: array of closed tradesd
-        :type closed_trades: [Trade]
-        :param budget: Budget at the moment backtests end
-        :type budget: float
-        :param market_change: dict with market change per pair
-        :type market_change: dict
-        :return: None
-        :rtype: None
-        """
-        # generate results
-
+        trading_module = self.trading_module
         main_results = self.generate_main_results(
-            open_trades, closed_trades, budget, market_change)
-        coin_res = self.generate_coin_results(closed_trades, market_change)
-        open_trade_res = self.generate_open_trades_results(open_trades)
+            trading_module.open_trades,
+            trading_module.closed_trades,
+            trading_module.budget,
+            market_change)
+        coin_res = self.generate_coin_results(trading_module.closed_trades, market_change)
+        open_trade_res = generate_open_trades_results(trading_module.open_trades)
 
-        # print tables
-        main_results.show(self.config.currency_symbol)
-        CoinInsights.show(coin_res, self.config.currency_symbol)
-        OpenTradeResult.show(open_trade_res, self.config.currency_symbol)
-        show_signature()
-
-        # plot graphs
-        if self.config.plots:
-            plot_per_coin(self)
+        return TradingStats(
+            main_results=main_results,
+            coin_res=coin_res,
+            open_trade_res=open_trade_res,
+            frame_with_signals=self.frame_with_signals,
+            buypoints=self.buypoints,
+            sellpoints=self.sellpoints,
+            df=self.df
+        )
 
     def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float,
                               market_change: dict) -> MainResults:
@@ -106,7 +107,7 @@ class StatsModule:
                            fee=self.config.fee,
                            total_fee_amount=self.trading_module.total_fee_amount)
 
-    def generate_coin_results(self, closed_trades: [Trade], market_change: dict) -> typing.List[CoinInsights]:
+    def generate_coin_results(self, closed_trades: [Trade], market_change: dict) -> list[CoinInsights]:
         stats = self.calculate_statistics_per_coin(closed_trades)
 
         new_stats = []
@@ -126,18 +127,6 @@ class StatsModule:
             new_stats.append(coin_insight)
 
         return new_stats
-
-    def generate_open_trades_results(self, open_trades: [Trade]) -> typing.List[OpenTradeResult]:
-        open_trade_stats = []
-        for trade in open_trades:
-            open_trade_res = OpenTradeResult(pair=trade.pair,
-                                             curr_profit_percentage=(trade.profit_ratio - 1) * 100,
-                                             curr_profit=trade.profit_dollar,
-                                             max_seen_drawdown=(trade.max_seen_drawdown - 1) * 100,
-                                             opened_at=trade.opened_at)
-
-            open_trade_stats.append(open_trade_res)
-        return open_trade_stats
 
     def calculate_statistics_per_coin(self, closed_trades):
         """

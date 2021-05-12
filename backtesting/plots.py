@@ -1,8 +1,12 @@
+from pstats import Stats
+
 import numpy as np
 from datetime import datetime
 import plotly.graph_objects as go
+from pandas import DataFrame
 from plotly.subplots import make_subplots
 
+from modules.stats.stats_config import StatsConfig
 
 
 def calculate_buy_sell_moments(pair, dates, df, points, list):
@@ -31,30 +35,25 @@ def calculate_buy_sell_moments(pair, dates, df, points, list):
     return list
 
 
-def plot_per_coin(self):
-    """
-    Plot dataframe of a all coin pairs
-    :return: None
-    :rtype: None
-    """
-    for pair in self.frame_with_signals:
+def plot_per_coin(signals, df: DataFrame, config: StatsConfig, buypoints, sellpoints):
+    for pair in signals:
 
         # fix the given indicators
         outside_ohlc = ['rsi', 'macd', 'mfi', 'adx/dmi', 'stoch rsi', 'cci', 'volume']
         default_ind1 = ['ema5', 'ema21']
 
-        if len(self.config.plot_indicators1) == 0:
-            self.config.replace(plot_indicators1 =default_ind1)
+        if len(config.plot_indicators1) == 0:
+            config.plot_indicators1 = default_ind1
 
         for x in outside_ohlc:
-            if x in self.config.plot_indicators1:
-                self.config.plot_indicators1.remove(x)
-                self.config.plot_indicators2.append(x)
+            if x in config.plot_indicators1:
+                config.plot_indicators1.remove(x)
+                config.plot_indicators2.append(x)
 
         # calculates subplots
         rows = 1
-        for ind in self.config.plot_indicators2:
-            if ind in self.df[pair].columns.values:
+        for ind in config.plot_indicators2:
+            if ind in df[pair].columns.values:
                 rows += 1
 
         height = [1]
@@ -70,24 +69,24 @@ def plot_per_coin(self):
             fig.update_xaxes(rangeslider={'visible': False}, row=1, col=1)
 
         # set up ohlc
-        dates = [datetime.fromtimestamp(time / 1000) for time in self.df[pair]["time"]]
+        dates = [datetime.fromtimestamp(time / 1000) for time in df[pair]["time"]]
 
         ohlc = go.Ohlc(
             x=dates,
-            open=self.df[pair]["open"],
-            high=self.df[pair]["high"],
-            low=self.df[pair]["low"],
-            close=self.df[pair]["close"],
+            open=df[pair]["open"],
+            high=df[pair]["high"],
+            low=df[pair]["low"],
+            close=df[pair]["close"],
             name='OHLC')
 
         fig.add_trace(ohlc, row=1, col=1)
 
         # add buy and sell signals
-        buysignal = [self.df[pair]["buy"][x] * ((self.df[pair]["high"][x] + self.df[pair]["low"][x]) / 2) for x in
-                     range(len(self.df[pair]["sell"]))]
+        buysignal = [df[pair]["buy"][x] * ((df[pair]["high"][x] + df[pair]["low"][x]) / 2) for x in
+                     range(len(df[pair]["sell"]))]
 
-        sellsignal = [self.df[pair]["sell"][x] * ((self.df[pair]["high"][x] + self.df[pair]["low"][x]) / 2) for x in
-                      range(len(self.df[pair]["sell"]))]
+        sellsignal = [df[pair]["sell"][x] * ((df[pair]["high"][x] + df[pair]["low"][x]) / 2) for x in
+                      range(len(df[pair]["sell"]))]
 
         fig.add_trace((go.Scatter(x=dates, y=buysignal,
                                   mode='markers', name='buysignal', line_color='rgb(0,255,0)')), row=1, col=1)
@@ -96,8 +95,8 @@ def plot_per_coin(self):
 
         # add actual buy and sell moments
 
-        buy = calculate_buy_sell_moments(pair, dates, self.df, self.buypoints, [])
-        sell = calculate_buy_sell_moments(pair, dates, self.df, self.sellpoints, [])
+        buy = calculate_buy_sell_moments(pair, dates, df, buypoints, [])
+        sell = calculate_buy_sell_moments(pair, dates, df, sellpoints, [])
 
         fig.add_trace((go.Scatter(x=dates, y=buy,
                                   mode='markers',
@@ -115,18 +114,18 @@ def plot_per_coin(self):
                                               color='rgb(220,20,60)'))), row=1, col=1)
 
         # add indicators1
-        for ind in self.config.plot_indicators1:
-            if ind in self.df[pair].columns.values:
-                fig.add_trace((go.Scatter(x=dates, y=self.df[pair][ind], name=ind,
+        for ind in config.plot_indicators1:
+            if ind in df[pair].columns.values:
+                fig.add_trace((go.Scatter(x=dates, y=df[pair][ind], name=ind,
                                           line=dict(width=2, dash='dot'))), row=1, col=1)
             else:
                 print(f"No {ind} found in {pair} strategy")
 
         # add indicators2
         plots = 2
-        for ind in self.config.plot_indicators2:
-            if ind in self.df[pair].columns.values:
-                fig.add_trace((go.Scatter(x=dates, y=self.df[pair][ind], name=ind,
+        for ind in config.plot_indicators2:
+            if ind in df[pair].columns.values:
+                fig.add_trace((go.Scatter(x=dates, y=df[pair][ind], name=ind,
                                           line=dict(width=2, dash='dot'))), row=plots, col=1)
                 plots += 1
             else:

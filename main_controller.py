@@ -13,7 +13,6 @@ class MainController:
     def __init__(self):
         self.config = ConfigModule()
         self.setup_module = SetupModule(self.config)
-        self.output_module = OutputModule()
 
     def run(self) -> None:
         algo_module = self.setup_module.setup()
@@ -25,4 +24,6 @@ class MainController:
         trading_module = TradingModule(trading_module_config)
         stats_module = StatsModule(stats_config, dict_with_signals, trading_module, df)
 
-        stats_module.analyze()
+        stats = stats_module.analyze()
+
+        OutputModule(stats_config).output(stats)
