@@ -45,13 +45,13 @@ ohlcv_indicators = get_ohlcv_indicators()
 
 def test_dataframe():
     frame_with_signals = MockPairFrame()
-    frame_with_signals["BTC/USD"] \
-        .add_entry(time=1, open=1, high=2, low=1, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(time=2, open=1, high=2, low=1, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(time=3, open=2, high=2, low=1, close=1, volume=1, buy=0, sell=1)
+    frame_with_signals["BTC/USDT"] \
+        .add_entry(time=1, open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
+        .add_entry(time=2, open=1, high=2, low=1, close=2, volume=1, buy=0, sell=1)
 
     trading_module = TradingModule(trading_module_config)
     df = pd.DataFrame.from_dict(frame_with_signals, orient='index', columns=ohlcv_indicators)
     stats_module = StatsModule(stats_config, frame_with_signals, trading_module, df)
+    stats = stats_module.analyze()
 
-    stats_module.analyze()
+    assert stats.main_results.overall_profit_percentage == 100

@@ -12,7 +12,7 @@ from modules.stats.trading_stats import TradingStats
 from utils import default_empty_dict_dict, calculate_worth_of_open_trades
 
 
-def generate_open_trades_results(open_trades: [Trade]) -> typing.List[OpenTradeResult]:
+def generate_open_trades_results(open_trades: [Trade]) -> list[OpenTradeResult]:
     open_trade_stats = []
     for trade in open_trades:
         open_trade_res = OpenTradeResult(pair=trade.pair,
@@ -74,7 +74,7 @@ class StatsModule:
                               market_change: dict) -> MainResults:
         # Get total budget and calculate overall profit
         budget += calculate_worth_of_open_trades(open_trades)
-        overall_profit = ((budget - self.config.starting_capital) / self.config.starting_capital) * 100
+        overall_profit_percentage = ((budget - self.config.starting_capital) / self.config.starting_capital) * 100
 
         # Find max seen and realised drowdown
         max_seen_drawdown = self.calculate_max_seen_drawdown()
@@ -92,7 +92,7 @@ class StatsModule:
                            market_change_btc=(self.config.btc_marketchange_ratio - 1) * 100,
                            starting_capital=self.config.starting_capital,
                            end_capital=budget,
-                           overall_profit_percentage=overall_profit,
+                           overall_profit_percentage=overall_profit_percentage,
                            n_trades=len(open_trades) + len(closed_trades),
                            n_left_open_trades=len(open_trades),
                            n_trades_with_loss=max_realised_drawdown['drawdown_trades'],
