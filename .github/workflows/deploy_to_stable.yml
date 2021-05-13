@@ -46,7 +46,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: dematrading/engine:stable, dematrading/engine:${{ needs.generate-new-tag.outputs.new_tag }}  # Builds a package with the `stable` tag, and another with the version as tag.
+          tags: dematrading/engine:stable, dematrading/engine:latest, dematrading/engine:${{ needs.generate-new-tag.outputs.new_tag }}  # Builds a package with the `stable` tag, and another with the version as tag.
       -
         name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
