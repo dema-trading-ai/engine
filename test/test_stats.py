@@ -24,7 +24,7 @@ def test_roi():
     # arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals["COIN/BASE"] \
+    fixture.frame_with_signals['COIN/BASE'] \
         .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
         .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=0)
 
@@ -44,7 +44,7 @@ def test_capital():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals["COIN/BASE"] \
+    fixture.frame_with_signals['COIN/BASE'] \
         .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
         .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=1)
 
@@ -60,7 +60,7 @@ def test_profit_percentage():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals["COIN/BASE"] \
+    fixture.frame_with_signals['COIN/BASE'] \
         .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
         .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=1)
 
@@ -76,7 +76,7 @@ def test_capital_open_trade():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals["COIN/BASE"] \
+    fixture.frame_with_signals['COIN/BASE'] \
         .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
         .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=0)
 
@@ -93,7 +93,7 @@ def test_stoploss():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals["COIN/BASE"] \
+    fixture.frame_with_signals['COIN/BASE'] \
         .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
         .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=1)
 
@@ -115,7 +115,7 @@ def test_dynamic_stoploss():
 
     fixture.trading_module_config.stoploss_type = "dynamic"
 
-    fixture.frame_with_signals["COIN/BASE"] \
+    fixture.frame_with_signals['COIN/BASE'] \
         .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0, stoploss=1) \
         .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=0, stoploss=1.5)
     # Act
@@ -133,7 +133,7 @@ def test_dynamic_stoploss_high():
 
     fixture.trading_module_config.stoploss_type = "dynamic"
 
-    fixture.frame_with_signals["COIN/BASE"] \
+    fixture.frame_with_signals['COIN/BASE'] \
         .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0, stoploss=1) \
         .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=0, stoploss=3)
     # Act
@@ -146,13 +146,13 @@ def test_dynamic_stoploss_high():
 def test_dividing_assets():
     """Given 'multiple assets', '' should 'rise same minus fee'"""
     # Arrange
-    fixture = StatsFixture(['COIN/BASE', "COIN2/BASE"])
+    fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE'])
 
-    fixture.frame_with_signals["COIN/BASE"] \
+    fixture.frame_with_signals['COIN/BASE'] \
         .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
         .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=0)
 
-    fixture.frame_with_signals["COIN2/BASE"] \
+    fixture.frame_with_signals['COIN2/BASE'] \
         .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
         .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=0)
 
@@ -171,7 +171,7 @@ def test_drawdown():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals["COIN/BASE"] \
+    fixture.frame_with_signals['COIN/BASE'] \
         .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
         .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=1)
 
@@ -185,10 +185,10 @@ def test_n_trades():
     """Given 'trades where made', 
     'number of trades' should 'display correct amount' """
     # Arrange
-    fixture = StatsFixture(['COIN/BASE', "COIN2/BASE", "COIN3/BASE"])
+    fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE', 'COIN3/BASE'])
 
     # Win/Loss/Open
-    fixture.frame_with_signals["COIN/BASE"] \
+    fixture.frame_with_signals['COIN/BASE'] \
         .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
         .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=1) \
         .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
@@ -196,7 +196,7 @@ def test_n_trades():
         .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0)
 
     # Win/Win/Open
-    fixture.frame_with_signals["COIN2/BASE"] \
+    fixture.frame_with_signals['COIN2/BASE'] \
         .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
         .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=1) \
         .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
@@ -204,7 +204,7 @@ def test_n_trades():
         .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0)
 
     # Loss/Loss/Open
-    fixture.frame_with_signals["COIN3/BASE"] \
+    fixture.frame_with_signals['COIN3/BASE'] \
         .add_entry(open=3, high=3, low=3, close=3, volume=1, buy=1, sell=0) \
         .add_entry(open=3, high=3, low=2, close=2, volume=1, buy=0, sell=1) \
         .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
@@ -225,9 +225,9 @@ def test_postitive_best_worst_trade():
     """Given one positive trade, 'best trade' should be trade profit,
     worst trade should be 0"""
     # Arrange
-    fixture = StatsFixture(['THREE'])
+    fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals["THREE"] \
+    fixture.frame_with_signals['COIN/BASE'] \
         .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
         .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=1)
 
@@ -243,9 +243,9 @@ def test_negative_best_worst_trade():
     """Given one negative trade, 'worst trade' should be trade profit,
     best trade should be 0"""
     # Arrange
-    fixture = StatsFixture(['THREE'])
+    fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals["THREE"] \
+    fixture.frame_with_signals['COIN/BASE'] \
         .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
         .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=1)
 
@@ -261,9 +261,9 @@ def test_best_worst_trade():
     """Given one negative trade, and one positive trade, 'worst trade' should be drawdown
     of negative trade, 'best trade' should be profit of positive trade"""
     # Arrange
-    fixture = StatsFixture(['THREE'])
+    fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals["THREE"] \
+    fixture.frame_with_signals['COIN/BASE'] \
         .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
         .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=1) \
         .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=1, sell=0) \
