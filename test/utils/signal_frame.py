@@ -33,7 +33,7 @@ class MockPairFrame(dict[str, MockOHLCVWithSignal]):
 
     def __init__(self, keys: list[str]):
         super().__init__()
-        self.__frame_keys = keys
+        self.frame_keys = keys
         for key in keys:
             self.setdefault(key, MockOHLCVWithSignal(key))
 
@@ -41,6 +41,5 @@ class MockPairFrame(dict[str, MockOHLCVWithSignal]):
         if k not in self:
             raise LookupError(f"no pair {k} defined on construction")
         super().__setitem__(k, v)
-
 
 
