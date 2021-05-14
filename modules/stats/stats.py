@@ -12,7 +12,7 @@ from modules.stats.trading_stats import TradingStats
 from utils import default_empty_dict_dict, calculate_worth_of_open_trades
 
 
-def generate_open_trades_results(open_trades: [Trade]) -> list[OpenTradeResult]:
+def generate_open_trades_results(open_trades: [Trade]) -> list:
     open_trade_stats = []
     for trade in open_trades:
         open_trade_res = OpenTradeResult(pair=trade.pair,
@@ -107,7 +107,7 @@ class StatsModule:
                            fee=self.config.fee,
                            total_fee_amount=self.trading_module.total_fee_amount)
 
-    def generate_coin_results(self, closed_trades: [Trade], market_change: dict) -> list[CoinInsights]:
+    def generate_coin_results(self, closed_trades: [Trade], market_change: dict) -> list:
         stats = self.calculate_statistics_per_coin(closed_trades)
 
         new_stats = []

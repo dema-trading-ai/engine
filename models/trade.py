@@ -126,7 +126,7 @@ class Trade:
                 return True
         return False
 
-    def trailing_stoploss(self, data_dict: dict, time: int) -> tuple[float, float]:
+    def trailing_stoploss(self, data_dict: dict, time: int) -> tuple:
         """
         Calculates the trailing stoploss (TSL) for each tick, applying the standard definition:
         - stoploss (SL) for a tick is calculated using: candle_open * (1 - trailing_percentage)
@@ -161,7 +161,7 @@ class Trade:
                     return ohlcv['time'], trail
         return np.NaN, np.NaN
 
-    def dynamic_stoploss(self, data_dict: dict, time: int) -> tuple[float, float]:
+    def dynamic_stoploss(self, data_dict: dict, time: int) -> tuple:
         """
         Finds the first occurence where the dynamic stoploss (defined in strategy)
         is triggered.

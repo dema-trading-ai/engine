@@ -33,7 +33,7 @@ class DataModule:
         self.exchange = config.exchange
         self.__load_markets()
 
-    def load_historical_data(self) -> dict[str, DataFrame]:
+    def load_historical_data(self) -> dict:
         """
         Method checks for datafile existence, if not existing, download data and save to file
         :return: None
@@ -247,7 +247,7 @@ class DataModule:
         filepath = os.path.join("data/backtesting-data/", self.config.exchange, filename)
         os.remove(filepath)
 
-    def warn_if_missing_ticks(self, history_data: dict[str, DataFrame]) -> None:
+    def warn_if_missing_ticks(self, history_data: dict) -> None:
         """
         Test whether any tick has a null/NaN value, and whether every
         tick (time) exists

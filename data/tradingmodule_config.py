@@ -8,8 +8,8 @@ from modules.setup.config import ConfigModule
 class TradingModuleConfig:
     fee: float
     max_open_trades: int
-    pairs: Sequence[str]
-    roi: dict[str, int]
+    pairs: Sequence
+    roi: dict
     starting_capital: float
     stoploss: float
     stoploss_type: Literal["standard", "trailing", "dynamic"]

@@ -87,7 +87,6 @@ def test_capital_open_trade():
 
     # Assert
     assert stats.main_results.end_capital == 198.
-    assert stats.main_results.end_capital == 198.
     assert len(stats.open_trade_res) == 1
 
 
@@ -108,7 +107,6 @@ def test_stoploss():
 
     # Assert
     assert stats.main_results.end_capital == 73.5075
-
 
 def test_dynamic_stoploss():
     """Given 'dynamic stoploss and value dips below stoploss',
@@ -188,7 +186,7 @@ def test_drawdown():
 StatsModuleFactory = Callable[[], StatsModule]
 
 
-def get_default_config(pairs: list[str]) -> tuple[StatsConfig, TradingModuleConfig, MockPairFrame, StatsModuleFactory]:
+def get_default_config(pairs: list):
     stats_config = StatsConfig(
         max_open_trades=max_open_trades,
         starting_capital=100,

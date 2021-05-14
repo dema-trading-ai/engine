@@ -27,7 +27,7 @@ class BackTesting:
     sellpoints = {}
     df = {}
 
-    def __init__(self, data: dict[str, DataFrame], config_module: ConfigModule, strategy: Strategy):
+    def __init__(self, data: dict, config_module: ConfigModule, strategy: Strategy):
         self.config = config_module
         self.starting_capital = config_module.starting_capital
         self.currency_symbol = config_module.currency_symbol

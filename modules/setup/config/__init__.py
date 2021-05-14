@@ -105,7 +105,7 @@ def parse_timeframe(timeframe_str: str):
     return timeframe_time
 
 
-def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtesting_till_now: bool) -> tuple[int, int]:
+def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtesting_till_now: bool) -> tuple:
     test_from = backtesting_from
     test_to = backtesting_to
     test_till_now = backtesting_till_now

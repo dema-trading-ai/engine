@@ -29,9 +29,9 @@ class MockOHLCVWithSignal(dict, object):
 KeyType = TypeVar("KeyType")
 
 
-class MockPairFrame(dict[str, MockOHLCVWithSignal]):
+class MockPairFrame(dict):
 
-    def __init__(self, keys: list[str]):
+    def __init__(self, keys: list):
         super().__init__()
         self.__frame_keys = keys
         for key in keys:

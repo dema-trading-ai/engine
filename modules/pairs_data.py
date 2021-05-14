@@ -1,1 +1,1 @@
-PairsData = dict[str, dict[str, dict[int, float]]]
+PairsData = dict
