@@ -17,14 +17,6 @@ from models.trade import Trade
 
 
 class TradingModule:
-    max_open_trades = None
-    closed_trades = []
-    open_trades = []
-
-    open_order_value_per_timestamp = {}
-    budget_per_timestamp = {}
-    realised_profits = []
-    total_fee_amount = 0
 
     def __init__(self, config: TradingModuleConfig):
         print("[INFO] Initializing trading-module...")
@@ -37,6 +29,13 @@ class TradingModule:
         self.fee = config.fee / 100
         self.sl_type = config.stoploss_type
         self.sl_perc = float(config.stoploss)
+
+        self.open_order_value_per_timestamp = {}
+        self.closed_trades = []
+        self.open_trades = []
+        self.budget_per_timestamp = {}
+        self.realised_profits = []
+        self.total_fee_amount = 0
 
     def tick(self, ohlcv: dict, data_dict: dict) -> None:
         trade = self.find_open_trade(ohlcv['pair'])
