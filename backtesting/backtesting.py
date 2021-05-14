@@ -180,8 +180,8 @@ class BackTesting:
             if max_seen_drawdown['from'] != 0 else '-'
         drawdown_to = datetime.fromtimestamp(max_seen_drawdown['to'] / 1000) \
             if max_seen_drawdown['to'] != 0 else '-'
-        drawdown_at = datetime.fromtimestamp(max_seen_drawdown['tick'] / 1000) \
-            if max_seen_drawdown['tick'] != 0 else '-'
+        drawdown_at = datetime.fromtimestamp(max_seen_drawdown['at'] / 1000) \
+            if max_seen_drawdown['at'] != 0 else '-'
 
         return MainResults(tested_from=datetime.fromtimestamp(self.backtesting_from / 1000),
                             tested_to=datetime.fromtimestamp(
@@ -322,13 +322,13 @@ class BackTesting:
         max_seen_drawdown = {
             "from": 0,
             "to": 0,
-            "tick": 0,
+            "at": 0,
             "drawdown": 1,  # ratio
         }
         temp_seen_drawdown = {
             "from": 0,
             "to": 0,
-            "tick": 0,
+            "at": 0,
             "drawdown": 1,  # ratio
             "peak": 0,
             "bottom": 0
@@ -347,7 +347,7 @@ class BackTesting:
                     max_seen_drawdown['drawdown'] = temp_seen_drawdown['drawdown']
                     max_seen_drawdown['from'] = temp_seen_drawdown['from']
                     max_seen_drawdown['to'] = temp_seen_drawdown['to']
-                    max_seen_drawdown['tick'] = temp_seen_drawdown['tick']
+                    max_seen_drawdown['at'] = temp_seen_drawdown['at']
 
                 # Reset temp_seen_drawdown stats
                 temp_seen_drawdown['peak'] = total_value
@@ -359,7 +359,7 @@ class BackTesting:
             elif total_value < temp_seen_drawdown['bottom']:
                 temp_seen_drawdown['bottom'] = total_value
                 temp_seen_drawdown['drawdown'] = temp_seen_drawdown['bottom'] / temp_seen_drawdown['peak']
-                temp_seen_drawdown['tick'] = tick
+                temp_seen_drawdown['at'] = tick
 
             # Update drawdown period
             temp_seen_drawdown['to'] = tick
