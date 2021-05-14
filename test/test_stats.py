@@ -181,6 +181,7 @@ def test_drawdown():
     # Assert
     assert math.isclose(stats.main_results.max_realised_drawdown, -50.995)
 
+
 def test_n_trades():
     """Given 'trades where made', 
     'number of trades' should 'display correct amount' """
@@ -221,7 +222,7 @@ def test_n_trades():
     assert stats.main_results.n_consecutive_losses == 2
 
 
-def test_postitive_best_worst_trade():
+def test_positive_best_worst_trade():
     """Given one positive trade, 'best trade' should be trade profit,
     worst trade should be 0"""
     # Arrange
