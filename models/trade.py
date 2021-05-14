@@ -1,4 +1,5 @@
 # Libraries
+import math
 from datetime import datetime
 import numpy as np
 
@@ -48,7 +49,7 @@ class Trade:
         self.closed_at = date
         self.close_fee_amount = self.capital * self.fee   # final issued fee
         self.capital -= self.close_fee_amount
-        self.set_profits(update_capital=False)
+        self.update_profits(update_capital=False)
 
     def update_stats(self, ohlcv: dict) -> None:
         """
@@ -60,10 +61,10 @@ class Trade:
         :rtype: None
         """
         self.current = ohlcv['close']
-        self.set_profits()
+        self.update_profits()
         self.update_max_drawdown()
 
-    def set_profits(self, update_capital: bool = True):
+    def update_profits(self, update_capital: bool = True):
         """
         Sets profits corresponding to current info
         """
@@ -114,21 +115,24 @@ class Trade:
         :rtype: boolean
         """
         if self.sl_type == 'standard':
-            if self.current < self.sl_price:
+            if ohlcv["low"] < self.sl_price:
                 self.current = self.sl_price
+                self.update_profits()
                 return True
         elif self.sl_type == 'trailing' or self.sl_type == 'dynamic':
             if self.sl_sell_time == ohlcv['time']:
                 self.current = self.sl_price
+                self.update_profits()
                 return True
         return False
 
-    def trailing_stoploss(self, data_dict: dict, time: int) -> [int, float]:
+    def trailing_stoploss(self, data_dict: dict, time: int) -> tuple[float, float]:
         """
         Calculates the trailing stoploss (TSL) for each tick, applying the standard definition:
         - stoploss (SL) for a tick is calculated using: candle_open * (1 - trailing_percentage)
         - TSL algorithm:
             1. TSL is defined as the SL of first candle
+            2. Get SL of next candle
             2. Get SL of next candle
             3. If SL for current candle is HIGHER than TSL:
                 -> TSL = current candle SL
@@ -157,7 +161,7 @@ class Trade:
                     return ohlcv['time'], trail
         return np.NaN, np.NaN
 
-    def dynamic_stoploss(self, data_dict: dict, time: int) -> [int, float]:
+    def dynamic_stoploss(self, data_dict: dict, time: int) -> tuple[float, float]:
         """
         Finds the first occurence where the dynamic stoploss (defined in strategy)
         is triggered.
@@ -173,5 +177,5 @@ class Trade:
             if int(timestamp) > time:
                 ohlcv = data_dict[timestamp]
                 if ohlcv['low'] < ohlcv['stoploss']:
-                    return ohlcv['time'], ohlcv['stoploss']
+                    return ohlcv['time'], min(ohlcv["stoploss"], ohlcv["open"])
         return np.NaN, np.NaN

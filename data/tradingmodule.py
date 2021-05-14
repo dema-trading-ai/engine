@@ -152,7 +152,10 @@ class TradingModule:
         """
         time_passed = datetime.fromtimestamp(ohlcv['time'] / 1000) - trade.opened_at
         profit_percentage = (trade.profit_ratio - 1) * 100
-        if profit_percentage > self.get_roi_over_time(time_passed):
+        roi_percentage = self.get_roi_over_time(time_passed)
+        if profit_percentage > roi_percentage:
+            trade.current = ohlcv["open"] * (1 + (roi_percentage / 100))
+            trade.update_profits()
             self.close_trade(trade, reason="ROI", ohlcv=ohlcv)
             return True
         return False

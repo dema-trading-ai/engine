@@ -1,4 +1,5 @@
 # Libraries
+from typing import TypeVar
 
 from pandas import DataFrame
 from tqdm import tqdm
@@ -53,7 +54,7 @@ class BackTesting:
         data_dict = {}
         notify = False
         notify_reason = ""
-        stoploss_type = self.config.raw_config['stoploss-type']
+        stoploss_type = self.config.stoploss_type
         for pair in tqdm(self.data.keys(), desc="[INFO] Populating Indicators",
                          total=len(self.data.keys()), ncols=75):
             df = self.data[pair]
@@ -61,7 +62,7 @@ class BackTesting:
             indicators = self.strategy.buy_signal(indicators)
             indicators = self.strategy.sell_signal(indicators)
             self.df[pair] = indicators.copy()
-            if stoploss_type == 'dynamic':
+            if stoploss_type == "dynamic":
                 stoploss = self.strategy.stoploss(indicators)
                 if stoploss is None:  # stoploss not configured
                     notify = True

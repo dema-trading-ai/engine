@@ -76,6 +76,7 @@
   },
   {
     "name": "fee",
+    "description": "fee as percentage, FI: \"0.25%\" ",
     "type": "number",
     "default": 0.25,
     "min": 0,

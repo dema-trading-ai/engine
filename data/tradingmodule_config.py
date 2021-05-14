@@ -1,12 +1,14 @@
-from typing import NamedTuple, Literal
+from dataclasses import dataclass
+from typing import NamedTuple, Literal, Sequence
 
 from modules.setup.config import ConfigModule
 
 
-class TradingModuleConfig(NamedTuple):
+@dataclass
+class TradingModuleConfig:
     fee: float
     max_open_trades: int
-    pairs: list[str]
+    pairs: Sequence[str]
     roi: dict[str, int]
     starting_capital: float
     stoploss: float
