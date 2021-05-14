@@ -18,6 +18,7 @@ stoploss = 1000
 
 OHLCV_INDICATORS = get_ohlcv_indicators()
 
+
 def test_roi():
     """given `value of coin rises over ROI limit` should sell at ROI price"""
     # arrange
@@ -105,6 +106,7 @@ def test_stoploss():
     # Assert
     assert stats.main_results.end_capital == 73.5075
 
+
 def test_dynamic_stoploss():
     """Given 'dynamic stoploss and value dips below stoploss',
     'end capital' should 'represent sold on stoploss price'"""
@@ -154,7 +156,7 @@ def test_dividing_assets():
         .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
         .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=1)
 
-    fixture.frame_with_signals.stoploss = 25
+    fixture.trading_module_config.stoploss = 25
     fixture.stats_config.stoploss = 25
 
     # Act
@@ -213,7 +215,6 @@ class StatsFixture:
         )
 
         self.frame_with_signals = MockPairFrame(pairs)
-
 
     def create(self):
         df = pd.DataFrame.from_dict(self.frame_with_signals, orient='index', columns=OHLCV_INDICATORS)
