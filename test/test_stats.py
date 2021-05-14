@@ -19,6 +19,8 @@ stoploss = 1000
 OHLCV_INDICATORS = get_ohlcv_indicators()
 
 
+# TODO num tra
+
 def test_roi():
     """given `value of coin rises over ROI limit` should sell at ROI price"""
     # arrange
