@@ -107,7 +107,7 @@ class CoinInsights:
             stats.append([c.pair,
                         c.n_trades, 
                         round(c.market_change, 2),
-                        round(c.cum_profit_percentage / (c.n_trades if c.n_trades > 0 else 1), 2),
+                        round((c.cum_profit_percentage / c.n_trades) if c.n_trades > 0 else 0, 2),
                         round(c.cum_profit_percentage, 2),
                         round(c.total_profit_percentage, 2),
                         round(c.profit, 2),
