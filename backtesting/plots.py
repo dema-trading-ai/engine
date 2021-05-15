@@ -68,12 +68,12 @@ def add_buy_sell_signal(fig, df, dates):
     :rtype: fig
     """
 
-    buysignal = [df["buy"][x] * ((df["high"][x] + df["low"][x]) / 2) for x in range(len(df["sell"]))]
-    sellsignal = [df["sell"][x] * ((df["high"][x] + df["low"][x]) / 2) for x in range(len(df["sell"]))]
+    df["buy"] *= (df["high"] + df["low"])/2
+    df["sell"] *= (df["high"] + df["low"])/2
 
-    fig.add_trace((go.Scatter(x=dates, y=buysignal,
+    fig.add_trace((go.Scatter(x=dates, y=df["buy"],
                               mode='markers', name='buysignal', line_color='rgb(0,255,0)')), row=1, col=1)
-    fig.add_trace((go.Scatter(x=dates, y=sellsignal,
+    fig.add_trace((go.Scatter(x=dates, y=df["sell"],
                               mode='markers', name='sellsignal', line_color='rgb(128,0,0)')), row=1, col=1)
 
     return fig
