@@ -178,7 +178,7 @@ def plot_per_coin(self):
 
         # create figure
         rows, height = plot_sizes(self.config["plot_indicators2"], self.df[pair])
-        fig = make_subplots(rows=rows, cols=1, row_heights=height)
+        fig = make_subplots(rows=rows, cols=1, row_heights=height, shared_xaxes=True)
         if rows > 1:
             fig.update_xaxes(rangeslider={'visible': False}, row=1, col=1)
 
@@ -202,6 +202,7 @@ def plot_per_coin(self):
         # add indicators
         fig = add_indicators(fig, dates, self.df[pair], self.config["plot_indicators1"], self.config["plot_indicators2"])
 
+        fig.update_xaxes(range=[dates[0], dates[-1]])
         fig.update_layout(
             title='%s Chart' % pair,
             yaxis_title=pair)
