@@ -40,6 +40,7 @@ class MainResults:
     max_seen_drawdown: float
     drawdown_from: datetime
     drawdown_to: datetime
+    drawdown_at: datetime
     configured_stoploss: float
     fee: float
     total_fee_amount: float
@@ -75,6 +76,7 @@ class MainResults:
               round(self.max_seen_drawdown, 2) + '\t%')
         print("| Max seen drawdown from: \t%s" % self.drawdown_from)
         print("| Max seen drawdown to: \t%s" % self.drawdown_to)
+        print("| Max seen drawdown at: \t%s" % self.drawdown_at)
         print("| Market change coins: \t\t%s" % round(self.market_change_coins, 2) + '\t%')
         print("| Market change BTC: \t\t%s" % round(self.market_change_btc, 2) + '\t%')
         print("| ")
@@ -107,13 +109,13 @@ class CoinInsights:
             stats.append([c.pair,
                         c.n_trades, 
                         round(c.market_change, 2),
-                        round(c.cum_profit_percentage / c.n_trades, 2),
+                        round((c.cum_profit_percentage / c.n_trades) if c.n_trades > 0 else 0, 2),
                         round(c.cum_profit_percentage, 2),
                         round(c.total_profit_percentage, 2),
                         round(c.profit, 2),
                         round(c.max_seen_drawdown, 2),
                         round(c.max_realised_drawdown, 2),
-                        c.total_duration / c.n_trades, 
+                        c.total_duration / c.n_trades if c.n_trades > 0 else '-',
                         c.roi, 
                         c.stoploss,
                         c.sell_signal])
