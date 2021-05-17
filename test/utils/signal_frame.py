@@ -1,4 +1,4 @@
-from typing import TypeVar, Literal
+from typing import TypeVar
 
 
 class MockOHLCVWithSignal(dict, object):

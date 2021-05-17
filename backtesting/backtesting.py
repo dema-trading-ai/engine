@@ -1,7 +1,5 @@
 # Libraries
-from typing import TypeVar
 
-from pandas import DataFrame
 from tqdm import tqdm
 
 # Files

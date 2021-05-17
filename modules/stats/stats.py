@@ -1,4 +1,3 @@
-import typing
 from datetime import datetime
 
 from tqdm import tqdm

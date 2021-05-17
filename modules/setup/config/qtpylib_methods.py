@@ -62,12 +62,12 @@ def numpy_rolling_series(func):
 
 
 @numpy_rolling_series
-def numpy_rolling_mean(data, window, as_source=False):
+def numpy_rolling_mean(data, window):
     return np.mean(numpy_rolling_window(data, window), axis=-1)
 
 
 @numpy_rolling_series
-def numpy_rolling_std(data, window, as_source=False):
+def numpy_rolling_std(data, window):
     return np.std(numpy_rolling_window(data, window), axis=-1, ddof=1)
 
 
@@ -253,7 +253,7 @@ def crossed_below(series1, series2):
 def rolling_std(series, window=200, min_periods=None):
     min_periods = window if min_periods is None else min_periods
     if min_periods == window and len(series) > window:
-        return numpy_rolling_std(series, window, True)
+        return numpy_rolling_std(series, window)
     else:
         try:
             return series.rolling(window=window, min_periods=min_periods).std()
@@ -266,7 +266,7 @@ def rolling_std(series, window=200, min_periods=None):
 def rolling_mean(series, window=200, min_periods=None):
     min_periods = window if min_periods is None else min_periods
     if min_periods == window and len(series) > window:
-        return numpy_rolling_mean(series, window, True)
+        return numpy_rolling_mean(series, window)
     else:
         try:
             return series.rolling(window=window, min_periods=min_periods).mean()

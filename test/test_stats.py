@@ -1,5 +1,5 @@
 import math
-from typing import Callable, Any
+from typing import Callable
 
 import pandas as pd
 

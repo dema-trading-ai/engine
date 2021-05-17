@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import NamedTuple, Literal, Sequence
+from typing import Literal, Sequence
 
 from modules.setup.config import ConfigModule
 

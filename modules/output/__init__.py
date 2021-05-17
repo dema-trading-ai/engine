@@ -1,11 +1,9 @@
-from backtesting.plots import plot_per_coin
-from backtesting.results import CoinInsights, OpenTradeResult, show_signature
+from backtesting.results import show_signature
 from modules.stats.stats_config import StatsConfig
 from modules.stats.trading_stats import TradingStats
 
 
 class OutputModule(object):
-
     config: StatsConfig
 
     def __init__(self, config: StatsConfig):
