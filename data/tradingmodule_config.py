@@ -20,8 +20,8 @@ def create_trading_module_config(config: ConfigModule):
         fee=config.fee,
         max_open_trades=config.max_open_trades,
         pairs=config.pairs,
-        roi=config.raw_config['roi'],
+        roi=config.roi,
         starting_capital=config.starting_capital,
         stoploss=config.stoploss,
-        stoploss_type=config.stoploss,
+        stoploss_type=config.stoploss_type,
     )

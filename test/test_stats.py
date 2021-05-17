@@ -26,17 +26,18 @@ def test_roi():
 
     fixture.frame_with_signals['COIN/BASE'] \
         .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=0)
+        .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=0) \
+        .add_entry(open=2, high=3, low=2, close=2, volume=1, buy=0, sell=0)
 
     fixture.trading_module_config.roi = {
-        "0": 50
+            "0": 150
     }
 
     # act
     stats = fixture.create().analyze()
 
     # assert
-    assert stats.main_results.end_capital == 147.015
+    assert stats.main_results.end_capital == 245.025
 
 
 def test_capital():
@@ -97,8 +98,8 @@ def test_stoploss():
         .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
         .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=1)
 
-    fixture.trading_module_config.stoploss = 25
-    fixture.stats_config.stoploss = 25
+    fixture.trading_module_config.stoploss = -25
+    fixture.stats_config.stoploss = -25
 
     # Act
     stats = fixture.create().analyze()

@@ -53,6 +53,7 @@ class ConfigModule(object):
         self.stoploss_type = config["stoploss-type"]
         self.max_open_trades = config["max-open-trades"]
         self.plots = config["plots"]
+        self.roi = config["roi"]
         self.currency_symbol = get_currency_symbol(self.raw_config)
 
     def load_btc_marketchange(self):
