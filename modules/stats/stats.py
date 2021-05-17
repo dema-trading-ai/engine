@@ -83,6 +83,8 @@ class StatsModule:
             if max_seen_drawdown['from'] != 0 else '-'
         drawdown_to = datetime.fromtimestamp(max_seen_drawdown['to'] / 1000) \
             if max_seen_drawdown['to'] != 0 else '-'
+        drawdown_at = datetime.fromtimestamp(max_seen_drawdown['at'] / 1000) \
+            if max_seen_drawdown['at'] != 0 else '-'
 
         return MainResults(tested_from=datetime.fromtimestamp(self.config.backtesting_from / 1000),
                            tested_to=datetime.fromtimestamp(
@@ -103,6 +105,7 @@ class StatsModule:
                            max_seen_drawdown=(max_seen_drawdown["drawdown"] - 1) * 100,
                            drawdown_from=drawdown_from,
                            drawdown_to=drawdown_to,
+                           drawdown_at=drawdown_at,
                            configured_stoploss=self.config.stoploss,
                            fee=self.config.fee,
                            total_fee_amount=self.trading_module.total_fee_amount)
@@ -210,11 +213,13 @@ class StatsModule:
         max_seen_drawdown = {
             "from": 0,
             "to": 0,
+            "at": 0,
             "drawdown": 1,  # ratio
         }
         temp_seen_drawdown = {
             "from": 0,
             "to": 0,
+            "at": 0,
             "drawdown": 1,  # ratio
             "peak": 0,
             "bottom": 0
@@ -228,23 +233,25 @@ class StatsModule:
 
             # Check for new drawdown period
             if total_value > temp_seen_drawdown['peak']:
+                # If last drawdown was larger than max drawdown, update max drawdown
+                if temp_seen_drawdown['drawdown'] < max_seen_drawdown['drawdown']:
+                    max_seen_drawdown['drawdown'] = temp_seen_drawdown['drawdown']
+                    max_seen_drawdown['from'] = temp_seen_drawdown['from']
+                    max_seen_drawdown['to'] = temp_seen_drawdown['to']
+                    max_seen_drawdown['at'] = temp_seen_drawdown['at']
+
+                # Reset temp_seen_drawdown stats
                 temp_seen_drawdown['peak'] = total_value
                 temp_seen_drawdown['bottom'] = total_value
                 temp_seen_drawdown['drawdown'] = 1.0  # ratio /w respect to peak
                 temp_seen_drawdown['from'] = tick
-                temp_seen_drawdown['to'] = tick
             # Check if drawdown reached new bottom
             elif total_value < temp_seen_drawdown['bottom']:
                 temp_seen_drawdown['bottom'] = total_value
                 temp_seen_drawdown['drawdown'] = temp_seen_drawdown['bottom'] / temp_seen_drawdown['peak']
-                temp_seen_drawdown['to'] = tick
-
-            # If last drawdown was larger than max drawdown, update max drawdown
-            if temp_seen_drawdown['drawdown'] < max_seen_drawdown['drawdown']:
-                max_seen_drawdown['drawdown'] = temp_seen_drawdown['drawdown']
-                max_seen_drawdown['from'] = temp_seen_drawdown['from']
-                max_seen_drawdown['to'] = temp_seen_drawdown['to']
-
+                temp_seen_drawdown['at'] = tick
+            # Update drawdown period
+            temp_seen_drawdown['to'] = tick
         return max_seen_drawdown
 
     def calculate_max_realised_drawdown(self) -> dict:
