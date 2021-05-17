@@ -166,7 +166,7 @@ def test_dividing_assets():
     assert stats.main_results.end_capital == 73.5075
 
 
-def test_drawdown():
+def test_simple_realized_drawdown():
     """Given 'sell at half value', 'realized drawdown' should 'be half'"""
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
@@ -180,6 +180,53 @@ def test_drawdown():
 
     # Assert
     assert math.isclose(stats.main_results.max_realised_drawdown, -50.995)
+
+
+def test_two_periods_realized_drawdown():
+    """Given multiple trades, creating two separate drawdown
+    periods, realized drawdown should be the drawdown of the biggest drawdown
+    period"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'] \
+        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
+        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=1) \
+        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
+        .add_entry(open=1, high=5, low=1, close=5, volume=1, buy=0, sell=1) \
+        .add_entry(open=5, high=5, low=5, close=5, volume=1, buy=1, sell=0) \
+        .add_entry(open=5, high=5, low=2, close=2, volume=1, buy=0, sell=1) \
+        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
+        .add_entry(open=2, high=4, low=2, close=4, volume=1, buy=0, sell=1)
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert math.isclose(stats.main_results.max_realised_drawdown, -60.796)
+
+
+def test_one_period_realized_drawdown():
+    """Given multiple trades, creating one drawdown period, realized
+    drawdown should be the drawdown of the entire period"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'] \
+        .add_entry(open=5, high=5, low=5, close=5, volume=1, buy=1, sell=0) \
+        .add_entry(open=5, high=5, low=3, close=3, volume=1, buy=0, sell=1) \
+        .add_entry(open=3, high=3, low=3, close=3, volume=1, buy=1, sell=0) \
+        .add_entry(open=3, high=4, low=3, close=4, volume=1, buy=0, sell=1) \
+        .add_entry(open=4, high=4, low=4, close=4, volume=1, buy=1, sell=0) \
+        .add_entry(open=4, high=4, low=1, close=1, volume=1, buy=0, sell=1) \
+        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
+        .add_entry(open=1, high=5, low=1, close=5, volume=1, buy=0, sell=1)
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert math.isclose(stats.main_results.max_realised_drawdown, -81.17039701198)
 
 
 def test_n_trades():
