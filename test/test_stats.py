@@ -7,14 +7,14 @@ from data.tradingmodule import TradingModule
 from data.tradingmodule_config import TradingModuleConfig
 from modules.stats.stats import StatsModule
 from modules.stats.stats_config import StatsConfig
-from test.utils.signal_frame import MockPairFrame
+from test.utils.signal_frame import MockPairFrame, TradeAction
 from utils import get_ohlcv_indicators
 
 max_open_trades = 3
 STARTING_CAPITAL = 100.
 FEE_PERCENTAGE = 1
 
-stoploss = 1000
+STOPLOSS = 100
 
 OHLCV_INDICATORS = get_ohlcv_indicators()
 
@@ -30,7 +30,7 @@ def test_roi():
         .add_entry(open=2, high=3, low=2, close=2, volume=1, buy=0, sell=0)
 
     fixture.trading_module_config.roi = {
-            "0": 150
+        "0": 150
     }
 
     # act
@@ -70,6 +70,51 @@ def test_profit_percentage():
 
     # Assert
     assert math.isclose(stats.main_results.overall_profit_percentage, 96.02)
+
+
+def test_roi_reached_multiple_times():
+    """Given 'multiple roi reached and multiple buys', 'capital' should 'reflect expected value'"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE']\
+        .multiply_price(2, TradeAction.BUY)\
+        .multiply_price(2)\
+        .multiply_price(2, TradeAction.BUY) \
+        .multiply_price(2)
+
+    fixture.trading_module_config.roi = {
+        "0": 10
+    }
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.main_results.end_capital == 116.23211721000003
+
+
+def test_roi_set_not_reached():
+    """Given 'multiple roi reached and multiple buys', 'capital' should 'reflect expected value'"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'] \
+        .multiply_price(2, TradeAction.BUY) \
+        .multiply_price(2, TradeAction.SELL) \
+        .multiply_price(2, TradeAction.BUY) \
+        .multiply_price(2, TradeAction.SELL)
+
+    fixture.trading_module_config.roi = {
+        "0": 1.5 * 100
+    }
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert math.isclose(stats.main_results.end_capital, 384.238404)
+    # Assert
 
 
 def test_capital_open_trade():
@@ -340,7 +385,7 @@ class StatsFixture:
             btc_marketchange_ratio=1,
             fee=FEE_PERCENTAGE,
 
-            stoploss=stoploss,
+            stoploss=STOPLOSS,
             currency_symbol="USDT",
             plots=False,
 
@@ -349,7 +394,7 @@ class StatsFixture:
         )
 
         self.trading_module_config = TradingModuleConfig(
-            stoploss=stoploss,
+            stoploss=STOPLOSS,
             max_open_trades=max_open_trades,
             starting_capital=STARTING_CAPITAL,
             fee=FEE_PERCENTAGE,
