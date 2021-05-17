@@ -49,7 +49,7 @@ class MockOHLCVWithSignal(dict, object):
 KeyType = TypeVar("KeyType")
 
 
-class MockPairFrame(dict[str, MockOHLCVWithSignal]):
+class MockPairFrame(dict):
 
     def __init__(self, keys: list):
         super().__init__()

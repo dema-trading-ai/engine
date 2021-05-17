@@ -117,6 +117,24 @@ def test_roi_set_not_reached():
     # Assert
 
 
+def test_fee():
+    """Given 'multiple trades', 'fee' should 'actual'"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'] \
+        .multiply_price(1, TradeAction.BUY)\
+        .multiply_price(2, TradeAction.SELL) \
+        .multiply_price(1, TradeAction.BUY) \
+        .multiply_price(2, TradeAction.SELL)
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert math.isclose(stats.main_results.total_fee_amount, 8.821396)
+
+
 def test_capital_open_trade():
     """Given 'value of coin rises and open trade', 'capital' should 'rise same minus fee'"""
     # Arrange
