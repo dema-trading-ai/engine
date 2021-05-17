@@ -8,7 +8,7 @@ import rapidjson
 # Files
 from models.trade import Trade
 
-CURRENT_VERSION = "v0.5.1"
+CURRENT_VERSION = "v0.5.3"
 
 
 def get_project_root():
@@ -33,7 +33,7 @@ def lower_bar_to_middle_bar(s: str) -> str:
     """
     return s.replace("_", "-")
 
-  
+
 def default_empty_array_dict() -> list:
     """
     :return: list for initializing dictionary
@@ -75,7 +75,8 @@ def df_to_dict(df: DataFrame) -> dict:
     df.index = df.index.map(str)
     return df.to_dict('index')
 
-def dict_to_df(data: dict) -> DataFrame:
+
+def dict_to_df(data: str) -> DataFrame:
     """
     Method turns dictionary into dataframe
     :param data: json with OHLCV data

@@ -1,10 +1,9 @@
 # Mandatory Imports
-from pandas import DataFrame, Series
-from backtesting.strategy import Strategy
-from models.trade import Trade
-
 # Optional Imports
 import talib.abstract as ta
+from pandas import DataFrame
+
+from backtesting.strategy import Strategy
 
 
 class IndicatorSample(Strategy):
