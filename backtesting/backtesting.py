@@ -77,3 +77,4 @@ class BackTesting:
             print(
                 f"[WARNING] Dynamic stoploss {notify_reason}. Using standard stoploss of {self.config.stoploss}%.")
         return data_dict
+

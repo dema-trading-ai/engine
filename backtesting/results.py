@@ -107,18 +107,19 @@ class CoinInsights:
         stats = []
         for c in instances:
             stats.append([c.pair,
-                          c.n_trades,
-                          round(c.market_change, 2),
-                          round((c.cum_profit_percentage / c.n_trades) if c.n_trades > 0 else c.cum_profit_percentage, 2),
-                          round(c.cum_profit_percentage, 2),
-                          round(c.total_profit_percentage, 2),
-                          round(c.profit, 2),
-                          round(c.max_seen_drawdown, 2),
-                          round(c.max_realised_drawdown, 2),
-                          c.total_duration / c.n_trades,
-                          c.roi,
-                          c.stoploss,
-                          c.sell_signal])
+
+                        c.n_trades, 
+                        round(c.market_change, 2),
+                        round((c.cum_profit_percentage / c.n_trades) if c.n_trades > 0 else 0, 2),
+                        round(c.cum_profit_percentage, 2),
+                        round(c.total_profit_percentage, 2),
+                        round(c.profit, 2),
+                        round(c.max_seen_drawdown, 2),
+                        round(c.max_realised_drawdown, 2),
+                        c.total_duration / c.n_trades if c.n_trades > 0 else '-',
+                        c.roi, 
+                        c.stoploss,
+                        c.sell_signal])
 
         print(tabulate(stats,
                        headers=['Pair',
