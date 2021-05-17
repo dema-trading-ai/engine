@@ -150,10 +150,10 @@ class TradingModule:
         :rtype: boolean
         """
         time_passed = datetime.fromtimestamp(ohlcv['time'] / 1000) - trade.opened_at
-        profit_percentage = (trade.profit_ratio - 1) * 100
+        profit_percentage = (ohlcv['high'] / trade.open) * 100
         roi_percentage = self.get_roi_over_time(time_passed)
         if profit_percentage > roi_percentage:
-            trade.current = ohlcv["open"] * (1 + (roi_percentage / 100))
+            trade.current = trade.open * (1 + (roi_percentage / 100))
             trade.update_profits()
             self.close_trade(trade, reason="ROI", ohlcv=ohlcv)
             return True
