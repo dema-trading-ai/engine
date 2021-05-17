@@ -16,7 +16,7 @@ jobs:
           python-version: 3.x
       - run: |
           pip install pytest-cov
-          pip install -r requirements.txt
+          pip install -r requirements-ci.txt
           pytest --cov-report xml:cobertura.xml --cov=.
 
       - name: Run codacy-coverage-reporter
