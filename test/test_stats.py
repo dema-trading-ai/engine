@@ -118,7 +118,7 @@ def test_roi_set_not_reached():
 
 
 def test_fee():
-    """Given 'multiple trades', 'fee' should 'actual'"""
+    """Given 'multiple trades', 'fee' should 'be actual'"""
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
@@ -133,6 +133,25 @@ def test_fee():
 
     # Assert
     assert math.isclose(stats.main_results.total_fee_amount, 8.821396)
+
+
+def test_fee_downwards():
+    """Given 'price goes down', 'fee' should 'be actual'"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'] \
+        .multiply_price(1, TradeAction.BUY)\
+        .multiply_price(0.5, TradeAction.SELL) \
+
+    fixture.trading_module_config.roi = {
+        "0": 100
+    }
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert math.isclose(stats.main_results.total_fee_amount, 1.495)
 
 
 def test_capital_open_trade():
