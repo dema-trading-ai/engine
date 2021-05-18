@@ -1,43 +1,7 @@
 import math
-from typing import Callable
-
-import pandas as pd
-
-from data.tradingmodule import TradingModule
-from data.tradingmodule_config import TradingModuleConfig
-from modules.stats.stats import StatsModule
-from modules.stats.stats_config import StatsConfig
-from test.utils.signal_frame import MockPairFrame
+from test.stats.stats_test_utils import StatsFixture
+from test.utils.signal_frame import TradeAction
 from utils import get_ohlcv_indicators
-
-max_open_trades = 3
-STARTING_CAPITAL = 100.
-FEE_PERCENTAGE = 1
-
-stoploss = 1000
-
-OHLCV_INDICATORS = get_ohlcv_indicators()
-
-
-def test_roi():
-    """given `value of coin rises over ROI limit` should sell at ROI price"""
-    # arrange
-    fixture = StatsFixture(['COIN/BASE'])
-
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=0) \
-        .add_entry(open=2, high=3, low=2, close=2, volume=1, buy=0, sell=0)
-
-    fixture.trading_module_config.roi = {
-            "0": 150
-    }
-
-    # act
-    stats = fixture.create().analyze()
-
-    # assert
-    assert stats.main_results.end_capital == 245.025
 
 
 def test_capital():
@@ -70,6 +34,87 @@ def test_profit_percentage():
 
     # Assert
     assert math.isclose(stats.main_results.overall_profit_percentage, 96.02)
+
+
+def test_roi_reached_multiple_times():
+    """Given 'multiple roi reached and multiple buys', 'capital' should 'reflect expected value'"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE']\
+        .multiply_price(2, TradeAction.BUY)\
+        .multiply_price(2)\
+        .multiply_price(2, TradeAction.BUY) \
+        .multiply_price(2)
+
+    fixture.trading_module_config.roi = {
+        "0": 10
+    }
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.main_results.end_capital == 116.23211721000003
+
+
+def test_roi_set_not_reached():
+    """Given 'multiple roi reached and multiple buys', 'capital' should 'reflect expected value'"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'] \
+        .multiply_price(2, TradeAction.BUY) \
+        .multiply_price(2, TradeAction.SELL) \
+        .multiply_price(2, TradeAction.BUY) \
+        .multiply_price(2, TradeAction.SELL)
+
+    fixture.trading_module_config.roi = {
+        "0": 1.5 * 100
+    }
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert math.isclose(stats.main_results.end_capital, 384.238404)
+
+
+def test_fee():
+    """Given 'multiple trades', 'fee' should 'be actual'"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'] \
+        .multiply_price(1, TradeAction.BUY)\
+        .multiply_price(2, TradeAction.SELL) \
+        .multiply_price(1, TradeAction.BUY) \
+        .multiply_price(2, TradeAction.SELL)
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert math.isclose(stats.main_results.total_fee_amount, 8.821396)
+
+
+def test_fee_downwards():
+    """Given 'price goes down', 'fee' should 'be actual'"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'] \
+        .multiply_price(1, TradeAction.BUY)\
+        .multiply_price(0.5, TradeAction.SELL) \
+
+    fixture.trading_module_config.roi = {
+        "0": 100
+    }
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert math.isclose(stats.main_results.total_fee_amount, 1.495)
 
 
 def test_capital_open_trade():
@@ -170,11 +215,68 @@ def test_dividing_assets():
 def test_simple_realized_drawdown():
     """Given 'sell at half value', 'realized drawdown' should 'be half'"""
     # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
+    fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE'])
 
     fixture.frame_with_signals['COIN/BASE'] \
         .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
         .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=1)
+    
+    fixture.frame_with_signals['COIN2/BASE'] \
+        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
+        .add_entry(open=2, high=2, low=1.5, close=1.5, volume=1, buy=0, sell=1)
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert math.isclose(stats.main_results.max_realised_drawdown, -38.74375)
+
+def test_simple_no_realized_drawdown():
+    """Given 'no drawdown trades', 'realized drawdown' should 'none'"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'] \
+        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
+        .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=1)
+    
+    fixture.frame_with_signals['COIN2/BASE'] \
+        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
+        .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=1)
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert math.isclose(stats.main_results.max_realised_drawdown, 0)
+
+
+def test_two_periods_realized_drawdown_v1():
+    """Given multiple trades, creating two separate drawdown
+    periods, realized drawdown should be the drawdown of the biggest drawdown
+    period"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'] \
+        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
+        .add_entry(open=2, high=2, low=1.5, close=1.5, volume=1, buy=0, sell=1) \
+        .add_entry(open=1.5, high=1.5, low=1.5, close=1.5, volume=1, buy=1, sell=0) \
+        .add_entry(open=1.5, high=6, low=1.5, close=6, volume=1, buy=0, sell=1) \
+        .add_entry(open=6, high=6, low=6, close=6, volume=1, buy=1, sell=0) \
+        .add_entry(open=6, high=6, low=3, close=3, volume=1, buy=0, sell=1) \
+        .add_entry(open=3, high=3, low=3, close=3, volume=1, buy=1, sell=0) \
+        .add_entry(open=3, high=4, low=3, close=4, volume=1, buy=0, sell=1)
+
+    fixture.frame_with_signals['COIN2/BASE'] \
+        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
+        .add_entry(open=2, high=2, low=1.5, close=1.5, volume=1, buy=0, sell=1) \
+        .add_entry(open=1.5, high=1.5, low=1.5, close=1.5, volume=1, buy=1, sell=0) \
+        .add_entry(open=1.5, high=6, low=1.5, close=6, volume=1, buy=0, sell=1) \
+        .add_entry(open=6, high=6, low=6, close=6, volume=1, buy=1, sell=0) \
+        .add_entry(open=6, high=6, low=3, close=3, volume=1, buy=0, sell=1) \
+        .add_entry(open=3, high=3, low=3, close=3, volume=1, buy=1, sell=0) \
+        .add_entry(open=3, high=4, low=3, close=4, volume=1, buy=0, sell=1)
 
     # Act
     stats = fixture.create().analyze()
@@ -182,52 +284,66 @@ def test_simple_realized_drawdown():
     # Assert
     assert math.isclose(stats.main_results.max_realised_drawdown, -50.995)
 
-
-def test_two_periods_realized_drawdown():
+def test_two_periods_realized_drawdown_v2():
     """Given multiple trades, creating two separate drawdown
     periods, realized drawdown should be the drawdown of the biggest drawdown
     period"""
     # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
+    fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE'])
 
     fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=1) \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=5, low=1, close=5, volume=1, buy=0, sell=1) \
-        .add_entry(open=5, high=5, low=5, close=5, volume=1, buy=1, sell=0) \
-        .add_entry(open=5, high=5, low=2, close=2, volume=1, buy=0, sell=1) \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=4, low=2, close=4, volume=1, buy=0, sell=1)
-
-    # Act
-    stats = fixture.create().analyze()
-
-    # Assert
-    assert math.isclose(stats.main_results.max_realised_drawdown, -60.796)
-
-
-def test_one_period_realized_drawdown():
-    """Given multiple trades, creating one drawdown period, realized
-    drawdown should be the drawdown of the entire period"""
-    # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
-
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=5, high=5, low=5, close=5, volume=1, buy=1, sell=0) \
-        .add_entry(open=5, high=5, low=3, close=3, volume=1, buy=0, sell=1) \
-        .add_entry(open=3, high=3, low=3, close=3, volume=1, buy=1, sell=0) \
-        .add_entry(open=3, high=4, low=3, close=4, volume=1, buy=0, sell=1) \
         .add_entry(open=4, high=4, low=4, close=4, volume=1, buy=1, sell=0) \
         .add_entry(open=4, high=4, low=1, close=1, volume=1, buy=0, sell=1) \
         .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=5, low=1, close=5, volume=1, buy=0, sell=1)
+        .add_entry(open=1, high=5, low=1, close=5, volume=1, buy=0, sell=1) \
+        .add_entry(open=5, high=5, low=5, close=5, volume=1, buy=1, sell=0) \
+        .add_entry(open=5, high=5, low=3, close=3, volume=1, buy=0, sell=1) \
+        .add_entry(open=3, high=3, low=3, close=3, volume=1, buy=1, sell=0) \
+        .add_entry(open=3, high=6, low=3, close=6, volume=1, buy=0, sell=1)
+
+    fixture.frame_with_signals['COIN2/BASE'] \
+        .add_entry(open=4, high=4, low=4, close=4, volume=1, buy=1, sell=0) \
+        .add_entry(open=4, high=4, low=1, close=1, volume=1, buy=0, sell=1) \
+        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
+        .add_entry(open=1, high=5, low=1, close=5, volume=1, buy=0, sell=1) \
+        .add_entry(open=5, high=5, low=5, close=5, volume=1, buy=1, sell=0) \
+        .add_entry(open=5, high=5, low=3, close=3, volume=1, buy=0, sell=1) \
+        .add_entry(open=3, high=3, low=3, close=3, volume=1, buy=1, sell=0) \
+        .add_entry(open=3, high=6, low=3, close=6, volume=1, buy=0, sell=1)
 
     # Act
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.main_results.max_realised_drawdown, -81.17039701198)
+    assert math.isclose(stats.main_results.max_realised_drawdown, -75.4975)
+
+def test_two_periods_realized_drawdown_v3():
+    """Given multiple trades, creating one drawdown period, realized
+    drawdown should be the drawdown of the entire period"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'] \
+        .add_entry(open=6, high=6, low=6, close=6, volume=1, buy=1, sell=0) \
+        .add_entry(open=6, high=6, low=4, close=4, volume=1, buy=0, sell=1) \
+        .add_entry(open=4, high=4, low=4, close=4, volume=1, buy=1, sell=0) \
+        .add_entry(open=4, high=5, low=4, close=5, volume=1, buy=0, sell=1) \
+        .add_entry(open=5, high=5, low=5, close=5, volume=1, buy=1, sell=0) \
+        .add_entry(open=5, high=5, low=2, close=2, volume=1, buy=0, sell=1) \
+
+    fixture.frame_with_signals['COIN2/BASE'] \
+        .add_entry(open=6, high=6, low=6, close=6, volume=1, buy=1, sell=0) \
+        .add_entry(open=6, high=6, low=4, close=4, volume=1, buy=0, sell=1) \
+        .add_entry(open=4, high=4, low=4, close=4, volume=1, buy=1, sell=0) \
+        .add_entry(open=4, high=5, low=4, close=5, volume=1, buy=0, sell=1) \
+        .add_entry(open=5, high=5, low=5, close=5, volume=1, buy=1, sell=0) \
+        .add_entry(open=5, high=5, low=2, close=2, volume=1, buy=0, sell=1) \
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert math.isclose(stats.main_results.max_realised_drawdown, -68.617328354)
 
 
 def test_n_trades():
@@ -326,41 +442,5 @@ def test_best_worst_trade():
     assert math.isclose(stats.main_results.max_drawdown_single_trade, -50.995)
 
 
-StatsModuleFactory = Callable[[], StatsModule]
 
 
-class StatsFixture:
-
-    def __init__(self, pairs: list):
-        self.stats_config = StatsConfig(
-            max_open_trades=max_open_trades,
-            starting_capital=100,
-            backtesting_from=1,
-            backtesting_to=10,
-            btc_marketchange_ratio=1,
-            fee=FEE_PERCENTAGE,
-
-            stoploss=stoploss,
-            currency_symbol="USDT",
-            plots=False,
-
-            plot_indicators1=[],
-            plot_indicators2=[]
-        )
-
-        self.trading_module_config = TradingModuleConfig(
-            stoploss=stoploss,
-            max_open_trades=max_open_trades,
-            starting_capital=STARTING_CAPITAL,
-            fee=FEE_PERCENTAGE,
-            pairs=pairs,
-            stoploss_type="standard",
-            roi={"0": int(9999999999)}
-        )
-
-        self.frame_with_signals = MockPairFrame(pairs)
-
-    def create(self):
-        df = pd.DataFrame.from_dict(self.frame_with_signals, orient='index', columns=OHLCV_INDICATORS)
-        trading_module = TradingModule(self.trading_module_config)
-        return StatsModule(self.stats_config, self.frame_with_signals, trading_module, df)
