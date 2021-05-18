@@ -42,14 +42,6 @@ def default_empty_array_dict() -> list:
     return []
 
 
-def default_empty_dict_dict() -> dict:
-    """
-    :return: dictionary for initializing default dictionary
-    :rtype: dict
-    """
-    return defaultdict(int)
-
-
 def calculate_worth_of_open_trades(open_trades: [Trade]) -> float:
     """
     Method calculates worth of open trades
