@@ -43,11 +43,11 @@ def show_trade_anomalies(stats: TradingStats):
     trades = list(filter(lambda x: x.sell_reason == SellReason.STOPLOSS_AND_ROI, stats.trades))
 
     if len(trades) > 0:
-        print_warning("WARNING: Both Stoploss and ROI were triggered in the same OHLCV candle")
-        print_warning("during the following trades:")
+        print_warning("WARNING: Both Stoploss and ROI were triggered in the same candle")
+        print_warning("during the following trade(s):")
         for trade in trades:
             print_warning(f"- {trade.opened_at} ==> {trade.closed_at}")
-        print_warning("profit for effected trades will be set to 0%")
+        print_warning("profit for affected trades will be set to 0%")
 
 
 def print_warning(text):
