@@ -1,14 +1,16 @@
+from collections import defaultdict
 from datetime import datetime
+from functools import partial
 
 from tqdm import tqdm
 
 from backtesting.results import OpenTradeResult, CoinInsights, MainResults
 from data.tradingmodule import TradingModule
-from models.trade import Trade
+from models.trade import Trade, SellReason
 from modules.pairs_data import PairsData
 from modules.stats.stats_config import StatsConfig
 from modules.stats.trading_stats import TradingStats
-from utils import default_empty_dict_dict, calculate_worth_of_open_trades
+from utils import calculate_worth_of_open_trades
 
 
 def generate_open_trades_results(open_trades: [Trade]) -> list:
@@ -66,7 +68,8 @@ class StatsModule:
             frame_with_signals=self.frame_with_signals,
             buypoints=self.buypoints,
             sellpoints=self.sellpoints,
-            df=self.df
+            df=self.df,
+            trades=trading_module.open_trades + trading_module.closed_trades
         )
 
     def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float,
@@ -123,9 +126,9 @@ class StatsModule:
                                         max_seen_drawdown=(stats[coin]['max_seen_ratio'] - 1) * 100,
                                         max_realised_drawdown=(stats[coin]['max_realised_ratio'] - 1) * 100,
                                         total_duration=stats[coin]['total_duration'],
-                                        roi=stats[coin]['sell_reasons']['ROI'],
-                                        stoploss=stats[coin]['sell_reasons']['Stoploss'],
-                                        sell_signal=stats[coin]['sell_reasons']['Sell signal'])
+                                        roi=stats[coin]['sell_reasons'][SellReason.ROI],
+                                        stoploss=stats[coin]['sell_reasons'][SellReason.STOPLOSS],
+                                        sell_signal=stats[coin]['sell_reasons'][SellReason.SELL_SIGNAL])
             new_stats.append(coin_insight)
 
         return new_stats
@@ -149,7 +152,7 @@ class StatsModule:
                 'max_seen_ratio': 1.0,
                 'max_realised_ratio': 1.0,
                 'total_duration': None,
-                'sell_reasons': default_empty_dict_dict()
+                'sell_reasons': defaultdict(int)
             } for pair in self.frame_with_signals.keys()
         }
 

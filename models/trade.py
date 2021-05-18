@@ -1,5 +1,7 @@
 # Libraries
 from datetime import datetime
+from enum import Enum
+from typing import Any
 
 import numpy as np
 
@@ -15,9 +17,17 @@ import numpy as np
 # ======================================================================
 
 
+class SellReason(Enum):
+    SELL_SIGNAL = "Sell Signal"
+    STOPLOSS = "Stoploss"
+    ROI = "ROI"
+    STOPLOSS_AND_ROI = "Stoploss and ROI"
+    NONE = "None"
+
 class Trade:
-    max_seen_drawdown: int = 0
-    closed_at = None
+    max_seen_drawdown: int
+    closed_at: Any
+    sell_reason: SellReason
 
     def __init__(self, ohlcv: dict, spend_amount: float, fee: float, date: datetime, sl_type: str, sl_perc: float):
         self.status = 'open'
@@ -25,15 +35,16 @@ class Trade:
         self.open = ohlcv['close']
         self.opened_at = date
         self.fee = fee
+        self.max_seen_drawdown = 0
         self.starting_amount = spend_amount
         self.lowest_seen_price = spend_amount
         self.capital = spend_amount - (spend_amount * fee)  # apply fee
         self.currency_amount = (self.capital / ohlcv['close'])
-        
+        self.sell_reason = SellReason.NONE
         self.sl_type = sl_type
         self.sl_perc = sl_perc
 
-    def close_trade(self, reason: str, date: datetime) -> None:
+    def close_trade(self, reason: SellReason, date: datetime) -> None:
         """
         Closes this trade and updates stats according to latest data.
 

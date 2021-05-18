@@ -15,3 +15,4 @@ class TradingStats:
     buypoints: dict
     sellpoints: dict
     df: DataFrame
+    trades: list

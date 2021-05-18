@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Optional
 
 from data.tradingmodule_config import TradingModuleConfig
-from models.trade import Trade
+from models.trade import Trade, SellReason
 
 
 # ======================================================================
@@ -74,14 +74,20 @@ class TradingModule:
         stoploss_reached = self.check_stoploss_open_trade(trade, ohlcv)
         roi_reached = self.check_roi_open_trade(trade, ohlcv)
 
-        if stoploss_reached or roi_reached:
-            return  # trade is closed by stoploss or ROI
+        if stoploss_reached and roi_reached:
+            trade.current = trade.open
+            trade.update_profits()
+            self.close_trade(trade, reason=SellReason.STOPLOSS_AND_ROI, ohlcv=ohlcv)
+        elif stoploss_reached:
+            self.close_trade(trade, reason=SellReason.STOPLOSS, ohlcv=ohlcv)
+        elif roi_reached:
+            self.close_trade(trade, reason=SellReason.ROI, ohlcv=ohlcv)
         elif ohlcv['sell'] == 1:
-            self.close_trade(trade, reason="Sell signal", ohlcv=ohlcv)
+            self.close_trade(trade, reason=SellReason.SELL_SIGNAL, ohlcv=ohlcv)
         else:  # trade is not closed
             self.update_value_per_timestamp_tracking(trade, ohlcv)
 
-    def close_trade(self, trade: Trade, reason: str, ohlcv: dict) -> None:
+    def close_trade(self, trade: Trade, reason: SellReason, ohlcv: dict) -> None:
         """
         :param trade: Trade model, trade to close
         :type trade: Trade
@@ -155,7 +161,6 @@ class TradingModule:
         if profit_percentage > roi_percentage:
             trade.current = trade.open * (1 + (roi_percentage / 100))
             trade.update_profits()
-            self.close_trade(trade, reason="ROI", ohlcv=ohlcv)
             return True
         return False
 
@@ -186,7 +191,6 @@ class TradingModule:
         """
         sl_signal = trade.check_for_sl(ohlcv)
         if sl_signal:
-            self.close_trade(trade, reason="Stoploss", ohlcv=ohlcv)
             return True
         return False
 
