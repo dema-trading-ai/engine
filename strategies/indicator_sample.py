@@ -1,10 +1,9 @@
 # Mandatory Imports
-from pandas import DataFrame, Series
-from backtesting.strategy import Strategy
-from models.trade import Trade
-
 # Optional Imports
 import talib.abstract as ta
+from pandas import DataFrame
+
+from backtesting.strategy import Strategy
 
 
 class IndicatorSample(Strategy):
@@ -88,7 +87,6 @@ class IndicatorSample(Strategy):
         # dataframe['fastk'] = stoch_fast['fastk']
 
         # # Stochastic RSI
-        # Please read https://github.com/freqtrade/freqtrade/issues/2961 before using this.
         # STOCHRSI is NOT aligned with tradingview, which may result in non-expected results.
         # stoch_rsi = ta.STOCHRSI(dataframe)
         # dataframe['fastd_rsi'] = stoch_rsi['fastd']

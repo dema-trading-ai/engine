@@ -2,10 +2,10 @@
 from datetime import datetime
 
 # Files
-from config.load_strategy import load_strategy_from_config
-from backtesting.strategy import Strategy
-from models.trade import Trade
-from utils import calculate_worth_of_open_trades
+from typing import Optional
+
+from data.tradingmodule_config import TradingModuleConfig
+from models.trade import Trade, SellReason
 
 
 # ======================================================================
@@ -15,39 +15,29 @@ from utils import calculate_worth_of_open_trades
 # © 2021 DemaTrading.ai
 # ======================================================================
 
+
 class TradingModule:
-    max_open_trades = None
-    closed_trades = []
-    open_trades = []
-    strategy = None
 
-    open_order_value_per_timestamp = {}
-    budget_per_timestamp = {}
-    realised_profits = []
-    total_fee_amount = 0
-
-    def __init__(self, config):
+    def __init__(self, config: TradingModuleConfig):
         print("[INFO] Initializing trading-module...")
         self.config = config
-        self.strategy = load_strategy_from_config(config)
-        self.budget = float(self.config['starting-capital'])
+        self.budget = float(self.config.starting_capital)
         self.realised_profit = self.budget
 
-        self.max_open_trades = int(self.config['max-open-trades'])
-        self.amount_of_pairs = len(self.config['pairs'])
-        self.fee = config['fee'] / 100
-        self.sl_type = config['stoploss-type']
-        self.sl_perc = float(config['stoploss'])
+        self.max_open_trades = int(self.config.max_open_trades)
+        self.amount_of_pairs = len(self.config.pairs)
+        self.fee = config.fee / 100
+        self.sl_type = config.stoploss_type
+        self.sl_perc = float(config.stoploss)
+
+        self.open_order_value_per_timestamp = {}
+        self.closed_trades = []
+        self.open_trades = []
+        self.budget_per_timestamp = {}
+        self.realised_profits = []
+        self.total_fee_amount = 0
 
     def tick(self, ohlcv: dict, data_dict: dict) -> None:
-        """
-        :param ohlcv: dictionary with OHLCV data for current tick
-        :type ohlcv: dict
-        :param data_dict: dict containing OHLCV data of current pair
-        :type data_dict: dict
-        :return: None
-        :rtype: None
-        """
         trade = self.find_open_trade(ohlcv['pair'])
         if trade:
             trade.update_stats(ohlcv)
@@ -84,14 +74,20 @@ class TradingModule:
         stoploss_reached = self.check_stoploss_open_trade(trade, ohlcv)
         roi_reached = self.check_roi_open_trade(trade, ohlcv)
 
-        if stoploss_reached or roi_reached:
-            return  # trade is closed by stoploss or ROI
+        if stoploss_reached and roi_reached:
+            trade.current = trade.open
+            trade.update_profits()
+            self.close_trade(trade, reason=SellReason.STOPLOSS_AND_ROI, ohlcv=ohlcv)
+        elif stoploss_reached:
+            self.close_trade(trade, reason=SellReason.STOPLOSS, ohlcv=ohlcv)
+        elif roi_reached:
+            self.close_trade(trade, reason=SellReason.ROI, ohlcv=ohlcv)
         elif ohlcv['sell'] == 1:
-            self.close_trade(trade, reason="Sell signal", ohlcv=ohlcv)
-        else:   # trade is not closed
+            self.close_trade(trade, reason=SellReason.SELL_SIGNAL, ohlcv=ohlcv)
+        else:  # trade is not closed
             self.update_value_per_timestamp_tracking(trade, ohlcv)
 
-    def close_trade(self, trade: Trade, reason: str, ohlcv: dict) -> None:
+    def close_trade(self, trade: Trade, reason: SellReason, ohlcv: dict) -> None:
         """
         :param trade: Trade model, trade to close
         :type trade: Trade
@@ -141,7 +137,7 @@ class TradingModule:
         date = datetime.fromtimestamp(ohlcv['time'] / 1000)
         new_trade = \
             Trade(ohlcv, spend_amount, self.fee, date, self.sl_type, self.sl_perc)
-        new_trade.configure_stoploss(ohlcv, data_dict, self.strategy)
+        new_trade.configure_stoploss(ohlcv, data_dict)
         new_trade.update_stats(ohlcv)
 
         # Update total budget with configured spend amount and fee
@@ -160,9 +156,11 @@ class TradingModule:
         :rtype: boolean
         """
         time_passed = datetime.fromtimestamp(ohlcv['time'] / 1000) - trade.opened_at
-        profit_percentage = (trade.profit_ratio - 1) * 100
-        if profit_percentage > self.get_roi_over_time(time_passed):
-            self.close_trade(trade, reason="ROI", ohlcv=ohlcv)
+        profit_percentage = ((ohlcv['high'] / trade.open) - 1.) * 100
+        roi_percentage = self.get_roi_over_time(time_passed)
+        if profit_percentage > roi_percentage:
+            trade.current = trade.open * (1 + (roi_percentage / 100))
+            trade.update_profits()
             return True
         return False
 
@@ -175,9 +173,9 @@ class TradingModule:
         :rtype: float
         """
         passed_minutes = time_passed.seconds / 60
-        roi = self.config['roi']['0']
+        roi = self.config.roi['0']
 
-        for key, value in sorted(self.config['roi'].items(), key=lambda item: int(item[0])):
+        for key, value in sorted(self.config.roi.items(), key=lambda item: int(item[0])):
             if passed_minutes >= int(key):
                 roi = value
         return roi
@@ -193,11 +191,10 @@ class TradingModule:
         """
         sl_signal = trade.check_for_sl(ohlcv)
         if sl_signal:
-            self.close_trade(trade, reason="Stoploss", ohlcv=ohlcv)
             return True
         return False
 
-    def find_open_trade(self, pair: str) -> Trade:
+    def find_open_trade(self, pair: str) -> Optional[Trade]:
         """
         :param pair: pair to check in "AAA/BBB" format
         :type pair: string
