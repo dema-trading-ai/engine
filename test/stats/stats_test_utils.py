@@ -1,4 +1,4 @@
-from collections import Callable
+from collections.abc import Callable
 
 import pandas as pd
 
@@ -9,7 +9,7 @@ from modules.stats.stats_config import StatsConfig
 from test.utils.signal_frame import MockPairFrame
 from utils import get_ohlcv_indicators
 
-StatsModuleFactory = Callable[[], StatsModule]
+StatsModuleFactory = [[], StatsModule]
 
 max_open_trades = 3
 STARTING_CAPITAL = 100.
