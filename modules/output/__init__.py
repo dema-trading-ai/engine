@@ -38,14 +38,17 @@ class ConsoleColors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-def show_trade_anomalies(stats: TradingStats):
 
+def show_trade_anomalies(stats: TradingStats):
     trades = list(filter(lambda x: x.sell_reason == SellReason.STOPLOSS_AND_ROI, stats.trades))
 
     if len(trades) > 0:
-        print_warning("WARNING: Stoploss and ROI reached for trade in single OHLCV")
+        print_warning("WARNING: Both Stoploss and ROI were triggered in the same OHLCV candle")
+        print_warning("during the following trades:")
         for trade in trades:
-            print_warning(f"Trade opened at {trade.opened_at}")
+            print_warning(f"- {trade.opened_at} ==> {trade.closed_at}")
+        print_warning("profit for effected trades will be set to 0%")
+
 
 def print_warning(text):
     print(f"{ConsoleColors.WARNING}{text}{ConsoleColors.ENDC}")
