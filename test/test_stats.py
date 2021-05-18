@@ -114,7 +114,6 @@ def test_roi_set_not_reached():
 
     # Assert
     assert math.isclose(stats.main_results.end_capital, 384.238404)
-    # Assert
 
 
 def test_fee():
