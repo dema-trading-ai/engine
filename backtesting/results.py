@@ -66,10 +66,10 @@ class MainResults:
         print("| Trades with loss: \t\t%s" % self.n_trades_with_loss)
         print("| Most consecutive losses: \t%s" % self.n_consecutive_losses)
         print("| ")
-        print("| Best trade: \t\t\t%s" %
-              round(self.max_win_single_trade, 2) + '\t%')
-        print("| Worst trade: \t\t\t%s" %
-              round(self.max_drawdown_single_trade, 2) + '\t%')
+        # print("| Best trade: \t\t\t%s" %
+        #       round(self.max_win_single_trade, 2) + '\t%')
+        # print("| Worst trade: \t\t\t%s" %
+        #       round(self.max_drawdown_single_trade, 2) + '\t%')
         print("| Max realised drawdown:\t%s" %
               round(self.max_realised_drawdown, 2) + '\t%')
         # print("| Max seen drawdown: \t\t%s" %
