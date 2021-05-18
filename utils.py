@@ -8,7 +8,7 @@ import rapidjson
 # Files
 from models.trade import Trade
 
-CURRENT_VERSION = "v0.6.1"
+CURRENT_VERSION = "v0.6.0"
 
 
 def get_project_root():
