@@ -1,4 +1,4 @@
-from backtesting.backtesting import BackTesting
+from modules.algo.backtesting import BackTesting
 from modules.setup.config import ConfigModule
 
 

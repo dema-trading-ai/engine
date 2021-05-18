@@ -1,15 +1,14 @@
 from collections import defaultdict
 from datetime import datetime
-from functools import partial
 
 from tqdm import tqdm
 
-from backtesting.results import OpenTradeResult, CoinInsights, MainResults
-from data.tradingmodule import TradingModule
-from models.trade import Trade, SellReason
+from modules.output.results import CoinInsights, MainResults, OpenTradeResult
 from modules.pairs_data import PairsData
 from modules.stats.stats_config import StatsConfig
+from modules.stats.trade import Trade, SellReason
 from modules.stats.trading_stats import TradingStats
+from modules.stats.tradingmodule import TradingModule
 from utils import calculate_worth_of_open_trades
 
 
@@ -228,7 +227,6 @@ class StatsModule:
         }
         timestamp_value = self.trading_module.open_order_value_per_timestamp
         timestamp_budget = self.trading_module.budget_per_timestamp
-        old_value = self.config.starting_capital
         for tick in timestamp_value:
             # Find total value at tick time
             total_value = self.find_total_value(timestamp_value, timestamp_budget, tick)

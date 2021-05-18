@@ -4,7 +4,7 @@ import utils
 import sys
 
 # Files
-from backtesting.strategy import Strategy
+from modules.algo.strategy import Strategy
 from modules.setup.config import StrategyDefinition
 
 

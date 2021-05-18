@@ -1,12 +1,10 @@
 # Libraries
 from pathlib import Path
-from collections import defaultdict
 from pandas import DataFrame
 import pandas as pd
 import rapidjson
 
-# Files
-from models.trade import Trade
+from modules.stats.trade import Trade
 
 CURRENT_VERSION = "v0.6.0"
 
