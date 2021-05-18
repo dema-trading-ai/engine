@@ -232,7 +232,7 @@ def test_simple_realized_drawdown():
     assert math.isclose(stats.main_results.max_realised_drawdown, -38.74375)
 
 def test_simple_no_realized_drawdown():
-    """Given 'sell at half value', 'realized drawdown' should 'be half'"""
+    """Given 'no drawdown trades', 'realized drawdown' should 'none'"""
     # Arrange
     fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE'])
 
