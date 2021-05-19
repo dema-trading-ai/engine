@@ -6,7 +6,7 @@ import rapidjson
 
 from modules.stats.trade import Trade
 
-CURRENT_VERSION = "v0.6.0"
+CURRENT_VERSION = "v0.6.1"
 
 
 def get_project_root():
