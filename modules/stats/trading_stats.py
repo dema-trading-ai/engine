@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from pandas import DataFrame
 
-from backtesting.results import MainResults
+from modules.output.results import MainResults
 from modules.pairs_data import PairsData
 
 

@@ -3,7 +3,7 @@
 import talib.abstract as ta
 from pandas import DataFrame
 
-from backtesting.strategy import Strategy
+from modules.algo.strategy import Strategy
 
 
 class MyStrategy(Strategy):

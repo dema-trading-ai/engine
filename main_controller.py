@@ -1,11 +1,11 @@
 # Files
-from data.tradingmodule import TradingModule
-from data.tradingmodule_config import create_trading_module_config
 from modules.output import OutputModule
 from modules.setup.config import ConfigModule
 from modules.setup import SetupModule
 from modules.stats.stats import StatsModule
 from modules.stats.stats_config import to_stats_config
+from modules.stats.tradingmodule import TradingModule
+from modules.stats.tradingmodule_config import create_trading_module_config
 
 
 class MainController:

@@ -1,11 +1,9 @@
-from collections.abc import Callable
-
 import pandas as pd
 
-from data.tradingmodule import TradingModule
-from data.tradingmodule_config import TradingModuleConfig
 from modules.stats.stats import StatsModule
 from modules.stats.stats_config import StatsConfig
+from modules.stats.tradingmodule import TradingModule
+from modules.stats.tradingmodule_config import TradingModuleConfig
 from test.utils.signal_frame import MockPairFrame
 from utils import get_ohlcv_indicators
 

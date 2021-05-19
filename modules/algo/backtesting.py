@@ -3,7 +3,7 @@
 from tqdm import tqdm
 
 # Files
-from backtesting.strategy import Strategy
+from modules.algo.strategy import Strategy
 from modules.pairs_data import PairsData
 from modules.setup.config import ConfigModule
 
@@ -75,4 +75,3 @@ class BackTesting:
             print(
                 f"[WARNING] Dynamic stoploss {notify_reason}. Using standard stoploss of {self.config.stoploss}%.")
         return data_dict
-
