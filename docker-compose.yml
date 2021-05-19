@@ -1,9 +1,8 @@
 version: '3'
 services:
   dema-engine:
-    image: dematrading/engine:latest
+    image: dematrading/engine:stable
     restart: unless-stopped
-    container_name: dema-engine
     volumes:
       - "./strategies:/usr/src/engine/strategies"
       - "./config.json:/usr/src/engine/config.json"

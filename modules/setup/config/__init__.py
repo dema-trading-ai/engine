@@ -11,9 +11,8 @@ import numpy as np
 from .strategy_definition import StrategyDefinition
 from .cctx_adapter import create_cctx_exchange
 from .currencies import get_currency_symbol
-from .validations import validate
+from .validations import validate_and_read_cli
 from .load_strategy import load_strategy_from_config
-from .cli import adjust_config_to_cli
 
 msec = 1000
 minute = 60 * msec
@@ -26,9 +25,9 @@ class ConfigModule(object):
     timeframe: str
     timeframe_ms: int
 
-    def __init__(self):
+    def __init__(self, args):
         config = read_config()
-        validate(config)
+        validate_and_read_cli(config, args)
 
         self.plot_indicators1 = config["plot_indicators1"]
         self.plot_indicators2 = config["plot_indicators2"]

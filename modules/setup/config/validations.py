@@ -1,25 +1,13 @@
-import json
-import os
-
-from modules.setup.config.cli import adjust_config_to_cli
-from modules.setup.config.spec import spec_type_to_python_type
+from cli.arg_parse import read_spec, spec_type_to_python_type
+from modules.setup.config.cli import get_cli_config
 
 
-def validate(config: dict):
+def validate_and_read_cli(config: dict, args):
     config_spec = read_spec()
-    adjust_config_to_cli(config, config_spec)
+    config.update(get_cli_config(args))
     validate_by_spec(config, config_spec)
     validate_single_currency_in_pairs(config)
     validate_fee(config)
-
-
-def read_spec() -> list:
-    directory = os.path.dirname(__file__)
-    spec_file_path = os.path.join(directory, "specification.json")
-
-    with open(spec_file_path, "r") as f:
-        spec = f.read()
-    return json.loads(spec)
 
 
 def validate_by_spec(config, config_spec):

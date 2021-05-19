@@ -19,6 +19,7 @@ def print_warning_if_version_outdated():
 
     latest_version_string = semver_to_string(get_latest_tag(repository_tags))
     print_warning(f"Update available {CURRENT_VERSION} → {latest_version_string}")
+    print_warning("Run 'docker-compose pull' to update")
 
 
 def semver_to_string(running_version):
