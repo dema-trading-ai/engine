@@ -3,7 +3,7 @@
 from tqdm import tqdm
 
 # Files
-from modules.algo.strategy import Strategy
+from backtesting.strategy import Strategy
 from modules.pairs_data import PairsData
 from modules.setup.config import ConfigModule
 

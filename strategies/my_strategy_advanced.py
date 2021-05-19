@@ -4,7 +4,7 @@ from pandas import DataFrame
 # Optional Imports
 import talib.abstract as ta
 
-from modules.algo.strategy import Strategy
+from backtesting.strategy import Strategy
 
 
 class MyStrategyAdvanced(Strategy):
