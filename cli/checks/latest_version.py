@@ -43,10 +43,9 @@ def string_to_semver(to_convert: str) -> Optional:
 
 
 def get_latest_tag(repository_tags: [str]):
-    tags_matching = map(string_to_semver, repository_tags)
-    tags_matching = filter(lambda x: x is not None, tags_matching)
-    tags_matching = sorted(tags_matching, reverse=True)[0]
-    return tags_matching
+    tags = map(string_to_semver, repository_tags)
+    tags = filter(lambda x: x is not None, tags)
+    return sorted(tags, reverse=True)[0]
 
 
 TAG_URL = "https://api.github.com/repos/dema-trading-ai/engine/tags"
