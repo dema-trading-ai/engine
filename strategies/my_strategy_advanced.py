@@ -1,9 +1,10 @@
 # Mandatory Imports
 from pandas import DataFrame
-from backtesting.strategy import Strategy
 
 # Optional Imports
 import talib.abstract as ta
+
+from modules.algo.strategy import Strategy
 
 
 class MyStrategyAdvanced(Strategy):

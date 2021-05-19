@@ -4,16 +4,14 @@ from datetime import datetime
 # Files
 from typing import Optional
 
-from data.tradingmodule_config import TradingModuleConfig
-from models.trade import Trade, SellReason
-
-
 # ======================================================================
 # TradingModule is responsible for tracking trades, calling strategy methods
 # and virtually opening / closing trades based on strategies' signal.
 #
 # © 2021 DemaTrading.ai
 # ======================================================================
+from modules.stats.trade import SellReason, Trade
+from modules.stats.tradingmodule_config import TradingModuleConfig
 
 
 class TradingModule:

@@ -8,6 +8,6 @@ services:
       - "./strategies:/usr/src/engine/strategies"
       - "./config.json:/usr/src/engine/config.json"
       - "./data/backtesting-data:/usr/src/engine/data/backtesting-data"
-    # default command to execute when 'docker-compose up' is ran.
+    # default command to execute when 'docker-compose up' is run.
     command: >
       -u main.py

@@ -1,7 +1,6 @@
 import math
 from test.stats.stats_test_utils import StatsFixture
 from test.utils.signal_frame import TradeAction
-from utils import get_ohlcv_indicators
 
 
 def test_capital():
