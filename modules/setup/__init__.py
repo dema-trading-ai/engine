@@ -1,7 +1,7 @@
-from backtesting.backtesting import BackTesting
-from data.datamodule import DataModule
 from modules.algo import AlgoModule
+from modules.algo.backtesting import BackTesting
 from modules.setup.config import print_pairs, load_strategy_from_config, ConfigModule
+from modules.setup.datamodule import DataModule
 
 
 class SetupModule(object):
