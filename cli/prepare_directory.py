@@ -24,7 +24,8 @@ def prepare_directory():
 
     Path(output_directory).mkdir(parents=True, exist_ok=True)
 
-    if len(os.listdir(output_directory)) > 0:
+    output_directory_contains_files = len(os.listdir(output_directory)) > 0
+    if output_directory_contains_files > 0:
         print_warning("Files detected in current directory. Cancelling...")
         return
 
