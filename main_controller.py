@@ -10,8 +10,8 @@ from modules.stats.tradingmodule_config import create_trading_module_config
 
 class MainController:
 
-    def __init__(self):
-        self.config = ConfigModule()
+    def __init__(self, args):
+        self.config = ConfigModule(args)
         self.setup_module = SetupModule(self.config)
 
     def run(self) -> None:
