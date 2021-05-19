@@ -1,12 +1,11 @@
-# Files
-from cli import check_version
+from cli.checks.latest_version import print_warning_if_version_outdated
 from main_controller import MainController
+
 
 def main():
     controller = MainController()
     controller.run()
-    check_version()
-
+    print_warning_if_version_outdated()
 
 
 if __name__ == "__main__":
