@@ -1,6 +1,6 @@
 from cli.arg_parse import execute_for_args
 from cli.checks.latest_version import print_warning_if_version_outdated
-from cli.prepare_directory import prepare_directory
+from cli.prepare_directory import prepare_workspace
 from main_controller import MainController
 
 
@@ -18,7 +18,7 @@ def run_engine(args):
 
 
 def run_init(args):
-    prepare_directory()
+    prepare_workspace()
 
 
 if __name__ == "__main__":

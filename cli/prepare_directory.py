@@ -5,7 +5,7 @@ from shutil import copy2
 from cli.print_utils import print_warning
 
 
-def prepare_directory():
+def prepare_workspace():
     def from_to(file_name: str):
         directory = os.getcwd()
         return os.path.join(directory, file_name), os.path.join("./output/", file_name)
