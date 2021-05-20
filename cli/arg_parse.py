@@ -14,13 +14,16 @@ CliActions = TypedDict("CliActions", {
 CLI_DESCR = "Dema Trading Engine"
 
 if getattr(sys, 'frozen', False):
-    application_path = os.path.dirname(sys.executable)
+    application_path = sys._MEIPASS
 elif __file__:
-    application_path = os.path.dirname(__file__)
+    application_path = os.getcwd()
+
+print(application_path)
 
 
 @cache
 def read_spec() -> list:
+    print("hero: awefawefawef")
     spec_file_path = os.path.join(application_path, "resources", "specification.json")
 
     with open(spec_file_path, "r") as f:
