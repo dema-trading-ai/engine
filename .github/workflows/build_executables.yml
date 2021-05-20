@@ -15,8 +15,11 @@ jobs:
           python-version: 3.9
       - name: download ta-lib
         run: curl https://download.lfd.uci.edu/pythonlibs/q4trcu4l/TA_Lib-0.4.20-cp39-cp39-win_amd64.whl -o ta-lib.whl
+      - name: ls
+        run: ls -la
+
       - name: install ta-lib
-        run: pip install ta-lib.whl
+        run: pip install ./ta-lib.whl
       - name: install requirements
         run: pip install -r requirements-ci.txt
       - name: build exe
