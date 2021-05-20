@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import sys
 from datetime import datetime
 from functools import cache
 from typing import TypedDict, Callable
@@ -12,10 +13,15 @@ CliActions = TypedDict("CliActions", {
 
 CLI_DESCR = "Dema Trading Engine"
 
+if getattr(sys, 'frozen', False):
+    application_path = os.path.dirname(sys.executable)
+elif __file__:
+    application_path = os.path.dirname(__file__)
+
 
 @cache
 def read_spec() -> list:
-    spec_file_path = os.path.join("./resources/", "specification.json")
+    spec_file_path = os.path.join(application_path, "resources", "specification.json")
 
     with open(spec_file_path, "r") as f:
         spec = f.read()
