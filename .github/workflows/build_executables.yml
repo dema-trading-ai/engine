@@ -16,7 +16,7 @@ jobs:
       - name: download ta-lib
         run: curl https://download.lfd.uci.edu/pythonlibs/q4trcu4l/TA_Lib-0.4.20-cp39-cp39-win_amd64.whl -o ta-lib.whl
       - name: ls
-        run: ls -la
+        run: dir
 
       - name: install ta-lib
         run: pip install ./ta-lib.whl
