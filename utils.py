@@ -1,4 +1,5 @@
 # Libraries
+import os
 from pathlib import Path
 from pandas import DataFrame
 import pandas as pd
@@ -10,7 +11,7 @@ CURRENT_VERSION = "v0.6.2"
 
 
 def get_project_root():
-    return Path(__file__).parent
+    return os.getcwd()
 
 
 def get_ohlcv_indicators() -> [str]:

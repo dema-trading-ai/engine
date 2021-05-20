@@ -15,8 +15,7 @@ CLI_DESCR = "Dema Trading Engine"
 
 @cache
 def read_spec() -> list:
-    directory = os.path.dirname(__file__)
-    spec_file_path = os.path.join(directory, "../modules/setup/config/specification.json")
+    spec_file_path = os.path.join("./resources/", "specification.json")
 
     with open(spec_file_path, "r") as f:
         spec = f.read()
