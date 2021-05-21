@@ -29,6 +29,7 @@ Running the Engine just takes a few simple things:
 3. Some code editor (https://www.jetbrains.com/pycharm/)
 4. Install TA-Lib dependencies (see: https://github.com/mrjbq7/ta-lib Installation -> Dependencies)
 
+
 ## Running without Docker
 
 First run:
