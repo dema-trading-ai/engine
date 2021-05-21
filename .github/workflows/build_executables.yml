@@ -16,12 +16,14 @@ jobs:
         with:
           python-version: 3.9
       - uses: actions/cache@v2
+        id: cache-talib
         with:
           path: ./${{ env.TALIB_URL }}
           key: talib-windows-wheel-${{ env.TALIB_URL }}
           restore-keys: |
             talib-windows-wheel-${TALIB_URL}
       - name: download ta-lib
+        if: steps.cache-talib.outputs.cache-hit != 'true'
         run: curl https://download.lfd.uci.edu/pythonlibs/q4trcu4l/${{ env.TALIB_URL }} -o ${{ env.TALIB_URL }}
       - name: install ta-lib
         run: pip install ./TA_Lib-0.4.20-cp39-cp39-win_amd64.whl
