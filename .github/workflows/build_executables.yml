@@ -43,7 +43,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: windows-exe
-          path: dist/main.exe
+          path: dist/engine.exe
   test:
     needs:
       - build
@@ -56,7 +56,7 @@ jobs:
         with:
           name: windows-exe
       - name: init
-        run: ./main.exe init new-dir
+        run: ./engine.exe init new-dir
       - name: run
-        run: ../main.exe
+        run: ../engine.exe
         working-directory: ./new-dir
