@@ -27,11 +27,9 @@ jobs:
         run: curl https://download.lfd.uci.edu/pythonlibs/q4trcu4l/${{ env.TALIB_URL }} -o ${{ env.TALIB_URL }}
       - name: install ta-lib
         run: pip install ./TA_Lib-0.4.20-cp39-cp39-win_amd64.whl
-      - name: print pip cache dir
-        run: pip cache dir
       - uses: actions/cache@v2
         with:
-          path: ~/.cache/pip
+          path: c:\users\runneradmin\appdata\local\pip\cache
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-ci.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
