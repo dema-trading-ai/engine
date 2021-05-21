@@ -3,11 +3,10 @@
 block_cipher = None
 
 added_files = [
-    ('./resources/*', 'resources/'),
+    ('./resources/', 'resources/'),
 ]
 
 a = Analysis(['main.py'],
-             pathex=['/home/gt/dema/engine'],
              binaries=[],
              datas=added_files,
              hiddenimports=["talib.abstract", "talib.stream"],
@@ -26,11 +25,10 @@ exe = EXE(pyz,
           a.zipfiles,
           a.datas,
           [],
-          name='main',
+          name='engine',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
           upx_exclude=[],
-          runtime_tmpdir=None,
           console=True )

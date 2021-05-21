@@ -4,6 +4,8 @@ from cli.prepare_workspace import prepare_workspace
 from main_controller import MainController
 
 
+#TODO add .gitignore file to setup resources dir
+
 def main():
     execute_for_args({
         'init': run_init,
@@ -18,7 +20,7 @@ def run_engine(args):
 
 
 def run_init(args):
-    prepare_workspace()
+    prepare_workspace(args)
 
 
 if __name__ == "__main__":

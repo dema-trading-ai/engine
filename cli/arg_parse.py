@@ -1,10 +1,11 @@
 import argparse
 import json
 import os
-import sys
 from datetime import datetime
 from functools import cache
 from typing import TypedDict, Callable
+
+from cli.directories import get_root_directory
 
 CliActions = TypedDict("CliActions", {
     'init': Callable,
@@ -13,18 +14,10 @@ CliActions = TypedDict("CliActions", {
 
 CLI_DESCR = "Dema Trading Engine"
 
-if getattr(sys, 'frozen', False):
-    application_path = sys._MEIPASS
-elif __file__:
-    application_path = os.getcwd()
-
-print(application_path)
-
 
 @cache
 def read_spec() -> list:
-    print("hero: awefawefawef")
-    spec_file_path = os.path.join(application_path, "resources", "specification.json")
+    spec_file_path = os.path.join(get_root_directory(), "resources", "specification.json")
 
     with open(spec_file_path, "r") as f:
         spec = f.read()
@@ -35,7 +28,10 @@ def execute_for_args(actions: CliActions):
     config_spec = read_spec()
     parser = argparse.ArgumentParser(description=CLI_DESCR)
     parser.set_defaults(func=actions['default'])
-    parser.add_subparsers(dest="init").add_parser("init").set_defaults(func=actions['init'])
+    init_parser = parser.add_subparsers(dest="init").add_parser("init")
+    init_parser.add_argument("dir", type=str, nargs='?', default=os.getcwd())
+    init_parser.set_defaults(func=actions['init'])
+
     for p in config_spec:
         cli = p.get("cli")
         if cli is None:
