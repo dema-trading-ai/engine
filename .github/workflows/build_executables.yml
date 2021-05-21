@@ -43,6 +43,8 @@ jobs:
           name: windows-exe
           path: dist/main.exe
   test:
+    needs:
+      - build
     runs-on: windows-latest
     steps:
       - name: list contents
