@@ -13,14 +13,29 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.9
+      - name: Set ta-lib download URL
+        env:
+          TALIB_URL: TA_Lib-0.4.20-cp39-cp39-win_amd64.whl
+      - uses: actions/cache@v2
+        with:
+          path: ./${TALIB_URL}
+          key: talib-windows-wheel-${TALIB_URL}
+          restore-keys: |
+            talib-windows-wheel-${TALIB_URL}
       - name: download ta-lib
-        run: curl https://download.lfd.uci.edu/pythonlibs/q4trcu4l/TA_Lib-0.4.20-cp39-cp39-win_amd64.whl -o TA_Lib-0.4.20-cp39-cp39-win_amd64.whl
+        run: curl https://download.lfd.uci.edu/pythonlibs/q4trcu4l/${TALIB_URL} -o ${TALIB_URL}
       - name: install ta-lib
         run: pip install ./TA_Lib-0.4.20-cp39-cp39-win_amd64.whl
+      - uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-ci.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
       - name: install requirements
         run: pip install -r requirements-ci.txt
       - name: build exe
-        run: python build_scripts/build_windows.py
+        run: python -OO build_scripts/build_windows.py
       - name: Archive code coverage results
         uses: actions/upload-artifact@v2
         with:
