@@ -34,7 +34,7 @@ jobs:
       - name: install requirements
         run: pip install -r requirements-ci.txt
       - name: build exe
-        run: python -OO build_scripts/build_windows.py
+        run: python build_scripts/build_windows.py
       - name: Archive code coverage results
         uses: actions/upload-artifact@v2
         with:
