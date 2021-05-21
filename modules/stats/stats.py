@@ -82,7 +82,7 @@ class StatsModule:
         max_seen_drawdown = self.calculate_max_seen_drawdown()
         max_realised_drawdown = self.calculate_max_realised_drawdown()
 
-        # Update some variables for prettier terminal output
+        # Update variables for prettier terminal output
         drawdown_from = datetime.fromtimestamp(max_seen_drawdown['from'] / 1000) \
             if max_seen_drawdown['from'] != 0 else '-'
         drawdown_to = datetime.fromtimestamp(max_seen_drawdown['to'] / 1000) \
@@ -120,18 +120,25 @@ class StatsModule:
 
     def generate_coin_results(self, closed_trades: [Trade], market_change: dict) -> [list, dict]:
         stats, best_worst_trade = self.calculate_statistics_per_coin(closed_trades)
-
         new_stats = []
+
         for coin in stats:
+            # Update variables for prettier terminal output
+            avg_profit_perc = (stats[coin]['cum_profit_prct'] / stats[coin]['amount_of_trades']) \
+                if stats[coin]['amount_of_trades'] > 0 else 0
+            avg_trade_duration = (stats[coin]['total_duration'] / stats[coin]['amount_of_trades']) \
+                if stats[coin]['amount_of_trades'] > 0 else '-'
+
             coin_insight = CoinInsights(pair=coin,
                                         n_trades=stats[coin]['amount_of_trades'],
                                         market_change=(market_change[coin] - 1) * 100,
                                         cum_profit_percentage=stats[coin]['cum_profit_prct'],
                                         total_profit_percentage=(stats[coin]['total_profit_ratio'] - 1) * 100,
+                                        avg_profit_percentage=avg_profit_perc,
                                         profit=stats[coin]['total_profit_amount'],
                                         max_seen_drawdown=(stats[coin]['max_seen_ratio'] - 1) * 100,
                                         max_realised_drawdown=(stats[coin]['max_realised_ratio'] - 1) * 100,
-                                        total_duration=stats[coin]['total_duration'],
+                                        avg_trade_duration=avg_trade_duration,
                                         roi=stats[coin]['sell_reasons'][SellReason.ROI],
                                         stoploss=stats[coin]['sell_reasons'][SellReason.STOPLOSS],
                                         sell_signal=stats[coin]['sell_reasons'][SellReason.SELL_SIGNAL])

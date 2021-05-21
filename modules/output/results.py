@@ -89,12 +89,13 @@ class CoinInsights:
     pair: str
     cum_profit_percentage: float
     total_profit_percentage: float
+    avg_profit_percentage: float
     profit: float
     n_trades: int
     market_change: float
     max_seen_drawdown: float
     max_realised_drawdown: float
-    total_duration: datetime
+    avg_trade_duration: datetime
     roi: int
     stoploss: int
     sell_signal: int
@@ -107,16 +108,15 @@ class CoinInsights:
         stats = []
         for c in instances:
             stats.append([c.pair,
-
-                        c.n_trades, 
+                        c.n_trades,
                         round(c.market_change, 2),
-                        round((c.cum_profit_percentage / c.n_trades) if c.n_trades > 0 else 0, 2),
+                        round(c.avg_profit_percentage, 2),
                         round(c.cum_profit_percentage, 2),
                         round(c.total_profit_percentage, 2),
                         round(c.profit, 2),
                         round(c.max_seen_drawdown, 2),
                         round(c.max_realised_drawdown, 2),
-                        c.total_duration / c.n_trades if c.n_trades > 0 else '-',
+                        c.avg_trade_duration,
                         c.roi, 
                         c.stoploss,
                         c.sell_signal])
