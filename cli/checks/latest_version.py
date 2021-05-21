@@ -1,6 +1,6 @@
 import json
 from typing import Optional
-from urllib.error import HTTPError
+from urllib.error import URLError
 from urllib.request import urlopen
 
 from cli.print_utils import print_warning
@@ -58,6 +58,6 @@ def get_engine_repository_tags() -> Optional:
         data_json = json.loads(response.read())
         tag_names = list(map(lambda x: x["name"], data_json))
         return tag_names
-    except HTTPError as http_err:
-        print_warning("Error while checking version. REASON:" + repr(http_err))
+    except URLError as url_err:
+        print_warning("Error while checking version. REASON:" + repr(url_err))
     return None

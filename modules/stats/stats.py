@@ -1,7 +1,7 @@
 from collections import defaultdict
 from datetime import datetime
-
 from tqdm import tqdm
+import numpy as np
 
 from modules.output.results import CoinInsights, MainResults, OpenTradeResult
 from modules.pairs_data import PairsData
@@ -52,13 +52,14 @@ class StatsModule:
                                     market_change: dict) -> TradingStats:
 
         trading_module = self.trading_module
+        coin_res, best_worst_trade = self.generate_coin_results(trading_module.closed_trades, market_change)
+        open_trade_res = generate_open_trades_results(trading_module.open_trades)
         main_results = self.generate_main_results(
             trading_module.open_trades,
             trading_module.closed_trades,
             trading_module.budget,
-            market_change)
-        coin_res = self.generate_coin_results(trading_module.closed_trades, market_change)
-        open_trade_res = generate_open_trades_results(trading_module.open_trades)
+            market_change,
+            best_worst_trade)
 
         return TradingStats(
             main_results=main_results,
@@ -72,7 +73,7 @@ class StatsModule:
         )
 
     def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float,
-                              market_change: dict) -> MainResults:
+                              market_change: dict, best_worst_trade: dict) -> MainResults:
         # Get total budget and calculate overall profit
         budget += calculate_worth_of_open_trades(open_trades)
         overall_profit_percentage = ((budget - self.config.starting_capital) / self.config.starting_capital) * 100
@@ -80,12 +81,18 @@ class StatsModule:
         # Find max seen and realised drowdown
         max_seen_drawdown = self.calculate_max_seen_drawdown()
         max_realised_drawdown = self.calculate_max_realised_drawdown()
+
+        # Update some variables for prettier terminal output
         drawdown_from = datetime.fromtimestamp(max_seen_drawdown['from'] / 1000) \
             if max_seen_drawdown['from'] != 0 else '-'
         drawdown_to = datetime.fromtimestamp(max_seen_drawdown['to'] / 1000) \
             if max_seen_drawdown['to'] != 0 else '-'
         drawdown_at = datetime.fromtimestamp(max_seen_drawdown['at'] / 1000) \
             if max_seen_drawdown['at'] != 0 else '-'
+        best_trade = (best_worst_trade['best_trade'] - 1) * 100 \
+            if best_worst_trade['best_trade'] != -np.inf else 0
+        worst_trade = (best_worst_trade['worst_trade'] - 1) * 100 \
+            if best_worst_trade['worst_trade'] != np.inf else 0
 
         return MainResults(tested_from=datetime.fromtimestamp(self.config.backtesting_from / 1000),
                            tested_to=datetime.fromtimestamp(
@@ -101,8 +108,8 @@ class StatsModule:
                            n_trades_with_loss=max_realised_drawdown['drawdown_trades'],
                            n_consecutive_losses=max_realised_drawdown['max_consecutive_losses'],
                            max_realised_drawdown=(max_realised_drawdown['max_drawdown'] - 1) * 100,
-                           max_drawdown_single_trade=(max_realised_drawdown['max_drawdown_one'] - 1) * 100,
-                           max_win_single_trade=(max_realised_drawdown['max_win_one'] - 1) * 100,
+                           worst_trade=worst_trade,
+                           best_trade=best_trade,
                            max_seen_drawdown=(max_seen_drawdown["drawdown"] - 1) * 100,
                            drawdown_from=drawdown_from,
                            drawdown_to=drawdown_to,
@@ -111,8 +118,8 @@ class StatsModule:
                            fee=self.config.fee,
                            total_fee_amount=self.trading_module.total_fee_amount)
 
-    def generate_coin_results(self, closed_trades: [Trade], market_change: dict) -> list:
-        stats = self.calculate_statistics_per_coin(closed_trades)
+    def generate_coin_results(self, closed_trades: [Trade], market_change: dict) -> [list, dict]:
+        stats, best_worst_trade = self.calculate_statistics_per_coin(closed_trades)
 
         new_stats = []
         for coin in stats:
@@ -130,7 +137,7 @@ class StatsModule:
                                         sell_signal=stats[coin]['sell_reasons'][SellReason.SELL_SIGNAL])
             new_stats.append(coin_insight)
 
-        return new_stats
+        return new_stats, best_worst_trade
 
     def calculate_statistics_per_coin(self, closed_trades):
         """
@@ -139,6 +146,11 @@ class StatsModule:
         :return: returns dictionary with statistics per coin.
         :rtype: dictionary
         """
+        best_worst_trade = {
+            "best_trade": -np.inf,  # ratio
+            "worst_trade": np.inf,  # ratio
+        }
+
         trades_per_coin = {
             pair: {
                 'cum_profit_prct': 0,
@@ -164,6 +176,12 @@ class StatsModule:
             self.buypoints[trade.pair].append(trade.opened_at)
             self.sellpoints[trade.pair].append(trade.closed_at)
 
+            # Update best/worst trade
+            if trade.profit_ratio > best_worst_trade['best_trade']:
+                best_worst_trade['best_trade'] = trade.profit_ratio
+            if trade.profit_ratio < best_worst_trade['worst_trade']:
+                best_worst_trade['worst_trade'] = trade.profit_ratio
+
             # Update average profit
             trades_per_coin[trade.pair]['cum_profit_prct'] += (trade.profit_ratio - 1) * 100
 
@@ -174,7 +192,6 @@ class StatsModule:
             # Update profit and amount of trades
             trades_per_coin[trade.pair]['total_profit_amount'] += trade.profit_dollar
             trades_per_coin[trade.pair]['amount_of_trades'] += 1
-
             trades_per_coin[trade.pair]['sell_reasons'][trade.sell_reason] += 1
 
             # Check for max seen drawdown
@@ -200,7 +217,7 @@ class StatsModule:
                 trades_per_coin[trade.pair]['total_duration'] = trade.closed_at - trade.opened_at
             else:
                 trades_per_coin[trade.pair]['total_duration'] += trade.closed_at - trade.opened_at
-        return trades_per_coin
+        return trades_per_coin, best_worst_trade
 
     # Method for calculating max seen drawdown
     # Max seen = visual drawdown (if you plot it). This drawdown might not be realised.
@@ -265,8 +282,6 @@ class StatsModule:
             "peak_ratio": 1,
             "curr_drawdown": 1,  # ratio
             "max_drawdown": 1,  # ratio
-            "max_drawdown_one": 1,  # ratio
-            "max_win_one": 1,  # ratio
             "curr_consecutive_losses": 0,
             "max_consecutive_losses": 0,
             "drawdown_trades": 0
@@ -284,17 +299,10 @@ class StatsModule:
                 max_realised_drawdown['drawdown_trades'] += 1
             else:
                 max_realised_drawdown['curr_consecutive_losses'] = 0
-                # Update max win for 1 trade
-                if profit_ratio > max_realised_drawdown['max_win_one']:
-                    max_realised_drawdown['max_win_one'] = profit_ratio
 
             # Check if max consecutive losses is beaten
             if max_realised_drawdown['curr_consecutive_losses'] > max_realised_drawdown['max_consecutive_losses']:
                 max_realised_drawdown['max_consecutive_losses'] = max_realised_drawdown['curr_consecutive_losses']
-
-            # Update max drawdown for 1 trade
-            if profit_ratio < max_realised_drawdown['max_drawdown_one']:
-                max_realised_drawdown['max_drawdown_one'] = profit_ratio
 
             # Update curr and total ratio
             max_realised_drawdown['curr_drawdown'] *= profit_ratio

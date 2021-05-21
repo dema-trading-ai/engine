@@ -35,8 +35,8 @@ class MainResults:
     n_trades_with_loss: int
     n_consecutive_losses: int
     max_realised_drawdown: float
-    max_drawdown_single_trade: float
-    max_win_single_trade: float
+    worst_trade: float
+    best_trade: float
     max_seen_drawdown: float
     drawdown_from: datetime
     drawdown_to: datetime
@@ -66,10 +66,10 @@ class MainResults:
         print("| Trades with loss: \t\t%s" % self.n_trades_with_loss)
         print("| Most consecutive losses: \t%s" % self.n_consecutive_losses)
         print("| ")
-        # print("| Best trade: \t\t\t%s" %
-        #       round(self.max_win_single_trade, 2) + '\t%')
-        # print("| Worst trade: \t\t\t%s" %
-        #       round(self.max_drawdown_single_trade, 2) + '\t%')
+        print("| Best trade: \t\t\t%s" %
+              round(self.best_trade, 2) + '\t%')
+        print("| Worst trade: \t\t\t%s" %
+              round(self.worst_trade, 2) + '\t%')
         print("| Max realised drawdown:\t%s" %
               round(self.max_realised_drawdown, 2) + '\t%')
         # print("| Max seen drawdown: \t\t%s" %
@@ -77,8 +77,8 @@ class MainResults:
         # print("| Max seen drawdown from: \t%s" % self.drawdown_from)
         # print("| Max seen drawdown to: \t%s" % self.drawdown_to)
         # print("| Max seen drawdown at: \t%s" % self.drawdown_at)
-        # print("| Market change coins: \t\t%s" % round(self.market_change_coins, 2) + '\t%')
-        # print("| Market change BTC: \t\t%s" % round(self.market_change_btc, 2) + '\t%')
+        print("| Market change coins: \t\t%s" % round(self.market_change_coins, 2) + '\t%')
+        print("| Market change BTC: \t\t%s" % round(self.market_change_btc, 2) + '\t%')
         print("| ")
         print("| Fee percentage: \t\t%s" % self.fee + '\t%')
         print("| Total fee paid: \t\t%s" % round(self.total_fee_amount, 2) + "\t" + currency_symbol)

@@ -85,7 +85,7 @@ def test_fee():
     fixture = StatsFixture(['COIN/BASE'])
 
     fixture.frame_with_signals['COIN/BASE'] \
-        .multiply_price(1, TradeAction.BUY)\
+        .multiply_price(1, TradeAction.BUY) \
         .multiply_price(2, TradeAction.SELL) \
         .multiply_price(1, TradeAction.BUY) \
         .multiply_price(2, TradeAction.SELL)
@@ -149,8 +149,28 @@ def test_stoploss():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.main_results.end_capital == 73.5075
+    assert stats.main_results.end_capital == 74.25
 
+def test_trailing_stoploss():
+    """Given 'trailing stoploss and value dips below stoploss',
+    'end capital' should 'represent sold on stoploss price'"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.trading_module_config.stoploss_type = "trailing"
+
+    fixture.frame_with_signals['COIN/BASE'] \
+        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
+        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=0)
+
+    fixture.trading_module_config.stoploss = -25
+    fixture.stats_config.stoploss = -25
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.main_results.end_capital == 74.25
 
 def test_dynamic_stoploss():
     """Given 'dynamic stoploss and value dips below stoploss',
@@ -208,7 +228,7 @@ def test_dividing_assets():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.main_results.end_capital == 73.5075
+    assert stats.main_results.end_capital == 74.25
 
 
 def test_simple_realized_drawdown():
@@ -383,63 +403,3 @@ def test_n_trades():
     assert stats.main_results.n_left_open_trades == 3
     assert stats.main_results.n_trades_with_loss == 3
     assert stats.main_results.n_consecutive_losses == 2
-
-
-def test_positive_best_worst_trade():
-    """Given one positive trade, 'best trade' should be trade profit,
-    worst trade should be 0"""
-    # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
-
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=1)
-
-    # Act
-    stats = fixture.create().analyze()
-
-    # Assert
-    assert math.isclose(stats.main_results.max_win_single_trade, 96.02)
-    assert math.isclose(stats.main_results.max_drawdown_single_trade, 0)
-
-
-def test_negative_best_worst_trade():
-    """Given one negative trade, 'worst trade' should be trade profit,
-    best trade should be 0"""
-    # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
-
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=1)
-
-    # Act
-    stats = fixture.create().analyze()
-
-    # Assert
-    assert math.isclose(stats.main_results.max_win_single_trade, 0)
-    assert math.isclose(stats.main_results.max_drawdown_single_trade, -50.995)
-
-
-def test_best_worst_trade():
-    """Given one negative trade, and one positive trade, 'worst trade' should be drawdown
-    of negative trade, 'best trade' should be profit of positive trade"""
-    # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
-
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=1) \
-        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=0, sell=1)
-
-    # Act
-    stats = fixture.create().analyze()
-
-    # Assert
-    assert math.isclose(stats.main_results.max_win_single_trade, 96.02)
-    assert math.isclose(stats.main_results.max_drawdown_single_trade, -50.995)
-
-
-
-

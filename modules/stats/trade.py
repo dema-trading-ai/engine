@@ -98,13 +98,13 @@ class Trade:
         """
         if self.sl_type == 'dynamic':
             if 'stoploss' in ohlcv:
-                self.sl_sell_time, self.sl_price = self.dynamic_stoploss(data_dict, ohlcv['time'])
+                self.sl_sell_time, self.sl_ratio = self.dynamic_stoploss(data_dict, ohlcv['time'])
             else:
                 self.sl_type = 'standard'   # when dynamic not configured use normal stoploss
         if self.sl_type == 'standard':
-            self.sl_price = self.open - (self.open * (abs(self.sl_perc) / 100))
+            self.sl_ratio = 1 - (abs(self.sl_perc) / 100)
         elif self.sl_type == 'trailing':
-            self.sl_sell_time, self.sl_price = self.trailing_stoploss(data_dict, ohlcv['time'])
+            self.sl_sell_time, self.sl_ratio = self.trailing_stoploss(data_dict, ohlcv['time'])
 
     def update_max_drawdown(self) -> None:
         """
@@ -127,13 +127,14 @@ class Trade:
         :rtype: boolean
         """
         if self.sl_type == 'standard':
-            if ohlcv["low"] < self.sl_price:
-                self.current = self.sl_price
+            lowest_ratio = (ohlcv['low'] * self.currency_amount) / self.starting_amount
+            if lowest_ratio <= self.sl_ratio:
+                self.current = (self.sl_ratio * self.starting_amount) / self.currency_amount
                 self.update_profits()
                 return True
         elif self.sl_type == 'trailing' or self.sl_type == 'dynamic':
             if self.sl_sell_time == ohlcv['time']:
-                self.current = self.sl_price
+                self.current = (self.sl_ratio * self.starting_amount) / self.currency_amount
                 self.update_profits()
                 return True
         return False
@@ -160,17 +161,21 @@ class Trade:
         :rtype: list
         """
         # Calculates correct TSL% and adds TSL value for each tick
-        stoploss_perc = 1 - (abs(self.sl_perc) / 100)
-        trail = data_dict[str(time)]['close'] * stoploss_perc
+        stoploss_perc = (abs(self.sl_perc) / 100)
+        trail_ratio = 1 - stoploss_perc
 
         for timestamp in data_dict.keys():
             if int(timestamp) > time:
                 ohlcv = data_dict[timestamp]
-                stoploss = ohlcv['open'] * stoploss_perc
-                if stoploss > trail:
-                    trail = stoploss
-                if ohlcv['low'] <= trail:
-                    return ohlcv['time'], trail
+                # Update trail ratio
+                stoploss_ratio = ((ohlcv['open'] * self.currency_amount) * stoploss_perc) / self.starting_amount
+                if stoploss_ratio > trail_ratio:
+                    trail_ratio = stoploss_ratio
+
+                # Check if lowest ratio crossed trail ratio
+                lowest_ratio = ((ohlcv['low'] * self.currency_amount) * stoploss_perc) / self.starting_amount
+                if lowest_ratio <= trail_ratio:
+                    return ohlcv['time'], trail_ratio
         return np.NaN, np.NaN
 
     def dynamic_stoploss(self, data_dict: dict, time: int) -> tuple:
@@ -188,6 +193,8 @@ class Trade:
         for timestamp in data_dict.keys():
             if int(timestamp) > time:
                 ohlcv = data_dict[timestamp]
-                if ohlcv['low'] < ohlcv['stoploss']:
-                    return ohlcv['time'], min(ohlcv["stoploss"], ohlcv["open"])
+                if ohlcv['low'] <= ohlcv['stoploss']:
+                    low_value = min(ohlcv["stoploss"], ohlcv["open"])
+                    sl_ratio = (low_value * self.currency_amount) / self.starting_amount
+                    return ohlcv['time'], sl_ratio
         return np.NaN, np.NaN

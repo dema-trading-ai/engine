@@ -57,9 +57,9 @@ class ConfigModule(object):
 
     def load_btc_marketchange(self):
         print("[INFO] Fetching marketchange of BTC/USDT...")
-        begin_data = self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe='1m', since=self.backtesting_from, limit=1)
-        end_timestamp = int(np.floor(self.backtesting_to / self.timeframe_ms) * self.timeframe_ms)
-        end_data = self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe='1m', since=end_timestamp, limit=1)
+        begin_data = self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe=self.timeframe, since=self.backtesting_from, limit=1)
+        end_timestamp = int(np.floor(self.backtesting_to / self.timeframe_ms) * self.timeframe_ms) - self.timeframe_ms
+        end_data = self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe=self.timeframe, since=end_timestamp, limit=1)
 
         begin_close_value = begin_data[0][4]
         end_close_value = end_data[0][4]
