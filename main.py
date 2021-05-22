@@ -4,7 +4,7 @@ from cli.prepare_workspace import prepare_workspace
 from main_controller import MainController
 
 
-#TODO add .gitignore file to setup resources dir
+# TODO add .gitignore file to setup resources dir
 
 def main():
     execute_for_args({
