@@ -28,8 +28,6 @@ jobs:
         run: pip install -r requirements.txt
       - name: build executable
         run: python build_scripts/build_windows.py
-      - name: run
-        run: python main.py
       - name: Archive built executable
         uses: actions/upload-artifact@v2
         with:
