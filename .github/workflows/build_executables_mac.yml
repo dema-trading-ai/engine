@@ -43,7 +43,7 @@ jobs:
         with:
           name: macos-exe
       - name: init
-        run: ./engine init new-dir
+        run: sudo ./engine init new-dir
       - name: run
         run: ../engine
         working-directory: ./new-dir
