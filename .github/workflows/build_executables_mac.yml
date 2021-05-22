@@ -38,6 +38,8 @@ jobs:
       - build
     runs-on: macos-latest
     steps:
+      - name: Install TA-lib
+        run: brew install ta-lib
       - name: exe
         uses: actions/download-artifact@v2
         with:
@@ -48,6 +50,8 @@ jobs:
         run: chmod +x ./engine
       - name: init
         run: ./engine init new-dir
+      - name: Install TA-lib
+        run: brew install ta-lib
       - name: run
         run: ../engine
         working-directory: ./new-dir
