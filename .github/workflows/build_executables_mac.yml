@@ -28,3 +28,4 @@ jobs:
         run: python build_scripts/build_windows.py
       - name: list
         run: ls -la
+        working-directory: ./dist
