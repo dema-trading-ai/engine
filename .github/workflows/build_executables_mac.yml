@@ -1,0 +1,30 @@
+name: Build executables
+on:
+  push:
+    branches: [feature/**, fix/**, development]
+  pull_request:
+    branches: [development]
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: save pip cache dir
+        id: pipdir
+        run: echo "::set-output name=pipcachedir::$(pip cache dir)"
+      - uses: actions/cache@v2
+        with:
+          path: ${{ steps.pipdir.outputs.pipcachedir }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-ci.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: install requirements
+        run: pip install -r requirements-ci.txt
+      - name: build exe
+        run: python build_scripts/build_windows.py
+      - name: list
+        run: ls -la
