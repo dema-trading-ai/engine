@@ -1,4 +1,4 @@
-name: Build executables
+name: Build executable windows
 on:
   push:
     branches: [feature/**, fix/**, development]
