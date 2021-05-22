@@ -42,8 +42,10 @@ jobs:
           name: macos-exe
       - name: list contents
         run: ls
+      - name: set executable bit
+        run: chmod +x ./engine
       - name: init
-        run: sudo ./engine init new-dir
+        run: ./engine init new-dir
       - name: run
         run: ../engine
         working-directory: ./new-dir
