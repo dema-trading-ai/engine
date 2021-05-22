@@ -28,8 +28,10 @@ jobs:
         run: pip install -r requirements-ci.txt
       - name: build executable
         run: python build_scripts/build_windows.py
+      - name: set executable bit
+        run: chmod +x ./dist/engine
       - name: init
-        run: ./engine init new-dir
+        run: ./dist/engine init new-dir
       - name: Archive built executable
         uses: actions/upload-artifact@v2
         with:
