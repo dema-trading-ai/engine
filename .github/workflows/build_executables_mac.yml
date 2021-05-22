@@ -24,8 +24,26 @@ jobs:
             ${{ runner.os }}-pip-
       - name: install requirements
         run: pip install -r requirements-ci.txt
-      - name: build exe
+      - name: build executable
         run: python build_scripts/build_windows.py
-      - name: list
-        run: ls -la
-        working-directory: ./dist
+      - name: Archive built executable
+        uses: actions/upload-artifact@v2
+        with:
+          name: macos-exe
+          path: dist/engine
+  test:
+    needs:
+      - build
+    runs-on: macos-latest
+    steps:
+      - name: list contents
+        run: dir
+      - name: exe
+        uses: actions/download-artifact@v2
+        with:
+          name: windows-exe
+      - name: init
+        run: ./engine init new-dir
+      - name: run
+        run: ../engine
+        working-directory: ./new-dir

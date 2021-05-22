@@ -40,7 +40,7 @@ jobs:
         run: pip install -r requirements-ci.txt
       - name: build exe
         run: python build_scripts/build_windows.py
-      - name: Archive code coverage results
+      - name: Archive built executable
         uses: actions/upload-artifact@v2
         with:
           name: windows-exe
