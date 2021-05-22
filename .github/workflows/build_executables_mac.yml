@@ -36,12 +36,12 @@ jobs:
       - build
     runs-on: macos-latest
     steps:
-      - name: list contents
-        run: ls
       - name: exe
         uses: actions/download-artifact@v2
         with:
           name: macos-exe
+      - name: list contents
+        run: ls
       - name: init
         run: sudo ./engine init new-dir
       - name: run
