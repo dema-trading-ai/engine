@@ -25,7 +25,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
       - name: install requirements
-        run: pip install -r requirements-ci.txt
+        run: pip install -r requirements.txt
       - name: build executable
         run: python build_scripts/build_windows.py
       - name: run
