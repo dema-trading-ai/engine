@@ -2,7 +2,6 @@ from cli.arg_parse import execute_for_args
 from cli.checks.latest_version import print_warning_if_version_outdated
 from cli.prepare_workspace import prepare_workspace
 from main_controller import MainController
-import talib
 
 # TODO add .gitignore file to setup resources dir
 
