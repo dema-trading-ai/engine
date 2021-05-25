@@ -89,9 +89,9 @@ class StatsModule:
             if max_seen_drawdown['to'] != 0 else '-'
         drawdown_at = datetime.fromtimestamp(max_seen_drawdown['at'] / 1000) \
             if max_seen_drawdown['at'] != 0 else '-'
-        best_trade = (best_worst_trade['best_trade'] - 1) * 100 \
+        best_trade_profit_percentage = (best_worst_trade['best_trade'] - 1) * 100 \
             if best_worst_trade['best_trade'] != -np.inf else 0
-        worst_trade = (best_worst_trade['worst_trade'] - 1) * 100 \
+        worst_trade_profit_percentage = (best_worst_trade['worst_trade'] - 1) * 100 \
             if best_worst_trade['worst_trade'] != np.inf else 0
 
         return MainResults(tested_from=datetime.fromtimestamp(self.config.backtesting_from / 1000),
@@ -108,8 +108,8 @@ class StatsModule:
                            n_trades_with_loss=max_realised_drawdown['drawdown_trades'],
                            n_consecutive_losses=max_realised_drawdown['max_consecutive_losses'],
                            max_realised_drawdown=(max_realised_drawdown['max_drawdown'] - 1) * 100,
-                           worst_trade=worst_trade,
-                           best_trade=best_trade,
+                           worst_trade_profit_percentage=worst_trade_profit_percentage,
+                           best_trade_profit_percentage=best_trade_profit_percentage,
                            max_seen_drawdown=(max_seen_drawdown["drawdown"] - 1) * 100,
                            drawdown_from=drawdown_from,
                            drawdown_to=drawdown_to,

@@ -35,8 +35,8 @@ class MainResults:
     n_trades_with_loss: int
     n_consecutive_losses: int
     max_realised_drawdown: float
-    worst_trade: float
-    best_trade: float
+    worst_trade_profit_percentage: float
+    best_trade_profit_percentage: float
     max_seen_drawdown: float
     drawdown_from: datetime
     drawdown_to: datetime
@@ -67,9 +67,9 @@ class MainResults:
         print("| Most consecutive losses: \t%s" % self.n_consecutive_losses)
         print("| ")
         print("| Best trade: \t\t\t%s" %
-              round(self.best_trade, 2) + '\t%')
+              round(self.best_trade_profit_percentage, 2) + '\t%')
         print("| Worst trade: \t\t\t%s" %
-              round(self.worst_trade, 2) + '\t%')
+              round(self.worst_trade_profit_percentage, 2) + '\t%')
         print("| Max realised drawdown:\t%s" %
               round(self.max_realised_drawdown, 2) + '\t%')
         # print("| Max seen drawdown: \t\t%s" %
