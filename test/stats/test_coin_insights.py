@@ -22,6 +22,7 @@ def test_fee_equals_stoploss():
     # Assert
     assert math.isclose(stats.coin_res[0].total_profit_percentage, -1.99)
 
+
 def test_worst_trade():
     """Given only losing trades, 'worst trade' should be worst of all trades"""
     # Arrange
@@ -44,10 +45,11 @@ def test_worst_trade():
 
     # Assert
     assert math.isclose(stats.coin_res[-1].total_profit_percentage, -38.74375)
-    assert math.isclose(stats.main_results.worst_trade, -38.74375)
+    assert math.isclose(stats.main_results.worst_trade_profit_percentage, -38.74375)
+
 
 def test_best_trade():
-    """Given only winning trades, 'worst trade' should be worst of all trades"""
+    """Given only winning trades, 'best trade' should be best of all trades"""
     # Arrange
     fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE', 'COIN3/BASE'])
 
@@ -68,10 +70,12 @@ def test_best_trade():
 
     # Assert
     assert math.isclose(stats.coin_res[-1].total_profit_percentage, 71.5175)
-    assert math.isclose(stats.main_results.best_trade, 71.5175)
+    assert math.isclose(stats.main_results.best_trade_profit_percentage, 71.5175)
+
 
 def test_best_worst_trade_only_wins():
-    """Given only winning trades, 'worst trade' should be worst of all trades"""
+    """Given only winning trades, 'worst trade' should be worst of all trades,
+    and 'best trade' should be best of all trades"""
     # Arrange
     fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE'])
 
@@ -87,11 +91,13 @@ def test_best_worst_trade_only_wins():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.main_results.best_trade, 47.015)
-    assert math.isclose(stats.main_results.worst_trade, 22.5125)
+    assert math.isclose(stats.main_results.best_trade_profit_percentage, 47.015)
+    assert math.isclose(stats.main_results.worst_trade_profit_percentage, 22.5125)
+
 
 def test_best_worst_trade_only_losses():
-    """Given only winning trades, 'worst trade' should be worst of all trades"""
+    """Given only losing trades, 'worst trade' should be worst of all trades,
+    and 'best trade' should be best of all trades"""
     # Arrange
     fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE'])
 
@@ -107,8 +113,8 @@ def test_best_worst_trade_only_losses():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.main_results.best_trade, -14.24125)
-    assert math.isclose(stats.main_results.worst_trade, -26.4925)
+    assert math.isclose(stats.main_results.best_trade_profit_percentage, -14.24125)
+    assert math.isclose(stats.main_results.worst_trade_profit_percentage, -26.4925)
 
 
 def test_marketchange():
@@ -140,6 +146,7 @@ def test_marketchange():
     assert stats.coin_res[0].market_change == 50
     assert stats.coin_res[1].market_change == -50
 
+
 def test_profit():
     """Given coin trends, 'profits' should match"""
     # Arrange
@@ -160,6 +167,7 @@ def test_profit():
     assert math.isclose(stats.coin_res[0].total_profit_percentage, 88.29602988)
     assert math.isclose(stats.coin_res[0].cum_profit_percentage, 402.405)
     assert math.isclose(stats.coin_res[0].avg_profit_percentage, 134.135)
+
 
 def test_multiple_periods_realized_drawdown_v1():
     """Given multiple trades, creating two separate drawdown
@@ -184,6 +192,7 @@ def test_multiple_periods_realized_drawdown_v1():
     # Assert
     assert math.isclose(stats.coin_res[0].max_realised_drawdown, -50.995)
 
+
 def test_multiple_periods_realized_drawdown_v2():
     """Given multiple trades, creating two separate drawdown
     periods, realized drawdown should be the drawdown of the biggest drawdown
@@ -206,6 +215,7 @@ def test_multiple_periods_realized_drawdown_v2():
 
     # Assert
     assert math.isclose(stats.coin_res[0].max_realised_drawdown, -75.4975)
+
 
 def test_multiple_periods_realized_drawdown_v3():
     """Given multiple trades, creating one drawdown period, realized

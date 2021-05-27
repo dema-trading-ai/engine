@@ -26,9 +26,13 @@ def generate_open_trades_results(open_trades: [Trade]) -> list:
 
 
 def calculate_best_worst_trade(closed_trades):
-    best_trade_ratio = max(closed_trades, key=lambda trade: trade.profit_ratio, default=-np.inf).profit_ratio
-    worst_trade_ratio = min(closed_trades, key=lambda trade: trade.profit_ratio, default=np.inf).profit_ratio
-    
+    if len(closed_trades) > 0:
+        best_trade_ratio = max(closed_trades, key=lambda trade: trade.profit_ratio, default=-np.inf).profit_ratio
+        worst_trade_ratio = min(closed_trades, key=lambda trade: trade.profit_ratio, default=np.inf).profit_ratio
+    else:
+        best_trade_ratio = -np.inf
+        worst_trade_ratio = np.inf
+
     return best_trade_ratio, worst_trade_ratio
 
 
