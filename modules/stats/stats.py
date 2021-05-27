@@ -25,6 +25,20 @@ def generate_open_trades_results(open_trades: [Trade]) -> list:
     return open_trade_stats
 
 
+def calculate_best_worst_trade(closed_trades):
+    best_worst_trade = {
+        "best_trade": -np.inf,  # ratio
+        "worst_trade": np.inf,  # ratio
+    }
+
+    for trade in closed_trades:
+        if trade.profit_ratio > best_worst_trade['best_trade']:
+            best_worst_trade['best_trade'] = trade.profit_ratio
+        if trade.profit_ratio < best_worst_trade['worst_trade']:
+            best_worst_trade['worst_trade'] = trade.profit_ratio
+    return best_worst_trade
+
+
 class StatsModule:
     buypoints = None
     sellpoints = None
@@ -52,7 +66,8 @@ class StatsModule:
                                     market_change: dict) -> TradingStats:
 
         trading_module = self.trading_module
-        coin_res, best_worst_trade = self.generate_coin_results(trading_module.closed_trades, market_change)
+        coin_res = self.generate_coin_results(trading_module.closed_trades, market_change)
+        best_worst_trade = calculate_best_worst_trade(trading_module.closed_trades)
         open_trade_res = generate_open_trades_results(trading_module.open_trades)
         main_results = self.generate_main_results(
             trading_module.open_trades,
@@ -119,7 +134,7 @@ class StatsModule:
                            total_fee_amount=self.trading_module.total_fee_amount)
 
     def generate_coin_results(self, closed_trades: [Trade], market_change: dict) -> [list, dict]:
-        stats, best_worst_trade = self.calculate_statistics_per_coin(closed_trades)
+        stats= self.calculate_statistics_per_coin(closed_trades)
         new_stats = []
 
         for coin in stats:
@@ -144,20 +159,9 @@ class StatsModule:
                                         sell_signal=stats[coin]['sell_reasons'][SellReason.SELL_SIGNAL])
             new_stats.append(coin_insight)
 
-        return new_stats, best_worst_trade
+        return new_stats
 
     def calculate_statistics_per_coin(self, closed_trades):
-        """
-        :param closed_trades: array of closed trades
-        :type closed_trades: [Trade]
-        :return: returns dictionary with statistics per coin.
-        :rtype: dictionary
-        """
-        best_worst_trade = {
-            "best_trade": -np.inf,  # ratio
-            "worst_trade": np.inf,  # ratio
-        }
-
         trades_per_coin = {
             pair: {
                 'cum_profit_prct': 0,
@@ -182,12 +186,6 @@ class StatsModule:
             # Save buy/sell signals
             self.buypoints[trade.pair].append(trade.opened_at)
             self.sellpoints[trade.pair].append(trade.closed_at)
-
-            # Update best/worst trade
-            if trade.profit_ratio > best_worst_trade['best_trade']:
-                best_worst_trade['best_trade'] = trade.profit_ratio
-            if trade.profit_ratio < best_worst_trade['worst_trade']:
-                best_worst_trade['worst_trade'] = trade.profit_ratio
 
             # Update average profit
             trades_per_coin[trade.pair]['cum_profit_prct'] += (trade.profit_ratio - 1) * 100
@@ -224,7 +222,7 @@ class StatsModule:
                 trades_per_coin[trade.pair]['total_duration'] = trade.closed_at - trade.opened_at
             else:
                 trades_per_coin[trade.pair]['total_duration'] += trade.closed_at - trade.opened_at
-        return trades_per_coin, best_worst_trade
+        return trades_per_coin
 
     # Method for calculating max seen drawdown
     # Max seen = visual drawdown (if you plot it). This drawdown might not be realised.
