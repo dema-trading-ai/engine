@@ -151,17 +151,21 @@ def test_stoploss():
     # Assert
     assert stats.main_results.end_capital == 74.25
 
+
 def test_trailing_stoploss():
-    """Given 'trailing stoploss and value dips below stoploss',
-    'end capital' should 'represent sold on stoploss price'"""
+    """Given 'trailing stoploss and value first rises and then
+    dips below stoploss', 'end capital' should 'represent sold
+    on stoploss price'"""
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
     fixture.trading_module_config.stoploss_type = "trailing"
 
     fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=0)
+        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
+        .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=0) \
+        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=0) \
+        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=0, sell=0)
 
     fixture.trading_module_config.stoploss = -25
     fixture.stats_config.stoploss = -25
@@ -170,7 +174,8 @@ def test_trailing_stoploss():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.main_results.end_capital == 74.25
+    assert stats.main_results.end_capital == 147.015
+
 
 def test_dynamic_stoploss():
     """Given 'dynamic stoploss and value dips below stoploss',
@@ -250,6 +255,7 @@ def test_simple_realized_drawdown():
     # Assert
     assert math.isclose(stats.main_results.max_realised_drawdown, -38.74375)
 
+
 def test_simple_no_realized_drawdown():
     """Given 'no drawdown trades', 'realized drawdown' should 'none'"""
     # Arrange
@@ -312,6 +318,7 @@ def test_multiple_periods_realized_drawdown():
 
     # Assert
     assert math.isclose(stats.main_results.max_realised_drawdown, -50.995)
+
 
 def test_n_trades():
     """Given 'trades where made', 

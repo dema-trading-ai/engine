@@ -24,6 +24,7 @@ class SellReason(Enum):
     STOPLOSS_AND_ROI = "Stoploss and ROI"
     NONE = "None"
 
+
 class Trade:
     max_seen_drawdown: int
     closed_at: Any
@@ -118,14 +119,6 @@ class Trade:
             self.max_seen_drawdown = self.profit_ratio
 
     def check_for_sl(self, ohlcv: dict) -> bool:
-        """
-        Checks if the stoploss is crossed.
-
-        :param ohlcv: dictionary with OHLCV data for current tick
-        :type ohlcv: dict
-        :return: boolean whether trade is clossed because of stoploss
-        :rtype: boolean
-        """
         if self.sl_type == 'standard':
             lowest_ratio = (ohlcv['low'] * self.currency_amount) / self.starting_amount
             if lowest_ratio <= self.sl_ratio:
@@ -142,33 +135,24 @@ class Trade:
     def trailing_stoploss(self, data_dict: dict, time: int) -> tuple:
         """
         Calculates the trailing stoploss (TSL) for each tick, applying the standard definition:
-        - stoploss (SL) for a tick is calculated using: candle_open * (1 - trailing_percentage)
+        - stoploss (SL) for a tick is calculated using: candle_high * (1 - trailing_percentage)
         - TSL algorithm:
             1. TSL is defined as the SL of first candle
-            2. Get SL of next candle
             2. Get SL of next candle
             3. If SL for current candle is HIGHER than TSL:
                 -> TSL = current candle SL
                 -> back to Step 2.
             4. If SL for current candle is LOWER than TSL:
                 -> back to Step 2.
-
-        :param data_dict: dict containing OHLCV data of current pair
-        :type data_dict: dict
-        :param time: time of current tick
-        :type time: int
-        :return: timestamp and price of first stoploss signal
-        :rtype: list
         """
         # Calculates correct TSL% and adds TSL value for each tick
         stoploss_perc = (abs(self.sl_perc) / 100)
         trail_ratio = 1 - stoploss_perc
-
         for timestamp in data_dict.keys():
             if int(timestamp) > time:
                 ohlcv = data_dict[timestamp]
                 # Update trail ratio
-                stoploss_ratio = ((ohlcv['open'] * self.currency_amount) * stoploss_perc) / self.starting_amount
+                stoploss_ratio = (ohlcv['high'] * self.currency_amount) * (1-stoploss_perc) / self.starting_amount
                 if stoploss_ratio > trail_ratio:
                     trail_ratio = stoploss_ratio
 
