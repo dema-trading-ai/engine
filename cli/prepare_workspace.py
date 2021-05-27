@@ -29,10 +29,13 @@ def prepare_workspace():
         print_warning("Files detected in current directory. Cancelling...")
         return
 
-    Path(from_to("./output/strategies")[0]).mkdir(parents=True, exist_ok=True)
+    strategies_directory = from_to("./output/strategies")[0]
+    Path(strategies_directory).mkdir(parents=True, exist_ok=True)
 
+    os.chown(strategies_directory, 1000, 1000)
     for local_path, targetpath in paths:
         copy2(local_path, targetpath)
+        os.chown(targetpath, 1000, 1000)
 
     print("Copied files...\n")
     print("Run 'docker-compose up' to get started.")
