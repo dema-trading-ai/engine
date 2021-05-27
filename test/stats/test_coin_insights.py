@@ -156,17 +156,15 @@ def test_profit():
         .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
         .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=1) \
         .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=6, low=1, close=6, volume=1, buy=0, sell=1) \
-        .add_entry(open=6, high=6, low=6, close=6, volume=1, buy=1, sell=0) \
-        .add_entry(open=6, high=6, low=4, close=4, volume=1, buy=0, sell=1)
+        .add_entry(open=1, high=4, low=1, close=4, volume=1, buy=0, sell=1)
 
     # Act
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.coin_res[0].total_profit_percentage, 88.29602988)
-    assert math.isclose(stats.coin_res[0].cum_profit_percentage, 402.405)
-    assert math.isclose(stats.coin_res[0].avg_profit_percentage, 134.135)
+    assert math.isclose(stats.coin_res[0].total_profit_percentage, 92.119202)
+    assert math.isclose(stats.coin_res[0].cum_profit_percentage, 241.045)
+    assert math.isclose(stats.coin_res[0].avg_profit_percentage, 120.5225)
 
 
 def test_multiple_periods_realized_drawdown_v1():
