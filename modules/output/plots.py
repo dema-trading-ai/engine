@@ -8,11 +8,11 @@ from modules.stats.stats_config import StatsConfig
 from modules.stats.trading_stats import TradingStats
 
 
-def plot_sizes(indicators2, df):
+def plot_sizes(subplot_indicator, df):
     """
     Method that calculates the amount of rows and height for the plot
-    :param indicators2: list with indicators outside the price scale
-    :type indicators2: list
+    :param subplot_indicator: list with indicators outside the price scale
+    :type subplot_indicator: list
     :param df: dataframe
     :type df: df
     :return rows: amount of rows in the final plot
@@ -22,7 +22,7 @@ def plot_sizes(indicators2, df):
     """
 
     rows = 1
-    for ind in indicators2:
+    for ind in subplot_indicator:
         if ind in df.columns.values:
             rows += 1
 
@@ -31,7 +31,7 @@ def plot_sizes(indicators2, df):
         height[0] -= 0.2
         height.append(0.2)
         if height[0] < 0.4:
-            print("too many indicators2 to plot")
+            print("too many subplot_indicator to plot")
 
     return rows, height
 
@@ -108,7 +108,7 @@ def add_buy_sell_points(fig, pair, dates, df, buypoints, sellpoints):
 
     return fig
 
-def add_indicators(fig, dates, df, indicators1, indicators2):
+def add_indicators(fig, dates, df, mainplot_indicator, subplot_indicator):
     """
     Method that adds indicators to plot
     :param fig: Ongoing plot
@@ -117,25 +117,25 @@ def add_indicators(fig, dates, df, indicators1, indicators2):
     :type dates: list
     :param df: dataframe
     :type df: df
-    :param indicators1: list with indicators on the price scale
-    :type indicators1: list
-    :param indicators2: list with indicators outside the price scale
-    :type indicators2: list
+    :param mainplot_indicator: list with indicators on the price scale
+    :type mainplot_indicator: list
+    :param subplot_indicator: list with indicators outside the price scale
+    :type subplot_indicator: list
     :return: figure with added buy and sell signals
     :rtype: fig
     """
 
-    # add indicators1
-    for ind in indicators1:
+    # add mainplot_indicator
+    for ind in mainplot_indicator:
         if ind in df.columns.values:
             fig.add_trace((go.Scatter(x=dates, y=df[ind], name=ind,
                                       line=dict(width=2, dash='dot'))), row=1, col=1)
         else:
             print(f"Unable to plot {ind}. No {ind} found in strategy")
 
-    # add indicators2
+    # add subplot_indicator
     plots = 2
-    for ind in indicators2:
+    for ind in subplot_indicator:
         if ind in df.columns.values:
             fig.add_trace((go.Scatter(x=dates, y=df[ind], name=ind,
                                       line=dict(width=2, dash='solid'))), row=plots, col=1)
@@ -155,7 +155,7 @@ def plot_per_coin(self: TradingStats, config: StatsConfig):
     for pair in self.df.keys():
 
         # create figure
-        rows, height = plot_sizes(config.plot_indicators2, self.df[pair])
+        rows, height = plot_sizes(config.plot_subplot_indicator, self.df[pair])
         fig = make_subplots(rows=rows, cols=1, row_heights=height, vertical_spacing=0.02, shared_xaxes=True)
         # slider blocks subplots otherwise
         if rows > 1:
@@ -179,7 +179,7 @@ def plot_per_coin(self: TradingStats, config: StatsConfig):
         # add actual buy and sell moments
         fig = add_buy_sell_points(fig, pair, dates, self.df, self.buypoints, self.sellpoints)
         # add indicators
-        fig = add_indicators(fig, dates, self.df[pair],config.plot_indicators1, config.plot_indicators2)
+        fig = add_indicators(fig, dates, self.df[pair],config.plot_mainplot_indicator, config.plot_subplot_indicator)
 
         fig.update_xaxes(range=[dates[0], dates[-1]])
         fig.update_layout(

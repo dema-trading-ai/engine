@@ -31,8 +31,8 @@ class ConfigModule(object):
         validate_and_read_cli(config, args)
         get_plot_indicators(config)
 
-        self.plot_indicators1 = config["plot_indicators1"]
-        self.plot_indicators2 = config["plot_indicators2"]
+        self.mainplot_indicator = config["mainplot_indicator"]
+        self.subplot_indicator = config["subplot_indicator"]
         self.starting_capital = float(config["starting-capital"])
         self.raw_config = config  # TODO remove, should be typed
         exchange_str = config["exchange"]

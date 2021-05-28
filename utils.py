@@ -75,11 +75,11 @@ def get_plot_indicators(config):
     default_ind2 = ['volume']
 
     try:
-        config["plot_indicators1"]
+        config["mainplot_indicator"]
     except KeyError:
-        config["plot_indicators1"] = default_ind1
+        config["mainplot_indicator"] = default_ind1
 
     try:
-        config["plot_indicators2"]
+        config["subplot_indicator"]
     except KeyError:
-        config["plot_indicators2"] = default_ind2
+        config["subplot_indicator"] = default_ind2
