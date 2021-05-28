@@ -145,41 +145,41 @@ def add_indicators(fig, dates, df, mainplot_indicator, subplot_indicator):
 
     return fig
 
-def plot_per_coin(self: TradingStats, config: StatsConfig):
+def plot_per_coin(stats: TradingStats, config: StatsConfig):
     """
     Plot dataframe of a all coin pairs
     :return: None
     :rtype: None
     """
 
-    for pair in self.df.keys():
+    for pair in stats.df.keys():
 
         # create figure
-        rows, height = plot_sizes(config.subplot_indicator, self.df[pair])
+        rows, height = plot_sizes(config.subplot_indicator, stats.df[pair])
         fig = make_subplots(rows=rows, cols=1, row_heights=height, vertical_spacing=0.02, shared_xaxes=True)
         # slider blocks subplots otherwise
         if rows > 1:
             fig.update_xaxes(rangeslider={'visible': False}, row=1, col=1)
 
         # set up the ohlc
-        dates = [datetime.fromtimestamp(time / 1000) for time in self.df[pair]["time"]]
+        dates = [datetime.fromtimestamp(time / 1000) for time in stats.df[pair]["time"]]
 
         ohlc = go.Ohlc(
             x=dates,
-            open=self.df[pair]["open"],
-            high=self.df[pair]["high"],
-            low=self.df[pair]["low"],
-            close=self.df[pair]["close"],
+            open=stats.df[pair]["open"],
+            high=stats.df[pair]["high"],
+            low=stats.df[pair]["low"],
+            close=stats.df[pair]["close"],
             name='OHLC')
 
         fig.add_trace(ohlc, row=1, col=1)
 
         # add buy and sell signals
-        fig = add_buy_sell_signal(fig, self.df[pair], dates)
+        fig = add_buy_sell_signal(fig, stats.df[pair], dates)
         # add actual buy and sell moments
-        fig = add_buy_sell_points(fig, pair, dates, self.df, self.buypoints, self.sellpoints)
+        fig = add_buy_sell_points(fig, pair, dates, stats.df, stats.buypoints, stats.sellpoints)
         # add indicators
-        fig = add_indicators(fig, dates, self.df[pair],config.mainplot_indicator, config.subplot_indicator)
+        fig = add_indicators(fig, dates, stats.df[pair],config.mainplot_indicator, config.subplot_indicator)
 
         fig.update_xaxes(range=[dates[0], dates[-1]])
         fig.update_layout(
