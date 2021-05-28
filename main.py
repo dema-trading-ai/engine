@@ -1,15 +1,25 @@
-# Files
+from cli.arg_parse import execute_for_args
+from cli.checks.latest_version import print_warning_if_version_outdated
+from cli.prepare_workspace import prepare_workspace
 from main_controller import MainController
-from config import read_config, print_pairs, read_spec, validate, adjust_config_to_cli
 
 
 def main():
-    config = read_config()
-    config_spec = read_spec()
-    adjust_config_to_cli(config, config_spec) 
-    validate(config, config_spec)
-    print_pairs(config)
-    MainController(config)
+    execute_for_args({
+        'init': run_init,
+        'default': run_engine
+    })
+    print_warning_if_version_outdated()
+
+
+def run_engine(args):
+    controller = MainController(args)
+    controller.run()
+
+
+def run_init(args):
+    prepare_workspace()
+
 
 if __name__ == "__main__":
     main()

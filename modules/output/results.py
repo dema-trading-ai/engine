@@ -66,19 +66,19 @@ class MainResults:
         print("| Trades with loss: \t\t%s" % self.n_trades_with_loss)
         print("| Most consecutive losses: \t%s" % self.n_consecutive_losses)
         print("| ")
-        print("| Best trade: \t\t\t%s" %
-              round(self.max_win_single_trade, 2) + '\t%')
-        print("| Worst trade: \t\t\t%s" %
-              round(self.max_drawdown_single_trade, 2) + '\t%')
+        # print("| Best trade: \t\t\t%s" %
+        #       round(self.max_win_single_trade, 2) + '\t%')
+        # print("| Worst trade: \t\t\t%s" %
+        #       round(self.max_drawdown_single_trade, 2) + '\t%')
         print("| Max realised drawdown:\t%s" %
               round(self.max_realised_drawdown, 2) + '\t%')
-        print("| Max seen drawdown: \t\t%s" %
-              round(self.max_seen_drawdown, 2) + '\t%')
-        print("| Max seen drawdown from: \t%s" % self.drawdown_from)
-        print("| Max seen drawdown to: \t%s" % self.drawdown_to)
-        print("| Max seen drawdown at: \t%s" % self.drawdown_at)
-        print("| Market change coins: \t\t%s" % round(self.market_change_coins, 2) + '\t%')
-        print("| Market change BTC: \t\t%s" % round(self.market_change_btc, 2) + '\t%')
+        # print("| Max seen drawdown: \t\t%s" %
+        #       round(self.max_seen_drawdown, 2) + '\t%')
+        # print("| Max seen drawdown from: \t%s" % self.drawdown_from)
+        # print("| Max seen drawdown to: \t%s" % self.drawdown_to)
+        # print("| Max seen drawdown at: \t%s" % self.drawdown_at)
+        # print("| Market change coins: \t\t%s" % round(self.market_change_coins, 2) + '\t%')
+        # print("| Market change BTC: \t\t%s" % round(self.market_change_btc, 2) + '\t%')
         print("| ")
         print("| Fee percentage: \t\t%s" % self.fee + '\t%')
         print("| Total fee paid: \t\t%s" % round(self.total_fee_amount, 2) + "\t" + currency_symbol)
@@ -107,6 +107,7 @@ class CoinInsights:
         stats = []
         for c in instances:
             stats.append([c.pair,
+
                         c.n_trades, 
                         round(c.market_change, 2),
                         round((c.cum_profit_percentage / c.n_trades) if c.n_trades > 0 else 0, 2),
@@ -122,19 +123,19 @@ class CoinInsights:
 
         print(tabulate(stats,
                        headers=['Pair',
-                              'trades',
-                              'market change (%)',
-                              'avg profit (%)',
-                              'cum profit (%)',
-                              'total profit (%)',
-                              f' profit ({currency_symbol})',
-                              'max seen drawdown %',
-                              'max realised drawdown %',
-                              'avg trade duration',
-                              'ROI', 
-                              'SL', 
-                              'Signal'],
-                        tablefmt='pretty'))
+                                'trades',
+                                'market change (%)',
+                                'avg profit (%)',
+                                'cum profit (%)',
+                                'total profit (%)',
+                                f' profit ({currency_symbol})',
+                                'max seen drawdown %',
+                                'max realised drawdown %',
+                                'avg trade duration',
+                                'ROI',
+                                'SL',
+                                'Signal'],
+                       tablefmt='pretty'))
 
 
 @dataclass
@@ -156,9 +157,9 @@ class OpenTradeResult:
                          round(res.max_seen_drawdown, 2),
                          res.opened_at])
         print(tabulate(rows,
-                       headers=['Pair', 
-                              'cur. profit (%)',
-                              f' cur. profit ({currency_symbol})',
-                              'max seen drawdown %', 
-                              'opened at'],
+                       headers=['Pair',
+                                'cur. profit (%)',
+                                f' cur. profit ({currency_symbol})',
+                                'max seen drawdown %',
+                                'opened at'],
                        tablefmt='pretty'))

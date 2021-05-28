@@ -1,7 +1,11 @@
-import numpy as np
 from datetime import datetime
+
+import numpy as np
 import plotly.graph_objects as go
+from pandas import DataFrame
 from plotly.subplots import make_subplots
+
+from modules.stats.stats_config import StatsConfig
 
 
 def get_indicators(config):
@@ -187,10 +191,10 @@ def plot_per_coin(self):
 
         ohlc = go.Ohlc(
             x=dates,
-            open=self.df[pair]["open"],
-            high=self.df[pair]["high"],
-            low=self.df[pair]["low"],
-            close=self.df[pair]["close"],
+            open=df[pair]["open"],
+            high=df[pair]["high"],
+            low=df[pair]["low"],
+            close=df[pair]["close"],
             name='OHLC')
 
         fig.add_trace(ohlc, row=1, col=1)
@@ -209,5 +213,3 @@ def plot_per_coin(self):
 
         fig.show()
         fig.write_html("data/backtesting-data/binance/plot%s.html" % pair.replace("/", ""))
-
-

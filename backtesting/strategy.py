@@ -1,7 +1,7 @@
 # Libraries
 import abc
-from pandas import DataFrame, Series
-from typing import Optional
+
+from pandas import DataFrame
 
 # ======================================================================
 # Strategy-class is responsible for populating indicators / signals

@@ -1,29 +1,20 @@
 # Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
 *$py.class
 
 # C extensions
-*.so
-
 # Distribution / packaging
 .Python
-build/
 develop-eggs/
 dist/
-output/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
 parts/
 sdist/
 var/
 wheels/
 pip-wheel-metadata/
 share/python-wheels/
-*.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
@@ -135,9 +126,5 @@ dmypy.json
 # .DS_Store
 .DS_Store
 
-**/.idea/**
-.idea/**
 .idea
-.idea/
-
 **/backtesting-data/**

@@ -1,177 +1,81 @@
-# Libraries
-from datetime import datetime, timedelta
-import typing
+from collections import defaultdict
+from datetime import datetime
+
 from tqdm import tqdm
-import numpy as np
 
-# Files
-from backtesting.results import MainResults, OpenTradeResult, CoinInsights, show_signature
-from utils import calculate_worth_of_open_trades, default_empty_dict_dict
-from models.trade import Trade
-from config.currencies import get_currency_symbol
-from config.load_strategy import load_strategy_from_config
-from backtesting.plots import plot_per_coin
-
-
-# ======================================================================
-# BackTesting class is responsible for processing the ticks (ohlcv-data)
-# besides responsible for calculations
-#
-# © 2021 DemaTrading.ai
-# ======================================================================
-#
-# These constants are used for displaying and
-# emphasizing in commandline backtestresults
+from modules.output.results import CoinInsights, MainResults, OpenTradeResult
+from modules.pairs_data import PairsData
+from modules.stats.stats_config import StatsConfig
+from modules.stats.trade import Trade, SellReason
+from modules.stats.trading_stats import TradingStats
+from modules.stats.tradingmodule import TradingModule
+from utils import calculate_worth_of_open_trades
 
 
-class BackTesting:
-    backtesting_from = None
-    backtesting_to = None
-    data = {}
-    buypoints = {}
-    sellpoints = {}
-    df = {}
+def generate_open_trades_results(open_trades: [Trade]) -> list:
+    open_trade_stats = []
+    for trade in open_trades:
+        open_trade_res = OpenTradeResult(pair=trade.pair,
+                                         curr_profit_percentage=(trade.profit_ratio - 1) * 100,
+                                         curr_profit=trade.profit_dollar,
+                                         max_seen_drawdown=(trade.max_seen_drawdown - 1) * 100,
+                                         opened_at=trade.opened_at)
 
-    def __init__(self, trading_module, config):
-        self.trading_module = trading_module
+        open_trade_stats.append(open_trade_res)
+    return open_trade_stats
+
+
+class StatsModule:
+    buypoints = None
+    sellpoints = None
+
+    def __init__(self, config: StatsConfig, frame_with_signals: PairsData, trading_module: TradingModule, df):
+        self.df = df
         self.config = config
-        self.starting_capital = float(self.config['starting-capital'])
-        self.currency_symbol = get_currency_symbol(config)
-        self.strategy = load_strategy_from_config(config)
+        self.trading_module = trading_module
+        self.frame_with_signals = frame_with_signals
 
-    # This method is called by DataModule when all data is gathered from chosen exchange
-    def start_backtesting(self, data: dict, backtesting_from: int, backtesting_to: int, btc_marketchange_ratio: float) -> None:
-        """
-        Method formats received data.
-        Method calls tradingmodule for each tick/candle (OHLCV).
-        Method finally calls generate result method
-        :param data: dictionary of all coins with OHLCV dataframe
-        :type data: dictionary
-        :param backtesting_from: 8601 timestamp
-        :type backtesting_from: int
-        :param backtesting_to: 8601 timestamp
-        :type backtesting_to: int
-        :param btc_marketchange_ratio: marketchange of BTC
-        :type btc_marketchange_ratio: float
-        :return: None
-        :rtype: None
-        """
-        self.data = data
-        self.backtesting_from = backtesting_from
-        self.backtesting_to = backtesting_to
-        self.btc_marketchange_ratio = btc_marketchange_ratio
-        print('[INFO] Starting backtest...')
-
-        data_dict = self.populate_signals()
-        pairs = list(data_dict.keys())
-        ticks = list(data_dict[pairs[0]].keys())
+    def analyze(self) -> TradingStats:
+        pairs = list(self.frame_with_signals.keys())
+        ticks = list(self.frame_with_signals[pairs[0]].keys())
 
         for tick in tqdm(ticks, desc='[INFO] Backtesting', total=len(ticks), ncols=75):
             for pair in pairs:
-                pair_dict = data_dict[pair]
+                pair_dict = self.frame_with_signals[pair]
                 tick_dict = pair_dict[tick]
                 self.trading_module.tick(tick_dict, pair_dict)
 
-        open_trades = self.trading_module.open_trades
-        closed_trades = self.trading_module.closed_trades
-        budget = self.trading_module.budget
-        market_change = self.get_market_change(ticks, pairs, data_dict)
-        self.generate_backtesting_result(open_trades, closed_trades, budget, market_change)
+        market_change = get_market_change(ticks, pairs, self.frame_with_signals)
+        return self.generate_backtesting_result(market_change)
 
-    def populate_signals(self) -> dict:
-        """
-        Method used for populating indicators / signals
-        Populates indicators
-        Populates buy signal
-        Populates sell signal
-        :return: dict containing OHLCV data per pair
-        :rtype: dict
-        """
-        data_dict = {}
-        notify = False
-        notify_reason = ""
-        for pair in tqdm(self.data.keys(), desc="[INFO] Populating Indicators",
-                            total=len(self.data.keys()), ncols=75):
-            df = self.data[pair]
-            indicators = self.strategy.generate_indicators(df)
-            indicators = self.strategy.buy_signal(indicators)
-            indicators = self.strategy.sell_signal(indicators)
-            self.df[pair] = indicators.copy()
-            if self.config['stoploss-type'] == 'dynamic':
-                stoploss = self.strategy.stoploss(indicators)
-                if stoploss is None:    # stoploss not configured
-                    notify = True
-                    notify_reason = "not configured"
-                elif 'stoploss' in stoploss.columns:
-                    indicators['stoploss'] = stoploss['stoploss']
-                else:   # stoploss wrongly configured
-                    notify = True
-                    notify_reason = "configured incorrectly"
-            data_dict[pair] = indicators.to_dict('index')
-        if notify:
-            print(f"[WARNING] Dynamic stoploss {notify_reason}. Using standard stoploss of {self.config['stoploss']}%.")
-        return data_dict
+    def generate_backtesting_result(self,
+                                    market_change: dict) -> TradingStats:
 
-    def get_market_change(self, ticks: list, pairs: list, data_dict: dict) -> dict:
-        """
-        Calculates the market change for every coin if bought at start and sold at end.
-
-        :param ticks: list with all ticks
-        :type ticks: list
-        :param pairs: list of traded pairs
-        :type pairs: list
-        :param data_dict: dict containing OHLCV data per pair
-        :type data_dict: dict
-        :return: dict with market change per pair
-        :rtype: dict
-        """
-        market_change = {}
-        total_change = 0
-        for pair in pairs:
-            begin_value = data_dict[pair][ticks[0]]['close']
-            end_value = data_dict[pair][ticks[-1]]['close']
-            coin_change = end_value / begin_value
-            market_change[pair] = coin_change
-            total_change += coin_change
-        market_change['all'] = total_change / len(pairs)
-        return market_change
-
-    # This method is called when backtesting method finished processing all OHLCV-data
-    def generate_backtesting_result(self, open_trades: [Trade], closed_trades: [Trade], budget: float, market_change: dict) -> None:
-        """
-        Oversized method for generating backtesting results
-
-        :param open_trades: array of open trades
-        :type open_trades: [Trade]
-        :param closed_trades: array of closed trades
-        :type closed_trades: [Trade]
-        :param budget: Budget at the moment backtests end
-        :type budget: float
-        :param market_change: dict with market change per pair
-        :type market_change: dict
-        :return: None
-        :rtype: None
-        """
-        # generate results
+        trading_module = self.trading_module
         main_results = self.generate_main_results(
-            open_trades, closed_trades, budget, market_change)
-        coin_res = self.generate_coin_results(closed_trades, market_change)
-        open_trade_res = self.generate_open_trades_results(open_trades)
+            trading_module.open_trades,
+            trading_module.closed_trades,
+            trading_module.budget,
+            market_change)
+        coin_res = self.generate_coin_results(trading_module.closed_trades, market_change)
+        open_trade_res = generate_open_trades_results(trading_module.open_trades)
 
-        # print tables
-        main_results.show(self.currency_symbol)
-        CoinInsights.show(coin_res, self.currency_symbol)
-        OpenTradeResult.show(open_trade_res, self.currency_symbol)
-        show_signature()
+        return TradingStats(
+            main_results=main_results,
+            coin_res=coin_res,
+            open_trade_res=open_trade_res,
+            frame_with_signals=self.frame_with_signals,
+            buypoints=self.buypoints,
+            sellpoints=self.sellpoints,
+            df=self.df,
+            trades=trading_module.open_trades + trading_module.closed_trades
+        )
 
-        #plot graphs
-        if self.config["plots"]:
-            plot_per_coin(self)
-
-    def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float, market_change: dict) -> MainResults:
+    def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float,
+                              market_change: dict) -> MainResults:
         # Get total budget and calculate overall profit
         budget += calculate_worth_of_open_trades(open_trades)
-        overall_profit = ((budget - self.starting_capital) / self.starting_capital) * 100
+        overall_profit_percentage = ((budget - self.config.starting_capital) / self.config.starting_capital) * 100
 
         # Find max seen and realised drowdown
         max_seen_drawdown = self.calculate_max_seen_drawdown()
@@ -183,33 +87,33 @@ class BackTesting:
         drawdown_at = datetime.fromtimestamp(max_seen_drawdown['at'] / 1000) \
             if max_seen_drawdown['at'] != 0 else '-'
 
-        return MainResults(tested_from=datetime.fromtimestamp(self.backtesting_from / 1000),
-                            tested_to=datetime.fromtimestamp(
-                               self.backtesting_to / 1000),
-                            max_open_trades=self.config['max-open-trades'],
-                            market_change_coins=(market_change['all'] - 1) * 100,
-                            market_change_btc=(self.btc_marketchange_ratio - 1) * 100,
-                            starting_capital=self.starting_capital,
-                            end_capital=budget,
-                            overall_profit_percentage=overall_profit,
-                            n_trades=len(open_trades)+len(closed_trades),
-                            n_left_open_trades=len(open_trades),
-                            n_trades_with_loss=max_realised_drawdown['drawdown_trades'],
-                            n_consecutive_losses=max_realised_drawdown['max_consecutive_losses'],
-                            max_realised_drawdown=(max_realised_drawdown['max_drawdown'] - 1) * 100,
-                            max_drawdown_single_trade=(max_realised_drawdown['max_drawdown_one'] - 1) * 100,
-                            max_win_single_trade=(max_realised_drawdown['max_win_one'] - 1) * 100,
-                            max_seen_drawdown=(max_seen_drawdown["drawdown"] - 1) * 100,
-                            drawdown_from=drawdown_from,
-                            drawdown_to=drawdown_to,
-                            drawdown_at=drawdown_at,
-                            configured_stoploss=self.config['stoploss'],
-                            fee = self.config['fee'],
-                            total_fee_amount=self.trading_module.total_fee_amount)
+        return MainResults(tested_from=datetime.fromtimestamp(self.config.backtesting_from / 1000),
+                           tested_to=datetime.fromtimestamp(
+                               self.config.backtesting_to / 1000),
+                           max_open_trades=self.config.max_open_trades,
+                           market_change_coins=(market_change['all'] - 1) * 100,
+                           market_change_btc=(self.config.btc_marketchange_ratio - 1) * 100,
+                           starting_capital=self.config.starting_capital,
+                           end_capital=budget,
+                           overall_profit_percentage=overall_profit_percentage,
+                           n_trades=len(open_trades) + len(closed_trades),
+                           n_left_open_trades=len(open_trades),
+                           n_trades_with_loss=max_realised_drawdown['drawdown_trades'],
+                           n_consecutive_losses=max_realised_drawdown['max_consecutive_losses'],
+                           max_realised_drawdown=(max_realised_drawdown['max_drawdown'] - 1) * 100,
+                           max_drawdown_single_trade=(max_realised_drawdown['max_drawdown_one'] - 1) * 100,
+                           max_win_single_trade=(max_realised_drawdown['max_win_one'] - 1) * 100,
+                           max_seen_drawdown=(max_seen_drawdown["drawdown"] - 1) * 100,
+                           drawdown_from=drawdown_from,
+                           drawdown_to=drawdown_to,
+                           drawdown_at=drawdown_at,
+                           configured_stoploss=self.config.stoploss,
+                           fee=self.config.fee,
+                           total_fee_amount=self.trading_module.total_fee_amount)
 
-    def generate_coin_results(self, closed_trades: [Trade], market_change: dict) -> typing.List[CoinInsights]:
+    def generate_coin_results(self, closed_trades: [Trade], market_change: dict) -> list:
         stats = self.calculate_statistics_per_coin(closed_trades)
-        
+
         new_stats = []
         for coin in stats:
             coin_insight = CoinInsights(pair=coin,
@@ -221,28 +125,12 @@ class BackTesting:
                                         max_seen_drawdown=(stats[coin]['max_seen_ratio'] - 1) * 100,
                                         max_realised_drawdown=(stats[coin]['max_realised_ratio'] - 1) * 100,
                                         total_duration=stats[coin]['total_duration'],
-                                        roi=stats[coin]['sell_reasons']['ROI'],
-                                        stoploss=stats[coin]['sell_reasons']['Stoploss'],
-                                        sell_signal=stats[coin]['sell_reasons']['Sell signal'])
+                                        roi=stats[coin]['sell_reasons'][SellReason.ROI],
+                                        stoploss=stats[coin]['sell_reasons'][SellReason.STOPLOSS],
+                                        sell_signal=stats[coin]['sell_reasons'][SellReason.SELL_SIGNAL])
             new_stats.append(coin_insight)
 
         return new_stats
-
-    def generate_open_trades_results(self, open_trades: [Trade]) -> typing.List[OpenTradeResult]:
-        open_trade_stats = []
-        for trade in open_trades:
-            open_trade_res = OpenTradeResult(pair=trade.pair,
-                                             curr_profit_percentage=(trade.profit_ratio - 1) * 100,
-                                             curr_profit=trade.profit_dollar,
-                                             max_seen_drawdown=(trade.max_seen_drawdown - 1) * 100,
-                                             opened_at=trade.opened_at)
-
-            open_trade_stats.append(open_trade_res)
-
-            # Save buy signals
-            self.buypoints[trade.pair].append(trade.opened_at)
-
-        return open_trade_stats
 
     def calculate_statistics_per_coin(self, closed_trades):
         """
@@ -263,13 +151,13 @@ class BackTesting:
                 'max_seen_ratio': 1.0,
                 'max_realised_ratio': 1.0,
                 'total_duration': None,
-                'sell_reasons': default_empty_dict_dict()
-            } for pair in self.data.keys()
+                'sell_reasons': defaultdict(int)
+            } for pair in self.frame_with_signals.keys()
         }
 
         # Used for plotting
-        self.buypoints = {pair: [] for pair in self.data.keys()}
-        self.sellpoints = {pair: [] for pair in self.data.keys()}
+        self.buypoints = {pair: [] for pair in self.frame_with_signals.keys()}
+        self.sellpoints = {pair: [] for pair in self.frame_with_signals.keys()}
 
         for trade in closed_trades:
             # Save buy/sell signals
@@ -305,7 +193,7 @@ class BackTesting:
             # Check for new ratio high
             if trades_per_coin[trade.pair]['total_ratio'] > trades_per_coin[trade.pair]['peak_ratio']:
                 trades_per_coin[trade.pair]['peak_ratio'] = trades_per_coin[trade.pair]['total_ratio']
-                trades_per_coin[trade.pair]['drawdown_ratio'] = 1.0     # reset ratio
+                trades_per_coin[trade.pair]['drawdown_ratio'] = 1.0  # reset ratio
 
             # Sum total times
             if trades_per_coin[trade.pair]['total_duration'] is None:
@@ -339,7 +227,6 @@ class BackTesting:
         }
         timestamp_value = self.trading_module.open_order_value_per_timestamp
         timestamp_budget = self.trading_module.budget_per_timestamp
-        old_value = self.starting_capital
         for tick in timestamp_value:
             # Find total value at tick time
             total_value = self.find_total_value(timestamp_value, timestamp_budget, tick)
@@ -358,13 +245,11 @@ class BackTesting:
                 temp_seen_drawdown['bottom'] = total_value
                 temp_seen_drawdown['drawdown'] = 1.0  # ratio /w respect to peak
                 temp_seen_drawdown['from'] = tick
-
             # Check if drawdown reached new bottom
             elif total_value < temp_seen_drawdown['bottom']:
                 temp_seen_drawdown['bottom'] = total_value
                 temp_seen_drawdown['drawdown'] = temp_seen_drawdown['bottom'] / temp_seen_drawdown['peak']
                 temp_seen_drawdown['at'] = tick
-
             # Update drawdown period
             temp_seen_drawdown['to'] = tick
         return max_seen_drawdown
@@ -378,17 +263,17 @@ class BackTesting:
         max_realised_drawdown = {
             "total_ratio": 1,
             "peak_ratio": 1,
-            "curr_drawdown": 1,     # ratio 
-            "max_drawdown": 1,      # ratio
+            "curr_drawdown": 1,  # ratio
+            "max_drawdown": 1,  # ratio
             "max_drawdown_one": 1,  # ratio
-            "max_win_one": 1,       # ratio
+            "max_win_one": 1,  # ratio
             "curr_consecutive_losses": 0,
             "max_consecutive_losses": 0,
             "drawdown_trades": 0
         }
 
         realised_profits = self.trading_module.realised_profits
-        prev_profit = self.starting_capital
+        prev_profit = self.config.starting_capital
 
         for new_profit in realised_profits:
             profit_ratio = new_profit / prev_profit
@@ -406,23 +291,23 @@ class BackTesting:
             # Check if max consecutive losses is beaten
             if max_realised_drawdown['curr_consecutive_losses'] > max_realised_drawdown['max_consecutive_losses']:
                 max_realised_drawdown['max_consecutive_losses'] = max_realised_drawdown['curr_consecutive_losses']
-            
+
             # Update max drawdown for 1 trade
             if profit_ratio < max_realised_drawdown['max_drawdown_one']:
                 max_realised_drawdown['max_drawdown_one'] = profit_ratio
-                
+
             # Update curr and total ratio
             max_realised_drawdown['curr_drawdown'] *= profit_ratio
             max_realised_drawdown['total_ratio'] *= profit_ratio
 
-            # Check for max realised drawdown 
+            # Check for max realised drawdown
             if max_realised_drawdown['curr_drawdown'] < max_realised_drawdown['max_drawdown']:
                 max_realised_drawdown['max_drawdown'] = max_realised_drawdown['curr_drawdown']
 
             # Check for new ratio high
             if max_realised_drawdown['total_ratio'] > max_realised_drawdown['peak_ratio']:
                 max_realised_drawdown['peak_ratio'] = max_realised_drawdown['total_ratio']
-                max_realised_drawdown['curr_drawdown'] = 1.0     # reset ratio
+                max_realised_drawdown['curr_drawdown'] = 1.0  # reset ratio
 
             prev_profit = new_profit
 
@@ -450,3 +335,28 @@ class BackTesting:
         except KeyError:
             pass
         return total_value
+
+
+def get_market_change(ticks: list, pairs: list, data_dict: dict) -> dict:
+    """
+    Calculates the market change for every coin if bought at start and sold at end.
+
+    :param ticks: list with all ticks
+    :type ticks: list
+    :param pairs: list of traded pairs
+    :type pairs: list
+    :param data_dict: dict containing OHLCV data per pair
+    :type data_dict: dict
+    :return: dict with market change per pair
+    :rtype: dict
+    """
+    market_change = {}
+    total_change = 0
+    for pair in pairs:
+        begin_value = data_dict[pair][ticks[0]]['close']
+        end_value = data_dict[pair][ticks[-1]]['close']
+        coin_change = end_value / begin_value
+        market_change[pair] = coin_change
+        total_change += coin_change
+    market_change['all'] = total_change / len(pairs)
+    return market_change
