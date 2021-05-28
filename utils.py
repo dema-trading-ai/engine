@@ -74,10 +74,7 @@ def get_plot_indicators(config):
     default_ind1 = ['ema5', 'ema21']
     default_ind2 = ['volume']
 
-    try:
-        config["mainplot_indicator"]
-    except KeyError:
-        config["mainplot_indicator"] = default_ind1
+        config.setdefault("mainplot_indicator", default_ind1)
 
     try:
         config["subplot_indicator"]
