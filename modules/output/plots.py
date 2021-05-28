@@ -155,7 +155,7 @@ def plot_per_coin(self: TradingStats, config: StatsConfig):
     for pair in self.df.keys():
 
         # create figure
-        rows, height = plot_sizes(config.plot_subplot_indicator, self.df[pair])
+        rows, height = plot_sizes(config.subplot_indicator, self.df[pair])
         fig = make_subplots(rows=rows, cols=1, row_heights=height, vertical_spacing=0.02, shared_xaxes=True)
         # slider blocks subplots otherwise
         if rows > 1:
@@ -179,7 +179,7 @@ def plot_per_coin(self: TradingStats, config: StatsConfig):
         # add actual buy and sell moments
         fig = add_buy_sell_points(fig, pair, dates, self.df, self.buypoints, self.sellpoints)
         # add indicators
-        fig = add_indicators(fig, dates, self.df[pair],config.plot_mainplot_indicator, config.plot_subplot_indicator)
+        fig = add_indicators(fig, dates, self.df[pair],config.mainplot_indicator, config.subplot_indicator)
 
         fig.update_xaxes(range=[dates[0], dates[-1]])
         fig.update_layout(
