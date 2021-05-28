@@ -49,12 +49,12 @@ def add_buy_sell_signal(fig, df, dates):
     :rtype: fig
     """
 
-    df["buy"] *= (df["high"] + df["low"])/2
-    df["sell"] *= (df["high"] + df["low"])/2
+    buy_signals = df["buy"] * df["close"]
+    sell_signals = df["sell"] * df["close"]
 
-    fig.add_trace((go.Scatter(x=dates, y=df["buy"],
+    fig.add_trace((go.Scatter(x=dates, y=buy_signals,
                               mode='markers', name='buysignal', line_color='rgb(0,255,0)')), row=1, col=1)
-    fig.add_trace((go.Scatter(x=dates, y=df["sell"],
+    fig.add_trace((go.Scatter(x=dates, y=sell_signals,
                               mode='markers', name='sellsignal', line_color='rgb(128,0,0)')), row=1, col=1)
 
     return fig
@@ -79,21 +79,19 @@ def add_buy_sell_points(fig, pair, dates, df, buypoints, sellpoints):
     :rtype: fig
     """
 
-    buy_points = []
-    for x in range(len(df[pair]["high"])):
+    buy_points_value = []
+    sell_points_value = []
+    for x in range(len(dates)):
         if dates[x] in buypoints[pair]:
-            buy_points.append((df[pair]["high"][x] + df[pair]["low"][x]) / 2)
+            buy_points_value.append(df[pair]["close"][x])
         else:
-            buy_points.append(np.NaN)
-
-    sell_points = []
-    for x in range(len(df[pair]["high"])):
+            buy_points_value.append(np.NaN)
         if dates[x] in sellpoints[pair]:
-            sell_points.append((df[pair]["high"][x] + df[pair]["low"][x]) / 2)
+            sell_points_value.append(df[pair]["close"][x])
         else:
-            sell_points.append(np.NaN)
+            sell_points_value.append(np.NaN)
 
-    fig.add_trace((go.Scatter(x=dates, y=buy_points,
+    fig.add_trace((go.Scatter(x=dates, y=buy_points_value,
                               mode='markers',
                               name='buy',
                               marker=dict(symbol='triangle-up-dot',
@@ -101,7 +99,7 @@ def add_buy_sell_points(fig, pair, dates, df, buypoints, sellpoints):
                                           line=dict(width=1),
                                           color='rgb(173,255,47)'))), row=1, col=1)
 
-    fig.add_trace((go.Scatter(x=dates, y=sell_points,
+    fig.add_trace((go.Scatter(x=dates, y=sell_points_value,
                               mode='markers', name='sell',
                               marker=dict(symbol='triangle-down-dot',
                                           size=12,
@@ -159,6 +157,7 @@ def plot_per_coin(self: TradingStats, config: StatsConfig):
         # create figure
         rows, height = plot_sizes(config.plot_indicators2, self.df[pair])
         fig = make_subplots(rows=rows, cols=1, row_heights=height, vertical_spacing=0.02, shared_xaxes=True)
+        # slider blocks subplots otherwise
         if rows > 1:
             fig.update_xaxes(rangeslider={'visible': False}, row=1, col=1)
 
