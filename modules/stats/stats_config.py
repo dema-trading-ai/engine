@@ -6,8 +6,8 @@ from modules.setup.config import ConfigModule
 
 @dataclass
 class StatsConfig:
-    plot_indicators1: list
-    plot_indicators2: list
+    mainplot_indicators: list
+    subplot_indicators: list
     fee: float
     stoploss: float
     max_open_trades: int
@@ -30,6 +30,6 @@ def to_stats_config(config: ConfigModule):
         plots=config.plots,
         starting_capital=config.starting_capital,
         currency_symbol=config.currency_symbol,
-        plot_indicators1=config.plot_indicators1,
-        plot_indicators2=config.plot_indicators2
+        mainplot_indicators=config.mainplot_indicators,
+        subplot_indicators=config.subplot_indicators
     )

@@ -73,6 +73,7 @@ class StatsModule:
             market_change,
             best_trade_ratio,
             worst_trade_ratio)
+        self.calculate_statistics_for_plots(trading_module.closed_trades, trading_module.open_trades)
 
         return TradingStats(
             main_results=main_results,
@@ -176,14 +177,7 @@ class StatsModule:
             } for pair in self.frame_with_signals.keys()
         }
 
-        # Used for plotting
-        self.buypoints = {pair: [] for pair in self.frame_with_signals.keys()}
-        self.sellpoints = {pair: [] for pair in self.frame_with_signals.keys()}
-
         for trade in closed_trades:
-            # Save buy/sell signals
-            self.buypoints[trade.pair].append(trade.opened_at)
-            self.sellpoints[trade.pair].append(trade.closed_at)
 
             # Update average profit
             trades_per_coin[trade.pair]['cum_profit_prct'] += (trade.profit_ratio - 1) * 100
@@ -347,6 +341,21 @@ class StatsModule:
             pass
         return total_value
 
+    def calculate_statistics_for_plots(self, closed_trades, open_trades):
+
+        # Used for plotting
+        self.buypoints = {pair: [] for pair in self.frame_with_signals.keys()}
+        self.sellpoints = {pair: [] for pair in self.frame_with_signals.keys()}
+
+        for trade in closed_trades:
+            # Save buy/sell signals
+            self.buypoints[trade.pair].append(trade.opened_at)
+            self.sellpoints[trade.pair].append(trade.closed_at)
+
+        for trade in open_trades:
+            # Save buy/sell signals
+            self.buypoints[trade.pair].append(trade.opened_at)
+
 
 def get_market_change(ticks: list, pairs: list, data_dict: dict) -> dict:
     """
@@ -371,3 +380,8 @@ def get_market_change(ticks: list, pairs: list, data_dict: dict) -> dict:
         total_change += coin_change
     market_change['all'] = total_change / len(pairs)
     return market_change
+
+
+
+
+

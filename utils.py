@@ -61,3 +61,16 @@ def dict_to_df(data: str) -> DataFrame:
     df = pd.DataFrame.from_dict(json_file, orient='index', columns=indicators)
     df.index = df.index.map(int)
     return df
+
+
+def get_plot_indicators(config):
+    """
+    Method that initializes indicators
+    :param config: main configuration
+    :type config: dict
+    :return: None
+    :rtype: None
+    """
+
+    config.setdefault("mainplot_indicators", ['ema5', 'ema21'])
+    config.setdefault("subplot_indicators", ['volume'])
