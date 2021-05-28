@@ -108,7 +108,8 @@ def add_buy_sell_points(fig, pair, dates, df, buypoints, sellpoints):
 
     return fig
 
-def add_indicators(fig, dates, df, mainplot_indicator, subplot_indicator):
+
+def add_indicators(fig, dates, df, mainplot_indicators, subplot_indicators):
     """
     Method that adds indicators to plot
     :param fig: Ongoing plot
@@ -117,16 +118,16 @@ def add_indicators(fig, dates, df, mainplot_indicator, subplot_indicator):
     :type dates: list
     :param df: dataframe
     :type df: df
-    :param mainplot_indicator: list with indicators on the price scale
-    :type mainplot_indicator: list
-    :param subplot_indicator: list with indicators outside the price scale
-    :type subplot_indicator: list
+    :param mainplot_indicators: list with indicators on the price scale
+    :type mainplot_indicators: list
+    :param subplot_indicators: list with indicators outside the price scale
+    :type subplot_indicators: list
     :return: figure with added buy and sell signals
     :rtype: fig
     """
 
     # add mainplot_indicator
-    for ind in mainplot_indicator:
+    for ind in mainplot_indicators:
         if ind in df.columns.values:
             fig.add_trace((go.Scatter(x=dates, y=df[ind], name=ind,
                                       line=dict(width=2, dash='dot'))), row=1, col=1)
@@ -135,7 +136,7 @@ def add_indicators(fig, dates, df, mainplot_indicator, subplot_indicator):
 
     # add subplot_indicator
     plots = 2
-    for ind in subplot_indicator:
+    for ind in subplot_indicators:
         if ind in df.columns.values:
             fig.add_trace((go.Scatter(x=dates, y=df[ind], name=ind,
                                       line=dict(width=2, dash='solid'))), row=plots, col=1)
@@ -144,6 +145,7 @@ def add_indicators(fig, dates, df, mainplot_indicator, subplot_indicator):
             print(f"Unable to plot {ind}. No {ind} found in strategy")
 
     return fig
+
 
 def plot_per_coin(stats: TradingStats, config: StatsConfig):
     """
@@ -155,7 +157,7 @@ def plot_per_coin(stats: TradingStats, config: StatsConfig):
     for pair in stats.df.keys():
 
         # create figure
-        rows, height = plot_sizes(config.subplot_indicator, stats.df[pair])
+        rows, height = plot_sizes(config.subplot_indicators, stats.df[pair])
         fig = make_subplots(rows=rows, cols=1, row_heights=height, vertical_spacing=0.02, shared_xaxes=True)
         # slider blocks subplots otherwise
         if rows > 1:
@@ -179,7 +181,7 @@ def plot_per_coin(stats: TradingStats, config: StatsConfig):
         # add actual buy and sell moments
         fig = add_buy_sell_points(fig, pair, dates, stats.df, stats.buypoints, stats.sellpoints)
         # add indicators
-        fig = add_indicators(fig, dates, stats.df[pair],config.mainplot_indicator, config.subplot_indicator)
+        fig = add_indicators(fig, dates, stats.df[pair], config.mainplot_indicators, config.subplot_indicators)
 
         fig.update_xaxes(range=[dates[0], dates[-1]])
         fig.update_layout(

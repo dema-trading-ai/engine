@@ -62,6 +62,7 @@ def dict_to_df(data: str) -> DataFrame:
     df.index = df.index.map(int)
     return df
 
+
 def get_plot_indicators(config):
     """
     Method that initializes indicators
@@ -71,8 +72,5 @@ def get_plot_indicators(config):
     :rtype: None
     """
 
-    default_ind1 = ['ema5', 'ema21']
-    default_ind2 = ['volume']
-
-    config.setdefault("mainplot_indicator", default_ind1)
-    config.setdefault("subplot_indicator", default_ind2)
+    config.setdefault("mainplot_indicators", ['ema5', 'ema21'])
+    config.setdefault("subplot_indicators", ['volume'])
