@@ -2,33 +2,10 @@ from datetime import datetime
 
 import numpy as np
 import plotly.graph_objects as go
-from pandas import DataFrame
 from plotly.subplots import make_subplots
 
 from modules.stats.stats_config import StatsConfig
-
-
-def get_indicators(config):
-    """
-    Method that initializes indicators
-    :param config: main configuration
-    :type config: dict
-    :return: None
-    :rtype: None
-    """
-
-    default_ind1 = ['ema5', 'ema21']
-    default_ind2 = ['volume']
-
-    try:
-        config["plot_indicators1"]
-    except KeyError:
-        config["plot_indicators1"] = default_ind1
-
-    try:
-        config["plot_indicators2"]
-    except KeyError:
-        config["plot_indicators2"] = default_ind2
+from modules.stats.trading_stats import TradingStats
 
 
 def plot_sizes(indicators2, df):
@@ -170,18 +147,17 @@ def add_indicators(fig, dates, df, indicators1, indicators2):
 
     return fig
 
-def plot_per_coin(self):
+def plot_per_coin(self: TradingStats, config: StatsConfig):
     """
     Plot dataframe of a all coin pairs
     :return: None
     :rtype: None
     """
 
-    get_indicators(self.config)
     for pair in self.df.keys():
 
         # create figure
-        rows, height = plot_sizes(self.config["plot_indicators2"], self.df[pair])
+        rows, height = plot_sizes(config.plot_indicators2, self.df[pair])
         fig = make_subplots(rows=rows, cols=1, row_heights=height, vertical_spacing=0.02, shared_xaxes=True)
         if rows > 1:
             fig.update_xaxes(rangeslider={'visible': False}, row=1, col=1)
@@ -191,10 +167,10 @@ def plot_per_coin(self):
 
         ohlc = go.Ohlc(
             x=dates,
-            open=df[pair]["open"],
-            high=df[pair]["high"],
-            low=df[pair]["low"],
-            close=df[pair]["close"],
+            open=self.df[pair]["open"],
+            high=self.df[pair]["high"],
+            low=self.df[pair]["low"],
+            close=self.df[pair]["close"],
             name='OHLC')
 
         fig.add_trace(ohlc, row=1, col=1)
@@ -204,7 +180,7 @@ def plot_per_coin(self):
         # add actual buy and sell moments
         fig = add_buy_sell_points(fig, pair, dates, self.df, self.buypoints, self.sellpoints)
         # add indicators
-        fig = add_indicators(fig, dates, self.df[pair], self.config["plot_indicators1"], self.config["plot_indicators2"])
+        fig = add_indicators(fig, dates, self.df[pair],config.plot_indicators1, config.plot_indicators2)
 
         fig.update_xaxes(range=[dates[0], dates[-1]])
         fig.update_layout(

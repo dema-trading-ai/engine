@@ -1,4 +1,5 @@
 from cli.print_utils import print_warning
+from modules.output.plots import plot_per_coin
 from modules.output.results import show_signature, CoinInsights
 from modules.stats.stats_config import StatsConfig
 from modules.stats.trade import SellReason
@@ -21,9 +22,9 @@ class OutputModule(object):
 
         show_signature()
 
-        # plot graphs
-        # if self.config.plots:
-        #     plot_per_coin(stats.frame_with_signals, stats.df, self.config, stats.buypoints, stats.sellpoints)
+        #plot graphs
+        if self.config.plots:
+            plot_per_coin(stats, config=self.config)
 
 
 def show_trade_anomalies(stats: TradingStats):

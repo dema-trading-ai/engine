@@ -61,3 +61,25 @@ def dict_to_df(data: str) -> DataFrame:
     df = pd.DataFrame.from_dict(json_file, orient='index', columns=indicators)
     df.index = df.index.map(int)
     return df
+
+def get_plot_indicators(config):
+    """
+    Method that initializes indicators
+    :param config: main configuration
+    :type config: dict
+    :return: None
+    :rtype: None
+    """
+
+    default_ind1 = ['ema5', 'ema21']
+    default_ind2 = ['volume']
+
+    try:
+        config["plot_indicators1"]
+    except KeyError:
+        config["plot_indicators1"] = default_ind1
+
+    try:
+        config["plot_indicators2"]
+    except KeyError:
+        config["plot_indicators2"] = default_ind2
