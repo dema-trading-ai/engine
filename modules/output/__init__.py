@@ -15,7 +15,7 @@ class OutputModule(object):
     def output(self, stats: TradingStats):
         # print tables
         stats.main_results.show(self.config.currency_symbol)
-        CoinInsights.show(stats.coin_res, self.config.currency_symbol)
+        # CoinInsights.show(stats.coin_res, self.config.currency_symbol)
         # OpenTradeResult.show(stats.open_trade_res, self.config.currency_symbol)
 
         show_trade_anomalies(stats)
