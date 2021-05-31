@@ -36,20 +36,8 @@ def calculate_best_worst_trade(closed_trades):
     return best_trade_ratio, worst_trade_ratio
 
 
-def find_total_value(value: dict, budget: dict, tick: int) -> float:
-    """
-    Finds the total value of given dictionaries at given tick time
-    """
-    total_value = 0
-    try:
-        total_value += value[tick]
-    except KeyError:
-        pass
-    try:
-        total_value += budget[tick]
-    except KeyError:
-        pass
-    return total_value
+def get_total_value_at_tick(open_order_value: dict, budget: dict, tick: int) -> float:
+    return open_order_value.get(tick, 0) + budget.get(tick, 0)
 
 
 class StatsModule:
@@ -259,7 +247,7 @@ class StatsModule:
         timestamp_budget = self.trading_module.budget_per_timestamp
         for tick in timestamp_budget:
             # Find total value at tick time
-            total_value = find_total_value(timestamp_value, timestamp_budget, tick)
+            total_value = get_total_value_at_tick(timestamp_value, timestamp_budget, tick)
 
             # Check for new drawdown period
             if total_value > temp_seen_drawdown['peak']:
