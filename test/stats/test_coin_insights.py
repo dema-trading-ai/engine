@@ -1,6 +1,5 @@
 import math
 from test.stats.stats_test_utils import StatsFixture
-from test.utils.signal_frame import TradeAction
 
 
 def test_fee_equals_stoploss():
@@ -167,70 +166,3 @@ def test_profit():
     assert math.isclose(stats.coin_res[0].avg_profit_percentage, 120.5225)
 
 
-def test_multiple_periods_realized_drawdown_v1():
-    """Given multiple trades, creating two separate drawdown
-    periods, realized drawdown should be the drawdown of the biggest drawdown
-    period"""
-    # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
-
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=2, low=1.5, close=1.5, volume=1, buy=0, sell=1) \
-        .add_entry(open=1.5, high=1.5, low=1.5, close=1.5, volume=1, buy=1, sell=0) \
-        .add_entry(open=1.5, high=6, low=1.5, close=6, volume=1, buy=0, sell=1) \
-        .add_entry(open=6, high=6, low=6, close=6, volume=1, buy=1, sell=0) \
-        .add_entry(open=6, high=6, low=3, close=3, volume=1, buy=0, sell=1) \
-        .add_entry(open=3, high=3, low=3, close=3, volume=1, buy=1, sell=0) \
-        .add_entry(open=3, high=4, low=3, close=4, volume=1, buy=0, sell=1)
-
-    # Act
-    stats = fixture.create().analyze()
-
-    # Assert
-    assert math.isclose(stats.coin_res[0].max_realised_drawdown, -50.995)
-
-
-def test_multiple_periods_realized_drawdown_v2():
-    """Given multiple trades, creating two separate drawdown
-    periods, realized drawdown should be the drawdown of the biggest drawdown
-    period"""
-    # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
-
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=4, high=4, low=4, close=4, volume=1, buy=1, sell=0) \
-        .add_entry(open=4, high=4, low=1, close=1, volume=1, buy=0, sell=1) \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=5, low=1, close=5, volume=1, buy=0, sell=1) \
-        .add_entry(open=5, high=5, low=5, close=5, volume=1, buy=1, sell=0) \
-        .add_entry(open=5, high=5, low=3, close=3, volume=1, buy=0, sell=1) \
-        .add_entry(open=3, high=3, low=3, close=3, volume=1, buy=1, sell=0) \
-        .add_entry(open=3, high=6, low=3, close=6, volume=1, buy=0, sell=1)
-
-    # Act
-    stats = fixture.create().analyze()
-
-    # Assert
-    assert math.isclose(stats.coin_res[0].max_realised_drawdown, -75.4975)
-
-
-def test_multiple_periods_realized_drawdown_v3():
-    """Given multiple trades, creating one drawdown period, realized
-    drawdown should be the drawdown of the entire period"""
-    # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
-
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=6, high=6, low=6, close=6, volume=1, buy=1, sell=0) \
-        .add_entry(open=6, high=6, low=4, close=4, volume=1, buy=0, sell=1) \
-        .add_entry(open=4, high=4, low=4, close=4, volume=1, buy=1, sell=0) \
-        .add_entry(open=4, high=5, low=4, close=5, volume=1, buy=0, sell=1) \
-        .add_entry(open=5, high=5, low=5, close=5, volume=1, buy=1, sell=0) \
-        .add_entry(open=5, high=5, low=2, close=2, volume=1, buy=0, sell=1) 
-
-    # Act
-    stats = fixture.create().analyze()
-
-    # Assert
-    assert math.isclose(stats.coin_res[0].max_realised_drawdown, -68.617328354)
