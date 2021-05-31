@@ -33,8 +33,8 @@ class StatsFixture:
             currency_symbol="USDT",
             plots=False,
 
-            plot_indicators1=[],
-            plot_indicators2=[]
+            mainplot_indicators=[],
+            subplot_indicators=[]
         )
 
         self.trading_module_config = TradingModuleConfig(

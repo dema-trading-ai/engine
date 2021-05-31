@@ -13,6 +13,7 @@ from .cctx_adapter import create_cctx_exchange
 from .currencies import get_currency_symbol
 from .validations import validate_and_read_cli
 from .load_strategy import load_strategy_from_config
+from utils import get_plot_indicators
 
 msec = 1000
 minute = 60 * msec
@@ -28,9 +29,10 @@ class ConfigModule(object):
     def __init__(self, args):
         config = read_config()
         validate_and_read_cli(config, args)
+        get_plot_indicators(config)
 
-        self.plot_indicators1 = config["plot_indicators1"]
-        self.plot_indicators2 = config["plot_indicators2"]
+        self.mainplot_indicators = config["mainplot_indicators"]
+        self.subplot_indicators = config["subplot_indicators"]
         self.starting_capital = float(config["starting-capital"])
         self.raw_config = config  # TODO remove, should be typed
         exchange_str = config["exchange"]
@@ -57,9 +59,9 @@ class ConfigModule(object):
 
     def load_btc_marketchange(self):
         print("[INFO] Fetching marketchange of BTC/USDT...")
-        begin_data = self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe='1m', since=self.backtesting_from, limit=1)
-        end_timestamp = int(np.floor(self.backtesting_to / self.timeframe_ms) * self.timeframe_ms)
-        end_data = self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe='1m', since=end_timestamp, limit=1)
+        begin_data = self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe=self.timeframe, since=self.backtesting_from, limit=1)
+        end_timestamp = int(np.floor(self.backtesting_to / self.timeframe_ms) * self.timeframe_ms) - self.timeframe_ms
+        end_data = self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe=self.timeframe, since=end_timestamp, limit=1)
 
         begin_close_value = begin_data[0][4]
         end_close_value = end_data[0][4]

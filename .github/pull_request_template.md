@@ -29,6 +29,9 @@ Fixes #
 <!-- Did you make any assumptions during this development? Certain flows or logic? This could be quite broad, but it's
  very crucial to avoid misconceptions regarding the working of the engine --> 
 
+# Packages added
+<!-- Did you add new packages to the code? What are the licences of the packages? Make sure to only add packages
+ that are allowed to be used in the engine -->
+
 # Additional Info
 <!-- Write anything here that wasn't mentioned above -->
-
