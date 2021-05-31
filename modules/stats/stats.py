@@ -36,6 +36,10 @@ def calculate_best_worst_trade(closed_trades):
     return best_trade_ratio, worst_trade_ratio
 
 
+def get_total_value_at_tick(open_order_value: dict, budget: dict, tick: int) -> float:
+    return open_order_value.get(tick, 0) + budget.get(tick, 0)
+
+
 class StatsModule:
     buypoints = None
     sellpoints = None
@@ -92,7 +96,7 @@ class StatsModule:
         budget += calculate_worth_of_open_trades(open_trades)
         overall_profit_percentage = ((budget - self.config.starting_capital) / self.config.starting_capital) * 100
 
-        # Find max seen and realised drowdown
+        # Find max seen and realised drawdown
         max_seen_drawdown = self.calculate_max_seen_drawdown()
         max_realised_drawdown = self.calculate_max_realised_drawdown()
 
@@ -241,9 +245,9 @@ class StatsModule:
         }
         timestamp_value = self.trading_module.open_order_value_per_timestamp
         timestamp_budget = self.trading_module.budget_per_timestamp
-        for tick in timestamp_value:
+        for tick in timestamp_budget:
             # Find total value at tick time
-            total_value = self.find_total_value(timestamp_value, timestamp_budget, tick)
+            total_value = get_total_value_at_tick(timestamp_value, timestamp_budget, tick)
 
             # Check for new drawdown period
             if total_value > temp_seen_drawdown['peak']:
@@ -266,6 +270,12 @@ class StatsModule:
                 temp_seen_drawdown['at'] = tick
             # Update drawdown period
             temp_seen_drawdown['to'] = tick
+        # If last drawdown was larger than max drawdown, update max drawdown
+        if temp_seen_drawdown['drawdown'] < max_seen_drawdown['drawdown']:
+            max_seen_drawdown['drawdown'] = temp_seen_drawdown['drawdown']
+            max_seen_drawdown['from'] = temp_seen_drawdown['from']
+            max_seen_drawdown['to'] = temp_seen_drawdown['to']
+            max_seen_drawdown['at'] = temp_seen_drawdown['at']
         return max_seen_drawdown
 
     def calculate_max_realised_drawdown(self) -> dict:
@@ -317,29 +327,6 @@ class StatsModule:
             prev_profit = new_profit
 
         return max_realised_drawdown
-
-    def find_total_value(self, value: dict, budget: dict, tick: int) -> float:
-        """
-        Finds the total value of given dictionaries at given tick time
-        :param value: total value of open trades per tick
-        :type value: dict
-        :param budget: total value of budget per tick
-        :type budget: dict
-        :param tick: given timestamp
-        :type tick: int
-        :param total_value: total value of two dicts combined
-        :type total_value: float
-        """
-        total_value = 0
-        try:
-            total_value += value[tick]
-        except KeyError:
-            pass
-        try:
-            total_value += budget[tick]
-        except KeyError:
-            pass
-        return total_value
 
     def calculate_statistics_for_plots(self, closed_trades, open_trades):
 

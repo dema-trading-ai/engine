@@ -72,11 +72,11 @@ class MainResults:
               round(self.worst_trade_profit_percentage, 2) + '\t%')
         print("| Max realised drawdown:\t%s" %
               round(self.max_realised_drawdown, 2) + '\t%')
-        # print("| Max seen drawdown: \t\t%s" %
-        #       round(self.max_seen_drawdown, 2) + '\t%')
-        # print("| Max seen drawdown from: \t%s" % self.drawdown_from)
-        # print("| Max seen drawdown to: \t%s" % self.drawdown_to)
-        # print("| Max seen drawdown at: \t%s" % self.drawdown_at)
+        print("| Max seen drawdown: \t\t%s" %
+              round(self.max_seen_drawdown, 2) + '\t%')
+        print("| Max seen drawdown from: \t%s" % self.drawdown_from)
+        print("| Max seen drawdown to: \t%s" % self.drawdown_to)
+        print("| Max seen drawdown at: \t%s" % self.drawdown_at)
         print("| Market change coins: \t\t%s" % round(self.market_change_coins, 2) + '\t%')
         print("| Market change BTC: \t\t%s" % round(self.market_change_btc, 2) + '\t%')
         print("| ")
