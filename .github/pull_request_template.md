@@ -31,8 +31,7 @@ Fixes #
 
 # Packages added
 <!-- Did you add new packages to the code? What are the licences of the packages? Make sure to only add packages
- that allowed to be used in the engine -->
+ that are allowed to be used in the engine -->
 
 # Additional Info
 <!-- Write anything here that wasn't mentioned above -->
-
