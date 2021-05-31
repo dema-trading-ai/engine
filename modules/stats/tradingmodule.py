@@ -207,17 +207,18 @@ class TradingModule:
     def update_value_per_timestamp_tracking(self, trade: Trade, ohlcv: dict) -> None:
         """
         Method is used to be able to track the open trades value per timestamp
-        :param trade: Any open trade
-        :type trade: Trade
-        :param ohlcv: dictionary with OHLCV data for current tick
-        :type ohlcv: dict
-        :return: None
-        :rtype: None
         """
-        try:
-            self.open_order_value_per_timestamp[ohlcv['time']] += trade.capital
-        except KeyError:
-            self.open_order_value_per_timestamp[ohlcv['time']] = trade.capital
+        trade_opened_at = datetime.timestamp(trade.opened_at) * 1000
+        if trade_opened_at == ohlcv['time']:
+            try:
+                self.open_order_value_per_timestamp[ohlcv['time']] += trade.starting_amount
+            except KeyError:
+                self.open_order_value_per_timestamp[ohlcv['time']] = trade.starting_amount
+        else:
+            try:
+                self.open_order_value_per_timestamp[ohlcv['time']] += trade.capital
+            except KeyError:
+                self.open_order_value_per_timestamp[ohlcv['time']] = trade.capital
 
     def update_budget_per_timestamp_tracking(self, ohlcv: dict) -> None:
         """
