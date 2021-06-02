@@ -28,14 +28,14 @@
     "name": "backtesting-from",
     "type": "string",
     "cli": {
-      "short": "start"
+      "short": "from"
     }
   },
   {
     "name": "backtesting-to",
     "type": "string",
     "cli": {
-      "short": "end"
+      "short": "to"
     }
   },
   {
