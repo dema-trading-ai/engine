@@ -101,11 +101,11 @@ class StatsModule:
         max_realised_drawdown = self.calculate_max_realised_drawdown()
 
         # Update variables for prettier terminal output
-        drawdown_from = datetime.fromtimestamp(max_seen_drawdown['from'] / 1000) \
+        drawdown_from = datetime.fromtimestamp(max_seen_drawdown['from'] / 1000).strftime('%Y-%m-%d ''%H:%M') \
             if max_seen_drawdown['from'] != 0 else '-'
-        drawdown_to = datetime.fromtimestamp(max_seen_drawdown['to'] / 1000) \
+        drawdown_to = datetime.fromtimestamp(max_seen_drawdown['to'] / 1000).strftime('%Y-%m-%d ''%H:%M') \
             if max_seen_drawdown['to'] != 0 else '-'
-        drawdown_at = datetime.fromtimestamp(max_seen_drawdown['at'] / 1000) \
+        drawdown_at = datetime.fromtimestamp(max_seen_drawdown['at'] / 1000).strftime('%Y-%m-%d ''%H:%M') \
             if max_seen_drawdown['at'] != 0 else '-'
         best_trade_profit_percentage = (best_trade_ratio - 1) * 100 \
             if best_trade_ratio != -np.inf else 0
@@ -117,9 +117,6 @@ class StatsModule:
         tested_to = datetime.fromtimestamp(
                                self.config.backtesting_to / 1000)
         tested_to = tested_to.strftime('%Y-%m-%d ''%H:%M')
-        drawdown_from = drawdown_from.strftime('%Y-%m-%d ''%H:%M')
-        drawdown_to = drawdown_to.strftime('%Y-%m-%d ''%H:%M')
-        drawdown_at = drawdown_at.strftime('%Y-%m-%d ''%H:%M')
 
         return MainResults(tested_from=tested_from,
                            tested_to=tested_to,
