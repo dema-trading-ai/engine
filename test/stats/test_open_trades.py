@@ -1,3 +1,5 @@
+import math
+
 from test.stats.stats_test_utils import StatsFixture
 
 
@@ -79,3 +81,35 @@ def test_open_trades_profit_negative():
 
     # Assert
     assert stats.open_trade_res[0].curr_profit == -50.5
+
+
+def test_open_trades_drawdown_positive():
+    """Given a profiting left open trade, max_seen_drawdown should be the fee"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'] \
+        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
+        .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=0)
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert math.isclose(stats.open_trade_res[0].max_seen_drawdown, -1)
+
+
+def test_open_trades_drawdown_negative():
+    """Given a losing left open trade, max_seen_drawdown should be correct, including buy fee"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'] \
+        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
+        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=0)
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.open_trade_res[0].max_seen_drawdown == -50.5
