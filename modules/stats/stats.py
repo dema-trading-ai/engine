@@ -112,6 +112,15 @@ class StatsModule:
         worst_trade_profit_percentage = (worst_trade_ratio - 1) * 100 \
             if worst_trade_ratio != np.inf else 0
 
+        tested_from = datetime.fromtimestamp(self.config.backtesting_from / 1000)
+        tested_from = tested_from.strftime('%Y-%m-%d ''%H:%M')
+        tested_to = datetime.fromtimestamp(
+                               self.config.backtesting_to / 1000)
+        tested_to = tested_to.strftime('%Y-%m-%d ''%H:%M')
+        drawdown_from = drawdown_from.strftime('%Y-%m-%d ''%H:%M')
+        drawdown_to = drawdown_to.strftime('%Y-%m-%d ''%H:%M')
+        drawdown_at = drawdown_at.strftime('%Y-%m-%d ''%H:%M')
+
         return MainResults(tested_from=datetime.fromtimestamp(self.config.backtesting_from / 1000),
                            tested_to=datetime.fromtimestamp(
                                self.config.backtesting_to / 1000),
