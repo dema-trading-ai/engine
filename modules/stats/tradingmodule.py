@@ -28,10 +28,11 @@ class TradingModule:
         self.sl_type = config.stoploss_type
         self.sl_perc = float(config.stoploss)
 
-        self.open_order_value_per_timestamp = {}
         self.closed_trades = []
         self.open_trades = []
         self.budget_per_timestamp = {}
+        self.open_trades_open_per_timestamp = {}
+        self.open_trades_low_per_timestamp = {}
         self.realised_profits = []
         self.total_fee_amount = 0
 
@@ -39,10 +40,12 @@ class TradingModule:
         trade = self.find_open_trade(ohlcv['pair'])
         if trade:
             trade.update_stats(ohlcv)
-            self.open_trade_tick(ohlcv, trade)
+            closed = self.open_trade_tick(ohlcv, trade)
+            if not closed:
+                self.update_budget_per_timestamp(ohlcv)
         else:
             self.no_trade_tick(ohlcv, data_dict)
-        self.update_budget_per_timestamp_tracking(ohlcv)
+            self.update_budget_per_timestamp(ohlcv)
 
     def no_trade_tick(self, ohlcv: dict, data_dict: dict) -> None:
         """
@@ -57,7 +60,7 @@ class TradingModule:
         if ohlcv['buy'] == 1:
             self.open_trade(ohlcv, data_dict)
 
-    def open_trade_tick(self, ohlcv: dict, trade: Trade) -> None:
+    def open_trade_tick(self, ohlcv: dict, trade: Trade) -> bool:
         """
         Method is called when specified pair has open trades.
         checks for ROI
@@ -73,8 +76,6 @@ class TradingModule:
         roi_reached = self.check_roi_open_trade(trade, ohlcv)
 
         if stoploss_reached and roi_reached:
-            trade.current = trade.open
-            trade.update_profits()
             self.close_trade(trade, reason=SellReason.STOPLOSS_AND_ROI, ohlcv=ohlcv)
         elif stoploss_reached:
             self.close_trade(trade, reason=SellReason.STOPLOSS, ohlcv=ohlcv)
@@ -82,8 +83,11 @@ class TradingModule:
             self.close_trade(trade, reason=SellReason.ROI, ohlcv=ohlcv)
         elif ohlcv['sell'] == 1:
             self.close_trade(trade, reason=SellReason.SELL_SIGNAL, ohlcv=ohlcv)
-        else:  # trade is not closed
-            self.update_value_per_timestamp_tracking(trade, ohlcv)
+        else:
+            self.update_open_trades_value_per_timestamp(trade, ohlcv)
+            return False
+        self.update_open_trades_value_per_timestamp(trade, ohlcv)
+        return True
 
     def close_trade(self, trade: Trade, reason: SellReason, ohlcv: dict) -> None:
         """
@@ -99,7 +103,18 @@ class TradingModule:
         date = datetime.fromtimestamp(ohlcv['time'] / 1000)
         trade.close_trade(reason, date)
 
-        self.total_fee_amount += trade.close_fee_amount
+        if trade.sell_reason == SellReason.STOPLOSS_AND_ROI:
+            # Because trade had no impact on results, remove first issued fee from
+            # total amount of fee and reset trade stats.
+            first_fee = trade.starting_amount * trade.fee
+            self.total_fee_amount -= first_fee
+
+            # Reset trade stats
+            trade.capital = trade.starting_amount
+            trade.update_profits(update_capital=False)
+            trade.max_seen_drawdown = 1.0
+        else:
+            self.total_fee_amount += trade.close_fee_amount
         self.budget += trade.capital
 
         self.open_trades.remove(trade)
@@ -136,13 +151,13 @@ class TradingModule:
         new_trade = \
             Trade(ohlcv, spend_amount, self.fee, date, self.sl_type, self.sl_perc)
         new_trade.configure_stoploss(ohlcv, data_dict)
-        new_trade.update_stats(ohlcv)
+        new_trade.update_stats(ohlcv, first=True)
 
         # Update total budget with configured spend amount and fee
         self.total_fee_amount += spend_amount * self.fee
         self.budget -= spend_amount
         self.open_trades.append(new_trade)
-        self.update_value_per_timestamp_tracking(new_trade, ohlcv)
+        self.update_open_trades_value_per_timestamp(new_trade, ohlcv)
 
     def check_roi_open_trade(self, trade: Trade, ohlcv: dict) -> bool:
         """
@@ -156,6 +171,7 @@ class TradingModule:
         time_passed = datetime.fromtimestamp(ohlcv['time'] / 1000) - trade.opened_at
         profit_percentage = ((ohlcv['high'] / trade.open) - 1.) * 100
         roi_percentage = self.get_roi_over_time(time_passed)
+
         if profit_percentage > roi_percentage:
             trade.current = trade.open * (1 + (roi_percentage / 100))
             trade.update_profits()
@@ -204,23 +220,32 @@ class TradingModule:
                 return trade
         return None
 
-    def update_value_per_timestamp_tracking(self, trade: Trade, ohlcv: dict) -> None:
+    def update_open_trades_value_per_timestamp(self, trade: Trade, ohlcv: dict) -> None:
         """
         Method is used to be able to track the open trades value per timestamp
         """
         trade_opened_at = datetime.timestamp(trade.opened_at) * 1000
         if trade_opened_at == ohlcv['time']:
-            try:
-                self.open_order_value_per_timestamp[ohlcv['time']] += trade.starting_amount
-            except KeyError:
-                self.open_order_value_per_timestamp[ohlcv['time']] = trade.starting_amount
+            self.open_trades_open_per_timestamp[ohlcv['time']] = \
+                self.open_trades_open_per_timestamp.get(ohlcv['time'], 0) + trade.starting_amount
+            self.open_trades_low_per_timestamp[ohlcv['time']] = \
+                self.open_trades_low_per_timestamp.get(ohlcv['time'], 0) + trade.starting_amount
         else:
-            try:
-                self.open_order_value_per_timestamp[ohlcv['time']] += trade.capital
-            except KeyError:
-                self.open_order_value_per_timestamp[ohlcv['time']] = trade.capital
+            # When trade.low_value is equal to trade.current in final candle, trade.capital could 
+            # be lower than curr_low_capital due to fee.
+            curr_low_capital = trade.low_value * trade.currency_amount
+            low_capital = curr_low_capital if curr_low_capital < trade.capital \
+                else trade.capital
+            self.open_trades_low_per_timestamp[ohlcv['time']] = \
+                self.open_trades_low_per_timestamp.get(ohlcv['time'], 0) + low_capital
 
-    def update_budget_per_timestamp_tracking(self, ohlcv: dict) -> None:
+            # Update open capital dict
+            open_capital = trade.open_value * trade.currency_amount
+            self.open_trades_open_per_timestamp[ohlcv['time']] = \
+                self.open_trades_open_per_timestamp.get(ohlcv['time'], 0) + open_capital
+            
+
+    def update_budget_per_timestamp(self, ohlcv: dict) -> None:
         """
         Used for tracking total budget per timestamp, used to be able to calculate
         max seen drawdown

@@ -243,14 +243,24 @@ class StatsModule:
             "peak": 0,
             "bottom": 0
         }
-        timestamp_value = self.trading_module.open_order_value_per_timestamp
+        timestamp_value_low = self.trading_module.open_trades_low_per_timestamp
+        timestamp_value_open = self.trading_module.open_trades_open_per_timestamp
         timestamp_budget = self.trading_module.budget_per_timestamp
-        for tick in timestamp_budget:
+
+        open_trade_ticks = timestamp_value_low.keys()
+        open_trade_tick_list = list(open_trade_ticks) if open_trade_ticks is not None else []
+        budget_ticks = timestamp_budget.keys()
+        budget_tick_list = list(budget_ticks) if budget_ticks is not None else []
+        ticks = open_trade_tick_list + budget_tick_list
+        ticks.sort()
+
+        for tick in ticks:
             # Find total value at tick time
-            total_value = get_total_value_at_tick(timestamp_value, timestamp_budget, tick)
+            total_value_low = get_total_value_at_tick(timestamp_value_low, timestamp_budget, tick)
+            total_value_open = get_total_value_at_tick(timestamp_value_open, timestamp_budget, tick)
 
             # Check for new drawdown period
-            if total_value > temp_seen_drawdown['peak']:
+            if total_value_open > temp_seen_drawdown['peak']:
                 # If last drawdown was larger than max drawdown, update max drawdown
                 if temp_seen_drawdown['drawdown'] < max_seen_drawdown['drawdown']:
                     max_seen_drawdown['drawdown'] = temp_seen_drawdown['drawdown']
@@ -259,17 +269,20 @@ class StatsModule:
                     max_seen_drawdown['at'] = temp_seen_drawdown['at']
 
                 # Reset temp_seen_drawdown stats
-                temp_seen_drawdown['peak'] = total_value
-                temp_seen_drawdown['bottom'] = total_value
-                temp_seen_drawdown['drawdown'] = 1.0  # ratio /w respect to peak
+                temp_seen_drawdown['peak'] = total_value_open
+                temp_seen_drawdown['bottom'] = total_value_open
+                temp_seen_drawdown['drawdown'] = 1.0  # ratio w/ respect to peak
                 temp_seen_drawdown['from'] = tick
+
             # Check if drawdown reached new bottom
-            elif total_value < temp_seen_drawdown['bottom']:
-                temp_seen_drawdown['bottom'] = total_value
+            if total_value_low < temp_seen_drawdown['bottom']:
+                temp_seen_drawdown['bottom'] = total_value_low
                 temp_seen_drawdown['drawdown'] = temp_seen_drawdown['bottom'] / temp_seen_drawdown['peak']
                 temp_seen_drawdown['at'] = tick
+
             # Update drawdown period
             temp_seen_drawdown['to'] = tick
+
         # If last drawdown was larger than max drawdown, update max drawdown
         if temp_seen_drawdown['drawdown'] < max_seen_drawdown['drawdown']:
             max_seen_drawdown['drawdown'] = temp_seen_drawdown['drawdown']

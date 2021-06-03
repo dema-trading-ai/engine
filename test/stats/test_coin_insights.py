@@ -166,3 +166,52 @@ def test_profit():
     assert math.isclose(stats.coin_res[0].avg_profit_percentage, 120.5225)
 
 
+def test_drawdown_equality():
+    """Given one coin, 'max seen/real drawdown' from main results should be equal
+    to that of the coin insights"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'] \
+        .add_entry(open=4, high=4, low=4, close=4, volume=1, buy=1, sell=0) \
+        .add_entry(open=4, high=4, low=1, close=2, volume=1, buy=0, sell=1)
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.main_results.max_seen_drawdown == \
+        stats.coin_res[0].max_seen_drawdown
+    assert stats.main_results.max_realised_drawdown == \
+        stats.coin_res[0].max_realised_drawdown
+
+
+def test_drawdown_simple():
+    """Given one coin, 'max seen drawdown' should be the 
+    lowest seen drawdown and 'max realised drawdown' should be the lowest
+    actual realised drawdown"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'] \
+        .add_entry(open=4, high=4, low=4, close=4, volume=1, buy=1, sell=0) \
+        .add_entry(open=4, high=4, low=1, close=2, volume=1, buy=0, sell=1)
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert math.isclose(stats.coin_res[0].max_seen_drawdown, -75.25)
+    assert math.isclose(stats.coin_res[0].max_realised_drawdown, -50.995)
+
+
+def test_drawdown_multiple_trades():
+    """Given multiple trades, 'max seen drawdown' should be the lowest seen drawdown
+    of the combined trades"""
+    # TODO
+
+
+def test_max_seen_drawdown_multiple_pairs():
+    """Given multiple pairs, 'max seen drawdown' should be the lowest seen drawdown
+    of the different pairs combined"""
+    # TODO

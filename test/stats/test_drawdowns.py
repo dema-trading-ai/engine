@@ -173,15 +173,11 @@ def test_simple_seen_drawdown():
 
 
 def test_simple_no_seen_drawdown():
-    """ Given 'no drawdown trades', 'seen drawdown' should 'none'"""
+    """ Given 'no drawdown trades', 'seen drawdown' should be equal to the fee (1%)"""
     # Arrange
-    fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE'])
+    fixture = StatsFixture(['COIN/BASE'])
 
     fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=1)
-
-    fixture.frame_with_signals['COIN2/BASE'] \
         .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
         .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=1)
 
@@ -189,8 +185,8 @@ def test_simple_no_seen_drawdown():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.main_results.max_seen_drawdown, 0)
-
+    assert math.isclose(stats.main_results.max_seen_drawdown, -1)
+    
 
 def test_multiple_periods_seen_drawdown_v1():
     """ Given one trade, creating two separate drawdown

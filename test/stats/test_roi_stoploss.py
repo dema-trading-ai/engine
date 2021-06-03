@@ -23,7 +23,8 @@ def test_roi():
 
 
 def test_both_roi_stoploss():
-    """given 'both ROI and stoploss triggered single OHLCV candle' should 'close trade for open price'"""
+    """given 'both ROI and stoploss triggered single OHLCV candle' 
+    should 'close trade for open price' """
     # arrange
     fixture = StatsFixture(['COIN/BASE'])
 
@@ -42,4 +43,4 @@ def test_both_roi_stoploss():
     stats = fixture.create().analyze()
 
     # assert
-    assert stats.main_results.end_capital == 98.01
+    assert stats.main_results.end_capital == 100
