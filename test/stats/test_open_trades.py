@@ -129,4 +129,21 @@ def test_open_trades_opened_at():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.open_trade_res[0].opened_at.timestamp() == 0
+    assert stats.open_trade_res[0].opened_at.timestamp() == 1/1000
+
+
+def test_open_trades_opened_at_timestep_two():
+    """Given a left open trade, opened_at should be timestep 2"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'] \
+        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=0, sell=0) \
+        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
+        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=0)
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.open_trade_res[0].opened_at.timestamp() == 2/1000
