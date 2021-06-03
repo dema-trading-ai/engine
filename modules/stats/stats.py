@@ -121,9 +121,8 @@ class StatsModule:
         drawdown_to = drawdown_to.strftime('%Y-%m-%d ''%H:%M')
         drawdown_at = drawdown_at.strftime('%Y-%m-%d ''%H:%M')
 
-        return MainResults(tested_from=datetime.fromtimestamp(self.config.backtesting_from / 1000),
-                           tested_to=datetime.fromtimestamp(
-                               self.config.backtesting_to / 1000),
+        return MainResults(tested_from=tested_from,
+                           tested_to=tested_to,
                            max_open_trades=self.config.max_open_trades,
                            market_change_coins=(market_change['all'] - 1) * 100,
                            market_change_btc=(self.config.btc_marketchange_ratio - 1) * 100,
