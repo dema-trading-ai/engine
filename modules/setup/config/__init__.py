@@ -74,7 +74,6 @@ def read_config(config_path: str) -> dict:
         ' Starting up DEMA BACKTESTING \n'
         '======================================')
     try:
-        print(config_path)
         with open(config_path, 'r') as configfile:
             data = configfile.read()
     except FileNotFoundError:
