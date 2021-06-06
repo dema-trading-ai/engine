@@ -101,20 +101,25 @@ class StatsModule:
         max_realised_drawdown = self.calculate_max_realised_drawdown()
 
         # Update variables for prettier terminal output
-        drawdown_from = datetime.fromtimestamp(max_seen_drawdown['from'] / 1000) \
+        drawdown_from = datetime.fromtimestamp(max_seen_drawdown['from'] / 1000).strftime('%Y-%m-%d ''%H:%M') \
             if max_seen_drawdown['from'] != 0 else '-'
-        drawdown_to = datetime.fromtimestamp(max_seen_drawdown['to'] / 1000) \
+        drawdown_to = datetime.fromtimestamp(max_seen_drawdown['to'] / 1000).strftime('%Y-%m-%d ''%H:%M') \
             if max_seen_drawdown['to'] != 0 else '-'
-        drawdown_at = datetime.fromtimestamp(max_seen_drawdown['at'] / 1000) \
+        drawdown_at = datetime.fromtimestamp(max_seen_drawdown['at'] / 1000).strftime('%Y-%m-%d ''%H:%M') \
             if max_seen_drawdown['at'] != 0 else '-'
         best_trade_profit_percentage = (best_trade_ratio - 1) * 100 \
             if best_trade_ratio != -np.inf else 0
         worst_trade_profit_percentage = (worst_trade_ratio - 1) * 100 \
             if worst_trade_ratio != np.inf else 0
 
-        return MainResults(tested_from=datetime.fromtimestamp(self.config.backtesting_from / 1000),
-                           tested_to=datetime.fromtimestamp(
-                               self.config.backtesting_to / 1000),
+        tested_from = datetime.fromtimestamp(self.config.backtesting_from / 1000)
+        tested_from = tested_from.strftime('%Y-%m-%d ''%H:%M')
+        tested_to = datetime.fromtimestamp(
+                               self.config.backtesting_to / 1000)
+        tested_to = tested_to.strftime('%Y-%m-%d ''%H:%M')
+
+        return MainResults(tested_from=tested_from,
+                           tested_to=tested_to,
                            max_open_trades=self.config.max_open_trades,
                            market_change_coins=(market_change['all'] - 1) * 100,
                            market_change_btc=(self.config.btc_marketchange_ratio - 1) * 100,
