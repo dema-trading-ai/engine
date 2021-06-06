@@ -52,6 +52,9 @@ def add_buy_sell_signal(fig, df, dates):
     buy_signals = df["buy"] * df["close"]
     sell_signals = df["sell"] * df["close"]
 
+    buy_signals = buy_signals.replace(0, np.nan)
+    sell_signals = sell_signals.replace(0, np.nan)
+
     fig.add_trace((go.Scatter(x=dates, y=buy_signals,
                               mode='markers', name='buysignal', line_color='rgb(0,255,0)')), row=1, col=1)
     fig.add_trace((go.Scatter(x=dates, y=sell_signals,
