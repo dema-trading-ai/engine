@@ -113,13 +113,19 @@ class StatsModule:
             if worst_trade_ratio != np.inf else 0
 
         tested_from = datetime.fromtimestamp(self.config.backtesting_from / 1000)
-        tested_from = tested_from.strftime('%Y-%m-%d ''%H:%M')
+        tested_from_string = tested_from.strftime('%Y-%m-%d ''%H:%M')
         tested_to = datetime.fromtimestamp(
                                self.config.backtesting_to / 1000)
-        tested_to = tested_to.strftime('%Y-%m-%d ''%H:%M')
+        tested_to_string = tested_to.strftime('%Y-%m-%d ''%H:%M')
 
-        return MainResults(tested_from=tested_from,
-                           tested_to=tested_to,
+        # tested_from_ts = datetime.mktime(tested_from.timetuple())
+        # tested_to_ts = datetime.mktime(tested_to.timetuple())
+
+        difference = tested_to - tested_from
+        nr_days = (tested_to - tested_from).days
+
+        return MainResults(tested_from=tested_from_string,
+                           tested_to=tested_to_string,
                            max_open_trades=self.config.max_open_trades,
                            market_change_coins=(market_change['all'] - 1) * 100,
                            market_change_btc=(self.config.btc_marketchange_ratio - 1) * 100,
@@ -127,6 +133,7 @@ class StatsModule:
                            end_capital=budget,
                            overall_profit_percentage=overall_profit_percentage,
                            n_trades=len(open_trades) + len(closed_trades),
+                           n_average_trades = len(open_trades) + len(closed_trades) / nr_days,
                            n_left_open_trades=len(open_trades),
                            n_trades_with_loss=max_realised_drawdown['drawdown_trades'],
                            n_consecutive_losses=max_realised_drawdown['max_consecutive_losses'],
