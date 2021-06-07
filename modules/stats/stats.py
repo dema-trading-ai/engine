@@ -121,7 +121,6 @@ class StatsModule:
         # tested_from_ts = datetime.mktime(tested_from.timetuple())
         # tested_to_ts = datetime.mktime(tested_to.timetuple())
 
-        difference = tested_to - tested_from
         nr_days = (tested_to - tested_from).days
 
         return MainResults(tested_from=tested_from_string,
