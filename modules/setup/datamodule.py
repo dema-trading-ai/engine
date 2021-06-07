@@ -28,7 +28,7 @@ day = 24 * hour
 
 class DataModule:
     def __init__(self, config: ConfigModule):
-        print('[INFO] Starting DemaTrading.ai Data-module...')
+        print('[INFO] Starting DEMA Data-module...')
         self.config = config
         self.exchange = config.exchange
         self.__load_markets()
