@@ -299,7 +299,7 @@ def test_n_average_trades():
     assert stats.main_results.n_average_trades == 3.0
 
 
-def test_n_average_trades():
+def test_n_average_trades_no_trades():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
@@ -321,7 +321,7 @@ def test_n_average_trades():
     assert stats.main_results.n_average_trades == 0
 
 
-def test_n_average_trades():
+def test_n_average_trades_more_time_less_trades():
     # Longer than a day with less trades following it.
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
@@ -344,7 +344,7 @@ def test_n_average_trades():
     assert stats.main_results.n_average_trades == 2.0
 
 
-def test_n_average_trades():
+def test_n_average_trades_less_time_more_trades():
     # Half of a day with more trades.
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])

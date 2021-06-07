@@ -113,10 +113,10 @@ class StatsModule:
             if worst_trade_ratio != np.inf else 0
 
         tested_from = datetime.fromtimestamp(self.config.backtesting_from / 1000)
-        tested_from_string = tested_from.strftime('%Y-%m-%d ''%H:%M:%S')
+        tested_from_string = tested_from.strftime('%Y-%m-%d ''%H:%M')
         tested_to = datetime.fromtimestamp(
             self.config.backtesting_to / 1000)
-        tested_to_string = tested_to.strftime('%Y-%m-%d ''%H:%M:%S')
+        tested_to_string = tested_to.strftime('%Y-%m-%d ''%H:%M')
 
         timespan_seconds = (tested_to - tested_from).total_seconds()
         nr_days = timespan_seconds / timedelta(days=1).total_seconds()
