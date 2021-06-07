@@ -62,6 +62,14 @@
     }
   },
   {
+    "name": "config",
+    "default": "config.json",
+    "type": "string",
+    "cli": {
+      "short": "c"
+    }
+  },
+  {
     "name": "roi",
     "type": "dict",
     "default": {
