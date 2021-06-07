@@ -71,7 +71,7 @@ class ConfigModule(object):
 def read_config(config_path: str) -> dict:
     print(
         '====================================== \n'
-        ' Starting up DEMA BACKTESTING \n'
+        ' Starting up DemaTrading.ai BACKTESTING \n'
         '======================================')
     try:
         with open(config_path, 'r') as configfile:
