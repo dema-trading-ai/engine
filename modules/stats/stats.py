@@ -130,7 +130,7 @@ class StatsModule:
                            end_capital=budget,
                            overall_profit_percentage=overall_profit_percentage,
                            n_trades=len(open_trades) + len(closed_trades),
-                           n_average_trades=len(open_trades) + len(closed_trades) / nr_days,
+                           n_average_trades=(len(open_trades) + len(closed_trades)) / nr_days,
                            n_left_open_trades=len(open_trades),
                            n_trades_with_loss=max_realised_drawdown['drawdown_trades'],
                            n_consecutive_losses=max_realised_drawdown['max_consecutive_losses'],

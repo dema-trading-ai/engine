@@ -333,15 +333,15 @@ def test_n_average_trades_more_time_less_trades():
     fixture.frame_with_signals['COIN/BASE'] \
         .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
         .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=1) \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=1) \
-        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=1, sell=1) \
+        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
+        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=1) \
         .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0)
 
     # Act
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.main_results.n_average_trades == 2.0
+    assert stats.main_results.n_average_trades == 1.5
 
 
 def test_n_average_trades_less_time_more_trades():
@@ -356,12 +356,12 @@ def test_n_average_trades_less_time_more_trades():
     fixture.frame_with_signals['COIN/BASE'] \
         .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
         .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=1) \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=1) \
-        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=1, sell=1) \
+        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
+        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=1) \
         .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0)
 
     # Act
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.main_results.n_average_trades == 5.0
+    assert stats.main_results.n_average_trades == 6.0
