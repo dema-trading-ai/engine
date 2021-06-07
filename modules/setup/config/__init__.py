@@ -27,7 +27,7 @@ class ConfigModule(object):
     timeframe_ms: int
 
     def __init__(self, args):
-        config = read_config()
+        config = read_config(args.config)
         validate_and_read_cli(config, args)
         get_plot_indicators(config)
 
@@ -68,16 +68,16 @@ class ConfigModule(object):
         return end_close_value / begin_close_value
 
 
-def read_config() -> dict:
+def read_config(config_path: str) -> dict:
     print(
         '====================================== \n'
         ' Starting up DemaTrading.ai BACKTESTING \n'
         '======================================')
     try:
-        with open('config.json', 'r') as configfile:
+        with open(config_path, 'r') as configfile:
             data = configfile.read()
     except FileNotFoundError:
-        raise FileNotFoundError("[ERROR] No config file found.")
+        raise FileNotFoundError(f"[ERROR] No config file found at {config_path}.")
     except Exception:
         raise Exception("[ERROR] Something went wrong parsing config file.",
                         sys.exc_info()[0])
