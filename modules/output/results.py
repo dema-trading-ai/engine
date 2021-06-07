@@ -31,7 +31,7 @@ class MainResults:
     end_capital: float
     overall_profit_percentage: float
     n_trades: int
-    n_average_trades: int
+    n_average_trades: float
     n_left_open_trades: int
     n_trades_with_loss: int
     n_consecutive_losses: int
@@ -63,7 +63,7 @@ class MainResults:
         print("| Overall profit: \t\t%s" %
               round(self.overall_profit_percentage, 2) + '\t%')
         print("| Amount of trades: \t\t%s" % self.n_trades)
-        print("| Average trades per day: \t\t%s" % self.n_average_trades)
+        print("| Average trades per day: \t\t%s" % round(self.n_average_trades, 2))
         print("| Left-open trades: \t\t%s" % self.n_left_open_trades)
         print("| Trades with loss: \t\t%s" % self.n_trades_with_loss)
         print("| Most consecutive losses: \t%s" % self.n_consecutive_losses)

@@ -1,5 +1,5 @@
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 from tqdm import tqdm
 import numpy as np
 
@@ -115,13 +115,14 @@ class StatsModule:
         tested_from = datetime.fromtimestamp(self.config.backtesting_from / 1000)
         tested_from_string = tested_from.strftime('%Y-%m-%d ''%H:%M')
         tested_to = datetime.fromtimestamp(
-                               self.config.backtesting_to / 1000)
+            self.config.backtesting_to / 1000)
         tested_to_string = tested_to.strftime('%Y-%m-%d ''%H:%M')
 
         # tested_from_ts = datetime.mktime(tested_from.timetuple())
         # tested_to_ts = datetime.mktime(tested_to.timetuple())
 
-        nr_days = (tested_to - tested_from).days
+        timespan_seconds = (tested_to - tested_from).total_seconds()
+        nr_days = timespan_seconds / timedelta(days=1).total_seconds()
 
         return MainResults(tested_from=tested_from_string,
                            tested_to=tested_to_string,
@@ -132,7 +133,7 @@ class StatsModule:
                            end_capital=budget,
                            overall_profit_percentage=overall_profit_percentage,
                            n_trades=len(open_trades) + len(closed_trades),
-                           n_average_trades = len(open_trades) + len(closed_trades) / nr_days,
+                           n_average_trades=len(open_trades) + len(closed_trades) / nr_days,
                            n_left_open_trades=len(open_trades),
                            n_trades_with_loss=max_realised_drawdown['drawdown_trades'],
                            n_consecutive_losses=max_realised_drawdown['max_consecutive_losses'],
@@ -148,7 +149,7 @@ class StatsModule:
                            total_fee_amount=self.trading_module.total_fee_amount)
 
     def generate_coin_results(self, closed_trades: [Trade], market_change: dict) -> [list, dict]:
-        stats= self.calculate_statistics_per_coin(closed_trades)
+        stats = self.calculate_statistics_per_coin(closed_trades)
         new_stats = []
 
         for coin in stats:
@@ -378,8 +379,3 @@ def get_market_change(ticks: list, pairs: list, data_dict: dict) -> dict:
         total_change += coin_change
     market_change['all'] = total_change / len(pairs)
     return market_change
-
-
-
-
-
