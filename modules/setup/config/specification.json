@@ -26,11 +26,17 @@
   },
   {
     "name": "backtesting-from",
-    "type": "datetime"
+    "type": "string",
+    "cli": {
+      "short": "from"
+    }
   },
   {
     "name": "backtesting-to",
-    "type": "datetime"
+    "type": "string",
+    "cli": {
+      "short": "to"
+    }
   },
   {
     "name": "backtesting-till-now",
