@@ -76,6 +76,9 @@ def read_config(config_path: str) -> dict:
     try:
         with open(config_path, 'r') as configfile:
             data = configfile.read()
+    except TypeError:
+        with open('config.json', 'r') as configfile:
+            data = configfile.read()
     except FileNotFoundError:
         raise FileNotFoundError(f"[ERROR] No config file found at {config_path}.")
     except Exception:
