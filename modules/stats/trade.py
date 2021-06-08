@@ -45,7 +45,7 @@ class Trade:
         self.sl_type = sl_type
         self.sl_perc = sl_perc
         self.current = ohlcv['close']
-        self.temp_seen_peak_price = self.starting_amount
+        self.seen_peak_capital = self.starting_amount
         self.temp_seen_drawdown_price = self.starting_amount
         self.max_seen_drawdown_price = self.starting_amount
         self.update_profits()
@@ -96,22 +96,18 @@ class Trade:
             self.lowest_seen_price = self.capital
             self.max_seen_drawdown = self.profit_ratio
 
-        # Check for new drawdown period
-        if self.capital > self.temp_seen_peak_price:
-            self.temp_seen_peak_price = self.capital
-
-            # If last drawdown was larger than max drawdown, update max drawdown
-            if self.temp_seen_drawdown_price < self.max_seen_drawdown_price:
-                self.max_seen_drawdown_price = self.temp_seen_drawdown_price
-                self.max_seen_drawdown = self.temp_seen_drawdown_price / self.temp_seen_peak_price
+        is_new_drawdown_period = self.capital > self.seen_peak_capital
+        if is_new_drawdown_period:
+            self.seen_peak_capital = self.capital
             self.temp_seen_drawdown_price = self.capital
-        # Check if drawdown reached new bottom
         elif self.capital < self.temp_seen_drawdown_price:
             self.temp_seen_drawdown_price = self.capital
-            # If this drawdown was larger than max drawdown, update max drawdown
-            if self.temp_seen_drawdown_price < self.max_seen_drawdown_price:
-                self.max_seen_drawdown_price = self.temp_seen_drawdown_price
-                self.max_seen_drawdown = self.temp_seen_drawdown_price / self.temp_seen_peak_price
+            self.set_drawdown_if_lower()
+
+    def set_drawdown_if_lower(self):
+        if self.temp_seen_drawdown_price < self.max_seen_drawdown_price:
+            self.max_seen_drawdown_price = self.temp_seen_drawdown_price
+            self.max_seen_drawdown = self.temp_seen_drawdown_price / self.seen_peak_capital
 
     def check_for_sl(self, ohlcv: dict) -> bool:
         if self.sl_type == 'standard':
