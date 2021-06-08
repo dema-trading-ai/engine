@@ -26,7 +26,7 @@ class SellReason(Enum):
 
 
 class Trade:
-    max_seen_drawdown: int
+    max_seen_drawdown: float
     closed_at: Any
     sell_reason: SellReason
 
@@ -36,7 +36,7 @@ class Trade:
         self.open = ohlcv['close']
         self.opened_at = date
         self.fee = fee
-        self.max_seen_drawdown = 0
+        self.max_seen_drawdown = 1  # ratio
         self.starting_amount = spend_amount
         self.lowest_seen_price = spend_amount
         self.capital = spend_amount - (spend_amount * fee)  # apply fee
@@ -44,6 +44,11 @@ class Trade:
         self.sell_reason = SellReason.NONE
         self.sl_type = sl_type
         self.sl_perc = sl_perc
+        self.current = ohlcv['close']
+        self.temp_seen_peak_price = self.starting_amount
+        self.temp_seen_drawdown_price = self.starting_amount
+        self.max_seen_drawdown_price = self.starting_amount
+        self.update_profits()
 
     def close_trade(self, reason: SellReason, date: datetime) -> None:
         """
@@ -65,38 +70,17 @@ class Trade:
         self.update_profits(update_capital=False)
 
     def update_stats(self, ohlcv: dict) -> None:
-        """
-        Updates states according to latest data.
-
-        :param ohlcv: dictionary with OHLCV data for current tick
-        :type ohlcv: dict
-        :return: None
-        :rtype: None
-        """
         self.current = ohlcv['close']
         self.update_profits()
         self.update_max_drawdown()
 
     def update_profits(self, update_capital: bool = True):
-        """
-        Sets profits corresponding to current info
-        """
         if update_capital:  # always triggers except when a trade is closed
             self.capital = self.currency_amount * self.current
         self.profit_ratio = self.capital / self.starting_amount
         self.profit_dollar = self.capital - self.starting_amount
 
     def configure_stoploss(self, ohlcv: dict, data_dict: dict) -> None:
-        """
-        Configures stoploss based on configured type.
-
-        :param ohlcv: dictionary with OHLCV data for current tick
-        :type ohlcv: dict
-        :param data_dict: dict containing OHLCV data of current pair
-        :type data_dict: dict
-        :return: None
-        :rtype: None
-        """
         if self.sl_type == 'dynamic':
             if 'stoploss' in ohlcv:
                 self.sl_sell_time, self.sl_ratio = self.dynamic_stoploss(data_dict, ohlcv['time'])
@@ -108,15 +92,26 @@ class Trade:
             self.sl_sell_time, self.sl_ratio = self.trailing_stoploss(data_dict, ohlcv['time'])
 
     def update_max_drawdown(self) -> None:
-        """
-        Updates max drawdown.
-
-        :return: None
-        :rtype: None
-        """
         if self.capital < self.lowest_seen_price:
             self.lowest_seen_price = self.capital
             self.max_seen_drawdown = self.profit_ratio
+
+        # Check for new drawdown period
+        if self.capital > self.temp_seen_peak_price:
+            self.temp_seen_peak_price = self.capital
+
+            # If last drawdown was larger than max drawdown, update max drawdown
+            if self.temp_seen_drawdown_price < self.max_seen_drawdown_price:
+                self.max_seen_drawdown_price = self.temp_seen_drawdown_price
+                self.max_seen_drawdown = self.temp_seen_drawdown_price / self.temp_seen_peak_price
+            self.temp_seen_drawdown_price = self.capital
+        # Check if drawdown reached new bottom
+        elif self.capital < self.temp_seen_drawdown_price:
+            self.temp_seen_drawdown_price = self.capital
+            # If this drawdown was larger than max drawdown, update max drawdown
+            if self.temp_seen_drawdown_price < self.max_seen_drawdown_price:
+                self.max_seen_drawdown_price = self.temp_seen_drawdown_price
+                self.max_seen_drawdown = self.temp_seen_drawdown_price / self.temp_seen_peak_price
 
     def check_for_sl(self, ohlcv: dict) -> bool:
         if self.sl_type == 'standard':
@@ -164,15 +159,8 @@ class Trade:
 
     def dynamic_stoploss(self, data_dict: dict, time: int) -> tuple:
         """
-        Finds the first occurence where the dynamic stoploss (defined in strategy)
+        Finds the first occurrence where the dynamic stoploss (defined in strategy)
         is triggered.
-
-        :param data_dict: dict containing OHLCV data of current pair
-        :type data_dict: dict
-        :param time: time of current tick
-        :type time: int
-        :return: timestamp and price of first stoploss signal
-        :rtype: list
         """
         for timestamp in data_dict.keys():
             if int(timestamp) > time:

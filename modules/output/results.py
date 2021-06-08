@@ -154,12 +154,10 @@ class OpenTradeResult:
             rows.append([res.pair,
                          round(res.curr_profit_percentage, 2),
                          round(res.curr_profit, 2),
-                         round(res.max_seen_drawdown, 2),
                          res.opened_at])
         print(tabulate(rows,
                        headers=['Pair',
                                 'cur. profit (%)',
                                 f' cur. profit ({currency_symbol})',
-                                'max seen drawdown %',
                                 'opened at'],
                        tablefmt='pretty'))
