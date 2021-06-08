@@ -26,11 +26,17 @@
   },
   {
     "name": "backtesting-from",
-    "type": "datetime"
+    "type": "string",
+    "cli": {
+      "short": "from"
+    }
   },
   {
     "name": "backtesting-to",
-    "type": "datetime"
+    "type": "string",
+    "cli": {
+      "short": "to"
+    }
   },
   {
     "name": "backtesting-till-now",
@@ -53,6 +59,14 @@
     "type": "string",
     "cli": {
       "short": "sl_type"
+    }
+  },
+  {
+    "name": "config",
+    "default": "config.json",
+    "type": "string",
+    "cli": {
+      "short": "c"
     }
   },
   {
