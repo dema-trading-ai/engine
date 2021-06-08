@@ -1,6 +1,6 @@
 from cli.print_utils import print_warning
 from modules.output.plots import plot_per_coin
-from modules.output.results import show_signature, CoinInsights
+from modules.output.results import show_signature, CoinInsights, OpenTradeResult
 from modules.stats.stats_config import StatsConfig
 from modules.stats.trade import SellReason
 from modules.stats.trading_stats import TradingStats
@@ -16,13 +16,13 @@ class OutputModule(object):
         # print tables
         stats.main_results.show(self.config.currency_symbol)
         # CoinInsights.show(stats.coin_res, self.config.currency_symbol)
-        # OpenTradeResult.show(stats.open_trade_res, self.config.currency_symbol)
+        OpenTradeResult.show(stats.open_trade_res, self.config.currency_symbol)
 
         show_trade_anomalies(stats)
 
         show_signature()
 
-        #plot graphs
+        # plot graphs
         if self.config.plots:
             plot_per_coin(stats, config=self.config)
 
