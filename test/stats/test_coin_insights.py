@@ -214,7 +214,7 @@ def test_drawdown_simple():
 
     fixture.frame_with_signals['COIN/BASE'] \
         .add_entry(open=4, high=4, low=4, close=4, volume=1, buy=1, sell=0) \
-        .add_entry(open=4, high=6, low=1, close=2, volume=1, buy=0, sell=1)
+        .add_entry(open=4, high=4, low=1, close=2, volume=1, buy=0, sell=1)
 
     # Act
     stats = fixture.create().analyze()

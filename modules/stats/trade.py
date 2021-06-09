@@ -76,10 +76,7 @@ class Trade:
         self.capital -= self.close_fee_amount
         self.update_profits(update_capital=False)
 
-        # Final max seen drawdown update
-        if self.temp_seen_drawdown < self.max_seen_drawdown:
-            self.max_seen_drawdown = self.temp_seen_drawdown
-        # Check if last capital exceeds lowest seen capital
+        # Check if last capital exceeds lowest seen capital (because of issued fee)
         if self.capital < self.temp_lowest_seen_capital:
             seen_drawdown = self.capital / self.temp_highest_seen_capital
             # Check if new seen drawdown exceeds max seen drawdown
