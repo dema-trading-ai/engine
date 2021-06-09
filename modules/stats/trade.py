@@ -35,6 +35,7 @@ class Trade:
         self.status = 'open'
         self.pair = ohlcv['pair']
         self.open = ohlcv['close']
+        self.current = ohlcv['close']
         self.opened_at = date
         self.fee = fee
         self.sell_reason = SellReason.NONE
@@ -45,20 +46,14 @@ class Trade:
         self.currency_amount = (self.capital / ohlcv['close'])
 
         # Variables for max seen drawdown
+        self.max_seen_drawdown = 1.0
         self.temp_seen_drawdown = 1.0
         self.temp_highest_seen_capital = spend_amount
         self.temp_lowest_seen_capital = spend_amount
-        self.max_seen_drawdown = 1.0
-        self.max_highest_seen_capital = spend_amount
-        self.max_lowest_seen_capital = spend_amount
 
         # Stoploss configurations
         self.sl_type = sl_type
         self.sl_perc = sl_perc
-        self.current = ohlcv['close']
-        self.seen_peak_capital = self.starting_amount
-        self.temp_seen_drawdown_price = self.starting_amount
-        self.max_seen_drawdown_price = self.starting_amount
         self.update_profits()
 
     def close_trade(self, reason: SellReason, date: datetime) -> None:
@@ -139,10 +134,6 @@ class Trade:
         
         # Check for new drawdown period
         if curr_open_capital > self.temp_highest_seen_capital:
-            # If last drawdown was larger than max drawdown, update max drawdown
-            if self.temp_seen_drawdown < self.max_seen_drawdown:
-                self.max_seen_drawdown = self.temp_seen_drawdown
-            
             # Reset temp seen drawdown stats
             self.temp_highest_seen_capital = curr_open_capital
             self.temp_lowest_seen_capital = curr_open_capital
@@ -153,18 +144,9 @@ class Trade:
             self.temp_lowest_seen_capital = curr_lowest_capital
             self.temp_seen_drawdown = curr_lowest_capital / self.temp_highest_seen_capital
 
-        is_new_drawdown_period = self.capital > self.seen_peak_capital
-        if is_new_drawdown_period:
-            self.seen_peak_capital = self.capital
-            self.temp_seen_drawdown_price = self.capital
-        elif self.capital < self.temp_seen_drawdown_price:
-            self.temp_seen_drawdown_price = self.capital
-            self.set_drawdown_if_lower()
-
-    def set_drawdown_if_lower(self):
-        if self.temp_seen_drawdown_price < self.max_seen_drawdown_price:
-            self.max_seen_drawdown_price = self.temp_seen_drawdown_price
-            self.max_seen_drawdown = self.temp_seen_drawdown_price / self.seen_peak_capital
+        # If temp drawdown is larger than max drawdown, update max drawdown
+        if self.temp_seen_drawdown < self.max_seen_drawdown:
+            self.max_seen_drawdown = self.temp_seen_drawdown
 
     def check_for_sl(self, ohlcv: dict) -> bool:
         if self.sl_type == 'standard':
