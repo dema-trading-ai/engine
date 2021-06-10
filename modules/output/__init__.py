@@ -4,7 +4,7 @@ from modules.output.results import show_signature, CoinInsights, OpenTradeResult
 from modules.stats.stats_config import StatsConfig
 from modules.stats.trade import SellReason
 from modules.stats.trading_stats import TradingStats
-
+from modules.output.logs import log_trades
 
 class OutputModule(object):
     config: StatsConfig
@@ -21,6 +21,8 @@ class OutputModule(object):
         show_trade_anomalies(stats)
 
         show_signature()
+
+        log_trades(stats.trades)
 
         # plot graphs
         if self.config.plots:

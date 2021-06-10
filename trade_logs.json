@@ -1,0 +1,113 @@
+[
+    {
+        "capital": 337.5244878059469,
+        "currency_amount": 0.18263323835612083,
+        "current": 1848.1,
+        "fee": 0.0025,
+        "lowest_seen_price": 337.003983076632,
+        "max_seen_drawdown": 0.9623709189527485,
+        "max_seen_drawdown_price": 337.003983076632,
+        "open": 1892.25,
+        "opened_at": "2021-03-14T02:05:00+00:00",
+        "pair": "ETH/USDT",
+        "profit_dollar": -8.92939217337107,
+        "profit_ratio": 0.9742263178755449,
+        "seen_peak_capital": 350.1809712240261,
+        "sell_reason": "NONE",
+        "sl_perc": -10.0,
+        "sl_ratio": 0.9,
+        "sl_type": "standard",
+        "starting_amount": 346.45387997931795,
+        "status": "open",
+        "temp_seen_drawdown_price": 337.003983076632
+    },
+    {
+        "capital": 334.1092784358459,
+        "currency_amount": 1.5616961691869025,
+        "current": 213.94,
+        "fee": 0.0025,
+        "lowest_seen_price": 334.1092784358459,
+        "max_seen_drawdown": 0.9558146807845239,
+        "max_seen_drawdown_price": 334.1092784358459,
+        "open": 221.29,
+        "opened_at": "2021-03-14T06:20:00+00:00",
+        "pair": "LTC/USDT",
+        "profit_dollar": -12.344601543472038,
+        "profit_ratio": 0.9643687017036467,
+        "seen_peak_capital": 349.5544535491044,
+        "sell_reason": "NONE",
+        "sl_perc": -10.0,
+        "sl_ratio": 0.9,
+        "sl_type": "standard",
+        "starting_amount": 346.45387997931795,
+        "status": "open",
+        "temp_seen_drawdown_price": 334.1092784358459
+    },
+    {
+        "capital": 341.8225563507969,
+        "currency_amount": 0.005796716174345117,
+        "current": 58968.31,
+        "fee": 0.0025,
+        "lowest_seen_price": 341.8225563507969,
+        "max_seen_drawdown": 0.9902506603535355,
+        "max_seen_drawdown_price": 341.8225563507969,
+        "open": 59400.0,
+        "opened_at": "2021-03-15T00:50:00+00:00",
+        "pair": "BTC/USDT",
+        "profit_dollar": -3.365354181634075,
+        "profit_ratio": 0.9902506603535355,
+        "seen_peak_capital": 345.187910532431,
+        "sell_reason": "NONE",
+        "sl_perc": -10.0,
+        "sl_ratio": 0.9,
+        "sl_type": "standard",
+        "starting_amount": 345.187910532431,
+        "status": "open",
+        "temp_seen_drawdown_price": 341.8225563507969
+    },
+    {
+        "capital": 340.2413925378812,
+        "close": 55973.69,
+        "close_fee_amount": 0.8527353196438126
+    },
+    {
+        "capital": 341.61881250000005,
+        "close": 198.71790000000001,
+        "close_fee_amount": 0.8561875000000001
+    },
+    {
+        "capital": 341.61881250000005,
+        "close": 1789.4705,
+        "close_fee_amount": 0.8561875000000001
+    },
+    {
+        "capital": 349.63968658995776,
+        "close": 211.87099999999998,
+        "close_fee_amount": 0.8762899413282149
+    },
+    {
+        "capital": 342.1325811435952,
+        "close": 57245.05,
+        "close_fee_amount": 0.8574751407107649
+    },
+    {
+        "capital": 335.5764442340126,
+        "close": 1771.49,
+        "close_fee_amount": 0.8410437198847435
+    },
+    {
+        "capital": 352.868982820221,
+        "close": 219.2664,
+        "close_fee_amount": 0.8843834155895263
+    },
+    {
+        "capital": 347.76523864762066,
+        "close": 57343.7,
+        "close_fee_amount": 0.8715920768110793
+    },
+    {
+        "capital": 345.18791053243086,
+        "close": 60427.55,
+        "close_fee_amount": 0.8651326078507039
+    }
+]
