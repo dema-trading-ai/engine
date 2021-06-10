@@ -38,7 +38,7 @@ To initialize a directory for running our engine, run the command below. Note: t
 docker run --rm -v "$(pwd):/usr/src/engine/output" dematrading/engine:stable init
 ```
 
-> Note: if you are using Windows, you should replace `"$(pwd):/usr/src/engine/output"` with `"$(shell pwd):/usr/src/engine/output"`
+> Note: if you are using Windows, please use powershell to perform this command.
 
 
 To run a backtest:
