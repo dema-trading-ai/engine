@@ -4,6 +4,7 @@ on:
     branches: [feature/**, fix/**, development]
   pull_request:
     branches: [development]
+  workflow_dispatch:
 jobs:
   build:
     runs-on: macos-latest
