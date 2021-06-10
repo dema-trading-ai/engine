@@ -5,6 +5,8 @@
 [![License](https://img.shields.io/github/license/dema-trading-ai/engine.svg)](https://github.com/dema-trading-ai/engine)
 [![Test PR/Push](https://github.com/dema-trading-ai/engine/actions/workflows/PR-Push-test.yml/badge.svg?branch=development)](https://github.com/dema-trading-ai/engine/actions/workflows/PR-Push-test.yml)
 
+#### [Go to full documentation](https://docs.dematrading.ai)
+
 # Discord
 
 Please join our Discord for updates, support, our community & more:
