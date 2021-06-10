@@ -376,3 +376,19 @@ def get_market_change(ticks: list, pairs: list, data_dict: dict) -> dict:
         total_change += coin_change
     market_change['all'] = total_change / len(pairs)
     return market_change
+
+
+Output.write(generate_open_trades_results(), closed_trades)
+L = ["These are all the details regarding the trade"]
+Output.writelines(L)
+Output.close()
+
+Output.append(generate_open_trades_results())
+Output.write(update)
+Output.close
+
+Output.open("output.txt", "r")
+print("Output of all statistics after appending additionals")
+print(Output.read())
+print()
+Output1.close()
