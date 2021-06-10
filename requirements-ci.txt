@@ -8,3 +8,4 @@ tqdm==4.58.0
 plotly==4.14.3
 python-rapidjson==1.0
 pytest-cov==2.12.0
+jsons==1.4.2
