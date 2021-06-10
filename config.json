@@ -18,7 +18,7 @@
   "fee": 0.25,
   "strategy-name": "MyStrategy",
   "strategies-folder": "strategies",
-  "plots": false,
+  "plots": true,
   "mainplot_indicators": ["ema5", "ema21"],
   "subplot_indicators": ["volume"]
 }
