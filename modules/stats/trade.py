@@ -84,17 +84,6 @@ class Trade:
                 self.max_seen_drawdown = seen_drawdown
 
     def update_stats(self, ohlcv: dict, first: bool = False) -> None:
-        """
-        Updates states according to latest data.
-
-        :param ohlcv: dictionary with OHLCV data for current tick
-        :type ohlcv: dict
-        :param first: boolean which indicates whether the function is called for
-        the first time.
-        :type first: bool
-        :return: None
-        :rtype: None
-        """
         self.current = ohlcv['close']
         self.update_profits()
         if not first:
