@@ -47,9 +47,9 @@ class Trade:
 
         # Variables for max seen drawdown
         self.max_seen_drawdown = 1.0
-        self.temp_seen_drawdown = 1.0
-        self.temp_highest_seen_capital = spend_amount
-        self.temp_lowest_seen_capital = spend_amount
+        self.curr_seen_drawdown = 1.0
+        self.curr_highest_seen_capital = spend_amount
+        self.curr_lowest_seen_capital = spend_amount
 
         # Stoploss configurations
         self.sl_type = sl_type
@@ -71,14 +71,14 @@ class Trade:
         self.sell_reason = reason
         self.close = self.current
         self.closed_at = date
-        self.close_fee_amount = self.capital * self.fee   # final issued fee
+        self.close_fee_paid = self.capital * self.fee   # final issued fee
 
-        self.capital -= self.close_fee_amount
+        self.capital -= self.close_fee_paid
         self.update_profits(update_capital=False)
 
         # Check if last capital exceeds lowest seen capital (because of issued fee)
-        if self.capital < self.temp_lowest_seen_capital:
-            seen_drawdown = self.capital / self.temp_highest_seen_capital
+        if self.capital < self.curr_lowest_seen_capital:
+            seen_drawdown = self.capital / self.curr_highest_seen_capital
             # Check if new seen drawdown exceeds max seen drawdown
             if seen_drawdown < self.max_seen_drawdown:
                 self.max_seen_drawdown = seen_drawdown
@@ -98,8 +98,8 @@ class Trade:
         self.current = ohlcv['close']
         self.update_profits()
         if not first:
-            self.low_value = ohlcv['low']
-            self.open_value = ohlcv['open']
+            self.candle_low = ohlcv['low']
+            self.candle_open = ohlcv['open']
             self.update_max_drawdown()
 
     def update_profits(self, update_capital: bool = True):
@@ -121,29 +121,30 @@ class Trade:
 
     def update_max_drawdown(self) -> None:
         """
-        Updates max seen drawdown.
+        Updates max seen drawdown defined as: biggest difference between
+        highest peak of candle 'open' and lowest bottom of candle 'low'.
 
         :return: None
         :rtype: None
         """
-        curr_open_capital = self.open_value * self.currency_amount
-        curr_lowest_capital = self.low_value * self.currency_amount
+        temp_max_capital = self.candle_open * self.currency_amount
+        temp_lowest_capital = self.candle_low * self.currency_amount
         
         # Check for new drawdown period
-        if curr_open_capital > self.temp_highest_seen_capital:
+        if temp_max_capital > self.curr_highest_seen_capital:
             # Reset temp seen drawdown stats
-            self.temp_highest_seen_capital = curr_open_capital
-            self.temp_lowest_seen_capital = curr_open_capital
-            self.temp_seen_drawdown = 1.0   # ratio w/ respect to peak
+            self.curr_highest_seen_capital = temp_max_capital
+            self.curr_lowest_seen_capital = temp_max_capital
+            self.curr_seen_drawdown = 1.0   # ratio w/ respect to peak
 
         # Check if drawdown reached new bottom
-        if curr_lowest_capital < self.temp_lowest_seen_capital:
-            self.temp_lowest_seen_capital = curr_lowest_capital
-            self.temp_seen_drawdown = curr_lowest_capital / self.temp_highest_seen_capital
+        if temp_lowest_capital < self.curr_lowest_seen_capital:
+            self.curr_lowest_seen_capital = temp_lowest_capital
+            self.curr_seen_drawdown = temp_lowest_capital / self.curr_highest_seen_capital
 
         # If temp drawdown is larger than max drawdown, update max drawdown
-        if self.temp_seen_drawdown < self.max_seen_drawdown:
-            self.max_seen_drawdown = self.temp_seen_drawdown
+        if self.curr_seen_drawdown < self.max_seen_drawdown:
+            self.max_seen_drawdown = self.curr_seen_drawdown
 
     def check_for_sl(self, ohlcv: dict) -> bool:
         if self.sl_type == 'standard':

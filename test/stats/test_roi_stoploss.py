@@ -23,7 +23,7 @@ def test_roi():
 
 
 def test_stoploss():
-    """Given 'value of coin falls below stoploss', 'profit' should 'lower same minus fee'"""
+    """Given 'value of coin falls below stoploss', 'profit' should be 'stoploss minus fee'"""
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 

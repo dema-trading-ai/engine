@@ -31,10 +31,10 @@ class TradingModule:
         self.closed_trades = []
         self.open_trades = []
         self.budget_per_timestamp = {}
-        self.open_trades_open_per_timestamp = {}
-        self.open_trades_low_per_timestamp = {}
+        self.lowest_total_capital_open_trades = {}
+        self.highest_total_capital_open_trades = {}
         self.realised_profits = []
-        self.total_fee_amount = 0
+        self.total_fee_paid = 0
 
     def tick(self, ohlcv: dict, data_dict: dict) -> None:
         trade = self.find_open_trade(ohlcv['pair'])
@@ -88,14 +88,14 @@ class TradingModule:
             # Because trade had no impact on results, remove first issued fee from
             # total amount of fee and reset trade stats.
             first_fee = trade.starting_amount * trade.fee
-            self.total_fee_amount -= first_fee
+            self.total_fee_paid -= first_fee
 
             # Reset trade stats
             trade.capital = trade.starting_amount
             trade.update_profits(update_capital=False)
             trade.max_seen_drawdown = 1.0
         else:
-            self.total_fee_amount += trade.close_fee_amount
+            self.total_fee_paid += trade.close_fee_paid
         self.budget += trade.capital
 
         self.open_trades.remove(trade)
@@ -126,7 +126,7 @@ class TradingModule:
         new_trade.update_stats(ohlcv, first=True)
 
         # Update total budget with configured spend amount and fee
-        self.total_fee_amount += spend_amount * self.fee
+        self.total_fee_paid += spend_amount * self.fee
         self.budget -= spend_amount
         self.open_trades.append(new_trade)
         self.update_open_trades_value_per_timestamp(new_trade, ohlcv)
@@ -165,27 +165,29 @@ class TradingModule:
 
     def update_open_trades_value_per_timestamp(self, trade: Trade, ohlcv: dict) -> None:
         """
-        Method is used to be able to track the open trades value per timestamp
+        Method is used to be able to track the open trades capitals per timestamp.
+        It tracks the max seen point and the lowest seen point over all open trades.
         """
         trade_opened_at = datetime.timestamp(trade.opened_at) * 1000
         if trade_opened_at == ohlcv['time']:
-            self.open_trades_open_per_timestamp[ohlcv['time']] = \
-                self.open_trades_open_per_timestamp.get(ohlcv['time'], 0) + trade.starting_amount
-            self.open_trades_low_per_timestamp[ohlcv['time']] = \
-                self.open_trades_low_per_timestamp.get(ohlcv['time'], 0) + trade.starting_amount
+            self.lowest_total_capital_open_trades[ohlcv['time']] = \
+                self.lowest_total_capital_open_trades.get(ohlcv['time'], 0) + trade.starting_amount
+            self.highest_total_capital_open_trades[ohlcv['time']] = \
+                self.highest_total_capital_open_trades.get(ohlcv['time'], 0) + trade.starting_amount
+            
         else:
-            # When trade.low_value is equal to trade.current in final candle, trade.capital could 
+            # When trade.candle_low is equal to trade.current in final candle, trade.capital could 
             # be lower than curr_low_capital due to fee.
-            curr_low_capital = trade.low_value * trade.currency_amount
-            low_capital = curr_low_capital if curr_low_capital < trade.capital \
+            lowest_seen_capital = trade.candle_low * trade.currency_amount
+            lowest_seen_capital = lowest_seen_capital if lowest_seen_capital < trade.capital \
                 else trade.capital
-            self.open_trades_low_per_timestamp[ohlcv['time']] = \
-                self.open_trades_low_per_timestamp.get(ohlcv['time'], 0) + low_capital
+            self.lowest_total_capital_open_trades[ohlcv['time']] = \
+                self.lowest_total_capital_open_trades.get(ohlcv['time'], 0) + lowest_seen_capital
 
-            # Update open capital dict
-            open_capital = trade.open_value * trade.currency_amount
-            self.open_trades_open_per_timestamp[ohlcv['time']] = \
-                self.open_trades_open_per_timestamp.get(ohlcv['time'], 0) + open_capital
+            # Update highest seen capital dict
+            high_seen_capital = trade.candle_open * trade.currency_amount
+            self.highest_total_capital_open_trades[ohlcv['time']] = \
+                self.highest_total_capital_open_trades.get(ohlcv['time'], 0) + high_seen_capital
             
 
     def update_budget_per_timestamp(self, ohlcv: dict) -> None:
