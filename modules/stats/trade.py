@@ -35,8 +35,9 @@ class Trade:
         self.pair = ohlcv['pair']
         self.open = ohlcv['close']
         self.opened_at = date
+        self.closed_at = None
         self.fee = fee
-        self.max_seen_drawdown = 1  # ratio
+        self.max_seen_drawdown = 1.0  # ratio
         self.starting_amount = spend_amount
         self.lowest_seen_price = spend_amount
         self.capital = spend_amount - (spend_amount * fee)  # apply fee
