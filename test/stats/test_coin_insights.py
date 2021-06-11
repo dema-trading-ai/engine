@@ -8,9 +8,7 @@ def test_fee_equals_stoploss():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=0, sell=0)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_flat_one_trade_no_sell()
 
     fixture.trading_module_config.stoploss = -1
     fixture.stats_config.stoploss = -1
@@ -27,24 +25,16 @@ def test_worst_trade():
     # Arrange
     fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE', 'COIN3/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=2, low=1.75, close=1.75, volume=1, buy=0, sell=1)
-
-    fixture.frame_with_signals['COIN2/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=2, low=1.5, close=1.5, volume=1, buy=0, sell=1)
-
-    fixture.frame_with_signals['COIN3/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=2, low=1.25, close=1.25, volume=1, buy=0, sell=1)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade()
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_50_one_trade()
+    fixture.frame_with_signals['COIN3/BASE'].test_scenario_down_75_one_trade()
 
     # Act
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.coin_res[-1].total_profit_percentage, -38.74375)
-    assert math.isclose(stats.main_results.worst_trade_profit_percentage, -38.74375)
+    assert math.isclose(stats.coin_res[-1].total_profit_percentage, -75.4975)
+    assert math.isclose(stats.main_results.worst_trade_profit_percentage, -75.4975)
 
 
 def test_best_trade():
@@ -52,24 +42,16 @@ def test_best_trade():
     # Arrange
     fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE', 'COIN3/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=1.25, low=1, close=1.25, volume=1, buy=0, sell=1)
-
-    fixture.frame_with_signals['COIN2/BASE'] \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=1.50, low=1, close=1.50, volume=1, buy=0, sell=1)
-
-    fixture.frame_with_signals['COIN3/BASE'] \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=1.75, low=1, close=1.75, volume=1, buy=0, sell=1)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade()
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_up_50_one_trade()
+    fixture.frame_with_signals['COIN3/BASE'].test_scenario_up_100_one_trade()
 
     # Act
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.coin_res[-1].total_profit_percentage, 71.5175)
-    assert math.isclose(stats.main_results.best_trade_profit_percentage, 71.5175)
+    assert math.isclose(stats.coin_res[-1].total_profit_percentage, 96.02)
+    assert math.isclose(stats.main_results.best_trade_profit_percentage, 96.02)
 
 
 def test_best_worst_trade_only_wins():
@@ -78,20 +60,15 @@ def test_best_worst_trade_only_wins():
     # Arrange
     fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=1.25, low=1, close=1.25, volume=1, buy=0, sell=1)
-
-    fixture.frame_with_signals['COIN2/BASE'] \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=1.50, low=1, close=1.50, volume=1, buy=0, sell=1)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade()
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_up_100_one_trade()
 
     # Act
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.main_results.best_trade_profit_percentage, 47.015)
-    assert math.isclose(stats.main_results.worst_trade_profit_percentage, 22.5125)
+    assert math.isclose(stats.main_results.best_trade_profit_percentage, 96.02)
+    assert math.isclose(stats.main_results.worst_trade_profit_percentage, 47.015)
 
 
 def test_best_worst_trade_only_losses():
@@ -100,20 +77,15 @@ def test_best_worst_trade_only_losses():
     # Arrange
     fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=2, low=1.75, close=1.75, volume=1, buy=0, sell=1)
-
-    fixture.frame_with_signals['COIN2/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=2, low=1.5, close=1.5, volume=1, buy=0, sell=1)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade()
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_75_one_trade()
 
     # Act
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.main_results.best_trade_profit_percentage, -14.24125)
-    assert math.isclose(stats.main_results.worst_trade_profit_percentage, -26.4925)
+    assert math.isclose(stats.main_results.best_trade_profit_percentage, -50.995)
+    assert math.isclose(stats.main_results.worst_trade_profit_percentage, -75.4975)
 
 
 def test_marketchange():
@@ -122,28 +94,15 @@ def test_marketchange():
     # Arrange
     fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=1) \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=6, low=1, close=6, volume=1, buy=0, sell=1) \
-        .add_entry(open=6, high=6, low=6, close=6, volume=1, buy=1, sell=0) \
-        .add_entry(open=6, high=6, low=3, close=3, volume=1, buy=0, sell=1)
-
-    fixture.frame_with_signals['COIN2/BASE'] \
-        .add_entry(open=6, high=6, low=6, close=6, volume=1, buy=1, sell=0) \
-        .add_entry(open=6, high=6, low=4, close=4, volume=1, buy=0, sell=1) \
-        .add_entry(open=4, high=4, low=4, close=4, volume=1, buy=1, sell=0) \
-        .add_entry(open=4, high=5, low=4, close=5, volume=1, buy=0, sell=1) \
-        .add_entry(open=5, high=5, low=5, close=5, volume=1, buy=1, sell=0) \
-        .add_entry(open=5, high=5, low=3, close=3, volume=1, buy=0, sell=1)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_75_one_trade()
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_80_up_50_one_trade()
 
     # Act
     stats = fixture.create().analyze()
 
     # Assert
     assert stats.coin_res[0].market_change == 50
-    assert stats.coin_res[1].market_change == -50
+    assert stats.coin_res[1].market_change == -70
 
 
 def test_profit():
@@ -151,18 +110,12 @@ def test_profit():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=1) \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=4, low=1, close=4, volume=1, buy=0, sell=1)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_75_two_trades()
 
     # Act
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.coin_res[0].total_profit_percentage, 92.119202)
-    assert math.isclose(stats.coin_res[0].cum_profit_percentage, 241.045)
-    assert math.isclose(stats.coin_res[0].avg_profit_percentage, 120.5225)
-
-
+    assert math.isclose(stats.coin_res[0].total_profit_percentage, 44.0894015)
+    assert math.isclose(stats.coin_res[0].cum_profit_percentage, 69.5275)
+    assert math.isclose(stats.coin_res[0].avg_profit_percentage, 34.76375)

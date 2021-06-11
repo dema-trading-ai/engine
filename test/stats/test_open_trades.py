@@ -1,6 +1,3 @@
-import math
-from datetime import datetime
-
 from test.stats.stats_test_utils import StatsFixture
 
 
@@ -9,9 +6,7 @@ def test_open_trades_pair():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=0)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade_no_sell()
 
     # Act
     stats = fixture.create().analyze()
@@ -25,9 +20,7 @@ def test_open_trades_profit_percentage_positive():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=0)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade_no_sell()
 
     # Act
     stats = fixture.create().analyze()
@@ -41,9 +34,7 @@ def test_open_trades_profit_percentage_negative():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=0)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade_no_sell()
 
     # Act
     stats = fixture.create().analyze()
@@ -57,9 +48,7 @@ def test_open_trades_profit_positive():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=0)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade_no_sell()
 
     # Act
     stats = fixture.create().analyze()
@@ -73,9 +62,7 @@ def test_open_trades_profit_negative():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=0)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade_no_sell()
 
     # Act
     stats = fixture.create().analyze()
@@ -89,9 +76,7 @@ def test_open_trades_drawdown_positive():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=0)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade_no_sell()
 
     # Act
     stats = fixture.create().analyze()
@@ -123,9 +108,7 @@ def test_open_trades_opened_at():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=0)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade_no_sell()
 
     # Act
     stats = fixture.create().analyze()
@@ -134,18 +117,16 @@ def test_open_trades_opened_at():
     assert stats.open_trade_res[0].opened_at.timestamp() == 1/1000
 
 
-def test_open_trades_opened_at_timestep_two():
-    """Given a left open trade, opened_at should be timestep 2"""
+def test_open_trades_opened_at_timestep_three():
+    """Given a left open trade, opened_at should be timestep 3"""
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=0, sell=0) \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=0)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade_no_sell()
 
     # Act
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.open_trade_res[0].opened_at.timestamp() == 2/1000
+    assert stats.open_trade_res[0].opened_at.timestamp() == 3/1000
