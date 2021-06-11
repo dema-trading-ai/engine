@@ -6,20 +6,17 @@ def test_roi():
     # arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=0) \
-        .add_entry(open=2, high=3, low=2, close=2, volume=1, buy=0, sell=0)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade_no_sell()
 
     fixture.trading_module_config.roi = {
-        "0": 150
+        "0": 75
     }
 
     # act
     stats = fixture.create().analyze()
 
     # assert
-    assert stats.main_results.end_capital == 245.025
+    assert stats.main_results.end_capital == 171.5175
 
 
 def test_both_roi_stoploss():
