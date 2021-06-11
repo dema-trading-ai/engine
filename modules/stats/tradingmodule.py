@@ -52,17 +52,6 @@ class TradingModule:
             self.open_trade(ohlcv, data_dict)
 
     def open_trade_tick(self, ohlcv: dict, trade: Trade) -> bool:
-        """
-        Method is called when specified pair has open trades.
-        checks for ROI
-        checks for stoploss
-        :param ohlcv: dictionary with OHLCV data for current tick
-        :type ohlcv: dict
-        :param trade: Trade corresponding to tick pair
-        :type trade: Trade
-        :return: None
-        :rtype: None
-        """
         stoploss_reached = self.check_stoploss_open_trade(trade, ohlcv)
         roi_reached = self.check_roi_open_trade(trade, ohlcv)
 
