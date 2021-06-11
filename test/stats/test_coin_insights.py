@@ -8,9 +8,7 @@ def test_fee_equals_stoploss():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=0, sell=0)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_2()
 
     fixture.trading_module_config.stoploss = -1
     fixture.stats_config.stoploss = -1

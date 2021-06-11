@@ -32,6 +32,47 @@ class MockOHLCVWithSignal(dict, object):
                                          }})
         return self
 
+    def test_scenario_1(self):
+        """
+        Chart flow:
+        1. Trend stays the same
+        """
+        self.add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0)
+        self.add_entry(open=2, high=2, low=2, close=2, volume=1, buy=0, sell=1)
+
+    def test_scenario_2(self):
+        """
+        Chart flow:
+        1. Trend stays the same (but no sell signal)
+        """
+        self.add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0)
+        self.add_entry(open=2, high=2, low=2, close=2, volume=1, buy=0, sell=0)
+
+    def test_scenario_3(self):
+        """
+        Chart flow:
+        1. Trend goes down 50%
+        """
+        self.add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0)
+        self.add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=1)
+
+    def test_scenario_4(self):
+        """
+        Chart flow:
+        1. Trend goes up 50%
+        """
+        self.add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0)
+        self.add_entry(open=2, high=3, low=2, close=3, volume=1, buy=0, sell=1)
+
+    def test_scenario_5(self):
+        """
+        Chart flow:
+        1. Trend goes down  
+        2. Trend goes up
+        """
+        self.add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0)
+        self.add_entry(open=2, high=3, low=2, close=3, volume=1, buy=0, sell=1)
+
     def multiply_price(self, multiplier: float, trade_action: TradeAction = TradeAction.NOTHING):
 
         if trade_action == TradeAction.BUY:
