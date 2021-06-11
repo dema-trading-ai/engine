@@ -112,9 +112,6 @@ class Trade:
         """
         Updates max seen drawdown defined as: biggest difference between
         highest peak of candle 'open' and lowest bottom of candle 'low'.
-
-        :return: None
-        :rtype: None
         """
         temp_max_capital = self.candle_open * self.currency_amount
         temp_lowest_capital = self.candle_low * self.currency_amount
