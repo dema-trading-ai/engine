@@ -37,10 +37,12 @@ class Trade:
         self.open = ohlcv['close']
         self.current = ohlcv['close']
         self.opened_at = date
+        self.closed_at = None
         self.fee = fee
         self.sell_reason = SellReason.NONE
 
         # Calculations for trade worth
+        self.max_seen_drawdown = 1.0  # ratio
         self.starting_amount = spend_amount
         self.capital = spend_amount - (spend_amount * fee)  # apply fee
         self.currency_amount = (self.capital / ohlcv['close'])
