@@ -1,4 +1,6 @@
 import math
+
+from modules.stats.trade import SellReason
 from test.stats.stats_test_utils import StatsFixture
 
 
@@ -20,7 +22,7 @@ def test_fee_equals_stoploss():
     assert math.isclose(stats.coin_res[0].total_profit_percentage, -1.99)
 
 
-def test_worst_trade():
+def test_profit_worst_trade():
     """Given only losing trades, 'worst trade' should be worst of all trades"""
     # Arrange
     fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE', 'COIN3/BASE'])
@@ -37,7 +39,7 @@ def test_worst_trade():
     assert math.isclose(stats.main_results.worst_trade_profit_percentage, -75.4975)
 
 
-def test_best_trade():
+def test_profit_best_trade():
     """Given only winning trades, 'best trade' should be best of all trades"""
     # Arrange
     fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE', 'COIN3/BASE'])
@@ -54,7 +56,7 @@ def test_best_trade():
     assert math.isclose(stats.main_results.best_trade_profit_percentage, 96.02)
 
 
-def test_best_worst_trade_only_wins():
+def test_profit_best_worst_trade_only_wins():
     """Given only winning trades, 'worst trade' should be worst of all trades,
     and 'best trade' should be best of all trades"""
     # Arrange
@@ -68,10 +70,12 @@ def test_best_worst_trade_only_wins():
 
     # Assert
     assert math.isclose(stats.main_results.best_trade_profit_percentage, 96.02)
+    assert math.isclose(stats.coin_res[1].total_profit_percentage, 96.02)
     assert math.isclose(stats.main_results.worst_trade_profit_percentage, 47.015)
+    assert math.isclose(stats.coin_res[0].total_profit_percentage, 47.015)
 
 
-def test_best_worst_trade_only_losses():
+def test_profit_best_worst_trade_only_losses():
     """Given only losing trades, 'worst trade' should be worst of all trades,
     and 'best trade' should be best of all trades"""
     # Arrange
@@ -85,7 +89,94 @@ def test_best_worst_trade_only_losses():
 
     # Assert
     assert math.isclose(stats.main_results.best_trade_profit_percentage, -50.995)
+    assert math.isclose(stats.coin_res[0].total_profit_percentage, -50.995)
     assert math.isclose(stats.main_results.worst_trade_profit_percentage, -75.4975)
+    assert math.isclose(stats.coin_res[1].total_profit_percentage, -75.4975)
+
+
+def test_profit_no_trades():
+    """Given no trades, profit should be zero"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_flat_no_trades()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert math.isclose(stats.main_results.best_trade_profit_percentage, 0)
+    assert math.isclose(stats.main_results.worst_trade_profit_percentage, 0)
+    assert math.isclose(stats.coin_res[0].total_profit_percentage, 0)
+    assert math.isclose(stats.coin_res[0].cum_profit_percentage, 0)
+    assert math.isclose(stats.coin_res[0].avg_profit_percentage, 0)
+
+
+def test_nr_of_trades_no_trades():
+    """Given no trades, nr of trades should be zero"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_flat_no_trades()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert math.isclose(stats.coin_res[0].n_trades, 0)
+
+
+def test_nr_of_trades_one_trade():
+    """Given one trades, nr of trades should be one"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert math.isclose(stats.coin_res[0].n_trades, 1)
+
+
+def test_nr_of_trades_three_trades():
+    """Given one trades, nr of trades should be one"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_20_down_75_three_trades()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert math.isclose(stats.coin_res[0].n_trades, 3)
+
+
+def test_nr_of_trades_three_coins():
+    """Given multiple coins, nr of trades should be correct"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE', 'COIN3/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_flat_no_trades()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_flat_no_trades()
+
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_flat_no_trades()
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_flat_no_trades()
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_flat_no_trades()
+
+    fixture.frame_with_signals['COIN3/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+
+    # Act
+    stats = fixture.create().analyze()
+
+
+    # Assert
+    assert math.isclose(stats.coin_res[0].n_trades, 1)
+    assert math.isclose(stats.coin_res[1].n_trades, 0)
+    assert math.isclose(stats.coin_res[2].n_trades, 3)
 
 
 def test_marketchange():
@@ -119,3 +210,52 @@ def test_profit():
     assert math.isclose(stats.coin_res[0].total_profit_percentage, 44.0894015)
     assert math.isclose(stats.coin_res[0].cum_profit_percentage, 69.5275)
     assert math.isclose(stats.coin_res[0].avg_profit_percentage, 34.76375)
+
+
+def test_sell_reason_sell_signal():
+    """ sell reason should match sell signal """
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.coin_res[0].sell_signal == 1
+
+
+def test_sell_reason_roi():
+    """ sell reason should match sell signal """
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade()
+
+    fixture.trading_module_config.roi = {
+        "0": 50
+    }
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.coin_res[0].roi == 1
+
+
+def test_sell_reason_stoploss():
+    """ sell reason should match sell signal """
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade()
+
+    fixture.trading_module_config.stoploss = -25
+    fixture.stats_config.stoploss = -25
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.coin_res[0].stoploss == 1
