@@ -45,12 +45,18 @@ def show_trade_anomalies(stats: TradingStats):
 def log_trades(stats: TradingStats):
     trades_dict = {}
     for trade in stats.trades:
-        trade_dict = {'status': trade.status, 'opened_at': trade.opened_at, 'closed_at': trade.closed_at,
-                      'pair': trade.pair, 'open_price': trade.open, 'fee_paid': trade.fee,
-                      'max_seen_drawdown': trade.max_seen_drawdown, 'starting_amount': trade.starting_amount,
-                      'lowest_seen_price': trade.lowest_seen_price, 'capital': trade.capital,
-                      'currency_amount': trade.currency_amount, 'sell_reason': trade.sell_reason,
-                      'seen_peak_capital': trade.seen_peak_capital}
+        trade_dict = {'status': trade.status,
+                      'opened_at': trade.opened_at,
+                      'closed_at': trade.closed_at,
+                      'pair': trade.pair,
+                      'open_price': trade.open,
+                      'fee_paid': trade.fee,
+                      'max_seen_drawdown': trade.max_seen_drawdown,
+                      'starting_amount': trade.starting_amount,
+                      'capital': trade.capital,
+                      'currency_amount': trade.currency_amount,
+                      'sell_reason': trade.sell_reason,
+                      'seen_peak_capital': trade.curr_highest_seen_capital}
         trades_dict[str(trade.opened_at)] = trade_dict
 
     trades_dict = dict(sorted(trades_dict.items()))
