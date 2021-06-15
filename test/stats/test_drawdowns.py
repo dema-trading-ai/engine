@@ -104,7 +104,6 @@ def test_simple_no_seen_drawdown():
     fixture = StatsFixture(['COIN/BASE'])
 
     fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade()
-    fixture.frame_with_signals['COIN2/BASE'].test_scenario_up_50_one_trade()
 
     # Act
     stats = fixture.create().analyze()

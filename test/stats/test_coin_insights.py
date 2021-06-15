@@ -267,9 +267,7 @@ def test_drawdown_equality():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=4, high=4, low=4, close=4, volume=1, buy=1, sell=0) \
-        .add_entry(open=4, high=4, low=1, close=2, volume=1, buy=0, sell=1)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_20_down_75_one_trade()
 
     # Act
     stats = fixture.create().analyze()
@@ -288,9 +286,7 @@ def test_seen_drawdown_equals_realised_drawdown():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=4, high=4, low=4, close=4, volume=1, buy=1, sell=0) \
-        .add_entry(open=4, high=4, low=2, close=2, volume=1, buy=0, sell=1)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade()
 
     # Act
     stats = fixture.create().analyze()
@@ -307,16 +303,14 @@ def test_drawdown_simple():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=4, high=4, low=4, close=4, volume=1, buy=1, sell=0) \
-        .add_entry(open=4, high=4, low=1, close=2, volume=1, buy=0, sell=1)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_20_down_75_one_trade()
 
     # Act
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.coin_res[0].max_seen_drawdown, -75.25)
-    assert math.isclose(stats.coin_res[0].max_realised_drawdown, -50.995)
+    assert math.isclose(stats.coin_res[0].max_seen_drawdown, -80.2)
+    assert math.isclose(stats.coin_res[0].max_realised_drawdown, -60.796)
 
 
 def test_drawdown_multiple_trades():
@@ -325,18 +319,15 @@ def test_drawdown_multiple_trades():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=6, high=6, low=6, close=6, volume=1, buy=1, sell=0) \
-        .add_entry(open=6, high=6, low=3, close=4, volume=1, buy=0, sell=1) \
-        .add_entry(open=4, high=4, low=4, close=4, volume=1, buy=1, sell=0) \
-        .add_entry(open=4, high=4, low=2, close=3, volume=1, buy=0, sell=1)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_20_down_75_one_trade()
 
     # Act
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.coin_res[0].max_seen_drawdown, -67.6567)
-    assert math.isclose(stats.coin_res[0].max_realised_drawdown, -51.9701995)
+    assert math.isclose(stats.coin_res[0].max_seen_drawdown, -95.148505)
+    assert math.isclose(stats.coin_res[0].max_realised_drawdown, -90.3940399)
 
 
 def test_drawdown_multiple_pairs():
@@ -345,20 +336,21 @@ def test_drawdown_multiple_pairs():
     # Arrange
     fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=4, high=4, low=4, close=4, volume=1, buy=1, sell=0) \
-        .add_entry(open=4, high=4, low=2, close=3, volume=1, buy=0, sell=1)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_20_down_75_one_trade()
 
-    fixture.frame_with_signals['COIN2/BASE'] \
-        .add_entry(open=3, high=3, low=3, close=3, volume=1, buy=1, sell=0) \
-        .add_entry(open=3, high=3, low=1, close=2, volume=1, buy=0, sell=1)
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_up_100_20_down_75_three_trades()
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+
+    # Act
+    stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.coin_res[0].max_seen_drawdown, -50.5)
-    assert math.isclose(stats.coin_res[0].max_realised_drawdown, -26.4925)
+    assert math.isclose(stats.coin_res[0].max_seen_drawdown, -95.148505)
+    assert math.isclose(stats.coin_res[0].max_realised_drawdown, -90.3940399)
 
-    assert math.isclose(stats.coin_res[1].max_seen_drawdown, -67)
-    assert math.isclose(stats.coin_res[1].max_realised_drawdown, -34.66)
+    assert math.isclose(stats.coin_res[1].max_seen_drawdown, -83.22282373767418)
+    assert math.isclose(stats.coin_res[1].max_realised_drawdown, -83.05335731078199)
 
-    assert math.isclose(stats.main_results.max_seen_drawdown, -58.75)
-    assert math.isclose(stats.main_results.max_realised_drawdown, -30.57625)
+    assert math.isclose(stats.main_results.max_seen_drawdown, -84.49838188862499)
+    assert math.isclose(stats.main_results.max_realised_drawdown, -85.52890115608895)
