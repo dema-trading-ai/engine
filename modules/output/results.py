@@ -115,13 +115,7 @@ class CoinInsights:
                         round(c.avg_profit_percentage, 2),
                         round(c.cum_profit_percentage, 2),
                         round(c.total_profit_percentage, 2),
-                        round(c.profit, 2),
-                        round(c.max_seen_drawdown, 2),
-                        round(c.max_realised_drawdown, 2),
-                        c.avg_trade_duration,
-                        c.roi, 
-                        c.stoploss,
-                        c.sell_signal])
+                        round(c.profit, 2)])
 
         print(tabulate(stats,
                        headers=['Pair',
@@ -130,7 +124,21 @@ class CoinInsights:
                                 'avg profit (%)',
                                 'cum profit (%)',
                                 'total profit (%)',
-                                f' profit ({currency_symbol})',
+                                f' profit ({currency_symbol})'],
+                       tablefmt='pretty'))
+
+        stats = []
+        for c in instances:
+            stats.append([c.pair,
+                        round(c.max_seen_drawdown, 2),
+                        round(c.max_realised_drawdown, 2),
+                        c.avg_trade_duration,
+                        c.roi,
+                        c.stoploss,
+                        c.sell_signal])
+
+        print(tabulate(stats,
+                       headers=['Pair',
                                 'max seen drawdown %',
                                 'max realised drawdown %',
                                 'avg trade duration',
