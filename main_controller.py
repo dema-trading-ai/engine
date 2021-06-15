@@ -1,6 +1,6 @@
 # Files
 from modules.output import OutputModule
-from modules.setup.config import ConfigModule, create_config_module
+from modules.setup.config import create_config_module
 from modules.setup import SetupModule
 from modules.stats.stats import StatsModule
 from modules.stats.stats_config import to_stats_config
