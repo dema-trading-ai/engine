@@ -7,9 +7,10 @@ def get_max_seen_drawdown(signal_dict, closed_pair_trades, fee_percentage: float
     df = get_inposition_df(trades_closed_open, signal_dict)
     df["change"] = (df["close"] / df["close"].shift(-1))
 
+    fee_ratio = 1 - fee_percentage / 100
     for open, close in trades_closed_open:
-        df.loc[open, "change"] *= fee_percentage
-        df.loc[close, "change"] *= fee_percentage
+        df.loc[open, "change"] *= fee_ratio
+        df.loc[close, "change"] *= fee_ratio
 
     df["value"] = df[df["in_position"] == 1]["change"].cumprod()
     return get_drawdown(df)
