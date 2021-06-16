@@ -16,8 +16,8 @@ def get_max_seen_drawdown(signal_dict, closed_pair_trades, fee_percentage: float
 
 
 def get_drawdown(df):
-    cummax = df["cumprod"].cummax()
-    df["drawdown"] = (df["cumprod"] - cummax) / cummax
+    cummax = df["value"].cummax()
+    df["drawdown"] = (df["value"] - cummax) / cummax
     return df["drawdown"].min()
 
 
@@ -27,7 +27,7 @@ def get_inposition_df(trades_closed_open, signal_dict):
     df["in_position"] = 0
 
     for open, close in trades_closed_open:
-        df.loc[open: close]["in_position"] = 1
+        df.loc[open: close, "in_position"] = 1
 
     return df
 

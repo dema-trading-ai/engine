@@ -8,12 +8,12 @@ from datetime import datetime
 
 import numpy as np
 
+from utils.utils import get_plot_indicators
 from .strategy_definition import StrategyDefinition
 from .cctx_adapter import create_cctx_exchange
 from .currencies import get_currency_symbol
 from .validations import validate_and_read_cli
 from .load_strategy import load_strategy_from_config
-from utils import get_plot_indicators
 
 msec = 1000
 minute = 60 * msec

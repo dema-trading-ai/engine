@@ -5,7 +5,7 @@ from tabulate import tabulate
 import typing
 
 # Files
-from utils import CURRENT_VERSION
+from utils.utils import CURRENT_VERSION
 
 FONT_BOLD = "\033[1m"
 FONT_RESET = "\033[0m"

@@ -9,16 +9,10 @@ from modules.stats.stats_config import StatsConfig
 from modules.stats.trade import Trade, SellReason
 from modules.stats.trading_stats import TradingStats
 from modules.stats.tradingmodule import TradingModule
-from utils import calculate_worth_of_open_trades
 from collections import defaultdict
 
-
-def group_by(arr, key: str):
-    combined = defaultdict(list)
-
-    for item in arr:
-        combined[getattr(item, key)].append(item)
-    return combined
+from utils.dict import group_by
+from utils.utils import calculate_worth_of_open_trades
 
 
 def generate_open_trades_results(open_trades: [Trade]) -> list:
@@ -198,7 +192,8 @@ class StatsModule:
         trades_per_coin = group_by(closed_trades, "pair")
 
         for key, closed_pair_trades in trades_per_coin.items():
-            per_coin_stats[key]["max_seen_ratio"] = get_max_seen_drawdown(self.frame_with_signals[key], closed_pair_trades, self.config.fee)
+            per_coin_stats[key]["max_seen_ratio"] = get_max_seen_drawdown(self.frame_with_signals[key],
+                                                                          closed_pair_trades, self.config.fee)
 
         for trade in closed_trades:
 

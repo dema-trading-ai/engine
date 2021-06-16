@@ -11,7 +11,6 @@ from pandas import DataFrame
 
 # Files
 from modules.setup.config import ConfigModule
-from utils import df_to_dict, dict_to_df, get_ohlcv_indicators
 
 # ======================================================================
 # DataModule is responsible for downloading OHLCV data, preparing it
@@ -19,6 +18,7 @@ from utils import df_to_dict, dict_to_df, get_ohlcv_indicators
 #
 # © 2021 DemaTrading.ai
 # ======================================================================
+from utils.utils import get_ohlcv_indicators, dict_to_df, df_to_dict
 
 msec = 1000
 minute = 60 * msec
