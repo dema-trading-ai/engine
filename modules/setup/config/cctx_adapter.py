@@ -1,4 +1,4 @@
-import ccxt
+import ccxt.async_support as ccxt
 
 from modules.setup.config.Exchanges import Exchange
 
