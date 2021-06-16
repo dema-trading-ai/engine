@@ -1,15 +1,24 @@
-from collections import defaultdict
 from datetime import datetime, timedelta
 from tqdm import tqdm
 import numpy as np
 
 from modules.output.results import CoinInsights, MainResults, OpenTradeResult
 from modules.pairs_data import PairsData
+from modules.stats.drawdown import get_max_seen_drawdown
 from modules.stats.stats_config import StatsConfig
 from modules.stats.trade import Trade, SellReason
 from modules.stats.trading_stats import TradingStats
 from modules.stats.tradingmodule import TradingModule
 from utils import calculate_worth_of_open_trades
+from collections import defaultdict
+
+
+def group_by(arr, key: str):
+    combined = defaultdict(list)
+
+    for item in arr:
+        combined[getattr(item, key)].append(item)
+    return combined
 
 
 def generate_open_trades_results(open_trades: [Trade]) -> list:
@@ -170,7 +179,7 @@ class StatsModule:
         return new_stats
 
     def calculate_statistics_per_coin(self, closed_trades):
-        trades_per_coin = {
+        per_coin_stats = {
             pair: {
                 'cum_profit_prct': 0,
                 'total_profit_ratio': 1.0,
@@ -186,44 +195,35 @@ class StatsModule:
             } for pair in self.frame_with_signals.keys()
         }
 
+        trades_per_coin = group_by(closed_trades, "pair")
+
+        for key, closed_pair_trades in trades_per_coin.items():
+            per_coin_stats[key]["max_seen_ratio"] = get_max_seen_drawdown(self.frame_with_signals[key], closed_pair_trades, self.config.fee)
+
         for trade in closed_trades:
 
             # Update average profit
-            trades_per_coin[trade.pair]['cum_profit_prct'] += (trade.profit_ratio - 1) * 100
+            per_coin_stats[trade.pair]['cum_profit_prct'] += (trade.profit_ratio - 1) * 100
 
             # Update total profit percentage and amount
-            trades_per_coin[trade.pair]['total_profit_ratio'] = \
-                trades_per_coin[trade.pair]['total_profit_ratio'] * trade.profit_ratio
+            per_coin_stats[trade.pair]['total_profit_ratio'] = \
+                per_coin_stats[trade.pair]['total_profit_ratio'] * trade.profit_ratio
 
             # Update profit and amount of trades
-            trades_per_coin[trade.pair]['total_profit_amount'] += trade.profit_dollar
-            trades_per_coin[trade.pair]['amount_of_trades'] += 1
-            trades_per_coin[trade.pair]['sell_reasons'][trade.sell_reason] += 1
-
-            # Check for max seen drawdown
-            max_seen_drawdown_ratio = trades_per_coin[trade.pair]['drawdown_ratio'] * trade.max_seen_drawdown
-            if max_seen_drawdown_ratio < trades_per_coin[trade.pair]['max_seen_ratio']:
-                trades_per_coin[trade.pair]['max_seen_ratio'] = max_seen_drawdown_ratio
-
-            # Update curr and total ratio
-            trades_per_coin[trade.pair]['drawdown_ratio'] *= trade.profit_ratio
-            trades_per_coin[trade.pair]['total_ratio'] *= trade.profit_ratio
+            per_coin_stats[trade.pair]['total_profit_amount'] += trade.profit_dollar
+            per_coin_stats[trade.pair]['amount_of_trades'] += 1
+            per_coin_stats[trade.pair]['sell_reasons'][trade.sell_reason] += 1
 
             # Check for max realised drawdown
-            if trades_per_coin[trade.pair]['drawdown_ratio'] < trades_per_coin[trade.pair]['max_realised_ratio']:
-                trades_per_coin[trade.pair]['max_realised_ratio'] = trades_per_coin[trade.pair]['drawdown_ratio']
-
-            # Check for new ratio high
-            if trades_per_coin[trade.pair]['total_ratio'] > trades_per_coin[trade.pair]['peak_ratio']:
-                trades_per_coin[trade.pair]['peak_ratio'] = trades_per_coin[trade.pair]['total_ratio']
-                trades_per_coin[trade.pair]['drawdown_ratio'] = 1.0  # reset ratio
+            if per_coin_stats[trade.pair]['drawdown_ratio'] < per_coin_stats[trade.pair]['max_realised_ratio']:
+                per_coin_stats[trade.pair]['max_realised_ratio'] = per_coin_stats[trade.pair]['drawdown_ratio']
 
             # Sum total times
-            if trades_per_coin[trade.pair]['total_duration'] is None:
-                trades_per_coin[trade.pair]['total_duration'] = trade.closed_at - trade.opened_at
+            if per_coin_stats[trade.pair]['total_duration'] is None:
+                per_coin_stats[trade.pair]['total_duration'] = trade.closed_at - trade.opened_at
             else:
-                trades_per_coin[trade.pair]['total_duration'] += trade.closed_at - trade.opened_at
-        return trades_per_coin
+                per_coin_stats[trade.pair]['total_duration'] += trade.closed_at - trade.opened_at
+        return per_coin_stats
 
     # Method for calculating max seen drawdown
     # Max seen = visual drawdown (if you plot it). This drawdown might not be realised.
@@ -242,7 +242,7 @@ class StatsModule:
             "peak": 0,
             "bottom": 0
         }
-        temp_seen_drawdown = max_seen_drawdown.copy() 
+        temp_seen_drawdown = max_seen_drawdown.copy()
 
         # Find dictionaries with capital info at certain ticks (open trades + budget)
         lowest_total_capital_open_trades_at_tick = self.trading_module.lowest_total_capital_open_trades
@@ -262,9 +262,9 @@ class StatsModule:
         for tick in ticks:
             # Find lowest and maximum capital at tick
             lowest_portfolio = lowest_total_capital_open_trades_at_tick.get(tick, 0) \
-                + total_budget_at_tick.get(tick,0)
+                               + total_budget_at_tick.get(tick, 0)
             maximum_portfolio = highest_total_capital_open_trades_at_tick.get(tick, 0) \
-                + total_budget_at_tick.get(tick, 0)
+                                + total_budget_at_tick.get(tick, 0)
 
             # Check for new drawdown period
             if maximum_portfolio > temp_seen_drawdown['peak']:
