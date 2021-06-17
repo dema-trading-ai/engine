@@ -85,7 +85,7 @@ def test_open_trades_drawdown_positive():
 
     # Assert
     assert math.isclose(stats.open_trade_res[0].max_seen_drawdown, -1)
-    assert stats.main_results.max_seen_drawdown == stats.open_trade_res[0].max_seen_drawdown
+    assert math.isclose(stats.main_results.max_seen_drawdown, stats.open_trade_res[0].max_seen_drawdown)
 
 
 def test_open_trades_drawdown_negative():

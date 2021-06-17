@@ -31,7 +31,7 @@ class TradingModule:
         self.closed_trades = []
         self.open_trades = []
         self.budget_per_timestamp = {}
-        self.capital_per_timestamp = {}
+        self.capital_per_timestamp = {0: self.budget}
         self.total_capital_open_trades = {}
         self.lowest_total_capital_open_trades = {}
         self.highest_total_capital_open_trades = {}

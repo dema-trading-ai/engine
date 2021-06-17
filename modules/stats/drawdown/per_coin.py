@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
 from modules.stats.trade import Trade
@@ -35,6 +36,10 @@ def trade_to_open_close(closed_pair_trades):
 
 def apply_worth_change(df, trades_open_closed):
     for open, close in trades_open_closed:
+        # skip the first row of each trade
+        idx = np.searchsorted(df.index, open)
+        open = df.index[max(0, idx + 1)]
+
         df.loc[open: close, "worth_change"] = (df["close"] / df["close"].shift(1))
     df["worth_change"] = df["worth_change"].fillna(1)
 
