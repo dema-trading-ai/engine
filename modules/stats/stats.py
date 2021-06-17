@@ -279,11 +279,11 @@ class StatsModule:
     def generate_open_trades_results(self, open_trades: [Trade]) -> list:
         open_trade_stats = []
         for trade in open_trades:
-            get_max_seen_drawdown_per_trade(self.frame_with_signals[trade.pair], trade, self.config.fee)
+            max_seen_drawdown = get_max_seen_drawdown_per_trade(self.frame_with_signals[trade.pair], trade, self.config.fee)
             open_trade_res = OpenTradeResult(pair=trade.pair,
                                              curr_profit_percentage=(trade.profit_ratio - 1) * 100,
                                              curr_profit=trade.profit_dollar,
-                                             max_seen_drawdown=(trade.max_seen_drawdown - 1) * 100,
+                                             max_seen_drawdown=(max_seen_drawdown - 1) * 100,
                                              opened_at=trade.opened_at)
 
             open_trade_stats.append(open_trade_res)
