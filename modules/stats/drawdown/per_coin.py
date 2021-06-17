@@ -10,7 +10,8 @@ def get_max_seen_drawdown_per_coin(signal_dict, closed_pair_trades: [Trade], fee
     values = signal_dict.values()
 
     df = pd.DataFrame(values).set_index("time")
-    df = apply_add_initializer_row(df)
+    # Copy first row to zero index to save asset value before applying fees
+    df = with_copied_initial_row(df)
 
     apply_worth_change(df, trades_open_closed)
     apply_fee_at_position_changed(df, fee_percentage, trades_open_closed)
@@ -20,11 +21,10 @@ def get_max_seen_drawdown_per_coin(signal_dict, closed_pair_trades: [Trade], fee
     return get_max_drawdown_ratio(df)
 
 
-def apply_add_initializer_row(df):
-    head = df.head(1)
+def with_copied_initial_row(df) -> pd.DataFrame:
+    head = df.head(1).copy()
     head.rename(index=lambda s: 0, inplace=True)
-    df = pd.concat([head, df])
-    return df
+    return pd.concat([head, df])
 
 
 def trade_to_open_close(closed_pair_trades):
