@@ -45,6 +45,7 @@ class Trade:
         self.max_seen_drawdown = 1.0  # ratio
         self.starting_amount = spend_amount
         self.capital = spend_amount - (spend_amount * fee)  # apply fee
+        self.capital_per_timestamp = {}
         self.currency_amount = (self.capital / ohlcv['close'])
 
         # Variables for max seen drawdown

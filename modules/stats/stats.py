@@ -6,6 +6,7 @@ from modules.output.results import CoinInsights, MainResults, OpenTradeResult
 from modules.pairs_data import PairsData
 from modules.stats.drawdown.per_coin import get_max_seen_drawdown_per_coin
 from modules.stats.drawdown.for_portfolio import get_max_seen_drawdown_for_portfolio
+from modules.stats.drawdown.per_trade import get_max_seen_drawdown_per_trade
 from modules.stats.stats_config import StatsConfig
 from modules.stats.trade import Trade, SellReason
 from modules.stats.trading_stats import TradingStats
@@ -15,18 +16,6 @@ from collections import defaultdict
 from utils.dict import group_by
 from utils.utils import calculate_worth_of_open_trades
 
-
-def generate_open_trades_results(open_trades: [Trade]) -> list:
-    open_trade_stats = []
-    for trade in open_trades:
-        open_trade_res = OpenTradeResult(pair=trade.pair,
-                                         curr_profit_percentage=(trade.profit_ratio - 1) * 100,
-                                         curr_profit=trade.profit_dollar,
-                                         max_seen_drawdown=(trade.max_seen_drawdown - 1) * 100,
-                                         opened_at=trade.opened_at)
-
-        open_trade_stats.append(open_trade_res)
-    return open_trade_stats
 
 
 def calculate_best_worst_trade(closed_trades):
@@ -69,7 +58,7 @@ class StatsModule:
         trading_module = self.trading_module
         coin_res = self.generate_coin_results(trading_module.closed_trades, market_change)
         best_trade_ratio, worst_trade_ratio = calculate_best_worst_trade(trading_module.closed_trades)
-        open_trade_res = generate_open_trades_results(trading_module.open_trades)
+        open_trade_res = self.generate_open_trades_results(trading_module.open_trades)
         main_results = self.generate_main_results(
             trading_module.open_trades,
             trading_module.closed_trades,
@@ -286,6 +275,19 @@ class StatsModule:
         for trade in open_trades:
             # Save buy/sell signals
             self.buypoints[trade.pair].append(trade.opened_at)
+
+    def generate_open_trades_results(self, open_trades: [Trade]) -> list:
+        open_trade_stats = []
+        for trade in open_trades:
+            get_max_seen_drawdown_per_trade(self.frame_with_signals[trade.pair], trade, self.config.fee)
+            open_trade_res = OpenTradeResult(pair=trade.pair,
+                                             curr_profit_percentage=(trade.profit_ratio - 1) * 100,
+                                             curr_profit=trade.profit_dollar,
+                                             max_seen_drawdown=(trade.max_seen_drawdown - 1) * 100,
+                                             opened_at=trade.opened_at)
+
+            open_trade_stats.append(open_trade_res)
+        return open_trade_stats
 
 
 def get_market_change(ticks: list, pairs: list, data_dict: dict) -> dict:
