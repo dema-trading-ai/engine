@@ -97,10 +97,9 @@ class StatsModule:
         overall_profit_percentage = ((budget - self.config.starting_capital) / self.config.starting_capital) * 100
 
         # Find max seen and realised drawdown
-        max_seen_drawdown = self.calculate_max_seen_drawdown()
         max_realised_drawdown = self.calculate_max_realised_drawdown()
 
-        max_seen_drawdown_new = get_max_seen_drawdown_for_portfolio(self.trading_module.capital_per_timestamp)
+        max_seen_drawdown = get_max_seen_drawdown_for_portfolio(self.trading_module.capital_per_timestamp)
 
         # Update variables for prettier terminal output
         drawdown_from = datetime.fromtimestamp(max_seen_drawdown['from'] / 1000).strftime('%Y-%m-%d ''%H:%M') \
@@ -139,7 +138,7 @@ class StatsModule:
                            max_realised_drawdown=(max_realised_drawdown['max_drawdown'] - 1) * 100,
                            worst_trade_profit_percentage=worst_trade_profit_percentage,
                            best_trade_profit_percentage=best_trade_profit_percentage,
-                           max_seen_drawdown=max_seen_drawdown_new * 100,
+                           max_seen_drawdown=max_seen_drawdown['drawdown'] * 100,
                            drawdown_from=drawdown_from,
                            drawdown_to=drawdown_to,
                            drawdown_at=drawdown_at,
@@ -222,73 +221,6 @@ class StatsModule:
             else:
                 per_coin_stats[trade.pair]['total_duration'] += trade.closed_at - trade.opened_at
         return per_coin_stats
-
-    # Method for calculating max seen drawdown
-    # Max seen = visual drawdown (if you plot it). This drawdown might not be realised.
-
-    def calculate_max_seen_drawdown(self) -> dict:
-        """
-        Method calculates max seen drawdown based on the saved budget / value changes
-        :return: returns max_seen_drawdown as a dictionary
-        :rtype: dictionary
-        """
-        max_seen_drawdown = {
-            "from": 0,
-            "to": 0,
-            "at": 0,
-            "drawdown": 1,  # ratio
-            "peak": 0,
-            "bottom": 0
-        }
-        temp_seen_drawdown = max_seen_drawdown.copy()
-
-        # Find dictionaries with capital info at certain ticks (open trades + budget)
-        lowest_total_capital_open_trades_at_tick = self.trading_module.lowest_total_capital_open_trades
-        highest_total_capital_open_trades_at_tick = self.trading_module.highest_total_capital_open_trades
-        total_budget_at_tick = self.trading_module.budget_per_timestamp
-
-        # Find ticks for total capital (low/max) of open trades
-        open_trade_ticks = list(lowest_total_capital_open_trades_at_tick.keys())
-
-        # Find ticks for total budget
-        budget_ticks = list(total_budget_at_tick.keys())
-
-        # Combine all possible ticks
-        ticks = open_trade_ticks + budget_ticks
-        ticks.sort()
-
-        for tick in ticks:
-            # Find lowest and maximum capital at tick
-            lowest_portfolio = lowest_total_capital_open_trades_at_tick.get(tick, 0) \
-                               + total_budget_at_tick.get(tick, 0)
-            maximum_portfolio = highest_total_capital_open_trades_at_tick.get(tick, 0) \
-                                + total_budget_at_tick.get(tick, 0)
-
-            # Check for new drawdown period
-            if maximum_portfolio > temp_seen_drawdown['peak']:
-                # If last drawdown was larger than max drawdown, update max drawdown
-                if temp_seen_drawdown['drawdown'] < max_seen_drawdown['drawdown']:
-                    max_seen_drawdown = temp_seen_drawdown.copy()
-
-                # Reset temp_seen_drawdown stats
-                temp_seen_drawdown['peak'] = maximum_portfolio
-                temp_seen_drawdown['bottom'] = maximum_portfolio
-                temp_seen_drawdown['drawdown'] = 1.0  # ratio w/ respect to peak
-                temp_seen_drawdown['from'] = tick
-
-            # Check if drawdown reached new bottom
-            if lowest_portfolio < temp_seen_drawdown['bottom']:
-                temp_seen_drawdown['bottom'] = lowest_portfolio
-                temp_seen_drawdown['drawdown'] = temp_seen_drawdown['bottom'] / temp_seen_drawdown['peak']
-                temp_seen_drawdown['at'] = tick
-
-            # Update drawdown period
-            temp_seen_drawdown['to'] = tick
-
-        # If last drawdown was larger than max drawdown, update max drawdown
-        if temp_seen_drawdown['drawdown'] < max_seen_drawdown['drawdown']:
-            max_seen_drawdown = temp_seen_drawdown.copy()
-        return max_seen_drawdown
 
     def calculate_max_realised_drawdown(self) -> dict:
         """
