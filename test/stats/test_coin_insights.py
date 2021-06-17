@@ -319,8 +319,8 @@ def test_drawdown_multiple_trades():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_20_down_75_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade()
 
     # Act
     stats = fixture.create().analyze()

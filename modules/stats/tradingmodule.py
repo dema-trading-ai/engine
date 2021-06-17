@@ -31,6 +31,8 @@ class TradingModule:
         self.closed_trades = []
         self.open_trades = []
         self.budget_per_timestamp = {}
+        self.capital_per_timestamp = {}
+        self.total_capital_open_trades = {}
         self.lowest_total_capital_open_trades = {}
         self.highest_total_capital_open_trades = {}
         self.realised_profits = []
@@ -40,18 +42,17 @@ class TradingModule:
         trade = self.find_open_trade(ohlcv['pair'])
         if trade:
             trade.update_stats(ohlcv)
-            closed = self.open_trade_tick(ohlcv, trade)
-            if not closed:
-                self.update_budget_per_timestamp(ohlcv)
+            self.open_trade_tick(ohlcv, trade)
         else:
             self.no_trade_tick(ohlcv, data_dict)
-            self.update_budget_per_timestamp(ohlcv)
+        self.update_budget_per_timestamp(ohlcv)
+        self.update_capital_per_timestamp(ohlcv)
 
     def no_trade_tick(self, ohlcv: dict, data_dict: dict) -> None:
         if ohlcv['buy'] == 1:
             self.open_trade(ohlcv, data_dict)
 
-    def open_trade_tick(self, ohlcv: dict, trade: Trade) -> bool:
+    def open_trade_tick(self, ohlcv: dict, trade: Trade):
         stoploss_reached = self.check_stoploss_open_trade(trade, ohlcv)
         roi_reached = self.check_roi_open_trade(trade, ohlcv)
 
@@ -65,11 +66,9 @@ class TradingModule:
             self.close_trade(trade, reason=SellReason.SELL_SIGNAL, ohlcv=ohlcv)
         else:
             self.update_open_trades_value_per_timestamp(trade, ohlcv)
-            return False
-        self.update_open_trades_value_per_timestamp(trade, ohlcv)
-        return True
 
     def close_trade(self, trade: Trade, reason: SellReason, ohlcv: dict) -> None:
+
         date = datetime.fromtimestamp(ohlcv['time'] / 1000)
         trade.close_trade(reason, date)
 
@@ -177,18 +176,17 @@ class TradingModule:
             high_seen_capital = trade.candle_open * trade.currency_amount
             self.highest_total_capital_open_trades[ohlcv['time']] = \
                 self.highest_total_capital_open_trades.get(ohlcv['time'], 0) + high_seen_capital
-            
+
+        # Update seen capital dict, on candle close value
+        self.total_capital_open_trades[ohlcv['time']] = \
+            self.total_capital_open_trades.get(ohlcv['time'], 0) + trade.capital
 
     def update_budget_per_timestamp(self, ohlcv: dict) -> None:
-        """
-        Used for tracking total budget per timestamp, used to be able to calculate
-        max seen drawdown
-        :param ohlcv: dictionary with OHLCV data for current tick
-        :type ohlcv: dict
-        :return: None
-        :rtype: None
-        """
         self.budget_per_timestamp[ohlcv['time']] = self.budget
+
+    def update_capital_per_timestamp(self, ohlcv: dict) -> None:
+        self.capital_per_timestamp[ohlcv['time']] = \
+            self.budget_per_timestamp[ohlcv['time']] + self.total_capital_open_trades.get(ohlcv['time'], 0)
 
     def update_realised_profit(self, trade: Trade) -> None:
         self.realised_profit += trade.profit_dollar

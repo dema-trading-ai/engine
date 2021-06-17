@@ -5,6 +5,7 @@ import numpy as np
 from modules.output.results import CoinInsights, MainResults, OpenTradeResult
 from modules.pairs_data import PairsData
 from modules.stats.drawdown.per_coin import get_max_seen_drawdown_per_coin
+from modules.stats.drawdown.for_portfolio import get_max_seen_drawdown_for_portfolio
 from modules.stats.stats_config import StatsConfig
 from modules.stats.trade import Trade, SellReason
 from modules.stats.trading_stats import TradingStats
@@ -99,6 +100,8 @@ class StatsModule:
         max_seen_drawdown = self.calculate_max_seen_drawdown()
         max_realised_drawdown = self.calculate_max_realised_drawdown()
 
+        max_seen_drawdown_new = get_max_seen_drawdown_for_portfolio(self.trading_module.capital_per_timestamp)
+
         # Update variables for prettier terminal output
         drawdown_from = datetime.fromtimestamp(max_seen_drawdown['from'] / 1000).strftime('%Y-%m-%d ''%H:%M') \
             if max_seen_drawdown['from'] != 0 else '-'
@@ -136,7 +139,7 @@ class StatsModule:
                            max_realised_drawdown=(max_realised_drawdown['max_drawdown'] - 1) * 100,
                            worst_trade_profit_percentage=worst_trade_profit_percentage,
                            best_trade_profit_percentage=best_trade_profit_percentage,
-                           max_seen_drawdown=(max_seen_drawdown["drawdown"] - 1) * 100,
+                           max_seen_drawdown=max_seen_drawdown_new * 100,
                            drawdown_from=drawdown_from,
                            drawdown_to=drawdown_to,
                            drawdown_at=drawdown_at,
