@@ -2,6 +2,7 @@ import math
 
 from modules.stats.trade import SellReason
 from test.stats.stats_test_utils import StatsFixture
+from test.utils.signal_frame import TradeAction
 
 
 def test_fee_equals_stoploss():
@@ -354,3 +355,19 @@ def test_drawdown_multiple_pairs():
 
     assert math.isclose(stats.main_results.max_seen_drawdown, -84.49838188862499)
     assert math.isclose(stats.main_results.max_realised_drawdown, -85.52890115608895)
+
+
+def test_seen_drawdown():
+    """Given 'one trade', 'seen_drawdown' should 'reflect actual'"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals["COIN/BASE"]\
+        .multiply_price(4, TradeAction.BUY)\
+        .multiply_price(0.5)\
+        .multiply_price(1, TradeAction.SELL)
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.coin_res[0].max_seen_drawdown == -50.5

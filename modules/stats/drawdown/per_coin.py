@@ -25,9 +25,9 @@ def trade_to_open_close(closed_pair_trades):
 
 
 def apply_worth_change(df, trades_open_closed):
-    df["worth_change"] = 1
     for open, close in trades_open_closed:
-        df.loc[open: close, "worth_change"] = (df["close"] / df["close"].shift(-1))
+        df.loc[open: close, "worth_change"] = (df["close"] / df["close"].shift(1))
+    df["worth_change"] = df["worth_change"].fillna(1)
 
 
 def apply_fee_at_position_changed(df, fee_percentage, trades_closed_open):
