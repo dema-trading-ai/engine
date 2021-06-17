@@ -18,7 +18,7 @@ from modules.setup.config import ConfigModule
 #
 # © 2021 DemaTrading.ai
 # ======================================================================
-from utils.utils import get_ohlcv_indicators, dict_to_df, df_to_dict
+from utils.utils import get_ohlcv_indicators, str_to_df, df_to_dict
 
 msec = 1000
 minute = 60 * msec
@@ -146,7 +146,7 @@ class DataModule:
             return None
 
         # Convert json to dataframe
-        df = dict_to_df(data)
+        df = str_to_df(data)
 
         # Find correct last tick timestamp
         n_downloaded_candles = (self.config.backtesting_to - self.config.backtesting_from) / self.config.timeframe_ms

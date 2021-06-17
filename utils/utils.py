@@ -52,7 +52,7 @@ def df_to_dict(df: DataFrame) -> dict:
     return df.to_dict('index')
 
 
-def dict_to_df(data: str) -> DataFrame:
+def str_to_df(data: str) -> DataFrame:
     """
     Method turns dictionary into dataframe
     """
