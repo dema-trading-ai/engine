@@ -173,7 +173,6 @@ def test_nr_of_trades_three_coins():
     # Act
     stats = fixture.create().analyze()
 
-
     # Assert
     assert math.isclose(stats.coin_res[0].n_trades, 1)
     assert math.isclose(stats.coin_res[1].n_trades, 0)
@@ -251,13 +250,13 @@ def test_sell_reason_stoploss():
     fixture = StatsFixture(['COIN/BASE'])
 
     fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade()
-    
+
     fixture.trading_module_config.stoploss = -25
     fixture.stats_config.stoploss = -25
 
     # Act
     stats = fixture.create().analyze()
-    
+
     # Assert
     assert stats.coin_res[0].stoploss == 1
 
@@ -275,9 +274,9 @@ def test_drawdown_equality():
 
     # Assert
     assert stats.main_results.max_seen_drawdown == \
-        stats.coin_res[0].max_seen_drawdown
+           stats.coin_res[0].max_seen_drawdown
     assert stats.main_results.max_realised_drawdown == \
-        stats.coin_res[0].max_realised_drawdown
+           stats.coin_res[0].max_realised_drawdown
 
 
 def test_seen_drawdown_equals_realised_drawdown():
@@ -294,7 +293,7 @@ def test_seen_drawdown_equals_realised_drawdown():
 
     # Assert
     assert stats.coin_res[0].max_seen_drawdown == \
-        stats.coin_res[0].max_realised_drawdown
+           stats.coin_res[0].max_realised_drawdown
 
 
 def test_drawdown_simple():
@@ -357,17 +356,33 @@ def test_drawdown_multiple_pairs():
     assert math.isclose(stats.main_results.max_realised_drawdown, -85.52890115608895)
 
 
-def test_seen_drawdown():
+def test_seen_drawdown_up_down():
     """Given 'one trade', 'seen_drawdown' should 'reflect actual'"""
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals["COIN/BASE"]\
-        .multiply_price(4, TradeAction.BUY)\
-        .multiply_price(0.5)\
-        .multiply_price(1, TradeAction.SELL)
+    fixture.frame_with_signals["COIN/BASE"] \
+        .multiply_price(1, TradeAction.BUY) \
+        .multiply_price(4) \
+        .multiply_price(0.1, TradeAction.SELL)
     # Act
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.coin_res[0].max_seen_drawdown == -50.5
+    assert math.isclose(stats.coin_res[0].max_seen_drawdown, -90.1)
+
+
+def test_seen_drawdown_down():
+    """Given 'one trade', 'seen_drawdown' should 'reflect actual'"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals["COIN/BASE"] \
+        .multiply_price(1, TradeAction.BUY) \
+        .multiply_price(0.1, TradeAction.SELL)
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.coin_res[0].max_seen_drawdown == -90.199
