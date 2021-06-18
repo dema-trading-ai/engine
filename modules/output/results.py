@@ -39,20 +39,21 @@ class MainResults:
     worst_trade_profit_percentage: float
     best_trade_profit_percentage: float
     max_seen_drawdown: float
-    drawdown_from: datetime
-    drawdown_to: datetime
-    drawdown_at: datetime
+    drawdown_from: str
+    drawdown_to: str
+    drawdown_at: str
     configured_stoploss: float
     fee: float
     total_fee_amount: float
 
     def show(self, currency_symbol: str):
+
         print("================================================= \n| %sBacktesting Results%s "
               "\n=================================================" % (FONT_BOLD, FONT_RESET))
         print("| Engine version \t\t%s" % CURRENT_VERSION)
         print("| ")
-        print("| Backtesting from: \t\t%s" % self.tested_from)
-        print("| Backtesting to: \t\t%s" % self.tested_to)
+        print("| Backtesting from: \t\t%s" % self.tested_from.strftime('%Y-%m-%d ''%H:%M'))
+        print("| Backtesting to: \t\t%s" % self.tested_to.strftime('%Y-%m-%d ''%H:%M'))
         print("| Max open trades: \t\t%s" % self.max_open_trades)
         print("| Stoploss: \t\t\t%s" % self.configured_stoploss + "\t%")
         print("| ")

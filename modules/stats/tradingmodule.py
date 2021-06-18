@@ -32,10 +32,10 @@ class TradingModule:
         self.open_trades = []
         self.budget_per_timestamp = {}
         self.capital_per_timestamp = {0: self.budget}
+        self.realised_profits_per_timestamp = {0: self.budget}
         self.total_capital_open_trades = {}
         self.lowest_total_capital_open_trades = {}
         self.highest_total_capital_open_trades = {}
-        self.realised_profits = []
         self.total_fee_paid = 0
 
     def tick(self, ohlcv: dict, data_dict: dict) -> None:
@@ -190,4 +190,4 @@ class TradingModule:
 
     def update_realised_profit(self, trade: Trade) -> None:
         self.realised_profit += trade.profit_dollar
-        self.realised_profits.append(self.realised_profit)
+        self.realised_profits_per_timestamp[int(datetime.timestamp(trade.closed_at)*1000)] = self.realised_profit
