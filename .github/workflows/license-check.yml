@@ -22,7 +22,7 @@ jobs:
           strategy-ini-file: ./licensecheck.toml
           requirements-txt-file: ./requirements.txt
       - name: License Checker CI
-          uses: andersy005/gh-action-py-liccheck@main
-          with:
-            strategy-ini-file: ./licensecheck.toml
-            requirements-txt-file: ./ci-requirements.txt
+        uses: andersy005/gh-action-py-liccheck@main
+        with:
+          strategy-ini-file: ./licensecheck.toml
+          requirements-txt-file: ./ci-requirements.txt
