@@ -8,3 +8,4 @@ pytest==6.2.2
 tqdm==4.58.0
 plotly==4.14.3
 python-rapidjson==1.0
+rich==10.3.0

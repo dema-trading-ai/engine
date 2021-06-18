@@ -80,9 +80,9 @@ class ConfigModule(object):
 
 def read_config(config_path: str) -> dict:
     print(
-        '====================================== \n'
+        '======================================== \n'
         ' Starting up DemaTrading.ai BACKTESTING \n'
-        '======================================')
+        '========================================')
     try:
         with open(config_path or "config.json", 'r') as configfile:
             data = configfile.read()
