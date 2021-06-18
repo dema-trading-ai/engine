@@ -11,7 +11,6 @@ from pandas import DataFrame
 
 # Files
 from modules.setup.config import ConfigModule
-from utils import df_to_dict, dict_to_df, get_ohlcv_indicators
 import asyncio
 
 # ======================================================================
@@ -20,7 +19,7 @@ import asyncio
 #
 # © 2021 DemaTrading.ai
 # ======================================================================
-from utils.utils import get_ohlcv_indicators, str_to_df, df_to_dict
+from utils.utils import str_to_df, df_to_dict, get_ohlcv_indicators
 
 msec = 1000
 minute = 60 * msec
