@@ -19,12 +19,10 @@ jobs:
       - name: License Checker SRC
         uses: andersy005/gh-action-py-liccheck@main
         with:
-          strategy-ini-file: ./licensecheck.toml
           requirements-txt-file: ./requirements.txt
           reporting-txt-file: ./lic_reporting.txt
       - name: License Checker CI
         uses: andersy005/gh-action-py-liccheck@main
         with:
-          strategy-ini-file: ./licensecheck.toml
           requirements-txt-file: ./ci-requirements.txt
           reporting-txt-file: ./lic_reporting.txt
