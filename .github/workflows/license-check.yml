@@ -1,6 +1,6 @@
 # Triggers the Github Workflow to increase the version numher and publish an update to the Github Package.
 
-name: DockerHub Stable Deployment
+name: Repository license check
 
 on:
   push:
@@ -21,8 +21,10 @@ jobs:
         with:
           strategy-ini-file: ./licensecheck.toml
           requirements-txt-file: ./requirements.txt
+          reporting-txt-file: ./lic_reporting.txt
       - name: License Checker CI
         uses: andersy005/gh-action-py-liccheck@main
         with:
           strategy-ini-file: ./licensecheck.toml
           requirements-txt-file: ./ci-requirements.txt
+          reporting-txt-file: ./lic_reporting.txt
