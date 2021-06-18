@@ -6,7 +6,7 @@ from modules.stats.trade import Trade
 
 
 def get_max_seen_drawdown_per_coin(signal_dict, closed_pair_trades: [Trade], fee_percentage: float):
-    trades_open_closed = trade_to_open_close(closed_pair_trades)
+    trades_open_closed_timestamps = map_trades_to_open_close_timestamps(closed_pair_trades)
 
     values = signal_dict.values()
     df = pd.DataFrame(values).set_index("time")
@@ -14,8 +14,8 @@ def get_max_seen_drawdown_per_coin(signal_dict, closed_pair_trades: [Trade], fee
     # Copy first row to zero index to save asset value before applying fees
     df = with_copied_initial_row(df)
 
-    apply_worth_change(df, trades_open_closed)
-    apply_fee_at_position_changed(df, fee_percentage, trades_open_closed)
+    apply_profit_ratio(df, trades_open_closed_timestamps)
+    add_trade_fee(df, fee_percentage, trades_open_closed_timestamps)
 
     df["value"] = df["worth_change"].cumprod()
 
@@ -28,23 +28,23 @@ def with_copied_initial_row(df) -> pd.DataFrame:
     return pd.concat([head, df])
 
 
-def trade_to_open_close(closed_pair_trades):
+def map_trades_to_open_close_timestamps(closed_pair_trades):
     trades_closed_open = [(int(trade.opened_at.timestamp() * 1000), int(trade.closed_at.timestamp() * 1000)) for trade
                           in closed_pair_trades]
     return trades_closed_open
 
 
-def apply_worth_change(df, trades_open_closed):
-    for open, close in trades_open_closed:
+def apply_profit_ratio(df, trades_open_closed):
+    for open_timestamp, close in trades_open_closed:
         # skip the first row of each trade
-        idx = np.searchsorted(df.index, open)
-        open = df.index[max(0, idx + 1)]
+        idx = np.searchsorted(df.index, open_timestamp)
+        open_timestamp = df.index[max(0, idx + 1)]
 
-        df.loc[open: close, "worth_change"] = (df["close"] / df["close"].shift(1))
+        df.loc[open_timestamp: close, "worth_change"] = (df["close"] / df["close"].shift(1))
     df["worth_change"] = df["worth_change"].fillna(1)
 
 
-def apply_fee_at_position_changed(df, fee_percentage, trades_closed_open):
+def add_trade_fee(df, fee_percentage, trades_closed_open):
     fee_ratio = 1 - fee_percentage / 100
     for open, close in trades_closed_open:
         df.loc[open, "worth_change"] *= fee_ratio
