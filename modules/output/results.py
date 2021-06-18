@@ -63,7 +63,7 @@ class MainResults:
         print("| Overall profit: \t\t%s" %
               round(self.overall_profit_percentage, 2) + '\t%')
         print("| Amount of trades: \t\t%s" % self.n_trades)
-        print("| Average trades per day: \t\t%s" % round(self.n_average_trades, 2))
+        print("| Average trades per day: \t%s" % round(self.n_average_trades, 2))
         print("| Left-open trades: \t\t%s" % self.n_left_open_trades)
         print("| Trades with loss: \t\t%s" % self.n_trades_with_loss)
         print("| Most consecutive losses: \t%s" % self.n_consecutive_losses)
@@ -115,13 +115,7 @@ class CoinInsights:
                         round(c.avg_profit_percentage, 2),
                         round(c.cum_profit_percentage, 2),
                         round(c.total_profit_percentage, 2),
-                        round(c.profit, 2),
-                        round(c.max_seen_drawdown, 2),
-                        round(c.max_realised_drawdown, 2),
-                        c.avg_trade_duration,
-                        c.roi, 
-                        c.stoploss,
-                        c.sell_signal])
+                        round(c.profit, 2)])
 
         print(tabulate(stats,
                        headers=['Pair',
@@ -130,7 +124,21 @@ class CoinInsights:
                                 'avg profit (%)',
                                 'cum profit (%)',
                                 'total profit (%)',
-                                f' profit ({currency_symbol})',
+                                f' profit ({currency_symbol})'],
+                       tablefmt='pretty'))
+
+        stats = []
+        for c in instances:
+            stats.append([c.pair,
+                        round(c.max_seen_drawdown, 2),
+                        round(c.max_realised_drawdown, 2),
+                        c.avg_trade_duration,
+                        c.roi,
+                        c.stoploss,
+                        c.sell_signal])
+
+        print(tabulate(stats,
+                       headers=['Pair',
                                 'max seen drawdown %',
                                 'max realised drawdown %',
                                 'avg trade duration',
@@ -156,10 +164,12 @@ class OpenTradeResult:
             rows.append([res.pair,
                          round(res.curr_profit_percentage, 2),
                          round(res.curr_profit, 2),
+                         round(res.max_seen_drawdown, 2),
                          res.opened_at])
         print(tabulate(rows,
                        headers=['Pair',
                                 'cur. profit (%)',
                                 f' cur. profit ({currency_symbol})',
+                                'max seen drawdown',
                                 'opened at'],
                        tablefmt='pretty'))
