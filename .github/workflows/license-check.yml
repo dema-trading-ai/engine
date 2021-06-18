@@ -1,0 +1,30 @@
+# Triggers the Github Workflow to increase the version numher and publish an update to the Github Package.
+
+name: DockerHub Stable Deployment
+
+on:
+  push:
+    branches:
+      - *
+  pull_request:
+    branches:
+      - development
+      - main
+
+jobs:
+  check-packages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
+      - name: License Checker SRC
+        uses: andersy005/gh-action-py-liccheck@main
+        with:
+          strategy-ini-file: ./licensecheck.toml
+          requirements-txt-file: ./requirements.txt
+      - name: License Checker CI
+          uses: andersy005/gh-action-py-liccheck@main
+          with:
+            strategy-ini-file: ./licensecheck.toml
+            requirements-txt-file: ./ci-requirements.txt
