@@ -181,42 +181,6 @@ def test_multiple_periods_seen_drawdown():
     assert math.isclose(stats.main_results.max_seen_drawdown, -75.4975)
 
 
-
-# def test_drawdown_equality():
-#     """Given one coin, 'max seen/real drawdown' from main results should be equal
-#     to that of the coin insights"""
-#     # Arrange
-#     fixture = StatsFixture(['COIN/BASE'])
-#
-#     fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_one_trade()
-#
-#     # Act
-#     stats = fixture.create().analyze()
-#
-#     # Assert
-#     assert stats.main_results.max_seen_drawdown == \
-#            stats.coin_res[0].max_seen_drawdown
-#     assert stats.main_results.max_realised_drawdown == \
-#            stats.coin_res[0].max_realised_drawdown
-
-
-# def test_seen_drawdown_equals_realised_drawdown():
-#     """Given one coin, 'max seen drawdown' should be the
-#     lowest seen drawdown and 'max realised drawdown' should be the lowest
-#     actual realised drawdown"""
-#     # Arrange
-#     fixture = StatsFixture(['COIN/BASE'])
-#
-#     fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade()
-#
-#     # Act
-#     stats = fixture.create().analyze()
-#
-#     # Assert
-#     assert stats.coin_res[0].max_seen_drawdown == \
-#            stats.coin_res[0].max_realised_drawdown
-
-
 def test_drawdown_simple():
     """Given one coin, 'max seen drawdown' should be the
     lowest seen drawdown and 'max realised drawdown' should be the lowest
@@ -231,7 +195,6 @@ def test_drawdown_simple():
 
     # Assert
     assert math.isclose(stats.coin_res[0].max_seen_drawdown, -80.2)
-    # assert math.isclose(stats.coin_res[0].max_realised_drawdown, -60.796)
 
 
 def test_drawdown_multiple_peaks():
@@ -247,35 +210,29 @@ def test_drawdown_multiple_peaks():
 
     # Assert
     assert math.isclose(stats.coin_res[0].max_seen_drawdown, -75.25)
-    # assert math.isclose(stats.coin_res[0].max_realised_drawdown, -90.3940399)
 
 
 def test_drawdown_multiple_pairs():
     """Given multiple pairs, 'max seen drawdown' should be the lowest seen drawdown
     of the different pairs combined"""
     # Arrange
-    # fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE'])
-    fixture = StatsFixture(['COIN/BASE'])
+    fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE'])
 
     fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_no_trades()
     fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_one_trade()
-    #
-    # fixture.frame_with_signals['COIN2/BASE'].test_scenario_up_100_down_20_down_75_three_trades()
-    # fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_up_100_down_20_down_75_three_trades()
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
 
     # Act
     stats = fixture.create().analyze()
 
     # Assert
     assert math.isclose(stats.coin_res[0].max_seen_drawdown, -90.3940399)
-    # assert math.isclose(stats.coin_res[0].max_realised_drawdown, -90.3940399)
 
-    # assert math.isclose(stats.coin_res[1].max_seen_drawdown, -83.22282373767418)
-    # # assert math.isclose(stats.coin_res[1].max_realised_drawdown, -83.05335731078199)
-    #
-    # assert math.isclose(stats.main_results.max_seen_drawdown, -84.49838188862499)
-    # assert math.isclose(stats.main_results.max_realised_drawdown, -85.52890115608895)
+    assert math.isclose(stats.coin_res[1].max_seen_drawdown, -83.22282373767418)
+
+    assert math.isclose(stats.main_results.max_seen_drawdown, -75.742525)
 
 
 def test_seen_drawdown_up_down():
