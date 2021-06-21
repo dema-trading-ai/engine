@@ -2,12 +2,7 @@ import pandas as pd
 
 
 def get_max_seen_drawdown_for_portfolio(capital_per_timestamp: dict):
-    max_seen_drawdown = {
-        "from": 0,
-        "to": 0,
-        "at": 0,
-        "drawdown": 1.0  # ratio
-    }
+    max_seen_drawdown = {}
 
     df = pd.DataFrame.from_dict(capital_per_timestamp, columns=['value'], orient='index')
     df["drawdown"] = df["value"] / df["value"].cummax()
@@ -20,5 +15,7 @@ def get_max_seen_drawdown_for_portfolio(capital_per_timestamp: dict):
 
     if len(df_next_peak) > 0:
         max_seen_drawdown["to"] = df_next_peak.index[0]
+    else:
+        max_seen_drawdown["to"] = 0
 
     return max_seen_drawdown
