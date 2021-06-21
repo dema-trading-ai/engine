@@ -17,7 +17,7 @@ def get_max_seen_drawdown_per_coin(signal_dict, closed_pair_trades: [Trade], fee
     apply_profit_ratio(df, trades_open_closed_timestamps)
     add_trade_fee(df, fee_percentage, trades_open_closed_timestamps)
 
-    df["value"] = df["worth_change"].cumprod()
+    df["value"] = df["profit_ratio"].cumprod()
 
     return get_max_drawdown_ratio(df)
 
@@ -40,12 +40,12 @@ def apply_profit_ratio(df, trades_open_closed):
         idx = np.searchsorted(df.index, open_timestamp)
         open_timestamp = df.index[max(0, idx + 1)]
 
-        df.loc[open_timestamp: close, "worth_change"] = (df["close"] / df["close"].shift(1))
-    df["worth_change"] = df["worth_change"].fillna(1)
+        df.loc[open_timestamp: close, "profit_ratio"] = (df["close"] / df["close"].shift(1))
+    df["profit_ratio"] = df["profit_ratio"].fillna(1)
 
 
 def add_trade_fee(df, fee_percentage, trades_closed_open):
     fee_ratio = 1 - fee_percentage / 100
     for open, close in trades_closed_open:
-        df.loc[open, "worth_change"] *= fee_ratio
-        df.loc[close, "worth_change"] *= fee_ratio
+        df.loc[open, "profit_ratio"] *= fee_ratio
+        df.loc[close, "profit_ratio"] *= fee_ratio
