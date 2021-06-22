@@ -1,8 +1,6 @@
 import math
 
-from modules.stats.trade import SellReason
 from test.stats.stats_test_utils import StatsFixture
-from test.utils.signal_frame import TradeAction
 
 
 def test_fee_equals_stoploss():

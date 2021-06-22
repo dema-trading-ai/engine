@@ -259,7 +259,7 @@ def test_drawdown_multiple_pairs():
 
     fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
     fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_one_trade()
-    #
+
     fixture.frame_with_signals['COIN2/BASE'].test_scenario_up_100_down_20_down_75_three_trades()
     fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
 

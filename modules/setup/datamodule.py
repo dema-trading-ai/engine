@@ -12,7 +12,7 @@ import asyncio
 
 # Files
 from modules.setup.config import ConfigModule
-from utils.utils import get_ohlcv_indicators, str_to_df, df_to_dict
+from utils.utils import str_to_df, df_to_dict, get_ohlcv_indicators
 
 # ======================================================================
 # DataModule is responsible for downloading OHLCV data, preparing it

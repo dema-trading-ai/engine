@@ -128,7 +128,7 @@ class StatsModule:
                            max_realised_drawdown=max_realised_drawdown['drawdown'] * 100,
                            worst_trade_profit_percentage=worst_trade_profit_percentage,
                            best_trade_profit_percentage=best_trade_profit_percentage,
-                           max_seen_drawdown=max_seen_drawdown['drawdown'] * 100,
+                           max_seen_drawdown=(max_seen_drawdown['drawdown']-1) * 100,
                            drawdown_from=drawdown_from,
                            drawdown_to=drawdown_to,
                            drawdown_at=drawdown_at,
