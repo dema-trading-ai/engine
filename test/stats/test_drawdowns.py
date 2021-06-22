@@ -215,8 +215,8 @@ def test_drawdown_equality():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.main_results.max_seen_drawdown, stats.coin_res[0].max_seen_drawdown)
-    assert math.isclose(stats.main_results.max_realised_drawdown, stats.coin_res[0].max_realised_drawdown)
+    assert math.isclose(stats.main_results.max_seen_drawdown, stats.coin_results[0].max_seen_drawdown)
+    assert math.isclose(stats.main_results.max_realised_drawdown, stats.coin_results[0].max_realised_drawdown)
 
 
 def test_seen_drawdown_equals_realised_drawdown():
@@ -232,8 +232,8 @@ def test_seen_drawdown_equals_realised_drawdown():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.coin_res[0].max_seen_drawdown == \
-           stats.coin_res[0].max_realised_drawdown
+    assert stats.coin_results[0].max_seen_drawdown == \
+           stats.coin_results[0].max_realised_drawdown
 
 
 def test_drawdown_simple():

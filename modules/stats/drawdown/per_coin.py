@@ -61,7 +61,7 @@ def find_trade_timestamps(closed_pair_trades):
 
 
 def get_max_realised_drawdown_per_coin(signal_dict, closed_pair_trades: [Trade], fee_percentage: float):
-    trades_open_closed_timestamps = map_trades_to_open_close_timestamps(closed_pair_trades)
+    trades_open_closed_timestamps = map_trades_to_opened_closed_timestamps(closed_pair_trades)
     trade_timestamps = find_trade_timestamps(closed_pair_trades)
 
     values = signal_dict.values()
