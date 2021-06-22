@@ -39,7 +39,11 @@ def get_max_realised_drawdown_for_portfolio(realised_profits_per_timestamp: dict
         .astype(int)
 
     max_realised_drawdown['drawdown'] = df["drawdown"].min()
-    max_realised_drawdown['losing_trades'] = df["losing_trade"].value_counts().loc[True]
+    losing_trades_count = df["losing_trade"].value_counts()
+    if True in losing_trades_count:
+        max_realised_drawdown['losing_trades'] = losing_trades_count.loc[True]
+    else:
+        max_realised_drawdown['losing_trades'] = 0
     max_realised_drawdown['max_consecutive_losses'] = df["consecutive_losses"].max()
 
     return max_realised_drawdown

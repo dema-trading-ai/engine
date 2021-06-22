@@ -82,7 +82,7 @@ def test_multiple_periods_realized_drawdown():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.main_results.max_realised_drawdown, -76.5727336801886)
+    assert math.isclose(stats.main_results.max_realised_drawdown, -75.4975)
 
 
 def test_simple_seen_drawdown():
@@ -248,7 +248,7 @@ def test_drawdown_multiple_peaks():
 
     # Assert
     assert math.isclose(stats.coin_res[0].max_seen_drawdown, -75.25)
-    assert math.isclose(stats.coin_res[0].max_realised_drawdown, -90.3940399)
+    assert math.isclose(stats.coin_res[0].max_realised_drawdown, -55.8955)
 
 
 def test_drawdown_multiple_pairs():
@@ -258,6 +258,7 @@ def test_drawdown_multiple_pairs():
     fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE'])
 
     fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_flat_no_trades()
     fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_one_trade()
 
     fixture.frame_with_signals['COIN2/BASE'].test_scenario_up_100_down_20_down_75_three_trades()
@@ -270,11 +271,11 @@ def test_drawdown_multiple_pairs():
     assert math.isclose(stats.coin_res[0].max_seen_drawdown, -90.3940399)
     assert math.isclose(stats.coin_res[0].max_realised_drawdown, -90.3940399)
 
-    assert math.isclose(stats.coin_res[1].max_seen_drawdown, -83.22282373767418)
-    assert math.isclose(stats.coin_res[1].max_realised_drawdown, -83.05335731078199)
+    assert math.isclose(stats.coin_res[1].max_seen_drawdown, -91.86056132492075)
+    assert math.isclose(stats.coin_res[1].max_realised_drawdown, -91.86056132492075)
 
-    assert math.isclose(stats.main_results.max_seen_drawdown, -84.49838188862499)
-    assert math.isclose(stats.main_results.max_realised_drawdown, -85.52890115608895)
+    assert math.isclose(stats.main_results.max_seen_drawdown, -85.76400119125371)
+    assert math.isclose(stats.main_results.max_realised_drawdown, -85.76400119125371)
 
 
 def test_seen_drawdown_up_down():

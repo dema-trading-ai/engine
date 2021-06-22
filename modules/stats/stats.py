@@ -4,7 +4,7 @@ import numpy as np
 
 from modules.output.results import CoinInsights, MainResults, OpenTradeResult
 from modules.pairs_data import PairsData
-from modules.stats.drawdown.per_coin import get_max_seen_drawdown_per_coin
+from modules.stats.drawdown.per_coin import get_max_seen_drawdown_per_coin, get_max_realised_drawdown_per_coin
 from modules.stats.drawdown.for_portfolio import get_max_seen_drawdown_for_portfolio, \
     get_max_realised_drawdown_for_portfolio
 from modules.stats.drawdown.per_trade import get_max_seen_drawdown_per_trade
@@ -186,6 +186,8 @@ class StatsModule:
         for key, closed_pair_trades in trades_per_coin.items():
             seen_drawdown_per_coin = get_max_seen_drawdown_per_coin(self.frame_with_signals[key], closed_pair_trades, self.config.fee)
             per_coin_stats[key]["max_seen_ratio"] = seen_drawdown_per_coin
+            realised_drawdown_per_coin = get_max_realised_drawdown_per_coin(self.frame_with_signals[key], closed_pair_trades, self.config.fee)
+            per_coin_stats[key]["max_realised_ratio"] = realised_drawdown_per_coin
 
         for trade in closed_trades:
 
