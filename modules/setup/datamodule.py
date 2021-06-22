@@ -147,7 +147,7 @@ class DataModule:
         try:
             with open(filepath, 'r') as datafile:
                 data = datafile.read()
-                df = dict_to_df(data)
+                df = str_to_df(data)
         except FileNotFoundError:
             print("[ERROR] Backtesting datafile was not found.")
             return None
