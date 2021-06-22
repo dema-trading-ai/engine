@@ -191,5 +191,4 @@ def plot_per_coin(stats: TradingStats, config: StatsConfig):
             title='%s Chart' % pair,
             yaxis_title=pair)
 
-        fig.show()
         fig.write_html("data/backtesting-data/binance/plot%s.html" % pair.replace("/", ""))
