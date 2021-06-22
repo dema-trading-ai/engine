@@ -90,29 +90,19 @@ class StatsModule:
 
         max_seen_drawdown = get_max_seen_drawdown_for_portfolio(self.trading_module.capital_per_timestamp)
 
-        # Update variables for prettier terminal output
-        drawdown_from = datetime.fromtimestamp(max_seen_drawdown['from'] / 1000).strftime('%Y-%m-%d ''%H:%M') \
-            if max_seen_drawdown['from'] != 0 else '-'
-        drawdown_to = datetime.fromtimestamp(max_seen_drawdown['to'] / 1000).strftime('%Y-%m-%d ''%H:%M') \
-            if max_seen_drawdown['to'] != 0 else '-'
-        drawdown_at = datetime.fromtimestamp(max_seen_drawdown['at'] / 1000).strftime('%Y-%m-%d ''%H:%M') \
-            if max_seen_drawdown['at'] != 0 else '-'
         best_trade_profit_percentage = (best_trade_ratio - 1) * 100 \
             if best_trade_ratio != -np.inf else 0
         worst_trade_profit_percentage = (worst_trade_ratio - 1) * 100 \
             if worst_trade_ratio != np.inf else 0
 
         tested_from = datetime.fromtimestamp(self.config.backtesting_from / 1000)
-        tested_from_string = tested_from.strftime('%Y-%m-%d ''%H:%M')
-        tested_to = datetime.fromtimestamp(
-            self.config.backtesting_to / 1000)
-        tested_to_string = tested_to.strftime('%Y-%m-%d ''%H:%M')
+        tested_to = datetime.fromtimestamp(self.config.backtesting_to / 1000)
 
         timespan_seconds = (tested_to - tested_from).total_seconds()
         nr_days = timespan_seconds / timedelta(days=1).total_seconds()
 
-        return MainResults(tested_from=tested_from_string,
-                           tested_to=tested_to_string,
+        return MainResults(tested_from=tested_from,
+                           tested_to=tested_to,
                            max_open_trades=self.config.max_open_trades,
                            market_change_coins=(market_change['all'] - 1) * 100,
                            market_change_btc=(self.config.btc_marketchange_ratio - 1) * 100,
@@ -128,9 +118,9 @@ class StatsModule:
                            worst_trade_profit_percentage=worst_trade_profit_percentage,
                            best_trade_profit_percentage=best_trade_profit_percentage,
                            max_seen_drawdown=(max_seen_drawdown['drawdown']-1) * 100,
-                           drawdown_from=drawdown_from,
-                           drawdown_to=drawdown_to,
-                           drawdown_at=drawdown_at,
+                           drawdown_from=max_seen_drawdown['from'],
+                           drawdown_to=max_seen_drawdown['to'],
+                           drawdown_at=max_seen_drawdown['at'],
                            configured_stoploss=self.config.stoploss,
                            fee=self.config.fee,
                            total_fee_amount=self.trading_module.total_fee_paid)

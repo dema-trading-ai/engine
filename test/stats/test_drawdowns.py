@@ -97,6 +97,9 @@ def test_simple_seen_drawdown():
 
     # Assert
     assert math.isclose(stats.main_results.max_seen_drawdown, -50.995)
+    assert stats.main_results.drawdown_from == 0
+    assert stats.main_results.drawdown_to == 0
+    assert stats.main_results.drawdown_at == 2
 
 
 def test_simple_no_seen_drawdown():
@@ -111,6 +114,9 @@ def test_simple_no_seen_drawdown():
 
     # Assert
     assert math.isclose(stats.main_results.max_seen_drawdown, -1)
+    assert stats.main_results.drawdown_from == 0
+    assert stats.main_results.drawdown_to == 2
+    assert stats.main_results.drawdown_at == 1
     
 
 def test_multiple_periods_seen_drawdown_two_drawdown_periods():
@@ -127,6 +133,9 @@ def test_multiple_periods_seen_drawdown_two_drawdown_periods():
 
     # Assert
     assert math.isclose(stats.main_results.max_seen_drawdown, -75.4975)
+    assert stats.main_results.drawdown_from == 4
+    assert stats.main_results.drawdown_to == 0
+    assert stats.main_results.drawdown_at == 6
 
 
 def test_multiple_periods_seen_drawdown_one_drawdown_period():
@@ -143,6 +152,9 @@ def test_multiple_periods_seen_drawdown_one_drawdown_period():
 
     # Assert
     assert math.isclose(stats.main_results.max_realised_drawdown, -80.7880798)
+    assert stats.main_results.drawdown_from == 2
+    assert stats.main_results.drawdown_to == 0
+    assert stats.main_results.drawdown_at == 6
 
 
 def test_multiple_periods_seen_drawdown_easy():
@@ -162,6 +174,9 @@ def test_multiple_periods_seen_drawdown_easy():
 
     # Assert
     assert math.isclose(stats.main_results.max_seen_drawdown, -59.1625)
+    assert stats.main_results.drawdown_from == 0
+    assert stats.main_results.drawdown_to == 0
+    assert stats.main_results.drawdown_at == 2
 
 
 def test_multiple_periods_seen_drawdown():
@@ -171,7 +186,9 @@ def test_multiple_periods_seen_drawdown():
     fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE', 'COIN3/BASE'])
 
     fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+
     fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+
     fixture.frame_with_signals['COIN3/BASE'].test_scenario_up_100_down_20_down_75_three_trades()
 
     # Act
@@ -179,6 +196,9 @@ def test_multiple_periods_seen_drawdown():
 
     # Assert
     assert math.isclose(stats.main_results.max_seen_drawdown, -75.4975)
+    assert stats.main_results.drawdown_from == 4
+    assert stats.main_results.drawdown_to == 0
+    assert stats.main_results.drawdown_at == 6
 
 
 def test_drawdown_simple():
@@ -195,6 +215,9 @@ def test_drawdown_simple():
 
     # Assert
     assert math.isclose(stats.coin_res[0].max_seen_drawdown, -80.2)
+    assert stats.main_results.drawdown_from == 2
+    assert stats.main_results.drawdown_to == 0
+    assert stats.main_results.drawdown_at == 4
 
 
 def test_drawdown_multiple_peaks():
@@ -210,6 +233,9 @@ def test_drawdown_multiple_peaks():
 
     # Assert
     assert math.isclose(stats.coin_res[0].max_seen_drawdown, -75.25)
+    assert stats.main_results.drawdown_from == 3
+    assert stats.main_results.drawdown_to == 0
+    assert stats.main_results.drawdown_at == 4
 
 
 def test_drawdown_multiple_pairs():
@@ -219,6 +245,7 @@ def test_drawdown_multiple_pairs():
     fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE'])
 
     fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_flat_no_trades()
     fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_one_trade()
 
     fixture.frame_with_signals['COIN2/BASE'].test_scenario_up_100_down_20_down_75_three_trades()
@@ -230,9 +257,12 @@ def test_drawdown_multiple_pairs():
     # Assert
     assert math.isclose(stats.coin_res[0].max_seen_drawdown, -90.3940399)
 
-    assert math.isclose(stats.coin_res[1].max_seen_drawdown, -83.22282373767418)
+    assert math.isclose(stats.coin_res[1].max_seen_drawdown, -91.86056132492075)
 
-    assert math.isclose(stats.main_results.max_seen_drawdown, -75.742525)
+    assert math.isclose(stats.main_results.max_seen_drawdown, -85.76400119125371)
+    assert stats.main_results.drawdown_from == 4
+    assert stats.main_results.drawdown_to == 0
+    assert stats.main_results.drawdown_at == 12
 
 
 def test_seen_drawdown_up_down():
