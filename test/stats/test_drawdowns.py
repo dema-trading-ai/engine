@@ -276,6 +276,8 @@ def test_drawdown_multiple_pairs():
 
     assert math.isclose(stats.main_results.max_seen_drawdown, -85.76400119125371)
     assert math.isclose(stats.main_results.max_realised_drawdown, -85.76400119125371)
+    assert stats.main_results.n_trades_with_loss == 7
+    assert stats.main_results.n_consecutive_losses == 4
 
 
 def test_seen_drawdown_up_down():

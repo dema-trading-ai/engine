@@ -29,6 +29,24 @@ def calculate_best_worst_trade(closed_trades):
     return best_trade_ratio, worst_trade_ratio
 
 
+def get_number_of_losing_trades(closed_trades: [Trade]) -> int:
+    nr_losing_trades = sum(1 for trade in closed_trades if trade.profit_ratio <= 1)
+    return nr_losing_trades
+
+
+def get_number_of_consecutive_losing_trades(closed_trades):
+    nr_consecutive_trades = 0
+    temp_nr_consecutive_trades = 0
+    for trade in closed_trades:
+        if trade.profit_ratio <= 1:
+            temp_nr_consecutive_trades += 1
+        else:
+            temp_nr_consecutive_trades = 0
+        if temp_nr_consecutive_trades > nr_consecutive_trades:
+            nr_consecutive_trades = temp_nr_consecutive_trades
+    return nr_consecutive_trades
+
+
 class StatsModule:
     buy_points = None
     sell_points = None
@@ -93,6 +111,9 @@ class StatsModule:
             self.trading_module.capital_per_timestamp
         )
 
+        nr_losing_trades = get_number_of_losing_trades(closed_trades)
+        nr_consecutive_losing_trades = get_number_of_consecutive_losing_trades(closed_trades)
+
         # Update variables for prettier terminal output
         drawdown_from = datetime.fromtimestamp(max_seen_drawdown['from'] / 1000).strftime('%Y-%m-%d ''%H:%M') \
             if max_seen_drawdown['from'] != 0 else '-'
@@ -123,9 +144,9 @@ class StatsModule:
                            n_trades=len(open_trades) + len(closed_trades),
                            n_average_trades=(len(open_trades) + len(closed_trades)) / nr_days,
                            n_left_open_trades=len(open_trades),
-                           n_trades_with_loss=max_realised_drawdown['losing_trades'],
-                           n_consecutive_losses=max_realised_drawdown['max_consecutive_losses'],
-                           max_realised_drawdown=max_realised_drawdown['drawdown'] * 100,
+                           n_trades_with_loss=nr_losing_trades,
+                           n_consecutive_losses=nr_consecutive_losing_trades,
+                           max_realised_drawdown=(max_realised_drawdown-1) * 100,
                            worst_trade_profit_percentage=worst_trade_profit_percentage,
                            best_trade_profit_percentage=best_trade_profit_percentage,
                            max_seen_drawdown=(max_seen_drawdown['drawdown']-1) * 100,

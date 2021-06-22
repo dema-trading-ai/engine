@@ -247,6 +247,9 @@ def test_n_average_trades():
 
     # Assert
     assert stats.main_results.n_average_trades == 3.0
+    assert stats.main_results.n_left_open_trades == 0
+    assert stats.main_results.n_trades_with_loss == 2
+    assert stats.main_results.n_consecutive_losses == 1
 
 
 def test_n_average_trades_no_trades():
@@ -264,6 +267,9 @@ def test_n_average_trades_no_trades():
 
     # Assert
     assert stats.main_results.n_average_trades == 0
+    assert stats.main_results.n_left_open_trades == 0
+    assert stats.main_results.n_trades_with_loss == 0
+    assert stats.main_results.n_consecutive_losses == 0
 
 
 def test_n_average_trades_more_time_less_trades():
