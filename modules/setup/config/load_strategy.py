@@ -1,11 +1,11 @@
 # Libraries
 import os
-import utils
 import sys
 
 # Files
 from backtesting.strategy import Strategy
 from modules.setup.config import StrategyDefinition
+from utils.utils import get_project_root
 
 
 def load_strategy_from_config(strategy_definition: StrategyDefinition) -> Strategy:
@@ -37,7 +37,7 @@ def load_strategy_from_config(strategy_definition: StrategyDefinition) -> Strate
 
 def get_full_path_to_strategies_folder(strategies_folder: str) -> str:
     stripped_folder = strategies_folder.strip("./")
-    strategies_path = os.path.join(utils.get_project_root(), stripped_folder)
+    strategies_path = os.path.join(get_project_root(), stripped_folder)
     if not os.path.exists(strategies_path):
         print(
             f"[ERROR] the strategies folder '{strategies_folder}' (expanded to '{strategies_path}') does not exist.")

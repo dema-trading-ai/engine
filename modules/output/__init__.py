@@ -2,7 +2,7 @@ import json
 
 from cli.print_utils import print_warning
 from modules.output.plots import plot_per_coin
-from modules.output.results import show_signature, CoinInsights, OpenTradeResult
+from modules.output.results import show_signature, CoinInsights, LeftOpenTradeResult
 from modules.stats.stats_config import StatsConfig
 from modules.stats.trade import SellReason
 from modules.stats.trading_stats import TradingStats
@@ -17,8 +17,8 @@ class OutputModule(object):
     def output(self, stats: TradingStats):
         # print tables
         stats.main_results.show(self.config.currency_symbol)
-        CoinInsights.show(stats.coin_res, self.config.currency_symbol)
-        OpenTradeResult.show(stats.open_trade_res, self.config.currency_symbol)
+        CoinInsights.show(stats.coin_results, self.config.currency_symbol)
+        LeftOpenTradeResult.show(stats.open_trade_results, self.config.currency_symbol)
 
         show_trade_anomalies(stats)
 
@@ -51,12 +51,10 @@ def log_trades(stats: TradingStats):
                       'pair': trade.pair,
                       'open_price': trade.open,
                       'fee_paid': trade.fee,
-                      'max_seen_drawdown': trade.max_seen_drawdown,
                       'starting_amount': trade.starting_amount,
                       'capital': trade.capital,
                       'currency_amount': trade.currency_amount,
-                      'sell_reason': trade.sell_reason,
-                      'seen_peak_capital': trade.curr_highest_seen_capital}
+                      'sell_reason': trade.sell_reason}
         trades_dict[str(trade.opened_at)] = trade_dict
 
     trades_dict = dict(sorted(trades_dict.items()))
