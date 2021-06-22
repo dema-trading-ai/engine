@@ -161,7 +161,7 @@ class CoinInsights:
 
 
 @dataclass
-class OpenTradeResult:
+class LeftOpenTradeResult:
     pair: str
     curr_profit_percentage: float
     curr_profit: float
@@ -169,7 +169,7 @@ class OpenTradeResult:
     opened_at: datetime
 
     @staticmethod
-    def show(instances: typing.List['OpenTradeResult'], currency_symbol):
+    def show(instances: typing.List['LeftOpenTradeResult'], currency_symbol):
         print("| %sLeft open trades %s" % (FONT_BOLD, FONT_RESET))
         rows = []
         for res in instances:
