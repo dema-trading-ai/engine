@@ -156,13 +156,13 @@ class TradingModule:
         Method is used to be able to track the open trades capitals per timestamp.
         It tracks the max seen point and the lowest seen point over all open trades.
         """
-        trade_opened_at = datetime.timestamp(trade.opened_at) * 1000
+        trade_opened_at = trade.opened_at.timestamp() * 1000
         if trade_opened_at == ohlcv['time']:
             self.lowest_total_capital_open_trades[ohlcv['time']] = \
                 self.lowest_total_capital_open_trades.get(ohlcv['time'], 0) + trade.starting_amount
             self.highest_total_capital_open_trades[ohlcv['time']] = \
                 self.highest_total_capital_open_trades.get(ohlcv['time'], 0) + trade.starting_amount
-            
+
         else:
             # When trade.candle_low is equal to trade.current in final candle, trade.capital could 
             # be lower than curr_low_capital due to fee.
