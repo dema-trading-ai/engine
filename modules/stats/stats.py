@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from tqdm import tqdm
 import numpy as np
 
-from modules.output.results import CoinInsights, MainResults, OpenTradeResult
+from modules.output.results import CoinInsights, MainResults, LeftOpenTradeResult
 from modules.pairs_data import PairsData
 from modules.stats.drawdown.per_coin import get_max_seen_drawdown_per_coin, get_max_realised_drawdown_per_coin
 from modules.stats.drawdown.for_portfolio import get_max_seen_drawdown_for_portfolio, \
@@ -76,7 +76,7 @@ class StatsModule:
         trading_module = self.trading_module
         coin_res = self.generate_coin_results(trading_module.closed_trades, market_change)
         best_trade_ratio, worst_trade_ratio = calculate_best_worst_trade(trading_module.closed_trades)
-        open_trade_res = self.generate_open_trades_results(trading_module.open_trades)
+        open_trade_res = self.get_left_open_trades_results(trading_module.open_trades)
         main_results = self.generate_main_results(
             trading_module.open_trades,
             trading_module.closed_trades,
@@ -114,21 +114,13 @@ class StatsModule:
         nr_losing_trades = get_number_of_losing_trades(closed_trades)
         nr_consecutive_losing_trades = get_number_of_consecutive_losing_trades(closed_trades)
 
-        # Update variables for prettier terminal output
-        drawdown_from = datetime.fromtimestamp(max_seen_drawdown['from'] / 1000).strftime('%Y-%m-%d ''%H:%M') \
-            if max_seen_drawdown['from'] != 0 else '-'
-        drawdown_to = datetime.fromtimestamp(max_seen_drawdown['to'] / 1000).strftime('%Y-%m-%d ''%H:%M') \
-            if max_seen_drawdown['to'] != 0 else '-'
-        drawdown_at = datetime.fromtimestamp(max_seen_drawdown['at'] / 1000).strftime('%Y-%m-%d ''%H:%M') \
-            if max_seen_drawdown['at'] != 0 else '-'
         best_trade_profit_percentage = (best_trade_ratio - 1) * 100 \
             if best_trade_ratio != -np.inf else 0
         worst_trade_profit_percentage = (worst_trade_ratio - 1) * 100 \
             if worst_trade_ratio != np.inf else 0
 
         tested_from = datetime.fromtimestamp(self.config.backtesting_from / 1000)
-        tested_to = datetime.fromtimestamp(
-            self.config.backtesting_to / 1000)
+        tested_to = datetime.fromtimestamp(self.config.backtesting_to / 1000)
 
         timespan_seconds = (tested_to - tested_from).total_seconds()
         nr_days = timespan_seconds / timedelta(days=1).total_seconds()
@@ -150,9 +142,9 @@ class StatsModule:
                            worst_trade_profit_percentage=worst_trade_profit_percentage,
                            best_trade_profit_percentage=best_trade_profit_percentage,
                            max_seen_drawdown=(max_seen_drawdown['drawdown']-1) * 100,
-                           drawdown_from=drawdown_from,
-                           drawdown_to=drawdown_to,
-                           drawdown_at=drawdown_at,
+                           drawdown_from=max_seen_drawdown['from'],
+                           drawdown_to=max_seen_drawdown['to'],
+                           drawdown_at=max_seen_drawdown['at'],
                            configured_stoploss=self.config.stoploss,
                            fee=self.config.fee,
                            total_fee_amount=self.trading_module.total_fee_paid)
@@ -250,18 +242,18 @@ class StatsModule:
             # Save buy/sell signals
             self.buy_points[trade.pair].append(trade.opened_at)
 
-    def generate_open_trades_results(self, open_trades: [Trade]) -> list:
-        open_trade_stats = []
+    def get_left_open_trades_results(self, open_trades: [Trade]) -> list:
+        left_open_trade_stats = []
         for trade in open_trades:
             max_seen_drawdown = get_max_seen_drawdown_per_trade(self.frame_with_signals[trade.pair], trade, self.config.fee)
-            open_trade_res = OpenTradeResult(pair=trade.pair,
-                                             curr_profit_percentage=(trade.profit_ratio - 1) * 100,
-                                             curr_profit=trade.profit_dollar,
-                                             max_seen_drawdown=(max_seen_drawdown - 1) * 100,
-                                             opened_at=trade.opened_at)
+            left_open_trade_results = LeftOpenTradeResult(pair=trade.pair,
+                                                          curr_profit_percentage=(trade.profit_ratio - 1) * 100,
+                                                          curr_profit=trade.profit_dollar,
+                                                          max_seen_drawdown=(max_seen_drawdown - 1) * 100,
+                                                          opened_at=trade.opened_at)
 
-            open_trade_stats.append(open_trade_res)
-        return open_trade_stats
+            left_open_trade_stats.append(left_open_trade_results)
+        return left_open_trade_stats
 
 
 def get_market_change(ticks: list, pairs: list, data_dict: dict) -> dict:

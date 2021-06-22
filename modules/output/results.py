@@ -39,21 +39,31 @@ class MainResults:
     worst_trade_profit_percentage: float
     best_trade_profit_percentage: float
     max_seen_drawdown: float
-    drawdown_from: str
-    drawdown_to: str
-    drawdown_at: str
+    drawdown_from: int
+    drawdown_to: int
+    drawdown_at: int
     configured_stoploss: float
     fee: float
     total_fee_amount: float
 
     def show(self, currency_symbol: str):
+        # Update variables for prettier terminal output
+        drawdown_from_string = datetime.fromtimestamp(self.drawdown_from / 1000).strftime('%Y-%m-%d ''%H:%M') \
+            if self.drawdown_from != 0 else '-'
+        drawdown_to_string = datetime.fromtimestamp(self.drawdown_to / 1000).strftime('%Y-%m-%d ''%H:%M') \
+            if self.drawdown_to != 0 else '-'
+        drawdown_at_string = datetime.fromtimestamp(self.drawdown_at / 1000).strftime('%Y-%m-%d ''%H:%M') \
+            if self.drawdown_at != 0 else '-'
+
+        tested_from_string = self.tested_from.strftime('%Y-%m-%d ''%H:%M')
+        tested_to_string = self.tested_to.strftime('%Y-%m-%d ''%H:%M')
 
         print("================================================= \n| %sBacktesting Results%s "
               "\n=================================================" % (FONT_BOLD, FONT_RESET))
         print("| Engine version \t\t%s" % CURRENT_VERSION)
         print("| ")
-        print("| Backtesting from: \t\t%s" % self.tested_from.strftime('%Y-%m-%d ''%H:%M'))
-        print("| Backtesting to: \t\t%s" % self.tested_to.strftime('%Y-%m-%d ''%H:%M'))
+        print("| Backtesting from: \t\t%s" % tested_from_string)
+        print("| Backtesting to: \t\t%s" % tested_to_string)
         print("| Max open trades: \t\t%s" % self.max_open_trades)
         print("| Stoploss: \t\t\t%s" % self.configured_stoploss + "\t%")
         print("| ")
@@ -77,9 +87,9 @@ class MainResults:
               round(self.max_realised_drawdown, 2) + '\t%')
         print("| Max seen drawdown: \t\t%s" %
               round(self.max_seen_drawdown, 2) + '\t%')
-        print("| Max seen drawdown from: \t%s" % self.drawdown_from)
-        print("| Max seen drawdown to: \t%s" % self.drawdown_to)
-        print("| Max seen drawdown at: \t%s" % self.drawdown_at)
+        print("| Max seen drawdown from: \t%s" % drawdown_from_string)
+        print("| Max seen drawdown to: \t%s" % drawdown_to_string)
+        print("| Max seen drawdown at: \t%s" % drawdown_at_string)
         print("| Market change coins: \t\t%s" % round(self.market_change_coins, 2) + '\t%')
         print("| Market change BTC: \t\t%s" % round(self.market_change_btc, 2) + '\t%')
         print("| ")
@@ -150,7 +160,7 @@ class CoinInsights:
 
 
 @dataclass
-class OpenTradeResult:
+class LeftOpenTradeResult:
     pair: str
     curr_profit_percentage: float
     curr_profit: float
@@ -158,7 +168,7 @@ class OpenTradeResult:
     opened_at: datetime
 
     @staticmethod
-    def show(instances: typing.List['OpenTradeResult'], currency_symbol):
+    def show(instances: typing.List['LeftOpenTradeResult'], currency_symbol):
         print("| %sLeft open trades %s" % (FONT_BOLD, FONT_RESET))
         rows = []
         for res in instances:

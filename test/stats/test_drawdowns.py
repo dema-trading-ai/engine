@@ -97,6 +97,9 @@ def test_simple_seen_drawdown():
 
     # Assert
     assert math.isclose(stats.main_results.max_seen_drawdown, -50.995)
+    assert stats.main_results.drawdown_from == 0
+    assert stats.main_results.drawdown_to == 0
+    assert stats.main_results.drawdown_at == 2
 
 
 def test_simple_no_seen_drawdown():
@@ -111,6 +114,9 @@ def test_simple_no_seen_drawdown():
 
     # Assert
     assert math.isclose(stats.main_results.max_seen_drawdown, -1)
+    assert stats.main_results.drawdown_from == 0
+    assert stats.main_results.drawdown_to == 2
+    assert stats.main_results.drawdown_at == 1
     
 
 def test_multiple_periods_seen_drawdown_two_drawdown_periods():
@@ -127,6 +133,9 @@ def test_multiple_periods_seen_drawdown_two_drawdown_periods():
 
     # Assert
     assert math.isclose(stats.main_results.max_seen_drawdown, -75.4975)
+    assert stats.main_results.drawdown_from == 4
+    assert stats.main_results.drawdown_to == 0
+    assert stats.main_results.drawdown_at == 6
 
 
 def test_multiple_periods_seen_drawdown_one_drawdown_period():
@@ -143,6 +152,9 @@ def test_multiple_periods_seen_drawdown_one_drawdown_period():
 
     # Assert
     assert math.isclose(stats.main_results.max_realised_drawdown, -80.7880798)
+    assert stats.main_results.drawdown_from == 2
+    assert stats.main_results.drawdown_to == 0
+    assert stats.main_results.drawdown_at == 6
 
 
 def test_multiple_periods_seen_drawdown_easy():
@@ -164,6 +176,9 @@ def test_multiple_periods_seen_drawdown_easy():
 
     # Assert
     assert math.isclose(stats.main_results.max_seen_drawdown, -59.1625)
+    assert stats.main_results.drawdown_from == 0
+    assert stats.main_results.drawdown_to == 0
+    assert stats.main_results.drawdown_at == 2
 
 
 def test_multiple_periods_seen_drawdown():
@@ -183,6 +198,9 @@ def test_multiple_periods_seen_drawdown():
 
     # Assert
     assert math.isclose(stats.main_results.max_seen_drawdown, -75.4975)
+    assert stats.main_results.drawdown_from == 4
+    assert stats.main_results.drawdown_to == 0
+    assert stats.main_results.drawdown_at == 6
 
 
 def test_drawdown_equality():
@@ -233,6 +251,9 @@ def test_drawdown_simple():
     # Assert
     assert math.isclose(stats.coin_res[0].max_seen_drawdown, -80.2)
     assert math.isclose(stats.coin_res[0].max_realised_drawdown, -60.796)
+    assert stats.main_results.drawdown_from == 2
+    assert stats.main_results.drawdown_to == 0
+    assert stats.main_results.drawdown_at == 4
 
 
 def test_drawdown_multiple_peaks():
@@ -249,6 +270,9 @@ def test_drawdown_multiple_peaks():
     # Assert
     assert math.isclose(stats.coin_res[0].max_seen_drawdown, -75.25)
     assert math.isclose(stats.coin_res[0].max_realised_drawdown, -55.8955)
+    assert stats.main_results.drawdown_from == 3
+    assert stats.main_results.drawdown_to == 0
+    assert stats.main_results.drawdown_at == 4
 
 
 def test_drawdown_multiple_pairs():
@@ -276,6 +300,10 @@ def test_drawdown_multiple_pairs():
 
     assert math.isclose(stats.main_results.max_seen_drawdown, -85.76400119125371)
     assert math.isclose(stats.main_results.max_realised_drawdown, -85.76400119125371)
+    assert stats.main_results.drawdown_from == 4
+    assert stats.main_results.drawdown_to == 0
+    assert stats.main_results.drawdown_at == 12
+
     assert stats.main_results.n_trades_with_loss == 7
     assert stats.main_results.n_consecutive_losses == 4
 
