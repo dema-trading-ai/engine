@@ -171,12 +171,12 @@ class LeftOpenTradeResult:
     def show(instances: typing.List['LeftOpenTradeResult'], currency_symbol):
         print("| %sLeft open trades %s" % (FONT_BOLD, FONT_RESET))
         rows = []
-        for res in instances:
-            rows.append([res.pair,
-                         round(res.curr_profit_percentage, 2),
-                         round(res.curr_profit, 2),
-                         round(res.max_seen_drawdown, 2),
-                         res.opened_at])
+        for result in instances:
+            rows.append([result.pair,
+                         round(result.curr_profit_percentage, 2),
+                         round(result.curr_profit, 2),
+                         round(result.max_seen_drawdown, 2),
+                         result.opened_at])
         print(tabulate(rows,
                        headers=['Pair',
                                 'cur. profit (%)',
