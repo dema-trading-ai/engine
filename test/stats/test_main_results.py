@@ -110,7 +110,7 @@ def test_capital_open_trade():
 
     # Assert
     assert stats.main_results.end_capital == 198.
-    assert len(stats.open_trade_res) == 1
+    assert len(stats.open_trade_results) == 1
 
 
 def test_stoploss():

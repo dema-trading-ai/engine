@@ -14,7 +14,7 @@ def test_open_trades_pair():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.open_trade_res[0].pair == 'COIN/BASE'
+    assert stats.open_trade_results[0].pair == 'COIN/BASE'
 
 
 def test_open_trades_profit_percentage_positive():
@@ -28,7 +28,7 @@ def test_open_trades_profit_percentage_positive():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.open_trade_res[0].curr_profit_percentage == 98
+    assert stats.open_trade_results[0].curr_profit_percentage == 98
 
 
 def test_open_trades_profit_percentage_negative():
@@ -42,7 +42,7 @@ def test_open_trades_profit_percentage_negative():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.open_trade_res[0].curr_profit_percentage == -50.5
+    assert stats.open_trade_results[0].curr_profit_percentage == -50.5
 
 
 def test_open_trades_profit_positive():
@@ -56,7 +56,7 @@ def test_open_trades_profit_positive():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.open_trade_res[0].curr_profit == 98
+    assert stats.open_trade_results[0].curr_profit == 98
 
 
 def test_open_trades_profit_negative():
@@ -70,7 +70,7 @@ def test_open_trades_profit_negative():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.open_trade_res[0].curr_profit == -50.5
+    assert stats.open_trade_results[0].curr_profit == -50.5
 
 
 def test_open_trades_drawdown_positive():
@@ -84,8 +84,8 @@ def test_open_trades_drawdown_positive():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.open_trade_res[0].max_seen_drawdown, -1)
-    assert math.isclose(stats.main_results.max_seen_drawdown, stats.open_trade_res[0].max_seen_drawdown)
+    assert math.isclose(stats.open_trade_results[0].max_seen_drawdown, -1)
+    assert math.isclose(stats.main_results.max_seen_drawdown, stats.open_trade_results[0].max_seen_drawdown)
 
 
 def test_open_trades_drawdown_negative():
@@ -101,8 +101,8 @@ def test_open_trades_drawdown_negative():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.open_trade_res[0].max_seen_drawdown == -50.5
-    assert stats.main_results.max_seen_drawdown == stats.open_trade_res[0].max_seen_drawdown
+    assert stats.open_trade_results[0].max_seen_drawdown == -50.5
+    assert stats.main_results.max_seen_drawdown == stats.open_trade_results[0].max_seen_drawdown
 
 
 def test_open_trades_opened_at():
@@ -116,7 +116,7 @@ def test_open_trades_opened_at():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.open_trade_res[0].opened_at.timestamp() == 1/1000
+    assert stats.open_trade_results[0].opened_at.timestamp() == 1 / 1000
 
 
 def test_open_trades_opened_at_timestep_three():
@@ -131,4 +131,4 @@ def test_open_trades_opened_at_timestep_three():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.open_trade_res[0].opened_at.timestamp() == 3/1000
+    assert stats.open_trade_results[0].opened_at.timestamp() == 3 / 1000

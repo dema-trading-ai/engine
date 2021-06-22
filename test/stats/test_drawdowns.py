@@ -214,7 +214,7 @@ def test_drawdown_simple():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.coin_res[0].max_seen_drawdown, -80.2)
+    assert math.isclose(stats.coin_results[0].max_seen_drawdown, -80.2)
     assert stats.main_results.drawdown_from == 2
     assert stats.main_results.drawdown_to == 0
     assert stats.main_results.drawdown_at == 4
@@ -232,7 +232,7 @@ def test_drawdown_multiple_peaks():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.coin_res[0].max_seen_drawdown, -75.25)
+    assert math.isclose(stats.coin_results[0].max_seen_drawdown, -75.25)
     assert stats.main_results.drawdown_from == 3
     assert stats.main_results.drawdown_to == 0
     assert stats.main_results.drawdown_at == 4
@@ -255,9 +255,9 @@ def test_drawdown_multiple_pairs():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.coin_res[0].max_seen_drawdown, -90.3940399)
+    assert math.isclose(stats.coin_results[0].max_seen_drawdown, -90.3940399)
 
-    assert math.isclose(stats.coin_res[1].max_seen_drawdown, -91.86056132492075)
+    assert math.isclose(stats.coin_results[1].max_seen_drawdown, -91.86056132492075)
 
     assert math.isclose(stats.main_results.max_seen_drawdown, -85.76400119125371)
     assert stats.main_results.drawdown_from == 4
@@ -278,7 +278,7 @@ def test_seen_drawdown_up_down():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.coin_res[0].max_seen_drawdown, -90.1)
+    assert math.isclose(stats.coin_results[0].max_seen_drawdown, -90.1)
 
 
 def test_seen_drawdown_down():
@@ -294,4 +294,4 @@ def test_seen_drawdown_down():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.coin_res[0].max_seen_drawdown == -90.199
+    assert stats.coin_results[0].max_seen_drawdown == -90.199

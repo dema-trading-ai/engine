@@ -56,9 +56,9 @@ class StatsModule:
                                     market_change: dict) -> TradingStats:
 
         trading_module = self.trading_module
-        coin_res = self.generate_coin_results(trading_module.closed_trades, market_change)
+        coin_results = self.generate_coin_results(trading_module.closed_trades, market_change)
         best_trade_ratio, worst_trade_ratio = calculate_best_worst_trade(trading_module.closed_trades)
-        open_trade_res = self.get_left_open_trades_results(trading_module.open_trades)
+        open_trade_results = self.get_left_open_trades_results(trading_module.open_trades)
         main_results = self.generate_main_results(
             trading_module.open_trades,
             trading_module.closed_trades,
@@ -70,8 +70,8 @@ class StatsModule:
 
         return TradingStats(
             main_results=main_results,
-            coin_res=coin_res,
-            open_trade_res=open_trade_res,
+            coin_results=coin_results,
+            open_trade_results=open_trade_results,
             frame_with_signals=self.frame_with_signals,
             buypoints=self.buypoints,
             sellpoints=self.sellpoints,

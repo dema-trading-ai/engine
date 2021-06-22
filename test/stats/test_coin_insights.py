@@ -18,7 +18,7 @@ def test_fee_equals_stoploss():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.coin_res[0].total_profit_percentage, -1.99)
+    assert math.isclose(stats.coin_results[0].total_profit_percentage, -1.99)
 
 
 def test_profit_worst_trade():
@@ -34,7 +34,7 @@ def test_profit_worst_trade():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.coin_res[-1].total_profit_percentage, -75.4975)
+    assert math.isclose(stats.coin_results[-1].total_profit_percentage, -75.4975)
     assert math.isclose(stats.main_results.worst_trade_profit_percentage, -75.4975)
 
 
@@ -51,7 +51,7 @@ def test_profit_best_trade():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.coin_res[-1].total_profit_percentage, 96.02)
+    assert math.isclose(stats.coin_results[-1].total_profit_percentage, 96.02)
     assert math.isclose(stats.main_results.best_trade_profit_percentage, 96.02)
 
 
@@ -69,9 +69,9 @@ def test_profit_best_worst_trade_only_wins():
 
     # Assert
     assert math.isclose(stats.main_results.best_trade_profit_percentage, 96.02)
-    assert math.isclose(stats.coin_res[1].total_profit_percentage, 96.02)
+    assert math.isclose(stats.coin_results[1].total_profit_percentage, 96.02)
     assert math.isclose(stats.main_results.worst_trade_profit_percentage, 47.015)
-    assert math.isclose(stats.coin_res[0].total_profit_percentage, 47.015)
+    assert math.isclose(stats.coin_results[0].total_profit_percentage, 47.015)
 
 
 def test_profit_best_worst_trade_only_losses():
@@ -88,9 +88,9 @@ def test_profit_best_worst_trade_only_losses():
 
     # Assert
     assert math.isclose(stats.main_results.best_trade_profit_percentage, -50.995)
-    assert math.isclose(stats.coin_res[0].total_profit_percentage, -50.995)
+    assert math.isclose(stats.coin_results[0].total_profit_percentage, -50.995)
     assert math.isclose(stats.main_results.worst_trade_profit_percentage, -75.4975)
-    assert math.isclose(stats.coin_res[1].total_profit_percentage, -75.4975)
+    assert math.isclose(stats.coin_results[1].total_profit_percentage, -75.4975)
 
 
 def test_profit_no_trades():
@@ -106,9 +106,9 @@ def test_profit_no_trades():
     # Assert
     assert math.isclose(stats.main_results.best_trade_profit_percentage, 0)
     assert math.isclose(stats.main_results.worst_trade_profit_percentage, 0)
-    assert math.isclose(stats.coin_res[0].total_profit_percentage, 0)
-    assert math.isclose(stats.coin_res[0].cum_profit_percentage, 0)
-    assert math.isclose(stats.coin_res[0].avg_profit_percentage, 0)
+    assert math.isclose(stats.coin_results[0].total_profit_percentage, 0)
+    assert math.isclose(stats.coin_results[0].cum_profit_percentage, 0)
+    assert math.isclose(stats.coin_results[0].avg_profit_percentage, 0)
 
 
 def test_nr_of_trades_no_trades():
@@ -122,7 +122,7 @@ def test_nr_of_trades_no_trades():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.coin_res[0].n_trades, 0)
+    assert math.isclose(stats.coin_results[0].n_trades, 0)
 
 
 def test_nr_of_trades_one_trade():
@@ -136,7 +136,7 @@ def test_nr_of_trades_one_trade():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.coin_res[0].n_trades, 1)
+    assert math.isclose(stats.coin_results[0].n_trades, 1)
 
 
 def test_nr_of_trades_three_trades():
@@ -150,7 +150,7 @@ def test_nr_of_trades_three_trades():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.coin_res[0].n_trades, 3)
+    assert math.isclose(stats.coin_results[0].n_trades, 3)
 
 
 def test_nr_of_trades_three_coins():
@@ -172,9 +172,9 @@ def test_nr_of_trades_three_coins():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.coin_res[0].n_trades, 1)
-    assert math.isclose(stats.coin_res[1].n_trades, 0)
-    assert math.isclose(stats.coin_res[2].n_trades, 3)
+    assert math.isclose(stats.coin_results[0].n_trades, 1)
+    assert math.isclose(stats.coin_results[1].n_trades, 0)
+    assert math.isclose(stats.coin_results[2].n_trades, 3)
 
 
 def test_marketchange():
@@ -190,8 +190,8 @@ def test_marketchange():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.coin_res[0].market_change == 50
-    assert stats.coin_res[1].market_change == -70
+    assert stats.coin_results[0].market_change == 50
+    assert stats.coin_results[1].market_change == -70
 
 
 def test_profit():
@@ -205,9 +205,9 @@ def test_profit():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.coin_res[0].total_profit_percentage, 44.0894015)
-    assert math.isclose(stats.coin_res[0].cum_profit_percentage, 69.5275)
-    assert math.isclose(stats.coin_res[0].avg_profit_percentage, 34.76375)
+    assert math.isclose(stats.coin_results[0].total_profit_percentage, 44.0894015)
+    assert math.isclose(stats.coin_results[0].cum_profit_percentage, 69.5275)
+    assert math.isclose(stats.coin_results[0].avg_profit_percentage, 34.76375)
 
 
 def test_sell_reason_sell_signal():
@@ -221,7 +221,7 @@ def test_sell_reason_sell_signal():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.coin_res[0].sell_signal == 1
+    assert stats.coin_results[0].sell_signal == 1
 
 
 def test_sell_reason_roi():
@@ -239,7 +239,7 @@ def test_sell_reason_roi():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.coin_res[0].roi == 1
+    assert stats.coin_results[0].roi == 1
 
 
 def test_sell_reason_stoploss():
@@ -256,5 +256,5 @@ def test_sell_reason_stoploss():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.coin_res[0].stoploss == 1
+    assert stats.coin_results[0].stoploss == 1
 
