@@ -51,7 +51,7 @@ def add_trade_fee(df, fee_percentage, trades_closed_opened):
         df.loc[closed, "profit_ratio"] *= fee_ratio
 
 
-def find_trade_timestamps(closed_pair_trades):
+def get_trade_timestamps(closed_pair_trades):
     trade_timestamps_list = []
     for trade in closed_pair_trades:
         trade_timestamps_list.append(int(trade.opened_at.timestamp() * 1000))
@@ -62,7 +62,7 @@ def find_trade_timestamps(closed_pair_trades):
 
 def get_max_realised_drawdown_per_coin(signal_dict, closed_pair_trades: [Trade], fee_percentage: float):
     trades_open_closed_timestamps = map_trades_to_opened_closed_timestamps(closed_pair_trades)
-    trade_timestamps = find_trade_timestamps(closed_pair_trades)
+    trade_timestamps = get_trade_timestamps(closed_pair_trades)
 
     values = signal_dict.values()
     df = pd.DataFrame(values).set_index("time")
