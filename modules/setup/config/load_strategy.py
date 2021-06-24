@@ -1,11 +1,11 @@
 # Libraries
 import os
-import utils
 import sys
 
 # Files
 from backtesting.strategy import Strategy
 from modules.setup.config import StrategyDefinition
+from utils.utils import get_project_root
 
 
 def load_strategy_from_config(strategy_definition: StrategyDefinition) -> Strategy:

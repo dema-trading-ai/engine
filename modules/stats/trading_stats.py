@@ -9,8 +9,8 @@ from modules.pairs_data import PairsData
 @dataclass
 class TradingStats:
     main_results: MainResults
-    coin_res: list
-    open_trade_res: list
+    coin_results: list
+    open_trade_results: list
     frame_with_signals: PairsData
     buypoints: dict
     sellpoints: dict
