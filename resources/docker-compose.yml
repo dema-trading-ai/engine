@@ -1,0 +1,8 @@
+version: '3'
+services:
+  dema-engine:
+    image: dematrading/engine:stable
+    volumes:
+      - "./strategies:/usr/src/engine/strategies"
+      - "./config.json:/usr/src/engine/config.json"
+      - "./data/backtesting-data:/usr/src/engine/data/backtesting-data"

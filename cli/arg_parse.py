@@ -5,7 +5,7 @@ from datetime import datetime
 from functools import cache
 from typing import TypedDict, Callable
 
-from cli.directories import get_root_directory
+from utils import get_project_root
 
 CliActions = TypedDict("CliActions", {
     'init': Callable,
@@ -17,7 +17,7 @@ CLI_DESCR = "Dema Trading Engine"
 
 @cache
 def read_spec() -> list:
-    spec_file_path = os.path.join(get_root_directory(), "resources", "specification.json")
+    spec_file_path = os.path.join(get_project_root(), "resources", "specification.json")
 
     with open(spec_file_path, "r") as f:
         spec = f.read()

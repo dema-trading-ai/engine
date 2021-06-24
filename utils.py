@@ -11,7 +11,7 @@ CURRENT_VERSION = "v0.6.4"
 
 
 def get_project_root():
-    return os.getcwd()
+    return Path(__file__).parent
 
 
 def get_ohlcv_indicators() -> [str]:
