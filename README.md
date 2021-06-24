@@ -54,13 +54,13 @@ docker build . -t dema-engine:alpha
 To run the container:
 
 ```
-docker run --rm dema-engine:alpha
+docker run -t --rm dema-engine:alpha
 ```
 
 To run the container with a volume (rebuilding not necessary on code changes):
 
 ```
-docker run --rm -v "$(pwd):/engine" dema-engine:alpha
+docker run -t --rm -v "$(pwd):/engine" dema-engine:alpha
 ```
 
 Note: do not forget '--rm' as your Docker will keep the container if you do not. Keeping the container is unnecessary and will cause an extreme increase in memory usage.
