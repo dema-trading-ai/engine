@@ -1,7 +1,5 @@
 name: Build executable windows
 on:
-  push:
-    branches: [feat/**, fix/**, development]
   pull_request:
     branches: [development]
 jobs:
