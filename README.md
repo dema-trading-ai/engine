@@ -3,7 +3,9 @@
 [![Build Status](https://img.shields.io/github/forks/dema-trading-ai/engine.svg)](https://github.com/dema-trading-ai/engine)
 [![Build Status](https://img.shields.io/github/stars/dema-trading-ai/engine.svg)](https://github.com/dema-trading-ai/engine)
 [![License](https://img.shields.io/github/license/dema-trading-ai/engine.svg)](https://github.com/dema-trading-ai/engine)
-[![Test PR/Push](https://github.com/dema-trading-ai/engine/actions/workflows/PR-Push-test.yml/badge.svg)](https://github.com/dema-trading-ai/engine/actions/workflows/PR-Push-test.yml)
+[![Test PR/Push](https://github.com/dema-trading-ai/engine/actions/workflows/PR-Push-test.yml/badge.svg?branch=development)](https://github.com/dema-trading-ai/engine/actions/workflows/PR-Push-test.yml)
+
+#### [Go to full documentation](https://docs.dematrading.ai)
 
 # Discord
 
@@ -30,6 +32,24 @@ Running the Engine just takes a few simple things:
 4. Install TA-Lib dependencies (see: https://github.com/mrjbq7/ta-lib Installation -> Dependencies)
 
 
+## Running with Docker
+
+To initialize a directory for running our engine, run the command below. Note: this command needs to be run in an empty directory. This command will generate all necessary files for running the engine and developing strategies.
+
+```
+docker run --rm -v "$(pwd):/usr/src/engine/output" dematrading/engine:stable init
+```
+
+> Note: if you are using Windows, please use powershell to perform this command.
+
+
+To run a backtest:
+
+```
+docker-compose up
+``` 
+
+
 ## Running without Docker
 
 First run:
@@ -42,56 +62,6 @@ After installing, you can run the Engine:
 
 ```
 python3 main.py
-```
-
-## Running with Docker
-
-First run:
-
-```
-docker build . -t dema-engine:alpha
-```
-
-To run the container:
-
-```
-docker run --rm dema-engine:alpha
-```
-
-To run the container with a volume (rebuilding not necessary on code changes):
-
-```
-docker run --rm -v "$(pwd):/engine" dema-engine:alpha
-```
-
-Note: do not forget '--rm' as your Docker will keep the container if you do not. Keeping the container is unnecessary and will cause an extreme increase in memory usage.
-
-## Using `make`
-
-As the `docker` commands listed above are not so developer friendly, we added a `Makefile` to help you save some tears. You will need to have `make` installed on your system (check using `make --version`), which is installed on most computers by default. If you do not have `make` installed, run `brew install make` (homebrew needed), `sudo apt install make` or `choco install make` (chocolately needed) for MacOS, Linux or Windows, respectively.
-
-To build the image:
-
-```
-make build
-```
-
-To run the container:
-
-```
-make run
-```
-
-To run on volume:
-
-```
-make runv
-```
-
-To build and run:
-
-```
-make
 ```
 
 ## Developing

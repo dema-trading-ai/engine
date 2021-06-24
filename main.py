@@ -1,3 +1,5 @@
+import asyncio
+
 from cli.arg_parse import execute_for_args
 from cli.checks.latest_version import print_warning_if_version_outdated
 from cli.prepare_workspace import prepare_workspace
@@ -14,8 +16,8 @@ def main():
 
 
 def run_engine(args):
-    controller = MainController(args)
-    controller.run()
+    controller = MainController()
+    asyncio.run(controller.run(args))
 
 
 def run_init(args):

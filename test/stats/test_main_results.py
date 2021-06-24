@@ -8,9 +8,7 @@ def test_capital():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=1)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade()
 
     # Act
     stats = fixture.create().analyze()
@@ -24,9 +22,7 @@ def test_profit_percentage():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=1)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade()
 
     # Act
     stats = fixture.create().analyze()
@@ -40,11 +36,8 @@ def test_roi_reached_multiple_times():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE']\
-        .multiply_price(2, TradeAction.BUY)\
-        .multiply_price(2)\
-        .multiply_price(2, TradeAction.BUY) \
-        .multiply_price(2)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade_no_sell()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade_no_sell()
 
     fixture.trading_module_config.roi = {
         "0": 10
@@ -62,14 +55,11 @@ def test_roi_set_not_reached():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .multiply_price(2, TradeAction.BUY) \
-        .multiply_price(2, TradeAction.SELL) \
-        .multiply_price(2, TradeAction.BUY) \
-        .multiply_price(2, TradeAction.SELL)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade()
 
     fixture.trading_module_config.roi = {
-        "0": 1.5 * 100
+        "0": 150
     }
 
     # Act
@@ -84,11 +74,8 @@ def test_fee():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .multiply_price(1, TradeAction.BUY) \
-        .multiply_price(2, TradeAction.SELL) \
-        .multiply_price(1, TradeAction.BUY) \
-        .multiply_price(2, TradeAction.SELL)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade()
 
     # Act
     stats = fixture.create().analyze()
@@ -102,13 +89,8 @@ def test_fee_downwards():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .multiply_price(1, TradeAction.BUY)\
-        .multiply_price(0.5, TradeAction.SELL) \
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade()
 
-    fixture.trading_module_config.roi = {
-        "0": 100
-    }
     # Act
     stats = fixture.create().analyze()
 
@@ -121,9 +103,7 @@ def test_capital_open_trade():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=0)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade_no_sell()
 
     # Act
     stats = fixture.create().analyze()
@@ -138,9 +118,7 @@ def test_stoploss():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=1)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade()
 
     fixture.trading_module_config.stoploss = -25
     fixture.stats_config.stoploss = -25
@@ -161,11 +139,7 @@ def test_trailing_stoploss():
 
     fixture.trading_module_config.stoploss_type = "trailing"
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=0) \
-        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=0) \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=0, sell=0)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_20_down_75_one_trade()
 
     fixture.trading_module_config.stoploss = -25
     fixture.stats_config.stoploss = -25
@@ -188,6 +162,7 @@ def test_dynamic_stoploss():
     fixture.frame_with_signals['COIN/BASE'] \
         .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0, stoploss=1) \
         .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=0, stoploss=1.5)
+
     # Act
     stats = fixture.create().analyze()
 
@@ -218,13 +193,9 @@ def test_dividing_assets():
     # Arrange
     fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=0)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade()
 
-    fixture.frame_with_signals['COIN2/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=0)
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_50_one_trade()
 
     fixture.trading_module_config.stoploss = 25
     fixture.stats_config.stoploss = 25
@@ -242,35 +213,87 @@ def test_n_trades():
     # Arrange
     fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE', 'COIN3/BASE'])
 
-    # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=1) \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=1) \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0)
-
-    # Win/Win/Open
-    fixture.frame_with_signals['COIN2/BASE'] \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=1) \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=3, low=2, close=3, volume=1, buy=0, sell=1) \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0)
-
-    # Loss/Loss/Open
-    fixture.frame_with_signals['COIN3/BASE'] \
-        .add_entry(open=3, high=3, low=3, close=3, volume=1, buy=1, sell=0) \
-        .add_entry(open=3, high=3, low=2, close=2, volume=1, buy=0, sell=1) \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=1) \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_up_100_20_down_75_three_trades()
+    fixture.frame_with_signals['COIN3/BASE'].test_scenario_down_75_one_trade()
+    fixture.frame_with_signals['COIN3/BASE'].test_scenario_up_50_one_trade()
+    fixture.frame_with_signals['COIN3/BASE'].test_scenario_up_100_one_trade_no_sell()
 
     # Act
     stats = fixture.create().analyze()
 
     # Assert
     assert stats.main_results.n_trades == 9
-    assert stats.main_results.n_left_open_trades == 3
-    assert stats.main_results.n_trades_with_loss == 3
+    assert stats.main_results.n_left_open_trades == 1
+    assert stats.main_results.n_trades_with_loss == 5
     assert stats.main_results.n_consecutive_losses == 2
+
+
+def test_n_average_trades():
+
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.stats_config.backtesting_to = 86400000
+    fixture.stats_config.backtesting_from = 0
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.main_results.n_average_trades == 3.0
+
+
+def test_n_average_trades_no_trades():
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.stats_config.backtesting_to = 86400000  # one day
+    fixture.stats_config.backtesting_from = 0
+
+    # Loss/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_flat_no_trades()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.main_results.n_average_trades == 0
+
+
+def test_n_average_trades_more_time_less_trades():
+    # Longer than a day with less trades following it.
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.stats_config.backtesting_to = 172800000  # two days
+    fixture.stats_config.backtesting_from = 0
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.main_results.n_average_trades == 1.5
+
+
+def test_n_average_trades_less_time_more_trades():
+    # Half of a day with more trades.
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.stats_config.backtesting_to = 43200000  # half a day
+    fixture.stats_config.backtesting_from = 0
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.main_results.n_average_trades == 6.0
