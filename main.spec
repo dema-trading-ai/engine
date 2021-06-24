@@ -9,7 +9,7 @@ added_files = [
 a = Analysis(['main.py'],
              binaries=[],
              datas=added_files,
-             hiddenimports=["talib"],
+             hiddenimports=[],
              hookspath=["./hooks"],
              runtime_hooks=[],
              excludes=[],
@@ -18,7 +18,7 @@ a = Analysis(['main.py'],
              cipher=block_cipher,
              noarchive=False)
 pyz = PYZ(a.pure, a.zipped_data,
-             cipher=block_cipher)
+          cipher=block_cipher)
 exe = EXE(pyz,
           a.scripts,
           a.binaries,
@@ -31,4 +31,4 @@ exe = EXE(pyz,
           strip=False,
           upx=True,
           upx_exclude=[],
-          console=True )
+          console=True)
