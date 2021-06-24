@@ -1,5 +1,6 @@
 import os
-from utils import get_project_root
+
+from utils.utils import get_project_root
 
 
 def get_resource(name: str):

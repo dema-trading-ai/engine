@@ -5,7 +5,7 @@ from datetime import datetime
 from functools import cache
 from typing import TypedDict, Callable
 
-from utils import get_project_root
+from utils.utils import get_project_root
 
 CliActions = TypedDict("CliActions", {
     'init': Callable,
