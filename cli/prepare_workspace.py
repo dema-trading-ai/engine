@@ -18,7 +18,6 @@ def prepare_workspace(args):
         print_warning("Files detected in current directory. Cancelling...")
         return
 
-
     Path(os.path.join(output_directory, "strategies")).mkdir(parents=True, exist_ok=True)
 
     for local_path, target_path in paths_to_copy:
