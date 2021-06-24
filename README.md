@@ -34,26 +34,11 @@ Running the Engine just takes a few simple things:
 
 ## Running with Docker
 
-First run:
-
-```
-docker build . -t dema-engine:alpha
-```
-
-To run the container:
-
-```
-docker run -t --rm dema-engine:alpha
-```
-
-To run the container with a volume (rebuilding not necessary on code changes):
+To initialize a directory for running our engine, run the command below. Note: this command needs to be run in an empty directory. This command will generate all necessary files for running the engine and developing strategies.
 
 ```
 docker run -t --rm -v "$(pwd):/usr/src/engine/output" dematrading/engine:stable init
 ```
-
-To initialize a directory for running our engine, run the command below. Note: this command needs to be run in an empty directory. This command will generate all necessary files for running the engine and developing strategies.
-
 
 > Note: if you are using Windows, please use powershell to perform this command.
 
