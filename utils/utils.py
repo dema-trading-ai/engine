@@ -1,5 +1,4 @@
 # Libraries
-import os
 from pathlib import Path
 from pandas import DataFrame
 import pandas as pd

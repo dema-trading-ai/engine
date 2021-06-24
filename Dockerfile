@@ -22,6 +22,4 @@ COPY ./requirements.txt ./requirements.txt
 RUN pip install -r requirements.txt
 COPY . .
 
-WORKDIR /app
-
-ENTRYPOINT ["python", "/usr/src/engine/main.py"]
+ENTRYPOINT ["python", "main.py"]

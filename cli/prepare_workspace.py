@@ -21,24 +21,24 @@ def prepare_workspace(args):
 
     Path(os.path.join(output_directory, "strategies")).mkdir(parents=True, exist_ok=True)
 
-    for local_path, targetpath in paths:
-        copy2(local_path, targetpath)
+    for local_path, target_path in paths:
+        copy2(local_path, target_path)
 
     print("Copied files...\n")
     print("Run 'docker-compose up' to get started.")
 
 
 def get_paths_to_copy(output_directory: str):
-    to_output = partial(from_to_path, output_directory)
-    paths = [
+    to_output = partial(get_src_destination, output_directory)
+    return [
         to_output("./config.json"),
+        to_output("./.gitignore"),
         to_output("./strategies/my_strategy.py"),
         to_output("./strategies/my_strategy_advanced.py"),
         to_output("./strategies/indicator_sample.py"),
         to_output("./docker-compose.yml")
     ]
-    return paths
 
 
-def from_to_path(output_directory: str, file_name: str):
+def get_src_destination(output_directory: str, file_name: str):
     return os.path.join(get_resource("setup"), file_name), os.path.join(output_directory, file_name)

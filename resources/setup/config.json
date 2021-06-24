@@ -13,21 +13,12 @@
     "60": 4,
     "120": 3
   },
-  "pairs": [
-    "BTC/USDT",
-    "LTC/USDT",
-    "ETH/USDT"
-  ],
+  "pairs": ["BTC/USDT", "LTC/USDT", "ETH/USDT"],
   "currency": "USDT",
   "fee": 0.25,
   "strategy-name": "MyStrategy",
-  "strategies-folder": "strategies",
-  "plots": false,
-  "plot_indicators1": [
-    "ema5",
-    "ema21"
-  ],
-  "plot_indicators2": [
-    "rsi"
-  ]
+  "strategies-folder": "resources/setup/strategies",
+  "plots": true,
+  "mainplot_indicators": ["ema5", "ema21"],
+  "subplot_indicators": ["volume"]
 }
