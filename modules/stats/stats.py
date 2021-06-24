@@ -42,8 +42,7 @@ def get_number_of_consecutive_losing_trades(closed_trades):
             temp_nr_consecutive_trades += 1
         else:
             temp_nr_consecutive_trades = 0
-        if temp_nr_consecutive_trades > nr_consecutive_trades:
-            nr_consecutive_trades = temp_nr_consecutive_trades
+        nr_consecutive_trades =  max(temp_nr_consecutive_trades, nr_consecutive_trades)
     return nr_consecutive_trades
 
 
