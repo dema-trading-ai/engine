@@ -1,6 +1,19 @@
 $ErrorActionPreference = "Stop"
 $ProgressPreference = 'SilentlyContinue'
 
+function IsElevated {
+    $id = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+    $p = New-Object System.Security.Principal.WindowsPrincipal($id)
+    if ($p.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator))
+    { Write-Output $true }      
+    else
+    { Write-Output $false }   
+}
+
+if (-not(IsElevated)) {
+    throw "Please run this script as administrator" 
+}
+
 $executableUri = "https://engine-store.ams3.digitaloceanspaces.com/windows-exe%20%281%29.zip"
 $tempDir = $env:TEMP + "\engine"
 $tempLocation = $tempDir + "\executable.zip"
@@ -17,6 +30,6 @@ $pathContent = [Environment]::GetEnvironmentVariable("Path", [EnvironmentVariabl
 
 $pathLine = ";$installationDir"
 
-if(-not($pathContent -match [Regex]::Escape($pathLine))){
+if (-not($pathContent -match [Regex]::Escape($pathLine))) {
     [Environment]::SetEnvironmentVariable("Path", $env:Path + $pathLine, [System.EnvironmentVariableTarget]::Machine)
 }
