@@ -8,10 +8,11 @@ import numpy as np
 import pandas as pd
 import rapidjson
 from pandas import DataFrame
+import asyncio
 
 # Files
 from modules.setup.config import ConfigModule
-import asyncio
+from utils.utils import str_to_df, df_to_dict, get_ohlcv_indicators
 
 # ======================================================================
 # DataModule is responsible for downloading OHLCV data, preparing it
@@ -19,7 +20,6 @@ import asyncio
 #
 # © 2021 DemaTrading.ai
 # ======================================================================
-from utils.utils import str_to_df, df_to_dict, get_ohlcv_indicators
 
 msec = 1000
 minute = 60 * msec

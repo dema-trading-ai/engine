@@ -58,7 +58,6 @@ class MainResults:
         tested_from_string = self.tested_from.strftime('%Y-%m-%d ''%H:%M')
         tested_to_string = self.tested_to.strftime('%Y-%m-%d ''%H:%M')
 
-
         print("================================================= \n| %sBacktesting Results%s "
               "\n=================================================" % (FONT_BOLD, FONT_RESET))
         print("| Engine version \t\t%s" % CURRENT_VERSION)

@@ -1,5 +1,7 @@
 import pandas as pd
 
+from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
+
 
 def get_max_seen_drawdown_for_portfolio(capital_per_timestamp: dict):
     max_seen_drawdown = {}
@@ -19,3 +21,10 @@ def get_max_seen_drawdown_for_portfolio(capital_per_timestamp: dict):
         max_seen_drawdown["to"] = 0
 
     return max_seen_drawdown
+
+
+def get_max_realised_drawdown_for_portfolio(realised_profits_per_timestamp: dict):
+    df = pd.DataFrame.from_dict(realised_profits_per_timestamp, columns=['value'], orient='index')
+    max_realised_drawdown = get_max_drawdown_ratio(df)
+
+    return max_realised_drawdown
