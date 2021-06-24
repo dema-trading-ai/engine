@@ -10,18 +10,18 @@ from cli.print_utils import print_warning
 def prepare_workspace(args):
     output_directory = args.dir
 
-    paths = get_paths_to_copy(output_directory)
+    paths_to_copy = get_paths_to_copy(output_directory)
 
+    Path(output_directory).mkdir(parents=True, exist_ok=True)
     output_directory_contains_files = any(os.listdir(output_directory))
     if output_directory_contains_files:
         print_warning("Files detected in current directory. Cancelling...")
         return
 
-    Path(output_directory).mkdir(parents=True, exist_ok=True)
 
     Path(os.path.join(output_directory, "strategies")).mkdir(parents=True, exist_ok=True)
 
-    for local_path, target_path in paths:
+    for local_path, target_path in paths_to_copy:
         copy2(local_path, target_path)
 
     print("Copied files...\n")
