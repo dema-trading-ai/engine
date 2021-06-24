@@ -5,7 +5,7 @@ from tabulate import tabulate
 import typing
 
 # Files
-from utils import CURRENT_VERSION
+from utils.utils import CURRENT_VERSION
 
 FONT_BOLD = "\033[1m"
 FONT_RESET = "\033[0m"
@@ -39,20 +39,31 @@ class MainResults:
     worst_trade_profit_percentage: float
     best_trade_profit_percentage: float
     max_seen_drawdown: float
-    drawdown_from: datetime
-    drawdown_to: datetime
-    drawdown_at: datetime
+    drawdown_from: int
+    drawdown_to: int
+    drawdown_at: int
     configured_stoploss: float
     fee: float
     total_fee_amount: float
 
     def show(self, currency_symbol: str):
+        # Update variables for prettier terminal output
+        drawdown_from_string = datetime.fromtimestamp(self.drawdown_from / 1000).strftime('%Y-%m-%d ''%H:%M') \
+            if self.drawdown_from != 0 else '-'
+        drawdown_to_string = datetime.fromtimestamp(self.drawdown_to / 1000).strftime('%Y-%m-%d ''%H:%M') \
+            if self.drawdown_to != 0 else '-'
+        drawdown_at_string = datetime.fromtimestamp(self.drawdown_at / 1000).strftime('%Y-%m-%d ''%H:%M') \
+            if self.drawdown_at != 0 else '-'
+
+        tested_from_string = self.tested_from.strftime('%Y-%m-%d ''%H:%M')
+        tested_to_string = self.tested_to.strftime('%Y-%m-%d ''%H:%M')
+
         print("================================================= \n| %sBacktesting Results%s "
               "\n=================================================" % (FONT_BOLD, FONT_RESET))
         print("| Engine version \t\t%s" % CURRENT_VERSION)
         print("| ")
-        print("| Backtesting from: \t\t%s" % self.tested_from)
-        print("| Backtesting to: \t\t%s" % self.tested_to)
+        print("| Backtesting from: \t\t%s" % tested_from_string)
+        print("| Backtesting to: \t\t%s" % tested_to_string)
         print("| Max open trades: \t\t%s" % self.max_open_trades)
         print("| Stoploss: \t\t\t%s" % self.configured_stoploss + "\t%")
         print("| ")
@@ -63,7 +74,7 @@ class MainResults:
         print("| Overall profit: \t\t%s" %
               round(self.overall_profit_percentage, 2) + '\t%')
         print("| Amount of trades: \t\t%s" % self.n_trades)
-        print("| Average trades per day: \t\t%s" % round(self.n_average_trades, 2))
+        print("| Average trades per day: \t%s" % round(self.n_average_trades, 2))
         print("| Left-open trades: \t\t%s" % self.n_left_open_trades)
         print("| Trades with loss: \t\t%s" % self.n_trades_with_loss)
         print("| Most consecutive losses: \t%s" % self.n_consecutive_losses)
@@ -76,9 +87,9 @@ class MainResults:
               round(self.max_realised_drawdown, 2) + '\t%')
         print("| Max seen drawdown: \t\t%s" %
               round(self.max_seen_drawdown, 2) + '\t%')
-        print("| Max seen drawdown from: \t%s" % self.drawdown_from)
-        print("| Max seen drawdown to: \t%s" % self.drawdown_to)
-        print("| Max seen drawdown at: \t%s" % self.drawdown_at)
+        print("| Max seen drawdown from: \t%s" % drawdown_from_string)
+        print("| Max seen drawdown to: \t%s" % drawdown_to_string)
+        print("| Max seen drawdown at: \t%s" % drawdown_at_string)
         print("| Market change coins: \t\t%s" % round(self.market_change_coins, 2) + '\t%')
         print("| Market change BTC: \t\t%s" % round(self.market_change_btc, 2) + '\t%')
         print("| ")
@@ -115,13 +126,7 @@ class CoinInsights:
                         round(c.avg_profit_percentage, 2),
                         round(c.cum_profit_percentage, 2),
                         round(c.total_profit_percentage, 2),
-                        round(c.profit, 2),
-                        round(c.max_seen_drawdown, 2),
-                        round(c.max_realised_drawdown, 2),
-                        c.avg_trade_duration,
-                        c.roi, 
-                        c.stoploss,
-                        c.sell_signal])
+                        round(c.profit, 2)])
 
         print(tabulate(stats,
                        headers=['Pair',
@@ -130,7 +135,21 @@ class CoinInsights:
                                 'avg profit (%)',
                                 'cum profit (%)',
                                 'total profit (%)',
-                                f' profit ({currency_symbol})',
+                                f' profit ({currency_symbol})'],
+                       tablefmt='pretty'))
+
+        stats = []
+        for c in instances:
+            stats.append([c.pair,
+                        round(c.max_seen_drawdown, 2),
+                        round(c.max_realised_drawdown, 2),
+                        c.avg_trade_duration,
+                        c.roi,
+                        c.stoploss,
+                        c.sell_signal])
+
+        print(tabulate(stats,
+                       headers=['Pair',
                                 'max seen drawdown %',
                                 'max realised drawdown %',
                                 'avg trade duration',
@@ -141,7 +160,7 @@ class CoinInsights:
 
 
 @dataclass
-class OpenTradeResult:
+class LeftOpenTradeResult:
     pair: str
     curr_profit_percentage: float
     curr_profit: float
@@ -149,17 +168,19 @@ class OpenTradeResult:
     opened_at: datetime
 
     @staticmethod
-    def show(instances: typing.List['OpenTradeResult'], currency_symbol):
+    def show(instances: typing.List['LeftOpenTradeResult'], currency_symbol):
         print("| %sLeft open trades %s" % (FONT_BOLD, FONT_RESET))
         rows = []
-        for res in instances:
-            rows.append([res.pair,
-                         round(res.curr_profit_percentage, 2),
-                         round(res.curr_profit, 2),
-                         res.opened_at])
+        for result in instances:
+            rows.append([result.pair,
+                         round(result.curr_profit_percentage, 2),
+                         round(result.curr_profit, 2),
+                         round(result.max_seen_drawdown, 2),
+                         result.opened_at])
         print(tabulate(rows,
                        headers=['Pair',
                                 'cur. profit (%)',
                                 f' cur. profit ({currency_symbol})',
+                                'max seen drawdown',
                                 'opened at'],
                        tablefmt='pretty'))

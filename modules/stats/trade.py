@@ -31,23 +31,26 @@ class Trade:
     sell_reason: SellReason
 
     def __init__(self, ohlcv: dict, spend_amount: float, fee: float, date: datetime, sl_type: str, sl_perc: float):
+        # Basic trade data
         self.status = 'open'
         self.pair = ohlcv['pair']
         self.open = ohlcv['close']
+        self.current = ohlcv['close']
         self.opened_at = date
+        self.closed_at = None
         self.fee = fee
-        self.max_seen_drawdown = 1  # ratio
-        self.starting_amount = spend_amount
-        self.lowest_seen_price = spend_amount
-        self.capital = spend_amount - (spend_amount * fee)  # apply fee
-        self.currency_amount = (self.capital / ohlcv['close'])
         self.sell_reason = SellReason.NONE
+
+        # Calculations for trade worth
+        self.max_seen_drawdown = 1.0  # ratio
+        self.starting_amount = spend_amount
+        self.capital = spend_amount - (spend_amount * fee)  # apply fee
+        self.capital_per_timestamp = {}
+        self.currency_amount = (self.capital / ohlcv['close'])
+
+        # Stoploss configurations
         self.sl_type = sl_type
         self.sl_perc = sl_perc
-        self.current = ohlcv['close']
-        self.seen_peak_capital = self.starting_amount
-        self.temp_seen_drawdown_price = self.starting_amount
-        self.max_seen_drawdown_price = self.starting_amount
         self.update_profits()
 
     def close_trade(self, reason: SellReason, date: datetime) -> None:
@@ -65,14 +68,17 @@ class Trade:
         self.sell_reason = reason
         self.close = self.current
         self.closed_at = date
-        self.close_fee_amount = self.capital * self.fee   # final issued fee
-        self.capital -= self.close_fee_amount
+        self.close_fee_paid = self.capital * self.fee   # final issued fee
+
+        self.capital -= self.close_fee_paid
         self.update_profits(update_capital=False)
 
-    def update_stats(self, ohlcv: dict) -> None:
+    def update_stats(self, ohlcv: dict, first: bool = False) -> None:
         self.current = ohlcv['close']
         self.update_profits()
-        self.update_max_drawdown()
+        if not first:
+            self.candle_low = ohlcv['low']
+            self.candle_open = ohlcv['open']
 
     def update_profits(self, update_capital: bool = True):
         if update_capital:  # always triggers except when a trade is closed
@@ -90,24 +96,6 @@ class Trade:
             self.sl_ratio = 1 - (abs(self.sl_perc) / 100)
         elif self.sl_type == 'trailing':
             self.sl_sell_time, self.sl_ratio = self.trailing_stoploss(data_dict, ohlcv['time'])
-
-    def update_max_drawdown(self) -> None:
-        if self.capital < self.lowest_seen_price:
-            self.lowest_seen_price = self.capital
-            self.max_seen_drawdown = self.profit_ratio
-
-        is_new_drawdown_period = self.capital > self.seen_peak_capital
-        if is_new_drawdown_period:
-            self.seen_peak_capital = self.capital
-            self.temp_seen_drawdown_price = self.capital
-        elif self.capital < self.temp_seen_drawdown_price:
-            self.temp_seen_drawdown_price = self.capital
-            self.set_drawdown_if_lower()
-
-    def set_drawdown_if_lower(self):
-        if self.temp_seen_drawdown_price < self.max_seen_drawdown_price:
-            self.max_seen_drawdown_price = self.temp_seen_drawdown_price
-            self.max_seen_drawdown = self.temp_seen_drawdown_price / self.seen_peak_capital
 
     def check_for_sl(self, ohlcv: dict) -> bool:
         if self.sl_type == 'standard':
