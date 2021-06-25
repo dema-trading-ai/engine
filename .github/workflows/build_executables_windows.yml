@@ -1,7 +1,7 @@
 name: Build executable windows
 on:
   pull_request:
-    branches: [development]
+    branches: [development, feat/deploy_exe_files_to_do]
 jobs:
   build:
     env:
@@ -41,7 +41,7 @@ jobs:
       - name: Archive built executable
         uses: actions/upload-artifact@v2
         with:
-          name: windows-exe
+          name: engine-windows
           path: dist/engine.exe
   test:
     needs:
@@ -53,9 +53,19 @@ jobs:
       - name: exe
         uses: actions/download-artifact@v2
         with:
-          name: windows-exe
+          name: engine-windows
       - name: init
         run: ./engine.exe init new-dir
       - name: run
         run: ../engine.exe
         working-directory: ./new-dir
+  deploy:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: ls -la
+      - run: |
+          aws s3 --endpoint=https://ams3.digitaloceanspaces.com cp .github/workflows/default_pipeline.yml s3://engine-store/item.sh
+        env:
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SPACES_KEY }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.DO_SPACES_SECRET }}
