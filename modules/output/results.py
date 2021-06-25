@@ -203,7 +203,7 @@ class CoinInsights:
     def show(instances: typing.List['CoinInsights'], currency_symbol: str):
         justification: JustifyMethod = "center"
 
-        coin_performance_table = CoinInsights.create_coin_performance_table(justification)
+        coin_performance_table = CoinInsights.create_coin_performance_table(justification, currency_symbol)
 
         coin_metrics_table = CoinInsights.create_coin_metrics_table(justification)
 
@@ -261,14 +261,14 @@ class CoinInsights:
         return coin_metrics_table
 
     @staticmethod
-    def create_coin_performance_table(justification) -> Table:
+    def create_coin_performance_table(justification, currency_symbol: str) -> Table:
         coin_performance_table = Table(title="Coin performance",
                                        box=box.ROUNDED)
         coin_performance_table.add_column("Pair", justify=justification)
         coin_performance_table.add_column("Avg. profit (%)", justify=justification, width=15)
         coin_performance_table.add_column("Cum. profit (%)", justify=justification, width=15)
         coin_performance_table.add_column("Total profit (%)", justify=justification, width=20)
-        coin_performance_table.add_column("Profit (%)", justify=justification, width=12)
+        coin_performance_table.add_column(f"Profit ({currency_symbol})", justify=justification, width=12)
         return coin_performance_table
 
 
