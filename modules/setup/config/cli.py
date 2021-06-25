@@ -1,4 +1,3 @@
-import utils
 from utils.utils import lower_bar_to_middle_bar
 
 

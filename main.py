@@ -20,7 +20,7 @@ def run_engine(args):
 
 
 def run_init(args):
-    prepare_workspace()
+    prepare_workspace(args)
 
 
 if __name__ == "__main__":

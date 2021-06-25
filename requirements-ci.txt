@@ -9,3 +9,4 @@ plotly==4.14.3
 python-rapidjson==1.0
 rich==10.3.0
 pytest-cov==2.12.0
+pyinstaller~=4.3

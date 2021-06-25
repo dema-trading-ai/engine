@@ -1,6 +1,6 @@
 import math
+
 from test.stats.stats_test_utils import StatsFixture
-from test.utils.signal_frame import TradeAction
 
 
 def test_capital():
