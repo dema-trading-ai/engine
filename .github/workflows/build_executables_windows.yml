@@ -38,6 +38,9 @@ jobs:
         run: pip install -r requirements-ci.txt
       - name: build exe
         run: python build_scripts/build.py
+        env:
+          PYTHONLEGACYWINDOWSIOENCODING: true
+          PYTHONIOENCODING: UTF-8
       - name: Archive built executable
         uses: actions/upload-artifact@v2
         with:
@@ -59,3 +62,6 @@ jobs:
       - name: run
         run: ../engine.exe
         working-directory: ./new-dir
+        env:
+          PYTHONLEGACYWINDOWSIOENCODING: true
+          PYTHONIOENCODING: UTF-8

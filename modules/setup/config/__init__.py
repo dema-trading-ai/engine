@@ -84,7 +84,7 @@ def read_config(config_path: str) -> dict:
         ' Starting up DemaTrading.ai BACKTESTING \n'
         '========================================')
     try:
-        with open(config_path or "config.json", 'r') as configfile:
+        with open(config_path or "config.json", 'r', encoding='utf-8') as configfile:
             data = configfile.read()
     except FileNotFoundError:
         raise FileNotFoundError(f"[ERROR] No config file found at {config_path}.")
