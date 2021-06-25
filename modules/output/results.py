@@ -79,24 +79,58 @@ class MainResults:
         justification: JustifyMethod = "left"
 
         # Settings table
-        settings_table = Table(box=box.ROUNDED)
-        settings_table.add_column("Settings "
-                                  ":wrench:",
-                                  justify=justification,
-                                  width=25)
-        settings_table.add_column(justify=justification, width=20)
-        settings_table.add_row("Engine version", CURRENT_VERSION)
-        settings_table.add_row("Backtesting from", tested_from_string)
-        settings_table.add_row("Backtesting to", tested_to_string)
-        stoploss_setting = f"{self.stoploss} % ({self.stoploss_type})" if \
-            self.stoploss_type != 'dynamic' else self.stoploss_type
-        settings_table.add_row("Stoploss", stoploss_setting)
-        settings_table.add_row("Start capital",
-                               f"{round(self.starting_capital, 2)} {currency_symbol}")
-        settings_table.add_row("Fee percentage", f"{self.fee} %")
-        settings_table.add_row("Max open trades", str(self.max_open_trades))
+        settings_table = self.create_settings_table(
+            currency_symbol,
+            justification,
+            tested_from_string,
+            tested_to_string
+        )
 
         # Performance table
+        performance_table = self.create_performance_table(
+            currency_symbol,
+            drawdown_at_string,
+            drawdown_from_string,
+            drawdown_to_string,
+            justification
+        )
+
+        # Trade info table
+        trade_info_table = self.create_trade_info_table(justification)
+
+        # Create grid for all tables
+        table_grid = Table(box=box.SIMPLE)
+        table_grid.add_column(":robot: BACKTESTING RESULTS :robot:")
+        table_grid.add_row(settings_table)
+        table_grid.add_row(performance_table, trade_info_table)
+        console.print(table_grid)
+
+    def create_trade_info_table(self, justification) -> Table:
+        trade_info_table = Table(box=box.ROUNDED)
+        trade_info_table.add_column("Trade Info "
+                                    ":mag:",
+                                    justify=justification,
+                                    style="magenta")
+        trade_info_table.add_column(justify=justification)
+        trade_info_table.add_row('Amount of trades', str(self.n_trades))
+        trade_info_table.add_row('Average trades per day',
+                                 str(round(self.n_average_trades, 2)))
+        trade_info_table.add_row('Left-open trades', str(self.n_left_open_trades))
+        trade_info_table.add_row('Trades with loss', str(self.n_trades_with_loss))
+        trade_info_table.add_row('Most consecutive losses',
+                                 str(self.n_consecutive_losses))
+        trade_info_table.add_row(f'Best trade',
+                                 colorize(round(
+                                     self.best_trade_profit_percentage, 2),
+                                     0, f'% ({self.best_trade_pair})'))
+        trade_info_table.add_row(f'Worst trade',
+                                 colorize(round(
+                                     self.worst_trade_profit_percentage, 2),
+                                     0, f'% ({self.worst_trade_pair})'))
+        return trade_info_table
+
+    def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown_from_string, drawdown_to_string,
+                                 justification) -> Table:
         performance_table = Table(box=box.ROUNDED)
         performance_table.add_column("Performance "
                                      ":chart_with_upwards_trend:", justify=justification,
@@ -127,36 +161,26 @@ class MainResults:
                                                  2), 0, '%'))
         performance_table.add_row('Total fee paid',
                                   f"{round(self.total_fee_amount)} {currency_symbol}")
+        return performance_table
 
-        # Trade info table
-        trade_info_table = Table(box=box.ROUNDED)
-        trade_info_table.add_column("Trade Info "
-                                    ":mag:",
-                                    justify=justification,
-                                    style="magenta")
-        trade_info_table.add_column(justify=justification)
-        trade_info_table.add_row('Amount of trades', str(self.n_trades))
-        trade_info_table.add_row('Average trades per day',
-                                 str(round(self.n_average_trades, 2)))
-        trade_info_table.add_row('Left-open trades', str(self.n_left_open_trades))
-        trade_info_table.add_row('Trades with loss', str(self.n_trades_with_loss))
-        trade_info_table.add_row('Most consecutive losses',
-                                 str(self.n_consecutive_losses))
-        trade_info_table.add_row(f'Best trade',
-                                 colorize(round(
-                                     self.best_trade_profit_percentage, 2),
-                                     0, f'% ({self.best_trade_pair})'))
-        trade_info_table.add_row(f'Worst trade',
-                                 colorize(round(
-                                    self.worst_trade_profit_percentage, 2),
-                                    0, f'% ({self.worst_trade_pair})'))
-
-        # Create grid for all tables
-        table_grid = Table(box=box.SIMPLE)
-        table_grid.add_column(":robot: BACKTESTING RESULTS :robot:")
-        table_grid.add_row(settings_table)
-        table_grid.add_row(performance_table, trade_info_table)
-        console.print(table_grid)
+    def create_settings_table(self, currency_symbol, justification, tested_from_string, tested_to_string) -> Table:
+        settings_table = Table(box=box.ROUNDED)
+        settings_table.add_column("Settings "
+                                  ":wrench:",
+                                  justify=justification,
+                                  width=25)
+        settings_table.add_column(justify=justification, width=20)
+        settings_table.add_row("Engine version", CURRENT_VERSION)
+        settings_table.add_row("Backtesting from", tested_from_string)
+        settings_table.add_row("Backtesting to", tested_to_string)
+        stoploss_setting = f"{self.stoploss} % ({self.stoploss_type})" if \
+            self.stoploss_type != 'dynamic' else self.stoploss_type
+        settings_table.add_row("Stoploss", stoploss_setting)
+        settings_table.add_row("Start capital",
+                               f"{round(self.starting_capital, 2)} {currency_symbol}")
+        settings_table.add_row("Fee percentage", f"{self.fee} %")
+        settings_table.add_row("Max open trades", str(self.max_open_trades))
+        return settings_table
 
 
 @dataclass
@@ -179,29 +203,11 @@ class CoinInsights:
     def show(instances: typing.List['CoinInsights'], currency_symbol: str):
         justification: JustifyMethod = "center"
 
-        coin_performance_table = Table(title="Coin performance",
-                                       box=box.ROUNDED)
-        coin_performance_table.add_column("Pair", justify=justification)
-        coin_performance_table.add_column("Avg. profit (%)", justify=justification, width=15)
-        coin_performance_table.add_column("Cum. profit (%)", justify=justification, width=15)
-        coin_performance_table.add_column("Total profit (%)", justify=justification, width=20)
-        coin_performance_table.add_column("Profit (%)", justify=justification, width=12)
+        coin_performance_table = CoinInsights.create_coin_performance_table(justification)
 
-        coin_metrics_table = Table(title="Coin Metrics", box=box.ROUNDED)
-        coin_metrics_table.add_column("Pair", justify=justification)
-        coin_metrics_table.add_column("Market change (%)", justify=justification)
-        coin_metrics_table.add_column("Max. seen drawdown (%)", justify=justification)
-        coin_metrics_table.add_column("Max. realised drawdown (%)",
-                                      justify=justification)
+        coin_metrics_table = CoinInsights.create_coin_metrics_table(justification)
 
-        coin_signal_table = Table(title="Coin Signals", box=box.ROUNDED)
-        coin_signal_table.add_column("Pair", justify=justification)
-        coin_signal_table.add_column("Trades", justify=justification, width=10)
-        coin_signal_table.add_column("Avg. trade duration",
-                                     justify=justification, width=25)
-        coin_signal_table.add_column("ROI", justify=justification, width=8)
-        coin_signal_table.add_column("SL", justify=justification, width=8)
-        coin_signal_table.add_column("Signal", justify=justification, width=8)
+        coin_signal_table = CoinInsights.create_coin_signals_table(justification)
 
         for c in instances:
             coin_performance_table.add_row(c.pair,
@@ -232,6 +238,39 @@ class CoinInsights:
         table_grid.add_row(coin_signal_table)
         console.print(table_grid)
 
+    @staticmethod
+    def create_coin_signals_table(justification) -> Table:
+        coin_signal_table = Table(title="Coin Signals", box=box.ROUNDED)
+        coin_signal_table.add_column("Pair", justify=justification)
+        coin_signal_table.add_column("Trades", justify=justification, width=10)
+        coin_signal_table.add_column("Avg. trade duration",
+                                     justify=justification, width=25)
+        coin_signal_table.add_column("ROI", justify=justification, width=8)
+        coin_signal_table.add_column("SL", justify=justification, width=8)
+        coin_signal_table.add_column("Signal", justify=justification, width=8)
+        return coin_signal_table
+
+    @staticmethod
+    def create_coin_metrics_table(justification) -> Table:
+        coin_metrics_table = Table(title="Coin Metrics", box=box.ROUNDED)
+        coin_metrics_table.add_column("Pair", justify=justification)
+        coin_metrics_table.add_column("Market change (%)", justify=justification)
+        coin_metrics_table.add_column("Max. seen drawdown (%)", justify=justification)
+        coin_metrics_table.add_column("Max. realised drawdown (%)",
+                                      justify=justification)
+        return coin_metrics_table
+
+    @staticmethod
+    def create_coin_performance_table(justification) -> Table:
+        coin_performance_table = Table(title="Coin performance",
+                                       box=box.ROUNDED)
+        coin_performance_table.add_column("Pair", justify=justification)
+        coin_performance_table.add_column("Avg. profit (%)", justify=justification, width=15)
+        coin_performance_table.add_column("Cum. profit (%)", justify=justification, width=15)
+        coin_performance_table.add_column("Total profit (%)", justify=justification, width=20)
+        coin_performance_table.add_column("Profit (%)", justify=justification, width=12)
+        return coin_performance_table
+
 
 @dataclass
 class LeftOpenTradeResult:
@@ -245,22 +284,27 @@ class LeftOpenTradeResult:
     def show(instances: typing.List['LeftOpenTradeResult'], currency_symbol):
         justification: JustifyMethod = "center"
 
-        open_trades_table = Table(title="Left open trades", box=box.ROUNDED)
-        open_trades_table.add_column("Pair", justify=justification)
-        open_trades_table.add_column("Cur. profit (%)", justify=justification, width=15)
-        open_trades_table.add_column(f"Cur. profit ({currency_symbol})", justify=justification, width=15)
-        open_trades_table.add_column("Max. seen drawdown (%)", justify=justification, width=25)
-        open_trades_table.add_column("Opened at", justify=justification, width=25)
+        left_open_trades_table = LeftOpenTradeResult.create_left_open_trades_table(currency_symbol, justification)
 
         for c in instances:
-            open_trades_table.add_row(c.pair,
-                                      colorize(round(c.curr_profit_percentage, 2), 0),
-                                      colorize(round(c.curr_profit, 2), 0),
-                                      colorize(round(c.max_seen_drawdown, 2), 0),
-                                      str(c.opened_at),
-                                      )
+            left_open_trades_table.add_row(c.pair,
+                                           colorize(round(c.curr_profit_percentage, 2), 0),
+                                           colorize(round(c.curr_profit, 2), 0),
+                                           colorize(round(c.max_seen_drawdown, 2), 0),
+                                           str(c.opened_at),
+                                           )
 
         table_grid = Table(box=box.SIMPLE)
         table_grid.add_column(":hourglass_flowing_sand:  LEFT OPEN TRADES :hourglass_flowing_sand:")
-        table_grid.add_row(open_trades_table)
+        table_grid.add_row(left_open_trades_table)
         console.print(table_grid)
+
+    @staticmethod
+    def create_left_open_trades_table(currency_symbol, justification) -> Table:
+        left_open_trades_table = Table(title="Left open trades", box=box.ROUNDED)
+        left_open_trades_table.add_column("Pair", justify=justification)
+        left_open_trades_table.add_column("Cur. profit (%)", justify=justification, width=15)
+        left_open_trades_table.add_column(f"Cur. profit ({currency_symbol})", justify=justification, width=15)
+        left_open_trades_table.add_column("Max. seen drawdown (%)", justify=justification, width=25)
+        left_open_trades_table.add_column("Opened at", justify=justification, width=25)
+        return left_open_trades_table
