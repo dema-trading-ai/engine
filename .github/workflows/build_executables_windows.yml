@@ -63,12 +63,21 @@ jobs:
         run: ../engine.exe
         working-directory: ./new-dir
   deploy:
+    needs:
+      - build
+      - test
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
+      - name: exe
+        uses: actions/download-artifact@v2
+        with:
+          name: engine-windows
+      - name: build archive
+        run: zip -j ./engine.exe
       - run: ls -la
       - run: |
-          aws s3 --endpoint=https://ams3.digitaloceanspaces.com cp .github/workflows/default_pipeline.yml s3://engine-store/item.sh
+          aws s3 --endpoint=https://ams3.digitaloceanspaces.com cp ./engine.exe s3://engine-store/item.sh
         env:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SPACES_KEY }}
           AWS_ACCESS_KEY_ID: ${{ secrets.DO_SPACES_SECRET }}
