@@ -1,7 +1,7 @@
 name: Build executable windows
 on:
   pull_request:
-    branches: [development]
+    branches: [ development ]
   push:
     branches:
       - feat/deploy_exe_files_to_do
@@ -77,7 +77,7 @@ jobs:
         run: zip -j engine ./engine.exe
       - run: ls -la
       - run: |
-          aws s3 --endpoint=https://ams3.digitaloceanspaces.com cp .\engine.zip s3://engine-store/engine.zip --acl public-read
+          aws s3 --endpoint=https://ams3.digitaloceanspaces.com cp ./engine.zip s3://engine-store/engine.zip --acl "public-read"
         env:
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SPACES_KEY }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.DO_SPACES_SECRET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.DO_SPACES_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SPACES_SECRET }}
