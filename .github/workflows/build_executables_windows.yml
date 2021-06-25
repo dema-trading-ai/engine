@@ -67,6 +67,7 @@ jobs:
       - build
       - test
     runs-on: ubuntu-18.04
+#    if: github.ref == 'refs/heads/release/stable' || github.ref == 'refs/heads/development'
     steps:
       - uses: actions/checkout@v2
       - name: exe
@@ -77,7 +78,7 @@ jobs:
         run: zip -j engine ./engine.exe
       - run: ls -la
       - run: |
-          aws s3 --endpoint=https://ams3.digitaloceanspaces.com cp ./engine.zip s3://engine-store/engine.zip --acl "public-read"
+          aws s3 --endpoint=https://ams3.digitaloceanspaces.com cp ./engine.zip s3://engine-store/${GITHUB_REF##*/}.zip --acl "public-read"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.DO_SPACES_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SPACES_SECRET }}
