@@ -45,13 +45,8 @@ class Trade:
         self.max_seen_drawdown = 1.0  # ratio
         self.starting_amount = spend_amount
         self.capital = spend_amount - (spend_amount * fee)  # apply fee
+        self.capital_per_timestamp = {}
         self.currency_amount = (self.capital / ohlcv['close'])
-
-        # Variables for max seen drawdown
-        self.max_seen_drawdown = 1.0
-        self.curr_seen_drawdown = 1.0
-        self.curr_highest_seen_capital = spend_amount
-        self.curr_lowest_seen_capital = spend_amount
 
         # Stoploss configurations
         self.sl_type = sl_type
@@ -78,20 +73,12 @@ class Trade:
         self.capital -= self.close_fee_paid
         self.update_profits(update_capital=False)
 
-        # Check if last capital exceeds lowest seen capital (because of issued fee)
-        if self.capital < self.curr_lowest_seen_capital:
-            seen_drawdown = self.capital / self.curr_highest_seen_capital
-            # Check if new seen drawdown exceeds max seen drawdown
-            if seen_drawdown < self.max_seen_drawdown:
-                self.max_seen_drawdown = seen_drawdown
-
     def update_stats(self, ohlcv: dict, first: bool = False) -> None:
         self.current = ohlcv['close']
         self.update_profits()
         if not first:
             self.candle_low = ohlcv['low']
             self.candle_open = ohlcv['open']
-            self.update_max_drawdown()
 
     def update_profits(self, update_capital: bool = True):
         if update_capital:  # always triggers except when a trade is closed
@@ -109,30 +96,6 @@ class Trade:
             self.sl_ratio = 1 - (abs(self.sl_perc) / 100)
         elif self.sl_type == 'trailing':
             self.sl_sell_time, self.sl_ratio = self.trailing_stoploss(data_dict, ohlcv['time'])
-
-    def update_max_drawdown(self) -> None:
-        """
-        Updates max seen drawdown defined as: biggest difference between
-        highest peak of candle 'open' and lowest bottom of candle 'low'.
-        """
-        temp_max_capital = self.candle_open * self.currency_amount
-        temp_lowest_capital = self.candle_low * self.currency_amount
-        
-        # Check for new drawdown period
-        if temp_max_capital > self.curr_highest_seen_capital:
-            # Reset temp seen drawdown stats
-            self.curr_highest_seen_capital = temp_max_capital
-            self.curr_lowest_seen_capital = temp_max_capital
-            self.curr_seen_drawdown = 1.0   # ratio w/ respect to peak
-
-        # Check if drawdown reached new bottom
-        if temp_lowest_capital < self.curr_lowest_seen_capital:
-            self.curr_lowest_seen_capital = temp_lowest_capital
-            self.curr_seen_drawdown = temp_lowest_capital / self.curr_highest_seen_capital
-
-        # If temp drawdown is larger than max drawdown, update max drawdown
-        if self.curr_seen_drawdown < self.max_seen_drawdown:
-            self.max_seen_drawdown = self.curr_seen_drawdown
 
     def check_for_sl(self, ohlcv: dict) -> bool:
         if self.sl_type == 'standard':

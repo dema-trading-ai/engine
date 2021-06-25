@@ -4,8 +4,9 @@ from urllib.error import URLError
 from urllib.request import urlopen
 
 from cli.print_utils import print_warning
-from utils import CURRENT_VERSION
 import re
+
+from utils.utils import CURRENT_VERSION
 
 
 def print_warning_if_version_outdated():

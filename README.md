@@ -37,7 +37,7 @@ Running the Engine just takes a few simple things:
 To initialize a directory for running our engine, run the command below. Note: this command needs to be run in an empty directory. This command will generate all necessary files for running the engine and developing strategies.
 
 ```
-docker run --rm -v "$(pwd):/usr/src/engine/output" dematrading/engine:stable init
+docker run -t --rm -v "$(pwd):/usr/src/engine/output" dematrading/engine:stable init
 ```
 
 > Note: if you are using Windows, please use powershell to perform this command.

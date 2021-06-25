@@ -86,7 +86,7 @@
     "name": "currency",
     "default": "USDT",
     "type": "string",
-    "options": ["USDT"]
+    "options": ["USDT", "BTC", "ETH"]
   },
   {
     "name": "fee",

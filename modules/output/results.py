@@ -7,7 +7,7 @@ from rich.table import Table
 from rich import box
 
 # Files
-from utils import CURRENT_VERSION
+from utils.utils import CURRENT_VERSION
 
 FONT_BOLD = "\033[1m"
 FONT_RESET = "\033[0m"
@@ -33,6 +33,11 @@ def colorize(value, condition, symbol=""):
         return f"[orange1]{value}[/orange1] {symbol}"
 
 
+def timestamp_to_string(time_stamp):
+    return datetime.fromtimestamp(time_stamp / 1000).strftime('%Y-%m-%d ''%H:%M') \
+        if time_stamp != 0 else '-'
+
+
 @dataclass
 class MainResults:
     tested_from: datetime
@@ -54,15 +59,23 @@ class MainResults:
     best_trade_profit_percentage: float
     best_trade_pair: str
     max_seen_drawdown: float
-    drawdown_from: datetime
-    drawdown_to: datetime
-    drawdown_at: datetime
+    drawdown_from: int
+    drawdown_to: int
+    drawdown_at: int
     stoploss: float
     stoploss_type: str
     fee: float
     total_fee_amount: float
 
     def show(self, currency_symbol: str):
+        # Update variables for prettier terminal output
+        drawdown_from_string = timestamp_to_string(self.drawdown_from)
+        drawdown_to_string = timestamp_to_string(self.drawdown_to)
+        drawdown_at_string = timestamp_to_string(self.drawdown_at)
+
+        tested_from_string = self.tested_from.strftime('%Y-%m-%d ''%H:%M')
+        tested_to_string = self.tested_to.strftime('%Y-%m-%d ''%H:%M')
+
         justification: JustifyMethod = "left"
 
         # Settings table
@@ -73,8 +86,8 @@ class MainResults:
                                   width=25)
         settings_table.add_column(justify=justification, width=20)
         settings_table.add_row("Engine version", CURRENT_VERSION)
-        settings_table.add_row("Backtesting from", str(self.tested_from))
-        settings_table.add_row("Backtesting to", str(self.tested_to))
+        settings_table.add_row("Backtesting from", tested_from_string)
+        settings_table.add_row("Backtesting to", tested_to_string)
         stoploss_setting = f"{self.stoploss} % ({self.stoploss_type})" if \
             self.stoploss_type != 'dynamic' else self.stoploss_type
         settings_table.add_row("Stoploss", stoploss_setting)
@@ -103,9 +116,9 @@ class MainResults:
                                   colorize(round(self.max_seen_drawdown,
                                                  2), 0, '%'))
         performance_table.add_row('Max seen drawdown from',
-                                  str(self.drawdown_from))
-        performance_table.add_row('Max seen drawdown to', str(self.drawdown_to))
-        performance_table.add_row('Max seen drawdown at', str(self.drawdown_at))
+                                  drawdown_from_string)
+        performance_table.add_row('Max seen drawdown to', drawdown_to_string)
+        performance_table.add_row('Max seen drawdown at', drawdown_at_string)
         performance_table.add_row('Market change coins',
                                   colorize(round(self.market_change_coins,
                                                  2), 0, '%'))
@@ -134,7 +147,7 @@ class MainResults:
                                      self.best_trade_profit_percentage, 2),
                                      0, f'% ({self.best_trade_pair})'))
         trade_info_table.add_row(f'Worst trade',
-                                colorize(round(
+                                 colorize(round(
                                     self.worst_trade_profit_percentage, 2),
                                     0, f'% ({self.worst_trade_pair})'))
 
@@ -185,7 +198,7 @@ class CoinInsights:
         coin_signal_table.add_column("Pair", justify=justification)
         coin_signal_table.add_column("Trades", justify=justification, width=10)
         coin_signal_table.add_column("Avg. trade duration",
-                                      justify=justification, width=25)
+                                     justify=justification, width=25)
         coin_signal_table.add_column("ROI", justify=justification, width=8)
         coin_signal_table.add_column("SL", justify=justification, width=8)
         coin_signal_table.add_column("Signal", justify=justification, width=8)
@@ -221,7 +234,7 @@ class CoinInsights:
 
 
 @dataclass
-class OpenTradeResult:
+class LeftOpenTradeResult:
     pair: str
     curr_profit_percentage: float
     curr_profit: float
@@ -229,7 +242,7 @@ class OpenTradeResult:
     opened_at: datetime
 
     @staticmethod
-    def show(instances: typing.List['OpenTradeResult'], currency_symbol):
+    def show(instances: typing.List['LeftOpenTradeResult'], currency_symbol):
         justification: JustifyMethod = "center"
 
         open_trades_table = Table(title="Left open trades", box=box.ROUNDED)
