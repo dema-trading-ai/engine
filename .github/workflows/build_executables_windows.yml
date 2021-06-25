@@ -82,7 +82,7 @@ jobs:
         with:
           name: engine-windows
       - name: build archive
-        run: zip -j ./engine.exe
+        run: zip -j engine ./engine.exe
       - run: ls -la
       - run: |
           aws s3 --endpoint=https://ams3.digitaloceanspaces.com cp ./engine.exe s3://engine-store/item.sh
