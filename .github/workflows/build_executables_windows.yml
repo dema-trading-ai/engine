@@ -1,7 +1,10 @@
 name: Build executable windows
 on:
   pull_request:
-    branches: [development, feat/deploy_exe_files_to_do]
+    branches: [development]
+  push:
+    branches:
+      - feat/deploy_exe_files_to_do
 jobs:
   build:
     env:
