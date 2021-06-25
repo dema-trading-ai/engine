@@ -25,12 +25,13 @@ jobs:
             ${{ runner.os }}-pip-
       - name: install requirements
         run: pip install -r requirements.txt
+      - run: python main.py
       - name: build executable
         run: python build_scripts/build.py
       - name: Archive built executable
         uses: actions/upload-artifact@v2
         with:
-          name: macos-exe
+          name: engine-macos
           path: dist/engine
   test:
     needs:
@@ -40,7 +41,7 @@ jobs:
       - name: exe
         uses: actions/download-artifact@v2
         with:
-          name: macos-exe
+          name: engine-macos
       - name: talib
         run: brew install ta-lib
       - name: list contents
@@ -52,3 +53,24 @@ jobs:
       - name: run
         run: ../engine
         working-directory: ./new-dir
+  deploy:
+    needs:
+      - build
+      - test
+    runs-on: ubuntu-18.04
+    environment: "executable_release"
+    if: github.ref == 'refs/heads/release/stable' || github.ref == 'refs/heads/development'
+    steps:
+      - uses: actions/checkout@v2
+      - name: exe
+        uses: actions/download-artifact@v2
+        with:
+          name: engine-macos
+      - name: build archive
+        run: zip -j engine ./engine.exe
+      - run: ls -la
+      - run: |
+          aws s3 --endpoint=https://ams3.digitaloceanspaces.com cp ./engine.zip s3://engine-store/engine-macos-${GITHUB_REF##*/}.zip --acl "public-read"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.DO_SPACES_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SPACES_SECRET }}

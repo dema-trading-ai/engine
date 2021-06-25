@@ -1,7 +1,12 @@
 name: Build executable windows
 on:
   pull_request:
-    branches: [development]
+    branches: [ development ]
+  push:
+    branches:
+      - release/stable
+      - development
+      - feat/deploy_exe_files_to_do
 jobs:
   build:
     env:
@@ -22,7 +27,7 @@ jobs:
             talib-windows-wheel-${TALIB_URL}
       - name: download ta-lib
         if: steps.cache-talib.outputs.cache-hit != 'true'
-        run: curl https://download.lfd.uci.edu/pythonlibs/q4trcu4l/${{ env.TALIB_URL }} -o ${{ env.TALIB_URL }}
+        run: curl https://engine-store.ams3.digitaloceanspaces.com/${{ env.TALIB_URL }} -o ${{ env.TALIB_URL }}
       - name: install ta-lib
         run: pip install ./TA_Lib-0.4.20-cp39-cp39-win_amd64.whl
       - name: save pip cache dir
@@ -44,7 +49,7 @@ jobs:
       - name: Archive built executable
         uses: actions/upload-artifact@v2
         with:
-          name: windows-exe
+          name: engine-windows
           path: dist/engine.exe
   test:
     needs:
@@ -56,7 +61,7 @@ jobs:
       - name: exe
         uses: actions/download-artifact@v2
         with:
-          name: windows-exe
+          name: engine-windows
       - name: init
         run: ./engine.exe init new-dir
       - name: run
@@ -65,3 +70,26 @@ jobs:
         env:
           PYTHONLEGACYWINDOWSIOENCODING: true
           PYTHONIOENCODING: UTF-8
+      - run: echo ${{github.ref}}
+  deploy:
+    needs:
+      - build
+      - test
+    runs-on: ubuntu-18.04
+    environment: "stable"
+    if: github.ref == 'refs/heads/release/stable' || github.ref == 'refs/heads/development' || github.ref == 'refs/heads/feat/deploy_exe_files_to_do'
+    steps:
+      - uses: actions/checkout@v2
+      - name: exe
+        uses: actions/download-artifact@v2
+        with:
+          name: engine-windows
+      - name: build archive
+        run: zip -j engine ./engine.exe
+      - run: ls -la
+      - run: |
+          aws s3 --endpoint=https://ams3.digitaloceanspaces.com cp ./engine.zip s3://engine-store/engine-windows-${GITHUB_REF##*/}.zip --acl "public-read"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.DO_SPACES_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SPACES_SECRET }}
+
