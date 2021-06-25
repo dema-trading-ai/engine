@@ -39,14 +39,6 @@ jobs:
             ${{ runner.os }}-pip-
       - name: install requirements
         run: pip install -r requirements-ci.txt
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ./dist
-            ./build
-          key: ${{ runner.os }}-pyinstaller-
-          restore-keys: |
-            ${{ runner.os }}-pyinstaller-
       - name: build exe
         run: python build_scripts/build.py
       - name: Archive built executable
@@ -85,7 +77,7 @@ jobs:
         run: zip -j engine ./engine.exe
       - run: ls -la
       - run: |
-          aws s3 --endpoint=https://ams3.digitaloceanspaces.com cp ./engine.zip s3://engine-store/engine.zip --acl public-read
+          aws s3 --endpoint=https://ams3.digitaloceanspaces.com cp .\engine.zip s3://engine-store/engine.zip --acl public-read
         env:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SPACES_KEY }}
           AWS_ACCESS_KEY_ID: ${{ secrets.DO_SPACES_SECRET }}
