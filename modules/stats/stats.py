@@ -19,14 +19,23 @@ from utils.utils import calculate_worth_of_open_trades
 
 
 def calculate_best_worst_trade(closed_trades):
-    if len(closed_trades) > 0:
-        best_trade_ratio = max(closed_trades, key=lambda trade: trade.profit_ratio, default=-np.inf).profit_ratio
-        worst_trade_ratio = min(closed_trades, key=lambda trade: trade.profit_ratio, default=np.inf).profit_ratio
-    else:
-        best_trade_ratio = -np.inf
-        worst_trade_ratio = np.inf
+    best_trade_ratio = -np.inf
+    best_trade_pair = ""
+    worst_trade_ratio = np.inf
+    worst_trade_pair = ""
 
-    return best_trade_ratio, worst_trade_ratio
+    if len(closed_trades) > 0:
+        best_trade = max(closed_trades,
+                         key=lambda trade: trade.profit_ratio, default=-np.inf)
+        best_trade_ratio = best_trade.profit_ratio
+        best_trade_pair = best_trade.pair
+
+        worst_trade = min(closed_trades,
+                          key=lambda trade: trade.profit_ratio, default=np.inf)
+        worst_trade_ratio = worst_trade.profit_ratio
+        worst_trade_pair = worst_trade.pair
+
+    return best_trade_ratio, best_trade_pair, worst_trade_ratio, worst_trade_pair
 
 
 def get_number_of_losing_trades(closed_trades: [Trade]) -> int:
@@ -42,7 +51,7 @@ def get_number_of_consecutive_losing_trades(closed_trades):
             temp_nr_consecutive_trades += 1
         else:
             temp_nr_consecutive_trades = 0
-        nr_consecutive_trades =  max(temp_nr_consecutive_trades, nr_consecutive_trades)
+        nr_consecutive_trades = max(temp_nr_consecutive_trades, nr_consecutive_trades)
     return nr_consecutive_trades
 
 
@@ -73,16 +82,21 @@ class StatsModule:
                                     market_change: dict) -> TradingStats:
 
         trading_module = self.trading_module
+
         coin_results = self.generate_coin_results(trading_module.closed_trades, market_change)
-        best_trade_ratio, worst_trade_ratio = calculate_best_worst_trade(trading_module.closed_trades)
+        best_trade_ratio, best_trade_pair, worst_trade_ratio, worst_trade_pair = \
+            calculate_best_worst_trade(trading_module.closed_trades)
         open_trade_results = self.get_left_open_trades_results(trading_module.open_trades)
+
         main_results = self.generate_main_results(
             trading_module.open_trades,
             trading_module.closed_trades,
             trading_module.budget,
             market_change,
             best_trade_ratio,
-            worst_trade_ratio)
+            best_trade_pair,
+            worst_trade_ratio,
+            worst_trade_pair)
         self.calculate_statistics_for_plots(trading_module.closed_trades, trading_module.open_trades)
 
         return TradingStats(
@@ -97,7 +111,9 @@ class StatsModule:
         )
 
     def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float,
-                              market_change: dict, best_trade_ratio: float, worst_trade_ratio: float) -> MainResults:
+                              market_change: dict, best_trade_ratio: float,
+                              best_trade_pair: str, worst_trade_ratio: float,
+                              worst_trade_pair: str) -> MainResults:
         # Get total budget and calculate overall profit
         budget += calculate_worth_of_open_trades(open_trades)
         overall_profit_percentage = ((budget - self.config.starting_capital) / self.config.starting_capital) * 100
@@ -139,12 +155,15 @@ class StatsModule:
                            n_consecutive_losses=nr_consecutive_losing_trades,
                            max_realised_drawdown=(max_realised_drawdown-1) * 100,
                            worst_trade_profit_percentage=worst_trade_profit_percentage,
+                           worst_trade_pair=worst_trade_pair,
                            best_trade_profit_percentage=best_trade_profit_percentage,
+                           best_trade_pair=best_trade_pair,
                            max_seen_drawdown=(max_seen_drawdown['drawdown']-1) * 100,
                            drawdown_from=max_seen_drawdown['from'],
                            drawdown_to=max_seen_drawdown['to'],
                            drawdown_at=max_seen_drawdown['at'],
-                           configured_stoploss=self.config.stoploss,
+                           stoploss=self.config.stoploss,
+                           stoploss_type=self.config.stoploss_type,
                            fee=self.config.fee,
                            total_fee_amount=self.trading_module.total_fee_paid)
 
@@ -196,9 +215,17 @@ class StatsModule:
         trades_per_coin = group_by(closed_trades, "pair")
 
         for key, closed_pair_trades in trades_per_coin.items():
-            seen_drawdown_per_coin = get_max_seen_drawdown_per_coin(self.frame_with_signals[key], closed_pair_trades, self.config.fee)
+            seen_drawdown_per_coin = get_max_seen_drawdown_per_coin(
+                self.frame_with_signals[key],
+                closed_pair_trades,
+                self.config.fee
+            )
             per_coin_stats[key]["max_seen_ratio"] = seen_drawdown_per_coin
-            realised_drawdown_per_coin = get_max_realised_drawdown_per_coin(self.frame_with_signals[key], closed_pair_trades, self.config.fee)
+            realised_drawdown_per_coin = get_max_realised_drawdown_per_coin(
+                self.frame_with_signals[key],
+                closed_pair_trades,
+                self.config.fee
+            )
             per_coin_stats[key]["max_realised_ratio"] = realised_drawdown_per_coin
 
         for trade in closed_trades:
@@ -244,7 +271,11 @@ class StatsModule:
     def get_left_open_trades_results(self, open_trades: [Trade]) -> list:
         left_open_trade_stats = []
         for trade in open_trades:
-            max_seen_drawdown = get_max_seen_drawdown_per_trade(self.frame_with_signals[trade.pair], trade, self.config.fee)
+            max_seen_drawdown = get_max_seen_drawdown_per_trade(
+                self.frame_with_signals[trade.pair],
+                trade,
+                self.config.fee
+            )
             left_open_trade_results = LeftOpenTradeResult(pair=trade.pair,
                                                           curr_profit_percentage=(trade.profit_ratio - 1) * 100,
                                                           curr_profit=trade.profit_dollar,
