@@ -30,6 +30,7 @@ class StatsFixture:
             fee=FEE_PERCENTAGE,
 
             stoploss=STOPLOSS,
+            stoploss_type="standard",
             currency_symbol="USDT",
             plots=False,
 
