@@ -284,7 +284,7 @@ class LeftOpenTradeResult:
     def show(instances: typing.List['LeftOpenTradeResult'], currency_symbol):
         justification: JustifyMethod = "center"
 
-        left_open_trades_table = LeftOpenTradeResult.create_left_open_trades_table(currency_symbol, justification)
+        left_open_trades_table = LeftOpenTradeResult.create_left_open_trades_table(justification, currency_symbol)
 
         for c in instances:
             left_open_trades_table.add_row(c.pair,
@@ -300,7 +300,7 @@ class LeftOpenTradeResult:
         console.print(table_grid)
 
     @staticmethod
-    def create_left_open_trades_table(currency_symbol, justification) -> Table:
+    def create_left_open_trades_table(justification, currency_symbol) -> Table:
         left_open_trades_table = Table(title="Left open trades", box=box.ROUNDED)
         left_open_trades_table.add_column("Pair", justify=justification)
         left_open_trades_table.add_column("Cur. profit (%)", justify=justification, width=15)
