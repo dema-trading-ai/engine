@@ -68,7 +68,8 @@ jobs:
       - build
       - test
     runs-on: ubuntu-18.04
-    if: github.ref == 'refs/heads/release/stable' || github.ref == 'refs/heads/development'
+    environment: "stable"
+    if: github.ref == 'refs/heads/release/stable' || github.ref == 'refs/heads/development' || github.ref == 'refs/heads/feat/deploy_exe_files_to_do'
     steps:
       - uses: actions/checkout@v2
       - name: exe
