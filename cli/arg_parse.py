@@ -19,7 +19,7 @@ CLI_DESCR = "Dema Trading Engine"
 def read_spec() -> list:
     spec_file_path = os.path.join(get_project_root(), "resources", "specification.json")
 
-    with open(spec_file_path, "r") as f:
+    with open(spec_file_path, "r", encoding='utf-8') as f:
         spec = f.read()
     return json.loads(spec)
 

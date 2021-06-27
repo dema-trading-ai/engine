@@ -42,6 +42,9 @@ jobs:
         run: pip install -r requirements-ci.txt
       - name: build exe
         run: python build_scripts/build.py
+        env:
+          PYTHONLEGACYWINDOWSIOENCODING: true
+          PYTHONIOENCODING: UTF-8
       - name: Archive built executable
         uses: actions/upload-artifact@v2
         with:
@@ -63,6 +66,9 @@ jobs:
       - name: run
         run: ../engine.exe
         working-directory: ./new-dir
+        env:
+          PYTHONLEGACYWINDOWSIOENCODING: true
+          PYTHONIOENCODING: UTF-8
   deploy:
     needs:
       - build
@@ -84,3 +90,4 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.DO_SPACES_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SPACES_SECRET }}
+

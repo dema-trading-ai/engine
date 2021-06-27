@@ -145,7 +145,7 @@ class DataModule:
         filename = self.generate_datafile_name(pair)
         filepath = os.path.join("data/backtesting-data/", self.config.exchange_name, filename)
         try:
-            with open(filepath, 'r') as datafile:
+            with open(filepath, 'r', encoding='utf-8') as datafile:
                 data = datafile.read()
                 df = str_to_df(data)
         except FileNotFoundError:
@@ -231,7 +231,7 @@ class DataModule:
         df_dict = df_to_dict(df)
 
         # Save json file
-        with open(filepath, 'w') as outfile:
+        with open(filepath, 'w', encoding='utf-8') as outfile:
             rapidjson.dump(df_dict, outfile, indent=4)
 
     def generate_datafile_name(self, pair: str) -> str:
