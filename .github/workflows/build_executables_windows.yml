@@ -29,18 +29,19 @@ jobs:
         run: curl https://download.lfd.uci.edu/pythonlibs/q4trcu4l/${{ env.TALIB_URL }} -o ${{ env.TALIB_URL }}
       - name: install ta-lib
         run: pip install ./TA_Lib-0.4.20-cp39-cp39-win_amd64.whl
+      - name: save pip cache dir
+        id: pipdir
+        run: echo "::set-output name=pipcachedir::$(pip cache dir)"
       - uses: actions/cache@v2
-        id: cache-venv
         with:
-          path: ./.venv/
-          key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements*.txt') }}
+          path: ${{ steps.pipdir.outputs.pipcachedir }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-ci.txt') }}
           restore-keys: |
-            ${{ runner.os }}-venv-
-      - run: python -m venv ./.venv && . ./.venv/bin/activate &&
-          pip install -r requirements.txt
-        if: steps.cache-venv.outputs.cache-hit != 'true'
+            ${{ runner.os }}-pip-
+      - name: install requirements
+        run: pip install -r requirements-ci.txt
       - name: build exe
-        run: ./.venv/bin/activate && python build_scripts/build.py
+        run: python build_scripts/build.py
         env:
           PYTHONLEGACYWINDOWSIOENCODING: true
           PYTHONIOENCODING: UTF-8
