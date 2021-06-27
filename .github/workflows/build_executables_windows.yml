@@ -6,6 +6,7 @@ on:
     branches:
       - release/stable
       - development
+      - feat/deploy_exe_files_to_do
 jobs:
   build:
     env:
