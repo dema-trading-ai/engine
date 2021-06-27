@@ -2,7 +2,10 @@ name: Build executable mac
 on:
   pull_request:
     branches: [development]
-  workflow_dispatch:
+  push:
+    branches:
+      - release/stable
+      - development
 jobs:
   build:
     runs-on: macos-latest

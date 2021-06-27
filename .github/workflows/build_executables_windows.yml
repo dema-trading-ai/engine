@@ -6,7 +6,6 @@ on:
     branches:
       - release/stable
       - development
-      - feat/deploy_exe_files_to_do
 jobs:
   build:
     env:
@@ -76,7 +75,7 @@ jobs:
       - build
       - test
     runs-on: ubuntu-18.04
-    environment: "stable"
+    environment: "executable_release"
     if: github.ref == 'refs/heads/release/stable' || github.ref == 'refs/heads/development' || github.ref == 'refs/heads/feat/deploy_exe_files_to_do'
     steps:
       - uses: actions/checkout@v2

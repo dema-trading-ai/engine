@@ -14,7 +14,7 @@ if (-not(IsElevated)) {
     throw "Please run this script as administrator" 
 }
 
-$executableUri = "https://engine-store.ams3.digitaloceanspaces.com/stable.zip"
+$executableUri = "https://engine-store.ams3.digitaloceanspaces.com/engine-windows-stable.zip"
 $tempDir = $env:TEMP + "\engine"
 $tempLocation = $tempDir + "\executable.zip"
 $installationDir = $env:ProgramFiles + "\engine"
