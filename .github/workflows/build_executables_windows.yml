@@ -87,7 +87,7 @@ jobs:
         run: zip -j engine ./engine.exe
       - run: ls -la
       - run: |
-          aws s3 --endpoint=https://ams3.digitaloceanspaces.com cp ./engine.zip s3://engine-store/${GITHUB_REF##*/}.zip --acl "public-read"
+          aws s3 --endpoint=https://ams3.digitaloceanspaces.com cp ./engine.zip s3://engine-store/engine-windows-${GITHUB_REF##*/}.zip --acl "public-read"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.DO_SPACES_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SPACES_SECRET }}
