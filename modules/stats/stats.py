@@ -58,12 +58,14 @@ def get_number_of_consecutive_losing_trades(closed_trades):
 
 
 def calculate_trade_durations(closed_trades):
-    shortest_trade_duration = min(trade.closed_at - trade.opened_at for trade in closed_trades)
-    longest_trade_duration = max(trade.closed_at - trade.opened_at for trade in closed_trades)
-    total_trade_duration = sum((trade.closed_at - trade.opened_at for trade in closed_trades), timedelta())
-    avg_trade_duration_not_rounded = total_trade_duration / len(closed_trades)
-    avg_trade_duration = pandas.Series(avg_trade_duration_not_rounded).dt.round('1s')[0].to_pytimedelta()
-
+    if len(closed_trades) > 0:
+        shortest_trade_duration = min(trade.closed_at - trade.opened_at for trade in closed_trades)
+        longest_trade_duration = max(trade.closed_at - trade.opened_at for trade in closed_trades)
+        total_trade_duration = sum((trade.closed_at - trade.opened_at for trade in closed_trades), timedelta())
+        avg_trade_duration_not_rounded = total_trade_duration / len(closed_trades)
+        avg_trade_duration = pandas.Series(avg_trade_duration_not_rounded).dt.round('1s')[0].to_pytimedelta()
+    else:
+        avg_trade_duration = longest_trade_duration = shortest_trade_duration = '-'
     return avg_trade_duration, longest_trade_duration, shortest_trade_duration
 
 
@@ -224,7 +226,10 @@ class StatsModule:
                 'max_seen_ratio': 1.0,
                 'max_realised_ratio': 1.0,
                 'total_duration': None,
-                'sell_reasons': defaultdict(int)
+                'sell_reasons': defaultdict(int),
+                "avg_trade_duration": '-',
+                "longest_trade_duration": '-',
+                "shortest_trade_duration": '-'
             } for pair in self.frame_with_signals.keys()
         }
 
@@ -247,6 +252,7 @@ class StatsModule:
                 per_coin_stats[key]["longest_trade_duration"], \
                 per_coin_stats[key]["shortest_trade_duration"] = \
                 calculate_trade_durations(closed_pair_trades)
+
             per_coin_stats[key]["max_realised_ratio"] = realised_drawdown_per_coin
 
         for trade in closed_trades:
