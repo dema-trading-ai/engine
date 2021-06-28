@@ -1,10 +1,10 @@
 # Mandatory Imports
+import talib.abstract as ta
 from pandas import DataFrame
+from backtesting.strategy import Strategy
 
 # Optional Imports
-import talib.abstract as ta
-
-from backtesting.strategy import Strategy
+import numpy as np
 
 
 class MyStrategyAdvanced(Strategy):
@@ -22,9 +22,34 @@ class MyStrategyAdvanced(Strategy):
         # RSI - Relative Strength Index
         dataframe['rsi'] = ta.RSI(dataframe, timeperiod=14)
 
+        # MFI - Money Flow Index
+        dataframe['mfi'] = ta.MFI(dataframe)
+
         # EMA - Exponential Moving Average
-        dataframe['ema5'] = ta.EMA(dataframe, timeperiod=5)
-        dataframe['ema21'] = ta.EMA(dataframe, timeperiod=21)
+        dataframe['ema50'] = ta.EMA(dataframe, timeperiod=50)
+        dataframe['ema200'] = ta.EMA(dataframe, timeperiod=200)
+
+        # SMA - Simple Moving Average
+        dataframe['sma'] = ta.SMA(dataframe, timeperiod=40)
+
+        # MACD - Moving Average Convergence Divergence
+        macd = ta.MACD(dataframe)
+        dataframe['macd'] = macd['macd']
+
+        # Minus Directional Indicator / Movement
+        dataframe['minus_di'] = ta.MINUS_DI(dataframe)
+
+        # Inverse Fisher transform on RSI, values [-1.0, 1.0]
+        rsi = 0.1 * (dataframe['rsi'] - 50)
+        dataframe['fisher_rsi'] = (np.exp(2 * rsi) - 1) / (np.exp(2 * rsi) + 1)
+
+        # STOCHF - Stochastic Fast
+        stoch_fast = ta.STOCHF(dataframe)
+        dataframe['fastd'] = stoch_fast['fastd']
+        dataframe['fastk'] = stoch_fast['fastk']
+
+        # SAR (Stop And Reverse) Parabolic
+        dataframe['sar'] = ta.SAR(dataframe)
 
         return dataframe
 
@@ -39,9 +64,24 @@ class MyStrategyAdvanced(Strategy):
 
         dataframe.loc[
             (
-                (dataframe['rsi'] < 30) &
-                (dataframe['ema5'] < dataframe['ema21']) &
-                (dataframe['volume'] > 0)
+                (
+                    # BULL MARKET
+                    (dataframe['ema50'] > dataframe['ema200']) &
+                    (dataframe['fastd'] > dataframe['fastk']) &
+                    (dataframe['volume'] > dataframe['volume'].rolling(200).mean() * 4) &
+                    (dataframe['rsi'] > 50)
+                )
+                |
+                (
+                    # BEAR MARKET
+                    (dataframe['ema50'] < dataframe['ema200']) &
+                    (dataframe['rsi'] < 28) &
+                    (dataframe['close'] < dataframe['sma']) &
+                    (dataframe['fisher_rsi'] < -0.94) &
+                    (dataframe['mfi'] < 16.0) &
+                    (dataframe['fastd'] > dataframe['fastk']) &
+                    (dataframe['fastd'] > 0)
+                )
             ),
             'buy'] = 1
 
@@ -60,8 +100,20 @@ class MyStrategyAdvanced(Strategy):
 
         dataframe.loc[
             (
-                (dataframe['rsi'] > 70) &
-                (dataframe['volume'] > 0)
+                (
+                    # BULL MARKET
+                    (dataframe['ema50'] > dataframe['ema200']) &
+                    (dataframe['rsi'] > 60) &
+                    (dataframe['macd'] < 0) &
+                    (dataframe['minus_di'] > 0)
+                )
+                |
+                (
+                    # BEAR MARKET
+                    (dataframe['ema50'] < dataframe['ema200']) &
+                    (dataframe['sar'] > dataframe['close']) &
+                    (dataframe['fisher_rsi'] > 0.3)
+                )
             ),
             'sell'] = 1
 
@@ -85,7 +137,7 @@ class MyStrategyAdvanced(Strategy):
         """
         # BEGIN STRATEGY
 
-        dataframe['stoploss'] = dataframe['ema5']
+        dataframe['stoploss'] = dataframe['ema50']
 
         # END STRATEGY
 
