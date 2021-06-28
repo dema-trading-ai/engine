@@ -95,10 +95,8 @@ def read_config(config_path: str) -> dict:
 
 
 def print_pairs(config_json):
-    coins = ''
-    for i in config_json['pairs']:
-        coins += str(i) + ' '
-    print("[INFO] Watching pairs: %s." % coins)
+    pairs_string = ''.join([f'{pair} ' for pair in config_json['pairs']])
+    print("[INFO] Watching pairs: %s." % pairs_string[:-1])
 
 
 def parse_timeframe(timeframe_str: str):

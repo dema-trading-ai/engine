@@ -67,7 +67,7 @@ class StatsModule:
 
     def analyze(self) -> TradingStats:
         pairs = list(self.frame_with_signals.keys())
-        ticks = list(self.frame_with_signals[pairs[0]].keys())
+        ticks = list(self.frame_with_signals[pairs[0]].keys()) if pairs else []
 
         for tick in tqdm(ticks, desc='[INFO] Backtesting', total=len(ticks), ncols=75):
             for pair in pairs:
@@ -295,5 +295,5 @@ def get_market_change(ticks: list, pairs: list, data_dict: dict) -> dict:
         coin_change = end_value / begin_value
         market_change[pair] = coin_change
         total_change += coin_change
-    market_change['all'] = total_change / len(pairs)
+    market_change['all'] = total_change / len(pairs) if len(pairs) > 0 else 1
     return market_change

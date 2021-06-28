@@ -1,4 +1,5 @@
 import json
+import os
 
 from cli.print_utils import print_warning
 from modules.output.plots import plot_per_coin
@@ -6,6 +7,9 @@ from modules.output.results import show_signature, CoinInsights, LeftOpenTradeRe
 from modules.stats.stats_config import StatsConfig
 from modules.stats.trade import SellReason
 from modules.stats.trading_stats import TradingStats
+from rich.console import Console
+
+console = Console()
 
 
 class OutputModule(object):
@@ -21,6 +25,12 @@ class OutputModule(object):
         LeftOpenTradeResult.show(stats.open_trade_results, self.config.currency_symbol)
 
         show_trade_anomalies(stats)
+
+        # check for correct window width
+        terminal_width = os.get_terminal_size().columns
+        if terminal_width < 108:  # minimal terminal width
+            console.print("[bright_yellow][ERROR] Your terminal width is too small. Increase "
+                          "terminal width to display results correctly. [/bright_yellow]")
 
         show_signature()
 
