@@ -39,7 +39,7 @@ class MyStrategyAdvanced(Strategy):
         # Minus Directional Indicator / Movement
         dataframe['minus_di'] = ta.MINUS_DI(dataframe)
 
-        # Inverse Fisher transform on RSI, values [-1.0, 1.0] (https://goo.gl/2JGGoy)
+        # Inverse Fisher transform on RSI, values [-1.0, 1.0]
         rsi = 0.1 * (dataframe['rsi'] - 50)
         dataframe['fisher_rsi'] = (np.exp(2 * rsi) - 1) / (np.exp(2 * rsi) + 1)
 
