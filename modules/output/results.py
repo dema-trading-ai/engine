@@ -262,7 +262,7 @@ class CoinInsights:
 
     @staticmethod
     def create_coin_performance_table(justification, currency_symbol: str) -> Table:
-        coin_performance_table = Table(title="Coin performance",
+        coin_performance_table = Table(title="Coin Performance",
                                        box=box.ROUNDED)
         coin_performance_table.add_column("Pair", justify=justification)
         coin_performance_table.add_column("Avg. profit (%)", justify=justification, width=15)
@@ -295,7 +295,7 @@ class LeftOpenTradeResult:
                                            )
 
         table_grid = Table(box=box.SIMPLE)
-        table_grid.add_column(":hourglass_flowing_sand:  LEFT OPEN TRADES :hourglass_flowing_sand:")
+        table_grid.add_column(":hourglass_flowing_sand: LEFT OPEN TRADES :hourglass_flowing_sand:")
         table_grid.add_row(left_open_trades_table)
         console.print(table_grid)
 
