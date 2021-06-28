@@ -129,9 +129,9 @@ class DataModule:
         try:
             os.makedirs(directory)
         except OSError:
-            print("Creation of the directory %s failed" % path)
+            print("Creation of the directory %s failed" % directory)
         else:
-            print("Successfully created the directory %s " % path)
+            print("Successfully created the directory %s " % directory)
 
     async def read_data_from_datafile(self, pair: str) -> Optional[DataFrame]:
         """

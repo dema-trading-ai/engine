@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta
+
+import pandas
 from tqdm import tqdm
 import numpy as np
 
@@ -53,6 +55,16 @@ def get_number_of_consecutive_losing_trades(closed_trades):
             temp_nr_consecutive_trades = 0
         nr_consecutive_trades = max(temp_nr_consecutive_trades, nr_consecutive_trades)
     return nr_consecutive_trades
+
+
+def calculate_trade_durations(closed_trades):
+    shortest_trade_duration = min(trade.closed_at - trade.opened_at for trade in closed_trades)
+    longest_trade_duration = max(trade.closed_at - trade.opened_at for trade in closed_trades)
+    total_trade_duration = sum((trade.closed_at - trade.opened_at for trade in closed_trades), timedelta())
+    avg_trade_duration_not_rounded = total_trade_duration / len(closed_trades)
+    avg_trade_duration = pandas.Series(avg_trade_duration_not_rounded).dt.round('1s')[0].to_pytimedelta()
+
+    return avg_trade_duration, longest_trade_duration, shortest_trade_duration
 
 
 class StatsModule:
@@ -134,6 +146,8 @@ class StatsModule:
         worst_trade_profit_percentage = (worst_trade_ratio - 1) * 100 \
             if worst_trade_ratio != np.inf else 0
 
+        avg_trade_duration, longest_trade_duration, shortest_trade_duration = calculate_trade_durations(closed_trades)
+
         tested_from = datetime.fromtimestamp(self.config.backtesting_from / 1000)
         tested_to = datetime.fromtimestamp(self.config.backtesting_to / 1000)
 
@@ -158,6 +172,9 @@ class StatsModule:
                            worst_trade_pair=worst_trade_pair,
                            best_trade_profit_percentage=best_trade_profit_percentage,
                            best_trade_pair=best_trade_pair,
+                           avg_trade_duration=avg_trade_duration,
+                           longest_trade_duration=longest_trade_duration,
+                           shortest_trade_duration=shortest_trade_duration,
                            max_seen_drawdown=(max_seen_drawdown['drawdown']-1) * 100,
                            drawdown_from=max_seen_drawdown['from'],
                            drawdown_to=max_seen_drawdown['to'],
@@ -188,6 +205,8 @@ class StatsModule:
                                         max_seen_drawdown=(stats[coin]['max_seen_ratio'] - 1) * 100,
                                         max_realised_drawdown=(stats[coin]['max_realised_ratio'] - 1) * 100,
                                         avg_trade_duration=avg_trade_duration,
+                                        longest_trade_duration=stats[coin]['longest_trade_duration'],
+                                        shortest_trade_duration=stats[coin]['shortest_trade_duration'],
                                         roi=stats[coin]['sell_reasons'][SellReason.ROI],
                                         stoploss=stats[coin]['sell_reasons'][SellReason.STOPLOSS],
                                         sell_signal=stats[coin]['sell_reasons'][SellReason.SELL_SIGNAL])
@@ -227,6 +246,10 @@ class StatsModule:
                 self.config.fee
             )
             per_coin_stats[key]["max_realised_ratio"] = realised_drawdown_per_coin
+            per_coin_stats[key]["longest_trade_duration"] = \
+                max(trade.closed_at - trade.opened_at for trade in closed_pair_trades)
+            per_coin_stats[key]["shortest_trade_duration"] = \
+                min(trade.closed_at - trade.opened_at for trade in closed_pair_trades)
 
         for trade in closed_trades:
 

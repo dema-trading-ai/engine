@@ -58,6 +58,9 @@ class MainResults:
     worst_trade_pair: str
     best_trade_profit_percentage: float
     best_trade_pair: str
+    avg_trade_duration: datetime
+    longest_trade_duration: datetime
+    shortest_trade_duration: datetime
     max_seen_drawdown: float
     drawdown_from: int
     drawdown_to: int
@@ -127,6 +130,9 @@ class MainResults:
                                  colorize(round(
                                      self.worst_trade_profit_percentage, 2),
                                      0, f'% ({self.worst_trade_pair})'))
+        trade_info_table.add_row('Shortest trade duration', str(self.shortest_trade_duration))
+        trade_info_table.add_row('Avg. trade duration', str(self.avg_trade_duration))
+        trade_info_table.add_row('Longest trade duration', str(self.longest_trade_duration))
         return trade_info_table
 
     def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown_from_string, drawdown_to_string,
@@ -195,6 +201,8 @@ class CoinInsights:
     max_seen_drawdown: float
     max_realised_drawdown: float
     avg_trade_duration: datetime
+    longest_trade_duration: datetime
+    shortest_trade_duration: datetime
     roi: int
     stoploss: int
     sell_signal: int
@@ -225,7 +233,9 @@ class CoinInsights:
 
             coin_signal_table.add_row(c.pair,
                                       str(c.n_trades),
+                                      str(c.shortest_trade_duration),
                                       str(c.avg_trade_duration),
+                                      str(c.longest_trade_duration),
                                       str(c.roi),
                                       str(c.stoploss),
                                       str(c.sell_signal),
@@ -240,19 +250,20 @@ class CoinInsights:
 
     @staticmethod
     def create_coin_signals_table(justification) -> Table:
-        coin_signal_table = Table(title="Coin Signals", box=box.ROUNDED)
+        coin_signal_table = Table(title="Coin Signals", box=box.ROUNDED, width=100)
         coin_signal_table.add_column("Pair", justify=justification)
-        coin_signal_table.add_column("Trades", justify=justification, width=10)
-        coin_signal_table.add_column("Avg. trade duration",
-                                     justify=justification, width=25)
-        coin_signal_table.add_column("ROI", justify=justification, width=8)
-        coin_signal_table.add_column("SL", justify=justification, width=8)
-        coin_signal_table.add_column("Signal", justify=justification, width=8)
+        coin_signal_table.add_column("Trades", justify=justification)
+        coin_signal_table.add_column("Shortest trade duration", justify=justification)
+        coin_signal_table.add_column("Avg. trade duration", justify=justification)
+        coin_signal_table.add_column("Longest trade duration", justify=justification)
+        coin_signal_table.add_column("ROI", justify=justification)
+        coin_signal_table.add_column("SL", justify=justification)
+        coin_signal_table.add_column("Signal", justify=justification)
         return coin_signal_table
 
     @staticmethod
     def create_coin_metrics_table(justification) -> Table:
-        coin_metrics_table = Table(title="Coin Metrics", box=box.ROUNDED)
+        coin_metrics_table = Table(title="Coin Metrics", box=box.ROUNDED, width=100)
         coin_metrics_table.add_column("Pair", justify=justification)
         coin_metrics_table.add_column("Market change (%)", justify=justification)
         coin_metrics_table.add_column("Max. seen drawdown (%)", justify=justification)
@@ -263,12 +274,13 @@ class CoinInsights:
     @staticmethod
     def create_coin_performance_table(justification, currency_symbol: str) -> Table:
         coin_performance_table = Table(title="Coin performance",
-                                       box=box.ROUNDED)
+                                       box=box.ROUNDED,
+                                       width=100)
         coin_performance_table.add_column("Pair", justify=justification)
-        coin_performance_table.add_column("Avg. profit (%)", justify=justification, width=15)
-        coin_performance_table.add_column("Cum. profit (%)", justify=justification, width=15)
-        coin_performance_table.add_column("Total profit (%)", justify=justification, width=20)
-        coin_performance_table.add_column(f"Profit ({currency_symbol})", justify=justification, width=12)
+        coin_performance_table.add_column("Avg. profit (%)", justify=justification)
+        coin_performance_table.add_column("Cum. profit (%)", justify=justification)
+        coin_performance_table.add_column("Total profit (%)", justify=justification)
+        coin_performance_table.add_column(f"Profit ({currency_symbol})", justify=justification)
         return coin_performance_table
 
 
@@ -301,10 +313,10 @@ class LeftOpenTradeResult:
 
     @staticmethod
     def create_left_open_trades_table(justification, currency_symbol) -> Table:
-        left_open_trades_table = Table(title="Left open trades", box=box.ROUNDED)
+        left_open_trades_table = Table(title="Left open trades", box=box.ROUNDED, width=100)
         left_open_trades_table.add_column("Pair", justify=justification)
-        left_open_trades_table.add_column("Cur. profit (%)", justify=justification, width=15)
-        left_open_trades_table.add_column(f"Cur. profit ({currency_symbol})", justify=justification, width=15)
-        left_open_trades_table.add_column("Max. seen drawdown (%)", justify=justification, width=25)
-        left_open_trades_table.add_column("Opened at", justify=justification, width=25)
+        left_open_trades_table.add_column("Cur. profit (%)", justify=justification)
+        left_open_trades_table.add_column(f"Cur. profit ({currency_symbol})", justify=justification)
+        left_open_trades_table.add_column("Max. seen drawdown (%)", justify=justification)
+        left_open_trades_table.add_column("Opened at", justify=justification)
         return left_open_trades_table
