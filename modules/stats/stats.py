@@ -1,44 +1,63 @@
-from collections import defaultdict
 from datetime import datetime, timedelta
 from tqdm import tqdm
 import numpy as np
 
-from modules.output.results import CoinInsights, MainResults, OpenTradeResult
+from modules.output.results import CoinInsights, MainResults, LeftOpenTradeResult
 from modules.pairs_data import PairsData
+from modules.stats.drawdown.per_coin import get_max_seen_drawdown_per_coin, get_max_realised_drawdown_per_coin
+from modules.stats.drawdown.for_portfolio import get_max_seen_drawdown_for_portfolio, \
+    get_max_realised_drawdown_for_portfolio
+from modules.stats.drawdown.per_trade import get_max_seen_drawdown_per_trade
 from modules.stats.stats_config import StatsConfig
 from modules.stats.trade import Trade, SellReason
 from modules.stats.trading_stats import TradingStats
 from modules.stats.tradingmodule import TradingModule
-from utils import calculate_worth_of_open_trades
+from collections import defaultdict
 
-
-def generate_open_trades_results(open_trades: [Trade]) -> list:
-    open_trade_stats = []
-    for trade in open_trades:
-        open_trade_res = OpenTradeResult(pair=trade.pair,
-                                         curr_profit_percentage=(trade.profit_ratio - 1) * 100,
-                                         curr_profit=trade.profit_dollar,
-                                         max_seen_drawdown=(trade.max_seen_drawdown - 1) * 100,
-                                         opened_at=trade.opened_at)
-
-        open_trade_stats.append(open_trade_res)
-    return open_trade_stats
+from utils.dict import group_by
+from utils.utils import calculate_worth_of_open_trades
 
 
 def calculate_best_worst_trade(closed_trades):
-    if len(closed_trades) > 0:
-        best_trade_ratio = max(closed_trades, key=lambda trade: trade.profit_ratio, default=-np.inf).profit_ratio
-        worst_trade_ratio = min(closed_trades, key=lambda trade: trade.profit_ratio, default=np.inf).profit_ratio
-    else:
-        best_trade_ratio = -np.inf
-        worst_trade_ratio = np.inf
+    best_trade_ratio = -np.inf
+    best_trade_pair = ""
+    worst_trade_ratio = np.inf
+    worst_trade_pair = ""
 
-    return best_trade_ratio, worst_trade_ratio
+    if len(closed_trades) > 0:
+        best_trade = max(closed_trades,
+                         key=lambda trade: trade.profit_ratio, default=-np.inf)
+        best_trade_ratio = best_trade.profit_ratio
+        best_trade_pair = best_trade.pair
+
+        worst_trade = min(closed_trades,
+                          key=lambda trade: trade.profit_ratio, default=np.inf)
+        worst_trade_ratio = worst_trade.profit_ratio
+        worst_trade_pair = worst_trade.pair
+
+    return best_trade_ratio, best_trade_pair, worst_trade_ratio, worst_trade_pair
+
+
+def get_number_of_losing_trades(closed_trades: [Trade]) -> int:
+    nr_losing_trades = sum(1 for trade in closed_trades if trade.profit_ratio <= 1)
+    return nr_losing_trades
+
+
+def get_number_of_consecutive_losing_trades(closed_trades):
+    nr_consecutive_trades = 0
+    temp_nr_consecutive_trades = 0
+    for trade in closed_trades:
+        if trade.profit_ratio <= 1:
+            temp_nr_consecutive_trades += 1
+        else:
+            temp_nr_consecutive_trades = 0
+        nr_consecutive_trades = max(temp_nr_consecutive_trades, nr_consecutive_trades)
+    return nr_consecutive_trades
 
 
 class StatsModule:
-    buypoints = None
-    sellpoints = None
+    buy_points = None
+    sell_points = None
 
     def __init__(self, config: StatsConfig, frame_with_signals: PairsData, trading_module: TradingModule, df):
         self.df = df
@@ -63,62 +82,66 @@ class StatsModule:
                                     market_change: dict) -> TradingStats:
 
         trading_module = self.trading_module
-        coin_res = self.generate_coin_results(trading_module.closed_trades, market_change)
-        best_trade_ratio, worst_trade_ratio = calculate_best_worst_trade(trading_module.closed_trades)
-        open_trade_res = generate_open_trades_results(trading_module.open_trades)
+
+        coin_results = self.generate_coin_results(trading_module.closed_trades, market_change)
+        best_trade_ratio, best_trade_pair, worst_trade_ratio, worst_trade_pair = \
+            calculate_best_worst_trade(trading_module.closed_trades)
+        open_trade_results = self.get_left_open_trades_results(trading_module.open_trades)
+
         main_results = self.generate_main_results(
             trading_module.open_trades,
             trading_module.closed_trades,
             trading_module.budget,
             market_change,
             best_trade_ratio,
-            worst_trade_ratio)
+            best_trade_pair,
+            worst_trade_ratio,
+            worst_trade_pair)
         self.calculate_statistics_for_plots(trading_module.closed_trades, trading_module.open_trades)
 
         return TradingStats(
             main_results=main_results,
-            coin_res=coin_res,
-            open_trade_res=open_trade_res,
+            coin_results=coin_results,
+            open_trade_results=open_trade_results,
             frame_with_signals=self.frame_with_signals,
-            buypoints=self.buypoints,
-            sellpoints=self.sellpoints,
+            buypoints=self.buy_points,
+            sellpoints=self.sell_points,
             df=self.df,
             trades=trading_module.open_trades + trading_module.closed_trades
         )
 
     def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float,
-                              market_change: dict, best_trade_ratio: float, worst_trade_ratio: float) -> MainResults:
+                              market_change: dict, best_trade_ratio: float,
+                              best_trade_pair: str, worst_trade_ratio: float,
+                              worst_trade_pair: str) -> MainResults:
         # Get total budget and calculate overall profit
         budget += calculate_worth_of_open_trades(open_trades)
         overall_profit_percentage = ((budget - self.config.starting_capital) / self.config.starting_capital) * 100
 
         # Find max seen and realised drawdown
-        max_seen_drawdown = self.calculate_max_seen_drawdown()
-        max_realised_drawdown = self.calculate_max_realised_drawdown()
+        max_realised_drawdown = get_max_realised_drawdown_for_portfolio(
+            self.trading_module.realised_profits_per_timestamp
+        )
+        max_seen_drawdown = get_max_seen_drawdown_for_portfolio(
+            self.trading_module.capital_per_timestamp
+        )
 
-        # Update variables for prettier terminal output
-        drawdown_from = datetime.fromtimestamp(max_seen_drawdown['from'] / 1000).strftime('%Y-%m-%d ''%H:%M') \
-            if max_seen_drawdown['from'] != 0 else '-'
-        drawdown_to = datetime.fromtimestamp(max_seen_drawdown['to'] / 1000).strftime('%Y-%m-%d ''%H:%M') \
-            if max_seen_drawdown['to'] != 0 else '-'
-        drawdown_at = datetime.fromtimestamp(max_seen_drawdown['at'] / 1000).strftime('%Y-%m-%d ''%H:%M') \
-            if max_seen_drawdown['at'] != 0 else '-'
+        nr_losing_trades = get_number_of_losing_trades(closed_trades)
+        nr_consecutive_losing_trades = get_number_of_consecutive_losing_trades(closed_trades)
+
         best_trade_profit_percentage = (best_trade_ratio - 1) * 100 \
             if best_trade_ratio != -np.inf else 0
         worst_trade_profit_percentage = (worst_trade_ratio - 1) * 100 \
             if worst_trade_ratio != np.inf else 0
 
         tested_from = datetime.fromtimestamp(self.config.backtesting_from / 1000)
-        tested_from_string = tested_from.strftime('%Y-%m-%d ''%H:%M')
-        tested_to = datetime.fromtimestamp(
-            self.config.backtesting_to / 1000)
-        tested_to_string = tested_to.strftime('%Y-%m-%d ''%H:%M')
+        tested_to = datetime.fromtimestamp(self.config.backtesting_to / 1000)
 
         timespan_seconds = (tested_to - tested_from).total_seconds()
         nr_days = timespan_seconds / timedelta(days=1).total_seconds()
 
-        return MainResults(tested_from=tested_from_string,
-                           tested_to=tested_to_string,
+        return MainResults(tested_from=tested_from,
+                           tested_to=tested_to,
                            max_open_trades=self.config.max_open_trades,
                            market_change_coins=(market_change['all'] - 1) * 100,
                            market_change_btc=(self.config.btc_marketchange_ratio - 1) * 100,
@@ -128,16 +151,19 @@ class StatsModule:
                            n_trades=len(open_trades) + len(closed_trades),
                            n_average_trades=(len(open_trades) + len(closed_trades)) / nr_days,
                            n_left_open_trades=len(open_trades),
-                           n_trades_with_loss=max_realised_drawdown['drawdown_trades'],
-                           n_consecutive_losses=max_realised_drawdown['max_consecutive_losses'],
-                           max_realised_drawdown=(max_realised_drawdown['max_drawdown'] - 1) * 100,
+                           n_trades_with_loss=nr_losing_trades,
+                           n_consecutive_losses=nr_consecutive_losing_trades,
+                           max_realised_drawdown=(max_realised_drawdown-1) * 100,
                            worst_trade_profit_percentage=worst_trade_profit_percentage,
+                           worst_trade_pair=worst_trade_pair,
                            best_trade_profit_percentage=best_trade_profit_percentage,
-                           max_seen_drawdown=(max_seen_drawdown["drawdown"] - 1) * 100,
-                           drawdown_from=drawdown_from,
-                           drawdown_to=drawdown_to,
-                           drawdown_at=drawdown_at,
-                           configured_stoploss=self.config.stoploss,
+                           best_trade_pair=best_trade_pair,
+                           max_seen_drawdown=(max_seen_drawdown['drawdown']-1) * 100,
+                           drawdown_from=max_seen_drawdown['from'],
+                           drawdown_to=max_seen_drawdown['to'],
+                           drawdown_at=max_seen_drawdown['at'],
+                           stoploss=self.config.stoploss,
+                           stoploss_type=self.config.stoploss_type,
                            fee=self.config.fee,
                            total_fee_amount=self.trading_module.total_fee_paid)
 
@@ -170,7 +196,7 @@ class StatsModule:
         return new_stats
 
     def calculate_statistics_per_coin(self, closed_trades):
-        trades_per_coin = {
+        per_coin_stats = {
             pair: {
                 'cum_profit_prct': 0,
                 'total_profit_ratio': 1.0,
@@ -186,191 +212,81 @@ class StatsModule:
             } for pair in self.frame_with_signals.keys()
         }
 
+        trades_per_coin = group_by(closed_trades, "pair")
+
+        for key, closed_pair_trades in trades_per_coin.items():
+            seen_drawdown_per_coin = get_max_seen_drawdown_per_coin(
+                self.frame_with_signals[key],
+                closed_pair_trades,
+                self.config.fee
+            )
+            per_coin_stats[key]["max_seen_ratio"] = seen_drawdown_per_coin
+            realised_drawdown_per_coin = get_max_realised_drawdown_per_coin(
+                self.frame_with_signals[key],
+                closed_pair_trades,
+                self.config.fee
+            )
+            per_coin_stats[key]["max_realised_ratio"] = realised_drawdown_per_coin
+
         for trade in closed_trades:
 
             # Update average profit
-            trades_per_coin[trade.pair]['cum_profit_prct'] += (trade.profit_ratio - 1) * 100
+            per_coin_stats[trade.pair]['cum_profit_prct'] += (trade.profit_ratio - 1) * 100
 
             # Update total profit percentage and amount
-            trades_per_coin[trade.pair]['total_profit_ratio'] = \
-                trades_per_coin[trade.pair]['total_profit_ratio'] * trade.profit_ratio
+            per_coin_stats[trade.pair]['total_profit_ratio'] = \
+                per_coin_stats[trade.pair]['total_profit_ratio'] * trade.profit_ratio
 
             # Update profit and amount of trades
-            trades_per_coin[trade.pair]['total_profit_amount'] += trade.profit_dollar
-            trades_per_coin[trade.pair]['amount_of_trades'] += 1
-            trades_per_coin[trade.pair]['sell_reasons'][trade.sell_reason] += 1
-
-            # Check for max seen drawdown
-            max_seen_drawdown_ratio = trades_per_coin[trade.pair]['drawdown_ratio'] * trade.max_seen_drawdown
-            if max_seen_drawdown_ratio < trades_per_coin[trade.pair]['max_seen_ratio']:
-                trades_per_coin[trade.pair]['max_seen_ratio'] = max_seen_drawdown_ratio
-
-            # Update curr and total ratio
-            trades_per_coin[trade.pair]['drawdown_ratio'] *= trade.profit_ratio
-            trades_per_coin[trade.pair]['total_ratio'] *= trade.profit_ratio
+            per_coin_stats[trade.pair]['total_profit_amount'] += trade.profit_dollar
+            per_coin_stats[trade.pair]['amount_of_trades'] += 1
+            per_coin_stats[trade.pair]['sell_reasons'][trade.sell_reason] += 1
 
             # Check for max realised drawdown
-            if trades_per_coin[trade.pair]['drawdown_ratio'] < trades_per_coin[trade.pair]['max_realised_ratio']:
-                trades_per_coin[trade.pair]['max_realised_ratio'] = trades_per_coin[trade.pair]['drawdown_ratio']
-
-            # Check for new ratio high
-            if trades_per_coin[trade.pair]['total_ratio'] > trades_per_coin[trade.pair]['peak_ratio']:
-                trades_per_coin[trade.pair]['peak_ratio'] = trades_per_coin[trade.pair]['total_ratio']
-                trades_per_coin[trade.pair]['drawdown_ratio'] = 1.0  # reset ratio
+            if per_coin_stats[trade.pair]['drawdown_ratio'] < per_coin_stats[trade.pair]['max_realised_ratio']:
+                per_coin_stats[trade.pair]['max_realised_ratio'] = per_coin_stats[trade.pair]['drawdown_ratio']
 
             # Sum total times
-            if trades_per_coin[trade.pair]['total_duration'] is None:
-                trades_per_coin[trade.pair]['total_duration'] = trade.closed_at - trade.opened_at
+            if per_coin_stats[trade.pair]['total_duration'] is None:
+                per_coin_stats[trade.pair]['total_duration'] = trade.closed_at - trade.opened_at
             else:
-                trades_per_coin[trade.pair]['total_duration'] += trade.closed_at - trade.opened_at
-        return trades_per_coin
-
-    # Method for calculating max seen drawdown
-    # Max seen = visual drawdown (if you plot it). This drawdown might not be realised.
-
-    def calculate_max_seen_drawdown(self) -> dict:
-        """
-        Method calculates max seen drawdown based on the saved budget / value changes
-        :return: returns max_seen_drawdown as a dictionary
-        :rtype: dictionary
-        """
-        max_seen_drawdown = {
-            "from": 0,
-            "to": 0,
-            "at": 0,
-            "drawdown": 1,  # ratio
-            "peak": 0,
-            "bottom": 0
-        }
-        temp_seen_drawdown = max_seen_drawdown.copy() 
-
-        # Find dictionaries with capital info at certain ticks (open trades + budget)
-        lowest_total_capital_open_trades_at_tick = self.trading_module.lowest_total_capital_open_trades
-        highest_total_capital_open_trades_at_tick = self.trading_module.highest_total_capital_open_trades
-        total_budget_at_tick = self.trading_module.budget_per_timestamp
-
-        # Find ticks for total capital (low/max) of open trades
-        open_trade_ticks = list(lowest_total_capital_open_trades_at_tick.keys())
-
-        # Find ticks for total budget
-        budget_ticks = list(total_budget_at_tick.keys())
-
-        # Combine all possible ticks
-        ticks = open_trade_ticks + budget_ticks
-        ticks.sort()
-
-        for tick in ticks:
-            # Find lowest and maximum capital at tick
-            lowest_portfolio = lowest_total_capital_open_trades_at_tick.get(tick, 0) \
-                + total_budget_at_tick.get(tick,0)
-            maximum_portfolio = highest_total_capital_open_trades_at_tick.get(tick, 0) \
-                + total_budget_at_tick.get(tick, 0)
-
-            # Check for new drawdown period
-            if maximum_portfolio > temp_seen_drawdown['peak']:
-                # If last drawdown was larger than max drawdown, update max drawdown
-                if temp_seen_drawdown['drawdown'] < max_seen_drawdown['drawdown']:
-                    max_seen_drawdown = temp_seen_drawdown.copy()
-
-                # Reset temp_seen_drawdown stats
-                temp_seen_drawdown['peak'] = maximum_portfolio
-                temp_seen_drawdown['bottom'] = maximum_portfolio
-                temp_seen_drawdown['drawdown'] = 1.0  # ratio w/ respect to peak
-                temp_seen_drawdown['from'] = tick
-
-            # Check if drawdown reached new bottom
-            if lowest_portfolio < temp_seen_drawdown['bottom']:
-                temp_seen_drawdown['bottom'] = lowest_portfolio
-                temp_seen_drawdown['drawdown'] = temp_seen_drawdown['bottom'] / temp_seen_drawdown['peak']
-                temp_seen_drawdown['at'] = tick
-
-            # Update drawdown period
-            temp_seen_drawdown['to'] = tick
-
-        # If last drawdown was larger than max drawdown, update max drawdown
-        if temp_seen_drawdown['drawdown'] < max_seen_drawdown['drawdown']:
-            max_seen_drawdown = temp_seen_drawdown.copy()
-        return max_seen_drawdown
-
-    def calculate_max_realised_drawdown(self) -> dict:
-        """
-        Method calculates max seen drawdown based on the saved budget / value changes
-        :return: returns max_seen_drawdown as a dictionary
-        :rtype: dictionary
-        """
-        max_realised_drawdown = {
-            "total_ratio": 1,
-            "peak_ratio": 1,
-            "curr_drawdown": 1,  # ratio
-            "max_drawdown": 1,  # ratio
-            "curr_consecutive_losses": 0,
-            "max_consecutive_losses": 0,
-            "drawdown_trades": 0
-        }
-
-        realised_profits = self.trading_module.realised_profits
-        prev_profit = self.config.starting_capital
-
-        for new_profit in realised_profits:
-            profit_ratio = new_profit / prev_profit
-
-            # Update consecutive losses
-            if profit_ratio < 1:
-                max_realised_drawdown['curr_consecutive_losses'] += 1
-                max_realised_drawdown['drawdown_trades'] += 1
-            else:
-                max_realised_drawdown['curr_consecutive_losses'] = 0
-
-            # Check if max consecutive losses is beaten
-            if max_realised_drawdown['curr_consecutive_losses'] > max_realised_drawdown['max_consecutive_losses']:
-                max_realised_drawdown['max_consecutive_losses'] = max_realised_drawdown['curr_consecutive_losses']
-
-            # Update curr and total ratio
-            max_realised_drawdown['curr_drawdown'] *= profit_ratio
-            max_realised_drawdown['total_ratio'] *= profit_ratio
-
-            # Check for max realised drawdown
-            if max_realised_drawdown['curr_drawdown'] < max_realised_drawdown['max_drawdown']:
-                max_realised_drawdown['max_drawdown'] = max_realised_drawdown['curr_drawdown']
-
-            # Check for new ratio high
-            if max_realised_drawdown['total_ratio'] > max_realised_drawdown['peak_ratio']:
-                max_realised_drawdown['peak_ratio'] = max_realised_drawdown['total_ratio']
-                max_realised_drawdown['curr_drawdown'] = 1.0  # reset ratio
-
-            prev_profit = new_profit
-
-        return max_realised_drawdown
+                per_coin_stats[trade.pair]['total_duration'] += trade.closed_at - trade.opened_at
+        return per_coin_stats
 
     def calculate_statistics_for_plots(self, closed_trades, open_trades):
 
         # Used for plotting
-        self.buypoints = {pair: [] for pair in self.frame_with_signals.keys()}
-        self.sellpoints = {pair: [] for pair in self.frame_with_signals.keys()}
+        self.buy_points = {pair: [] for pair in self.frame_with_signals.keys()}
+        self.sell_points = {pair: [] for pair in self.frame_with_signals.keys()}
 
         for trade in closed_trades:
             # Save buy/sell signals
-            self.buypoints[trade.pair].append(trade.opened_at)
-            self.sellpoints[trade.pair].append(trade.closed_at)
+            self.buy_points[trade.pair].append(trade.opened_at)
+            self.sell_points[trade.pair].append(trade.closed_at)
 
         for trade in open_trades:
             # Save buy/sell signals
-            self.buypoints[trade.pair].append(trade.opened_at)
+            self.buy_points[trade.pair].append(trade.opened_at)
+
+    def get_left_open_trades_results(self, open_trades: [Trade]) -> list:
+        left_open_trade_stats = []
+        for trade in open_trades:
+            max_seen_drawdown = get_max_seen_drawdown_per_trade(
+                self.frame_with_signals[trade.pair],
+                trade,
+                self.config.fee
+            )
+            left_open_trade_results = LeftOpenTradeResult(pair=trade.pair,
+                                                          curr_profit_percentage=(trade.profit_ratio - 1) * 100,
+                                                          curr_profit=trade.profit_dollar,
+                                                          max_seen_drawdown=(max_seen_drawdown - 1) * 100,
+                                                          opened_at=trade.opened_at)
+
+            left_open_trade_stats.append(left_open_trade_results)
+        return left_open_trade_stats
 
 
 def get_market_change(ticks: list, pairs: list, data_dict: dict) -> dict:
-    """
-    Calculates the market change for every coin if bought at start and sold at end.
-
-    :param ticks: list with all ticks
-    :type ticks: list
-    :param pairs: list of traded pairs
-    :type pairs: list
-    :param data_dict: dict containing OHLCV data per pair
-    :type data_dict: dict
-    :return: dict with market change per pair
-    :rtype: dict
-    """
     market_change = {}
     total_change = 0
     for pair in pairs:

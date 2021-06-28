@@ -8,11 +8,11 @@ import numpy as np
 import pandas as pd
 import rapidjson
 from pandas import DataFrame
+import asyncio
 
 # Files
 from modules.setup.config import ConfigModule
-from utils import df_to_dict, dict_to_df, get_ohlcv_indicators
-import asyncio
+from utils.utils import str_to_df, df_to_dict, get_ohlcv_indicators
 
 # ======================================================================
 # DataModule is responsible for downloading OHLCV data, preparing it
@@ -50,7 +50,11 @@ class DataModule:
     async def get_pair_data(self, pair):
         if self.is_datafolder_exist(pair):
             print("[INFO] Reading datafile for %s." % pair)
-            df = await self.read_data_from_datafile(pair)
+            try:
+                df = await self.read_data_from_datafile(pair)
+            except rapidjson.JSONDecodeError:
+                print("[INFO] Unable to read datafile for %s, starting download..." % pair)
+                df = await self.download_data_for_pair(pair, self.config.backtesting_from, self.config.backtesting_to)
         else:
             print("[INFO] Did not find datafile for %s, starting download..." % pair)
             df = await self.download_data_for_pair(pair, self.config.backtesting_from, self.config.backtesting_to)
@@ -141,17 +145,18 @@ class DataModule:
         filename = self.generate_datafile_name(pair)
         filepath = os.path.join("data/backtesting-data/", self.config.exchange_name, filename)
         try:
-            with open(filepath, 'r') as datafile:
+            with open(filepath, 'r', encoding='utf-8') as datafile:
                 data = datafile.read()
+                df = str_to_df(data)
         except FileNotFoundError:
             print("[ERROR] Backtesting datafile was not found.")
             return None
         except EnvironmentError:
             print("[ERROR] Something went wrong loading datafile", sys.exc_info()[0])
             return None
-
-        # Convert json to dataframe
-        df = dict_to_df(data)
+        except rapidjson.JSONDecodeError:
+            os.remove(filepath)
+            raise
 
         # Find correct last tick timestamp
         n_downloaded_candles = (self.config.backtesting_to - self.config.backtesting_from) / self.config.timeframe_ms
@@ -226,7 +231,7 @@ class DataModule:
         df_dict = df_to_dict(df)
 
         # Save json file
-        with open(filepath, 'w') as outfile:
+        with open(filepath, 'w', encoding='utf-8') as outfile:
             rapidjson.dump(df_dict, outfile, indent=4)
 
     def generate_datafile_name(self, pair: str) -> str:
