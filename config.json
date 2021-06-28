@@ -4,7 +4,7 @@
   "max-open-trades": 3,
   "starting-capital": 1000,
   "backtesting-from": "2021-03-11",
-  "backtesting-to": "2021-03-15",
+  "backtesting-to": "2021-05-15",
   "backtesting-till-now": false,
   "stoploss-type": "standard",
   "stoploss": -10,
