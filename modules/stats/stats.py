@@ -1,6 +1,4 @@
 from datetime import datetime, timedelta
-
-import pandas
 from tqdm import tqdm
 import numpy as np
 
@@ -62,10 +60,9 @@ def calculate_trade_durations(closed_trades):
         shortest_trade_duration = min(trade.closed_at - trade.opened_at for trade in closed_trades)
         longest_trade_duration = max(trade.closed_at - trade.opened_at for trade in closed_trades)
         total_trade_duration = sum((trade.closed_at - trade.opened_at for trade in closed_trades), timedelta())
-        avg_trade_duration_not_rounded = total_trade_duration / len(closed_trades)
-        avg_trade_duration = pandas.Series(avg_trade_duration_not_rounded).dt.round('1s')[0].to_pytimedelta()
+        avg_trade_duration = total_trade_duration / len(closed_trades)
     else:
-        avg_trade_duration = longest_trade_duration = shortest_trade_duration = '-'
+        avg_trade_duration = longest_trade_duration = shortest_trade_duration = timedelta(0)
     return avg_trade_duration, longest_trade_duration, shortest_trade_duration
 
 

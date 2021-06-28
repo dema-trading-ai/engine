@@ -1,7 +1,9 @@
 # Libraries
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 import typing
+
+import pandas
 from rich.console import Console, JustifyMethod
 from rich.table import Table
 from rich import box
@@ -109,6 +111,11 @@ class MainResults:
         console.print(table_grid)
 
     def create_trade_info_table(self, justification) -> Table:
+        avg_trade_duration = pandas.Series(self.avg_trade_duration).dt.round('1s')[0].to_pytimedelta() \
+            if self.avg_trade_duration != timedelta(0) else '-'
+        longest_trade_duration = self.longest_trade_duration if self.longest_trade_duration != timedelta(0) else '-'
+        shortest_trade_duration = self.shortest_trade_duration if self.shortest_trade_duration != timedelta(0) else '-'
+
         trade_info_table = Table(box=box.ROUNDED)
         trade_info_table.add_column("Trade Info "
                                     ":mag:",
@@ -130,9 +137,9 @@ class MainResults:
                                  colorize(round(
                                      self.worst_trade_profit_percentage, 2),
                                      0, f'% ({self.worst_trade_pair})'))
-        trade_info_table.add_row('Shortest trade duration', str(self.shortest_trade_duration))
-        trade_info_table.add_row('Avg. trade duration', str(self.avg_trade_duration))
-        trade_info_table.add_row('Longest trade duration', str(self.longest_trade_duration))
+        trade_info_table.add_row('Shortest trade duration', str(shortest_trade_duration))
+        trade_info_table.add_row('Avg. trade duration', str(avg_trade_duration))
+        trade_info_table.add_row('Longest trade duration', str(longest_trade_duration))
         return trade_info_table
 
     def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown_from_string, drawdown_to_string,
@@ -218,6 +225,11 @@ class CoinInsights:
         coin_signal_table = CoinInsights.create_coin_signals_table(justification)
 
         for c in instances:
+            avg_trade_duration = pandas.Series(c.avg_trade_duration).dt.round('1s')[0].to_pytimedelta() \
+                if c.avg_trade_duration != timedelta(0) else '-'
+            longest_trade_duration = c.longest_trade_duration if c.longest_trade_duration != timedelta(0) else '-'
+            shortest_trade_duration = c.shortest_trade_duration if c.shortest_trade_duration != timedelta(0) else '-'
+
             coin_performance_table.add_row(c.pair,
                                            colorize(round(c.avg_profit_percentage, 2), 0),
                                            colorize(round(c.cum_profit_percentage, 2), 0),
@@ -233,9 +245,9 @@ class CoinInsights:
 
             coin_signal_table.add_row(c.pair,
                                       str(c.n_trades),
-                                      str(c.shortest_trade_duration),
-                                      str(c.avg_trade_duration),
-                                      str(c.longest_trade_duration),
+                                      str(shortest_trade_duration),
+                                      str(avg_trade_duration),
+                                      str(longest_trade_duration),
                                       str(c.roi),
                                       str(c.stoploss),
                                       str(c.sell_signal),
