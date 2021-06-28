@@ -1,11 +1,10 @@
 # Mandatory Imports
+import talib.abstract as ta
 from pandas import DataFrame
+from backtesting.strategy import Strategy
 
 # Optional Imports
-import talib.abstract as ta
 import numpy as np
-
-from backtesting.strategy import Strategy
 
 
 class MyStrategyAdvanced(Strategy):
@@ -23,7 +22,7 @@ class MyStrategyAdvanced(Strategy):
         # RSI - Relative Strength Index
         dataframe['rsi'] = ta.RSI(dataframe, timeperiod=14)
 
-        # MFI
+        # MFI - Money Flow Index
         dataframe['mfi'] = ta.MFI(dataframe)
 
         # EMA - Exponential Moving Average
@@ -33,7 +32,7 @@ class MyStrategyAdvanced(Strategy):
         # SMA - Simple Moving Average
         dataframe['sma'] = ta.SMA(dataframe, timeperiod=40)
 
-        # MACD
+        # MACD - Moving Average Convergence Divergence
         macd = ta.MACD(dataframe)
         dataframe['macd'] = macd['macd']
 
@@ -44,12 +43,12 @@ class MyStrategyAdvanced(Strategy):
         rsi = 0.1 * (dataframe['rsi'] - 50)
         dataframe['fisher_rsi'] = (np.exp(2 * rsi) - 1) / (np.exp(2 * rsi) + 1)
 
-        # Stoch fast
+        # STOCHF - Stochastic Fast
         stoch_fast = ta.STOCHF(dataframe)
         dataframe['fastd'] = stoch_fast['fastd']
         dataframe['fastk'] = stoch_fast['fastk']
 
-        # SAR Parabol
+        # SAR (Stop And Reverse) Parabolic
         dataframe['sar'] = ta.SAR(dataframe)
 
         return dataframe
@@ -103,6 +102,7 @@ class MyStrategyAdvanced(Strategy):
             (
                 (
                     # BULL MARKET
+                    (dataframe['ema50'] > dataframe['ema200']) &
                     (dataframe['rsi'] > 60) &
                     (dataframe['macd'] < 0) &
                     (dataframe['minus_di'] > 0)
@@ -110,6 +110,7 @@ class MyStrategyAdvanced(Strategy):
                 |
                 (
                     # BEAR MARKET
+                    (dataframe['ema50'] < dataframe['ema200']) &
                     (dataframe['sar'] > dataframe['close']) &
                     (dataframe['fisher_rsi'] > 0.3)
                 )

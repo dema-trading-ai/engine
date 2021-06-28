@@ -1,9 +1,6 @@
 # Mandatory Imports
 import talib.abstract as ta
-
-# Optional Imports
 from pandas import DataFrame
-
 from backtesting.strategy import Strategy
 
 
