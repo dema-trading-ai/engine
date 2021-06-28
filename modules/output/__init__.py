@@ -9,7 +9,7 @@ from modules.stats.trade import SellReason
 from modules.stats.trading_stats import TradingStats
 from rich.console import Console
 
-console = Console()
+console = Console(color_system="truecolor", width=110)
 
 
 class OutputModule(object):
@@ -27,10 +27,14 @@ class OutputModule(object):
         show_trade_anomalies(stats)
 
         # check for correct window width
-        terminal_width = os.get_terminal_size().columns
-        if terminal_width < 108:  # minimal terminal width
-            console.print("[bright_yellow][ERROR] Your terminal width is too small. Increase "
-                          "terminal width to display results correctly. [/bright_yellow]")
+        try:
+            terminal_width = os.get_terminal_size().columns
+            if terminal_width < 108:  # minimal terminal width
+                console.print("[bright_yellow][ERROR] Your terminal width is too small. Increase "
+                              "terminal width to display results correctly. [/bright_yellow]")
+        except OSError:
+            console.print("[bright_yellow][WARNING] Please run in a standard terminal to display "
+                          "results correctly. [/bright_yellow]")
 
         show_signature()
 

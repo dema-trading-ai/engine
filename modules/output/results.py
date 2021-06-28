@@ -12,7 +12,7 @@ from utils.utils import CURRENT_VERSION
 FONT_BOLD = "\033[1m"
 FONT_RESET = "\033[0m"
 
-console = Console()
+console = Console(color_system="truecolor", width=110)
 
 
 def show_signature():
