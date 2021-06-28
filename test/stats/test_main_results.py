@@ -309,7 +309,7 @@ def test_n_average_trades_less_time_more_trades():
 
 
 def test_trade_length_no_trades():
-    # no trades - lengths should be '-'
+    # no trades - lengths should be 0
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
@@ -320,13 +320,13 @@ def test_trade_length_no_trades():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.main_results.avg_trade_duration == '-'
-    assert stats.main_results.longest_trade_duration == '-'
-    assert stats.main_results.shortest_trade_duration == '-'
+    assert stats.main_results.avg_trade_duration == timedelta(0)
+    assert stats.main_results.longest_trade_duration == timedelta(0)
+    assert stats.main_results.shortest_trade_duration == timedelta(0)
 
 
 def test_trade_length_one_trade_no_close():
-    # No closed trades - lengths should be '-'
+    # No closed trades - lengths should be 0
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
@@ -337,13 +337,13 @@ def test_trade_length_one_trade_no_close():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.main_results.avg_trade_duration == '-'
-    assert stats.main_results.longest_trade_duration == '-'
-    assert stats.main_results.shortest_trade_duration == '-'
+    assert stats.main_results.avg_trade_duration == timedelta(0)
+    assert stats.main_results.longest_trade_duration == timedelta(0)
+    assert stats.main_results.shortest_trade_duration == timedelta(0)
 
 
 def test_trade_length_one_trade():
-    # One trade, sold immediately; lengths should be 0
+    # One trade, sold immediately; lengths should be 1 ms
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
@@ -356,4 +356,56 @@ def test_trade_length_one_trade():
     # Assert
     assert stats.main_results.avg_trade_duration == timedelta(microseconds=1000)
     assert stats.main_results.longest_trade_duration == timedelta(microseconds=1000)
+    assert stats.main_results.shortest_trade_duration == timedelta(microseconds=1000)
+
+
+def test_trade_length_three_trades():
+    # Three trades, sold immediately; lengths should be 1 ms
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.main_results.avg_trade_duration == timedelta(microseconds=1000)
+    assert stats.main_results.longest_trade_duration == timedelta(microseconds=1000)
+    assert stats.main_results.shortest_trade_duration == timedelta(microseconds=1000)
+
+
+def test_trade_length_one_trade_longer():
+    # One trade, sold immediately; lengths should be 3 ms
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_one_trade()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.main_results.avg_trade_duration == timedelta(microseconds=3000)
+    assert stats.main_results.longest_trade_duration == timedelta(microseconds=3000)
+    assert stats.main_results.shortest_trade_duration == timedelta(microseconds=3000)
+
+
+def test_trade_length_four_trades():
+    # Three trades, sold immediately, one trade sold after 3 ms.
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_three_trades()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.main_results.avg_trade_duration == timedelta(microseconds=1500)
+    assert stats.main_results.longest_trade_duration == timedelta(microseconds=3000)
     assert stats.main_results.shortest_trade_duration == timedelta(microseconds=1000)
