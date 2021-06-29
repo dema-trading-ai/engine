@@ -169,7 +169,7 @@ def plot_per_coin(stats: TradingStats, config: StatsConfig):
         # set up the ohlc
         dates = [datetime.fromtimestamp(time / 1000) for time in stats.df[pair]["time"]]
 
-        ohlc = go.Ohlc(
+        ohlc = go.Candlestick(
             x=dates,
             open=stats.df[pair]["open"],
             high=stats.df[pair]["high"],

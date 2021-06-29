@@ -55,6 +55,17 @@ def get_number_of_consecutive_losing_trades(closed_trades):
     return nr_consecutive_trades
 
 
+def calculate_trade_durations(closed_trades):
+    if len(closed_trades) > 0:
+        shortest_trade_duration = min(trade.closed_at - trade.opened_at for trade in closed_trades)
+        longest_trade_duration = max(trade.closed_at - trade.opened_at for trade in closed_trades)
+        total_trade_duration = sum((trade.closed_at - trade.opened_at for trade in closed_trades), timedelta())
+        avg_trade_duration = total_trade_duration / len(closed_trades)
+    else:
+        avg_trade_duration = longest_trade_duration = shortest_trade_duration = timedelta(0)
+    return avg_trade_duration, longest_trade_duration, shortest_trade_duration
+
+
 class StatsModule:
     buy_points = None
     sell_points = None
@@ -134,6 +145,8 @@ class StatsModule:
         worst_trade_profit_percentage = (worst_trade_ratio - 1) * 100 \
             if worst_trade_ratio != np.inf else 0
 
+        avg_trade_duration, longest_trade_duration, shortest_trade_duration = calculate_trade_durations(closed_trades)
+
         tested_from = datetime.fromtimestamp(self.config.backtesting_from / 1000)
         tested_to = datetime.fromtimestamp(self.config.backtesting_to / 1000)
 
@@ -158,6 +171,9 @@ class StatsModule:
                            worst_trade_pair=worst_trade_pair,
                            best_trade_profit_percentage=best_trade_profit_percentage,
                            best_trade_pair=best_trade_pair,
+                           avg_trade_duration=avg_trade_duration,
+                           longest_trade_duration=longest_trade_duration,
+                           shortest_trade_duration=shortest_trade_duration,
                            max_seen_drawdown=(max_seen_drawdown['drawdown']-1) * 100,
                            drawdown_from=max_seen_drawdown['from'],
                            drawdown_to=max_seen_drawdown['to'],
@@ -172,22 +188,21 @@ class StatsModule:
         new_stats = []
 
         for coin in stats:
-            # Update variables for prettier terminal output
-            avg_profit_perc = (stats[coin]['cum_profit_prct'] / stats[coin]['amount_of_trades']) \
+            avg_profit_prct = (stats[coin]['cum_profit_prct'] / stats[coin]['amount_of_trades']) \
                 if stats[coin]['amount_of_trades'] > 0 else 0
-            avg_trade_duration = (stats[coin]['total_duration'] / stats[coin]['amount_of_trades']) \
-                if stats[coin]['amount_of_trades'] > 0 else '-'
 
             coin_insight = CoinInsights(pair=coin,
                                         n_trades=stats[coin]['amount_of_trades'],
                                         market_change=(market_change[coin] - 1) * 100,
                                         cum_profit_percentage=stats[coin]['cum_profit_prct'],
                                         total_profit_percentage=(stats[coin]['total_profit_ratio'] - 1) * 100,
-                                        avg_profit_percentage=avg_profit_perc,
+                                        avg_profit_percentage=avg_profit_prct,
                                         profit=stats[coin]['total_profit_amount'],
                                         max_seen_drawdown=(stats[coin]['max_seen_ratio'] - 1) * 100,
                                         max_realised_drawdown=(stats[coin]['max_realised_ratio'] - 1) * 100,
-                                        avg_trade_duration=avg_trade_duration,
+                                        avg_trade_duration=stats[coin]['avg_trade_duration'],
+                                        longest_trade_duration=stats[coin]['longest_trade_duration'],
+                                        shortest_trade_duration=stats[coin]['shortest_trade_duration'],
                                         roi=stats[coin]['sell_reasons'][SellReason.ROI],
                                         stoploss=stats[coin]['sell_reasons'][SellReason.STOPLOSS],
                                         sell_signal=stats[coin]['sell_reasons'][SellReason.SELL_SIGNAL])
@@ -208,7 +223,10 @@ class StatsModule:
                 'max_seen_ratio': 1.0,
                 'max_realised_ratio': 1.0,
                 'total_duration': None,
-                'sell_reasons': defaultdict(int)
+                'sell_reasons': defaultdict(int),
+                "avg_trade_duration": timedelta(0),
+                "longest_trade_duration": timedelta(0),
+                "shortest_trade_duration": timedelta(0)
             } for pair in self.frame_with_signals.keys()
         }
 
@@ -226,6 +244,12 @@ class StatsModule:
                 closed_pair_trades,
                 self.config.fee
             )
+
+            per_coin_stats[key]["avg_trade_duration"], \
+                per_coin_stats[key]["longest_trade_duration"], \
+                per_coin_stats[key]["shortest_trade_duration"] = \
+                calculate_trade_durations(closed_pair_trades)
+
             per_coin_stats[key]["max_realised_ratio"] = realised_drawdown_per_coin
 
         for trade in closed_trades:
