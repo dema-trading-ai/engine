@@ -1,7 +1,7 @@
 import json
 import os
 
-from cli.print_utils import print_warning, print_error
+from cli.print_utils import print_warning, print_error, print_info
 from modules.output.plots import plot_per_coin
 from modules.output.results import show_signature, CoinInsights, LeftOpenTradeResult
 from modules.stats.stats_config import StatsConfig
@@ -42,9 +42,9 @@ class OutputModule(object):
 
         # plot graphs
         if self.config.plots:
-            print("[INFO] Creating plots in " + FONT_BOLD + "data/backtesting-data/plots" + FONT_RESET + "...")
+            print_info("Creating plots in " + FONT_BOLD + "data/backtesting-data/plots" + FONT_RESET + "...")
             plot_per_coin(stats, config=self.config)
-        print("[INFO] Backtest finished!")
+        print_info("Backtest finished!")
 
         show_signature()
 
