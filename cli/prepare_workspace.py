@@ -4,7 +4,7 @@ from pathlib import Path
 from shutil import copy2
 
 from cli.directories import get_resource
-from cli.print_utils import print_warning
+from cli.print_utils import print_warning, print_info
 
 
 def prepare_workspace(args):
@@ -15,7 +15,7 @@ def prepare_workspace(args):
     Path(output_directory).mkdir(parents=True, exist_ok=True)
     output_directory_contains_files = any(os.listdir(output_directory))
     if output_directory_contains_files:
-        print_warning("Files detected in current directory. Cancelling...")
+        print_warning("Files detected in current directory. Cancelling.")
         return
 
     Path(os.path.join(output_directory, "strategies")).mkdir(parents=True, exist_ok=True)
@@ -23,8 +23,8 @@ def prepare_workspace(args):
     for local_path, target_path in paths_to_copy:
         copy2(local_path, target_path)
 
-    print("Copied files...\n")
-    print("Run 'docker-compose up' to get started.")
+    print_info("Copied files.\n")
+    print_info("Run 'docker-compose up' to get started.")
 
 
 def get_paths_to_copy(output_directory: str):

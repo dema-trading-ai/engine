@@ -1,6 +1,7 @@
 import json
+import os
 
-from cli.print_utils import print_warning
+from cli.print_utils import print_warning, print_error, print_info
 from modules.output.plots import plot_per_coin
 from modules.output.results import show_signature, CoinInsights, LeftOpenTradeResult
 from modules.stats.stats_config import StatsConfig
@@ -25,14 +26,23 @@ class OutputModule(object):
 
         show_trade_anomalies(stats)
 
-        print("[INFO] Logging trades to " + FONT_BOLD + "data/backtesting-data/trades_log.json" + FONT_RESET + "...")
+        # check for correct window width
+        try:
+            terminal_width = os.get_terminal_size().columns
+            if terminal_width < 108:  # minimal terminal width
+                print_error("Your terminal width is too small. Increase "
+                            "terminal width to display results correctly.")
+        except OSError:
+            pass
+
+        print_info("Logging trades to " + FONT_BOLD + "data/backtesting-data/trades_log.json" + FONT_RESET + "...")
         log_trades(stats)
 
         # plot graphs
         if self.config.plots:
-            print("[INFO] Creating plots in " + FONT_BOLD + "data/backtesting-data/plots" + FONT_RESET + "...")
+            print_info("Creating plots in " + FONT_BOLD + "data/backtesting-data/plots" + FONT_RESET + "...")
             plot_per_coin(stats, config=self.config)
-        print("[INFO] Backtest finished!")
+        print_info("Backtest finished!")
 
         show_signature()
 
@@ -41,11 +51,11 @@ def show_trade_anomalies(stats: TradingStats):
     trades = list(filter(lambda x: x.sell_reason == SellReason.STOPLOSS_AND_ROI, stats.trades))
 
     if len(trades) > 0:
-        print_warning("WARNING: Both Stoploss and ROI were triggered in the same candle")
-        print_warning("during the following trade(s):")
+        print_warning("Both Stoploss and ROI were triggered in the same candle, during the "
+                      "following trade(s):")
         for trade in trades:
             print_warning(f"- {trade.opened_at} ==> {trade.closed_at}")
-        print_warning("profit for affected trades will be set to 0%")
+        print_warning("Profit for affected trades will be set to 0%")
 
 
 def log_trades(stats: TradingStats):

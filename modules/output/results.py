@@ -8,21 +8,18 @@ from rich.table import Table
 from rich import box
 
 # Files
+from cli.print_utils import print_standard
 from utils.utils import CURRENT_VERSION
 
-FONT_BOLD = "\033[1m"
-FONT_RESET = "\033[0m"
-
-console = Console()
+console = Console(color_system="truecolor", width=200)
 
 
 def show_signature():
-    print("================================================================================")
-    print("%s   DemaTrading.ai BACKTESTING ENGINE IS SUBJECTED TO THE GNU AGPL-3.0 License %s" %
-          (FONT_BOLD, FONT_RESET))
-    print("%s   Copyright © 2021 - DemaTrading.ai%s" %
-          (FONT_BOLD, FONT_RESET))
-    print("================================================================================")
+    print_standard(
+        "================================================================================\n"
+        "   DemaTrading.ai BACKTESTING ENGINE IS SUBJECTED TO THE GNU AGPL-3.0 License\n"
+        "   Copyright © 2021 - DemaTrading.ai\n"
+        "================================================================================")
 
 
 def colorize(value, condition, symbol=""):
@@ -130,7 +127,7 @@ class MainResults:
                                     style="magenta")
         trade_info_table.add_column(justify=justification)
         trade_info_table.add_row('Amount of trades', str(self.n_trades))
-        trade_info_table.add_row('Average trades per day',
+        trade_info_table.add_row('Avg. trades per day',
                                  str(round(self.n_average_trades, 2)))
         trade_info_table.add_row('Left-open trades', str(self.n_left_open_trades))
         trade_info_table.add_row('Trades with loss', str(self.n_trades_with_loss))
@@ -163,16 +160,16 @@ class MainResults:
         performance_table.add_row('Overall profit',
                                   colorize(round(
                                       self.overall_profit_percentage, 2), 0, '%'))
-        performance_table.add_row('Max realised drawdown',
+        performance_table.add_row('Max. realised drawdown',
                                   colorize(round(self.max_realised_drawdown,
                                                  2), 0, '%'))
-        performance_table.add_row('Max seen drawdown',
+        performance_table.add_row('Max. seen drawdown',
                                   colorize(round(self.max_seen_drawdown,
                                                  2), 0, '%'))
-        performance_table.add_row('Max seen drawdown from',
+        performance_table.add_row('Max. seen drawdown from',
                                   drawdown_from_string)
-        performance_table.add_row('Max seen drawdown to', drawdown_to_string)
-        performance_table.add_row('Max seen drawdown at', drawdown_at_string)
+        performance_table.add_row('Max. seen drawdown to', drawdown_to_string)
+        performance_table.add_row('Max. seen drawdown at', drawdown_at_string)
         performance_table.add_row('Market change coins',
                                   colorize(round(self.market_change_coins,
                                                  2), 0, '%'))
@@ -199,7 +196,7 @@ class MainResults:
         settings_table.add_row("Start capital",
                                f"{round(self.starting_capital, 2)} {currency_symbol}")
         settings_table.add_row("Fee percentage", f"{self.fee} %")
-        settings_table.add_row("Max open trades", str(self.max_open_trades))
+        settings_table.add_row("Max. open trades", str(self.max_open_trades))
         return settings_table
 
 

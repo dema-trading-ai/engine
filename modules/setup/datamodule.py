@@ -9,6 +9,7 @@ import pandas as pd
 import rapidjson
 from pandas import DataFrame
 import asyncio
+from cli.print_utils import print_info, print_error, print_warning
 
 # Files
 from modules.setup.config import ConfigModule
@@ -30,7 +31,7 @@ day = 24 * hour
 class DataModule:
 
     async def create(config: ConfigModule):
-        print('[INFO] Starting DemaTrading.ai Data-module...')
+        print_info('Starting DemaTrading.ai data-module...')
         data_module = DataModule()
         data_module.config = config
         data_module.exchange = config.exchange
@@ -49,14 +50,14 @@ class DataModule:
 
     async def get_pair_data(self, pair):
         if self.is_datafolder_exist(pair):
-            print("[INFO] Reading datafile for %s." % pair)
+            print_info("Reading datafile for %s." % pair)
             try:
                 df = await self.read_data_from_datafile(pair)
             except rapidjson.JSONDecodeError:
-                print("[INFO] Unable to read datafile for %s, starting download..." % pair)
+                print_info("Unable to read datafile for %s, starting download..." % pair)
                 df = await self.download_data_for_pair(pair, self.config.backtesting_from, self.config.backtesting_to)
         else:
-            print("[INFO] Did not find datafile for %s, starting download..." % pair)
+            print_info("Did not find datafile for %s, starting download..." % pair)
             df = await self.download_data_for_pair(pair, self.config.backtesting_from, self.config.backtesting_to)
         return pair, df
 
@@ -73,7 +74,7 @@ class DataModule:
         fetch_ohlcv_limit = 1000
 
         if save:
-            print("[INFO] Downloading %s's data" % pair)
+            print_info("Downloading %s's data" % pair)
 
         slice_request_payloads = []
         while start_date < data_to:
@@ -98,7 +99,7 @@ class DataModule:
         df['buy'], df['sell'] = 0, 0  # default values
 
         if save:
-            print("[INFO] [%s] %s candles downloaded." % (pair, len(index)))
+            print_info("[%s] %s candles downloaded." % (pair, len(index)))
             self.save_dataframe(pair, df)
         return df
 
@@ -129,9 +130,9 @@ class DataModule:
         try:
             os.makedirs(directory)
         except OSError:
-            print("Creation of the directory %s failed" % directory)
+            print_error("Creation of the directory %s failed" % directory)
         else:
-            print("Successfully created the directory %s " % directory)
+            print_info("Successfully created the directory %s " % directory)
 
     async def read_data_from_datafile(self, pair: str) -> Optional[DataFrame]:
         """
@@ -149,10 +150,10 @@ class DataModule:
                 data = datafile.read()
                 df = str_to_df(data)
         except FileNotFoundError:
-            print("[ERROR] Backtesting datafile was not found.")
+            print_error("Backtesting datafile was not found.")
             return None
         except EnvironmentError:
-            print("[ERROR] Something went wrong loading datafile", sys.exc_info()[0])
+            print_error(f"Something went wrong loading datafile {sys.exc_info()[0]}")
             return None
         except rapidjson.JSONDecodeError:
             os.remove(filepath)
@@ -192,7 +193,7 @@ class DataModule:
 
         # Check if previous data needs to be downloaded
         if self.config.backtesting_from < df_begin:
-            print("[INFO] Incomplete datafile. Downloading extra candle(s)...")
+            print_info("Incomplete datafile. Downloading extra candle(s)...")
             notify = False
             prev_df = await self.download_data_for_pair(pair, self.config.backtesting_from, df_begin, False)
             df = pd.concat([prev_df, df])
@@ -201,7 +202,7 @@ class DataModule:
         # Check if new data needs to be downloaded
         if final_timestamp > df_end:
             if notify:
-                print("[INFO] Incomplete datafile. Downloading extra candle(s)...")
+                print_info("Incomplete datafile. Downloading extra candle(s)...")
             new_df = await self.download_data_for_pair(pair, df_end + self.config.timeframe_ms,
                                                        self.config.backtesting_to,
                                                        False)
@@ -210,7 +211,7 @@ class DataModule:
 
         # Check if new candles were downloaded
         if extra_candles > 0:
-            print("[INFO] [%s] %s extra candle(s) downloaded." % (pair, extra_candles))
+            print_info("[%s] %s extra candle(s) downloaded." % (pair, extra_candles))
 
         return df
 
@@ -275,7 +276,7 @@ class DataModule:
             n_missing = len(diff)
 
             if n_missing > 0:
-                print(f"[WARNING] Pair '{pair}' is missing {n_missing} ticks (rows)")
+                print_warning(f"Pair '{pair}' is missing {n_missing} ticks (rows)")
 
 
 def is_same_backtesting_period(history_data) -> bool:

@@ -1,8 +1,11 @@
 # Libraries
 from datetime import datetime
+from typing import Optional
 
 # Files
-from typing import Optional
+from cli.print_utils import print_info
+from modules.stats.trade import SellReason, Trade
+from modules.stats.tradingmodule_config import TradingModuleConfig
 
 # ======================================================================
 # TradingModule is responsible for tracking trades, calling strategy methods
@@ -10,14 +13,11 @@ from typing import Optional
 #
 # © 2021 DemaTrading.ai
 # ======================================================================
-from modules.stats.trade import SellReason, Trade
-from modules.stats.tradingmodule_config import TradingModuleConfig
 
 
 class TradingModule:
 
     def __init__(self, config: TradingModuleConfig):
-        print("[INFO] Initializing trading-module...")
         self.config = config
         self.budget = float(self.config.starting_capital)
         self.realised_profit = self.budget
@@ -92,7 +92,7 @@ class TradingModule:
 
     def open_trade(self, ohlcv: dict, data_dict: dict) -> None:
         if self.budget <= 0:
-            print("[INFO] Budget is running low, cannot buy")
+            print_info("Budget is running low, cannot buy")
             return
 
         # Find available trade spaces
