@@ -224,9 +224,9 @@ class StatsModule:
                 'max_realised_ratio': 1.0,
                 'total_duration': None,
                 'sell_reasons': defaultdict(int),
-                "avg_trade_duration": '-',
-                "longest_trade_duration": '-',
-                "shortest_trade_duration": '-'
+                "avg_trade_duration": timedelta(0),
+                "longest_trade_duration": timedelta(0),
+                "shortest_trade_duration": timedelta(0)
             } for pair in self.frame_with_signals.keys()
         }
 
