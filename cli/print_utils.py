@@ -10,17 +10,17 @@ class ConsoleColors:
 
 
 def print_warning(text):
-    print("[WARNING] ", end='')
+    console_standard.print("[WARNING] ", end='')
     console_color.print(f"{ConsoleColors.WARNING}{text}[/]")
 
 
 def print_error(text):
-    print("[ERROR] ", end='')
+    console_standard.print("[ERROR] ", end='')
     console_color.print(f"{ConsoleColors.ERROR}{text}[/]")
 
 
 def print_config_error(text):
-    print("[CONFIG ERROR] ", end='')
+    console_standard.print("[CONFIG ERROR] ", end='')
     console_color.print(f"{ConsoleColors.ERROR}{text}[/]")
 
 
