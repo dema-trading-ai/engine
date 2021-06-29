@@ -70,7 +70,7 @@ jobs:
         with:
           name: engine-macos
       - name: build archive
-        run: zip -j engine ./engine.exe
+        run: zip -j engine ./engine
       - run: ls -la
       - run: |
           aws s3 --endpoint=https://ams3.digitaloceanspaces.com cp ./engine.zip s3://engine-store/engine-macos-${GITHUB_REF##*/}.zip --acl "public-read"
