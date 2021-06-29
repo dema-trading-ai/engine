@@ -1,3 +1,4 @@
+# Libraries
 import os
 from datetime import datetime
 
@@ -6,6 +7,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from pathlib import Path
 
+# Files
 from cli.print_utils import print_warning
 from modules.stats.stats_config import StatsConfig
 from modules.stats.trading_stats import TradingStats

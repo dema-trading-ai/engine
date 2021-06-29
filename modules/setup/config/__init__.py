@@ -1,14 +1,15 @@
 # This module contains helper functions that have to do with the config
 # file, like validation and currency support
 
+# Libraries
 import json
 import re
 import sys
 from contextlib import asynccontextmanager
 from datetime import datetime
-
 import numpy as np
 
+# Files
 from utils.utils import get_plot_indicators
 from .strategy_definition import StrategyDefinition
 from .cctx_adapter import create_cctx_exchange

@@ -1,8 +1,11 @@
 # Libraries
 from datetime import datetime
+from typing import Optional
 
 # Files
-from typing import Optional
+from cli.print_utils import print_info
+from modules.stats.trade import SellReason, Trade
+from modules.stats.tradingmodule_config import TradingModuleConfig
 
 # ======================================================================
 # TradingModule is responsible for tracking trades, calling strategy methods
@@ -10,9 +13,6 @@ from typing import Optional
 #
 # © 2021 DemaTrading.ai
 # ======================================================================
-from cli.print_utils import print_info
-from modules.stats.trade import SellReason, Trade
-from modules.stats.tradingmodule_config import TradingModuleConfig
 
 
 class TradingModule:

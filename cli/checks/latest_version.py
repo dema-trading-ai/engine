@@ -1,11 +1,12 @@
+# Libraries
 import json
 from typing import Optional
 from urllib.error import URLError
 from urllib.request import urlopen
-
-from cli.print_utils import print_warning, print_error
 import re
 
+# Files
+from cli.print_utils import print_warning, print_error
 from utils.utils import CURRENT_VERSION
 
 
