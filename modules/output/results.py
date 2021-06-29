@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 import typing
 
-import pandas
 from rich.console import Console, JustifyMethod
 from rich.table import Table
 from rich import box
@@ -35,9 +34,18 @@ def colorize(value, condition, symbol=""):
         return f"[orange1]{value}[/orange1] {symbol}"
 
 
-def timestamp_to_string(time_stamp):
+def timestamp_to_string(time_stamp: int) -> str:
     return datetime.fromtimestamp(time_stamp / 1000).strftime('%Y-%m-%d ''%H:%M') \
         if time_stamp != 0 else '-'
+
+
+def format_time_difference(avg_trade_duration_unformatted: timedelta) -> str:
+    if avg_trade_duration_unformatted != timedelta(0):
+        avg_trade_duration_rounded = timedelta(seconds=round(avg_trade_duration_unformatted.total_seconds()))
+        avg_trade_duration = str(avg_trade_duration_rounded)
+    else:
+        avg_trade_duration = '-'
+    return avg_trade_duration
 
 
 @dataclass
@@ -60,9 +68,9 @@ class MainResults:
     worst_trade_pair: str
     best_trade_profit_percentage: float
     best_trade_pair: str
-    avg_trade_duration: datetime
-    longest_trade_duration: datetime
-    shortest_trade_duration: datetime
+    avg_trade_duration: timedelta
+    longest_trade_duration: timedelta
+    shortest_trade_duration: timedelta
     max_seen_drawdown: float
     drawdown_from: int
     drawdown_to: int
@@ -111,10 +119,9 @@ class MainResults:
         console.print(table_grid)
 
     def create_trade_info_table(self, justification) -> Table:
-        avg_trade_duration = pandas.Series(self.avg_trade_duration).dt.round('1s')[0].to_pytimedelta() \
-            if self.avg_trade_duration != timedelta(0) else '-'
-        longest_trade_duration = self.longest_trade_duration if self.longest_trade_duration != timedelta(0) else '-'
-        shortest_trade_duration = self.shortest_trade_duration if self.shortest_trade_duration != timedelta(0) else '-'
+        avg_trade_duration = format_time_difference(self.avg_trade_duration)
+        longest_trade_duration = format_time_difference(self.longest_trade_duration)
+        shortest_trade_duration = format_time_difference(self.shortest_trade_duration)
 
         trade_info_table = Table(box=box.ROUNDED)
         trade_info_table.add_column("Trade Info "
@@ -207,9 +214,9 @@ class CoinInsights:
     market_change: float
     max_seen_drawdown: float
     max_realised_drawdown: float
-    avg_trade_duration: datetime
-    longest_trade_duration: datetime
-    shortest_trade_duration: datetime
+    avg_trade_duration: timedelta
+    longest_trade_duration: timedelta
+    shortest_trade_duration: timedelta
     roi: int
     stoploss: int
     sell_signal: int
@@ -225,8 +232,7 @@ class CoinInsights:
         coin_signal_table = CoinInsights.create_coin_signals_table(justification)
 
         for c in instances:
-            avg_trade_duration = pandas.Series(c.avg_trade_duration).dt.round('1s')[0].to_pytimedelta() \
-                if c.avg_trade_duration != timedelta(0) else '-'
+            avg_trade_duration = format_time_difference(c.avg_trade_duration)
             longest_trade_duration = c.longest_trade_duration if c.longest_trade_duration != timedelta(0) else '-'
             shortest_trade_duration = c.shortest_trade_duration if c.shortest_trade_duration != timedelta(0) else '-'
 
