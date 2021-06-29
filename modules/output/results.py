@@ -11,7 +11,7 @@ from rich import box
 from cli.print_utils import print_standard
 from utils.utils import CURRENT_VERSION
 
-console = Console(color_system="truecolor", width=110)
+console = Console(color_system="truecolor", width=200)
 
 
 def show_signature():
