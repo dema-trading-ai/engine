@@ -5,7 +5,6 @@
 # Distribution / packaging
 .Python
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -15,6 +14,8 @@ var/
 wheels/
 pip-wheel-metadata/
 share/python-wheels/
+dist
+build
 .installed.cfg
 *.egg
 MANIFEST

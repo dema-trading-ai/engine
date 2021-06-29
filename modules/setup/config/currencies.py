@@ -1,3 +1,6 @@
+from cli.print_utils import print_warning
+
+
 def get_currency_symbol(config):
     return get_currency_symbol_from_code(config["currency"])
 
@@ -14,7 +17,10 @@ def get_currency_symbol_from_code(currency_code: str) -> str:
         return "£"
     if "JPY" in currency_code:
         return "¥"
+    if "BTC" in currency_code:
+        return "BTC"
+    if "ETH" in currency_code:
+        return "ETH"
     else:
-        print(
-            "[WARNING] Could not find right symbol for your base currency, using $ instead")
+        print_warning("Could not find right symbol for your base currency, using $ instead.")
         return "$"

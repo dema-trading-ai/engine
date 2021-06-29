@@ -1,11 +1,11 @@
 # Libraries
 import os
-import utils
 import sys
 
 # Files
 from backtesting.strategy import Strategy
 from modules.setup.config import StrategyDefinition
+from cli.print_utils import print_error
 
 
 def load_strategy_from_config(strategy_definition: StrategyDefinition) -> Strategy:
@@ -25,27 +25,28 @@ def load_strategy_from_config(strategy_definition: StrategyDefinition) -> Strate
             try:
                 strategy = CustomStrategy()
             except TypeError:
-                print("[ERROR] Your custom strategy has inherited from the base class Strategy,"
-                      "\n[ERROR] but it does not implement all abstract methods")
+                print_error("Your custom strategy has inherited from the base class Strategy,")
+                print_error("but it does not implement all abstract methods.")
                 raise SystemExit
             return strategy
 
     # in case it is not found
-    print(f"[ERROR] Could not find strategy '{strategy_definition.strategy_name}' in the directory '{strategies_path}'.")
+    print_error(f"Could not find strategy '{strategy_definition.strategy_name}' "
+                f"in the directory '{strategies_path}'")
     raise SystemExit
 
 
 def get_full_path_to_strategies_folder(strategies_folder: str) -> str:
     stripped_folder = strategies_folder.strip("./")
-    strategies_path = os.path.join(utils.get_project_root(), stripped_folder)
+    strategies_path = os.path.join(os.getcwd(), stripped_folder)
     if not os.path.exists(strategies_path):
-        print(
-            f"[ERROR] the strategies folder '{strategies_folder}' (expanded to '{strategies_path}') does not exist.")
+        print_error(f"The strategies folder '{strategies_folder}' "
+                    f"(expanded to '{strategies_path}') does not exist.")
         raise SystemExit
     return strategies_path
 
 
 def check_if_subclass_of_strategy(type_: type):
     if not issubclass(type_, Strategy):
-        print("[ERROR] Your custom made strategy must be a subclass of Strategy")
+        print_error("Your custom made strategy must be a subclass of Strategy.")
         raise SystemExit
