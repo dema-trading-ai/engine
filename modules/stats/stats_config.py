@@ -10,6 +10,7 @@ class StatsConfig:
     subplot_indicators: list
     fee: float
     stoploss: float
+    stoploss_type: str
     max_open_trades: int
     btc_marketchange_ratio: float
     backtesting_to: int
@@ -23,6 +24,7 @@ def to_stats_config(config: ConfigModule):
     return StatsConfig(
         fee=config.fee,
         stoploss=config.stoploss,
+        stoploss_type=config.stoploss_type,
         max_open_trades=config.max_open_trades,
         btc_marketchange_ratio=config.btc_marketchange_ratio,
         backtesting_to=config.backtesting_to,

@@ -1,14 +1,32 @@
+from rich.console import Console
+
+console_standard = Console(color_system=None)
+console_color = Console(color_system="truecolor")
+
+
 class ConsoleColors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+    WARNING = '[bright_yellow]'
+    ERROR = '[bright_red]'
 
 
 def print_warning(text):
-    print(f"{ConsoleColors.WARNING}{text}{ConsoleColors.ENDC}")
+    console_standard.print("[WARNING] ", end='')
+    console_color.print(f"{ConsoleColors.WARNING}{text}[/]")
+
+
+def print_error(text):
+    console_standard.print("[ERROR] ", end='')
+    console_color.print(f"{ConsoleColors.ERROR}{text}[/]")
+
+
+def print_config_error(text):
+    console_standard.print("[CONFIG ERROR] ", end='')
+    console_color.print(f"{ConsoleColors.ERROR}{text}[/]")
+
+
+def print_info(text):
+    console_standard.print(f"[INFO] {text}")
+
+
+def print_standard(text):
+    console_standard.print(text)

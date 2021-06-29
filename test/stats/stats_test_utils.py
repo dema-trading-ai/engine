@@ -5,7 +5,7 @@ from modules.stats.stats_config import StatsConfig
 from modules.stats.tradingmodule import TradingModule
 from modules.stats.tradingmodule_config import TradingModuleConfig
 from test.utils.signal_frame import MockPairFrame
-from utils import get_ohlcv_indicators
+from utils.utils import get_ohlcv_indicators
 
 StatsModuleFactory = [[], StatsModule]
 
@@ -30,6 +30,7 @@ class StatsFixture:
             fee=FEE_PERCENTAGE,
 
             stoploss=STOPLOSS,
+            stoploss_type="standard",
             currency_symbol="USDT",
             plots=False,
 

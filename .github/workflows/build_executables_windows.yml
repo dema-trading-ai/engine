@@ -1,0 +1,94 @@
+name: Build executable windows
+on:
+  pull_request:
+    branches: [ development ]
+  push:
+    branches:
+      - release/stable
+      - development
+jobs:
+  build:
+    env:
+      TALIB_URL: TA_Lib-0.4.20-cp39-cp39-win_amd64.whl
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - uses: actions/cache@v2
+        id: cache-talib
+        with:
+          path: ./${{ env.TALIB_URL }}
+          key: talib-windows-wheel-${{ env.TALIB_URL }}
+          restore-keys: |
+            talib-windows-wheel-${TALIB_URL}
+      - name: download ta-lib
+        if: steps.cache-talib.outputs.cache-hit != 'true'
+        run: curl https://engine-store.ams3.digitaloceanspaces.com/${{ env.TALIB_URL }} -o ${{ env.TALIB_URL }}
+      - name: install ta-lib
+        run: pip install ./TA_Lib-0.4.20-cp39-cp39-win_amd64.whl
+      - name: save pip cache dir
+        id: pipdir
+        run: echo "::set-output name=pipcachedir::$(pip cache dir)"
+      - uses: actions/cache@v2
+        with:
+          path: ${{ steps.pipdir.outputs.pipcachedir }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-ci.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: install requirements
+        run: pip install -r requirements-ci.txt
+      - name: build exe
+        run: python build_scripts/build.py
+        env:
+          PYTHONLEGACYWINDOWSIOENCODING: true
+          PYTHONIOENCODING: UTF-8
+      - name: Archive built executable
+        uses: actions/upload-artifact@v2
+        with:
+          name: engine-windows
+          path: dist/engine.exe
+  test:
+    needs:
+      - build
+    runs-on: windows-latest
+    steps:
+      - name: list contents
+        run: dir
+      - name: exe
+        uses: actions/download-artifact@v2
+        with:
+          name: engine-windows
+      - name: init
+        run: ./engine.exe init new-dir
+      - name: run
+        run: ../engine.exe
+        working-directory: ./new-dir
+        env:
+          PYTHONLEGACYWINDOWSIOENCODING: true
+          PYTHONIOENCODING: UTF-8
+      - run: echo ${{github.ref}}
+  deploy:
+    needs:
+      - build
+      - test
+    runs-on: ubuntu-18.04
+    environment: "executable_release"
+    if: github.ref == 'refs/heads/release/stable' || github.ref == 'refs/heads/development' || github.ref == 'refs/heads/feat/deploy_exe_files_to_do'
+    steps:
+      - uses: actions/checkout@v2
+      - name: exe
+        uses: actions/download-artifact@v2
+        with:
+          name: engine-windows
+      - name: build archive
+        run: zip -j engine ./engine.exe
+      - run: ls -la
+      - run: |
+          aws s3 --endpoint=https://ams3.digitaloceanspaces.com cp ./engine.zip s3://engine-store/engine-windows-${GITHUB_REF##*/}.zip --acl "public-read"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.DO_SPACES_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SPACES_SECRET }}
+
