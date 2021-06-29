@@ -1,8 +1,10 @@
+import os
 from datetime import datetime
 
 import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from pathlib import Path
 
 from modules.stats.stats_config import StatsConfig
 from modules.stats.trading_stats import TradingStats
@@ -105,7 +107,7 @@ def plot_per_coin(stats: TradingStats, config: StatsConfig):
         # set up the ohlc
         dates = [datetime.fromtimestamp(time / 1000) for time in stats.df[pair]["time"]]
 
-        ohlc = go.Ohlc(
+        ohlc = go.Candlestick(
             x=dates,
             open=stats.df[pair]["open"],
             high=stats.df[pair]["high"],
@@ -127,4 +129,13 @@ def plot_per_coin(stats: TradingStats, config: StatsConfig):
             title='%s Chart' % pair,
             yaxis_title=pair)
 
-        fig.write_html("data/backtesting-data/binance/plot%s.html" % pair.replace("/", ""))
+        # remove plots if they already existed in the binance folder.
+        # used to remove plots made by older version so users don't by accident open old plots.
+        # Can be removed in a future release, when we can be quite certain that the old plots are gone.
+        try:
+            os.remove("data/backtesting-data/binance/plot%s.html" % pair.replace("/", ""))
+        except OSError:
+            pass
+
+        Path("data/backtesting-data/plots/").mkdir(parents=True, exist_ok=True)
+        fig.write_html("data/backtesting-data/plots/plot%s.html" % pair.replace("/", ""))
