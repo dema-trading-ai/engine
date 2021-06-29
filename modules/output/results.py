@@ -7,17 +7,18 @@ from rich.table import Table
 from rich import box
 
 # Files
+from cli.print_utils import print_standard
 from utils.utils import CURRENT_VERSION
 
 console = Console(color_system="truecolor", width=110)
 
 
 def show_signature():
-    console.print(
-        f"================================================================================\n"
-        f"   DemaTrading.ai BACKTESTING ENGINE IS SUBJECTED TO THE GNU AGPL-3.0 License\n"
-        f"   Copyright © 2021 - DemaTrading.ai\n"
-        f"================================================================================")
+    print_standard(
+        "================================================================================\n"
+        "   DemaTrading.ai BACKTESTING ENGINE IS SUBJECTED TO THE GNU AGPL-3.0 License\n"
+        "   Copyright © 2021 - DemaTrading.ai\n"
+        "================================================================================")
 
 
 def colorize(value, condition, symbol=""):

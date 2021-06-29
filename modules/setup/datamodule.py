@@ -153,7 +153,7 @@ class DataModule:
             print_error("Backtesting datafile was not found.")
             return None
         except EnvironmentError:
-            print_error("Something went wrong loading datafile", sys.exc_info()[0])
+            print_error(f"Something went wrong loading datafile {sys.exc_info()[0]}")
             return None
         except rapidjson.JSONDecodeError:
             os.remove(filepath)

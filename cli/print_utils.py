@@ -1,4 +1,7 @@
-from rich import print as print_rich
+from rich.console import Console
+
+console_standard = Console(color_system=None)
+console_color = Console(color_system="truecolor")
 
 
 class ConsoleColors:
@@ -7,19 +10,23 @@ class ConsoleColors:
 
 
 def print_warning(text):
-    print_rich(f"[WARNING] {ConsoleColors.WARNING}{text}[/]")
+    print("[WARNING] ", end='')
+    console_color.print(f"{ConsoleColors.WARNING}{text}[/]")
 
 
 def print_error(text):
-    print_rich(f"[ERROR] {ConsoleColors.ERROR}{text}[/]")
+    print("[ERROR] ", end='')
+    console_color.print(f"{ConsoleColors.ERROR}{text}[/]")
 
 
 def print_config_error(text):
-    print_rich(f"[CONFIG ERROR] {ConsoleColors.ERROR}{text}[/]")
+    print("[CONFIG ERROR] ", end='')
+    console_color.print(f"{ConsoleColors.ERROR}{text}[/]")
+
 
 def print_info(text):
-    print_rich(f"[INFO] {text}")
+    console_standard.print(f"[INFO] {text}")
 
 
 def print_standard(text):
-    print_rich(text)
+    console_standard.print(text)

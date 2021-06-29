@@ -3,7 +3,7 @@ from typing import Optional
 from urllib.error import URLError
 from urllib.request import urlopen
 
-from cli.print_utils import print_warning
+from cli.print_utils import print_warning, print_error
 import re
 
 from utils.utils import CURRENT_VERSION
@@ -60,5 +60,5 @@ def get_engine_repository_tags() -> Optional:
         tag_names = list(map(lambda x: x["name"], data_json))
         return tag_names
     except URLError as url_err:
-        print_warning("Error while checking version. REASON:" + repr(url_err))
+        print_error(f"Error while checking version. REASON: {repr(url_err)}")
     return None
