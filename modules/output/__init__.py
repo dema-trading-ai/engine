@@ -37,7 +37,7 @@ class OutputModule(object):
 
         show_signature()
 
-        print("[INFO] Logging trades to " + FONT_BOLD + "data/backtesting-data/trades_log.json" + FONT_RESET + "...")
+        print_info("Logging trades to " + FONT_BOLD + "data/backtesting-data/trades_log.json" + FONT_RESET + "...")
         log_trades(stats)
 
         # plot graphs
