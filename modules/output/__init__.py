@@ -32,7 +32,6 @@ class OutputModule(object):
             if terminal_width < 108:  # minimal terminal width
                 console.print("[ERROR] [bright_red]Your terminal width is too small. Increase "
                               "terminal width to display results correctly.[/bright_red]")
-            print(terminal_width)
         except OSError:
             pass
 
