@@ -35,8 +35,6 @@ class OutputModule(object):
         except OSError:
             pass
 
-        show_signature()
-
         print_info("Logging trades to " + FONT_BOLD + "data/backtesting-data/trades_log.json" + FONT_RESET + "...")
         log_trades(stats)
 
