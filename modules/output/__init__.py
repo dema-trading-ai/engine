@@ -8,6 +8,9 @@ from modules.stats.stats_config import StatsConfig
 from modules.stats.trade import SellReason
 from modules.stats.trading_stats import TradingStats
 
+FONT_BOLD = "\033[1m"
+FONT_RESET = "\033[0m"
+
 
 class OutputModule(object):
     config: StatsConfig
@@ -34,11 +37,16 @@ class OutputModule(object):
 
         show_signature()
 
+        print("[INFO] Logging trades to " + FONT_BOLD + "data/backtesting-data/trades_log.json" + FONT_RESET + "...")
         log_trades(stats)
 
         # plot graphs
         if self.config.plots:
+            print("[INFO] Creating plots in " + FONT_BOLD + "data/backtesting-data/plots" + FONT_RESET + "...")
             plot_per_coin(stats, config=self.config)
+        print("[INFO] Backtest finished!")
+
+        show_signature()
 
 
 def show_trade_anomalies(stats: TradingStats):
