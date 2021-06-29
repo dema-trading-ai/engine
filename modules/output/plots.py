@@ -4,6 +4,7 @@ import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+from cli.print_utils import print_warning
 from modules.stats.stats_config import StatsConfig
 from modules.stats.trading_stats import TradingStats
 
@@ -31,7 +32,7 @@ def plot_sizes(subplot_indicator, df):
         height[0] -= 0.2
         height.append(0.2)
         if height[0] < 0.4:
-            print("too many subplot_indicator to plot")
+            print_warning("Too many subplot_indicator to plot.")
 
     return rows, height
 
@@ -135,7 +136,7 @@ def add_indicators(fig, dates, df, mainplot_indicators, subplot_indicators):
             fig.add_trace((go.Scatter(x=dates, y=df[ind], name=ind,
                                       line=dict(width=2, dash='dot'))), row=1, col=1)
         else:
-            print(f"Unable to plot {ind}. No {ind} found in strategy")
+            print_warning(f"Unable to plot {ind}. No {ind} found in strategy.")
 
     # add subplot_indicator
     plots = 2
@@ -145,7 +146,7 @@ def add_indicators(fig, dates, df, mainplot_indicators, subplot_indicators):
                                       line=dict(width=2, dash='solid'))), row=plots, col=1)
             plots += 1
         else:
-            print(f"Unable to plot {ind}. No {ind} found in strategy")
+            print_warning(f"Unable to plot {ind}. No {ind} found in strategy.")
 
     return fig
 

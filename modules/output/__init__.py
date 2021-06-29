@@ -1,15 +1,12 @@
 import json
 import os
 
-from cli.print_utils import print_warning
+from cli.print_utils import print_warning, print_error
 from modules.output.plots import plot_per_coin
 from modules.output.results import show_signature, CoinInsights, LeftOpenTradeResult
 from modules.stats.stats_config import StatsConfig
 from modules.stats.trade import SellReason
 from modules.stats.trading_stats import TradingStats
-from rich.console import Console
-
-console = Console(color_system="truecolor", width=110)
 
 
 class OutputModule(object):
@@ -30,8 +27,8 @@ class OutputModule(object):
         try:
             terminal_width = os.get_terminal_size().columns
             if terminal_width < 108:  # minimal terminal width
-                console.print("[ERROR] [bright_red]Your terminal width is too small. Increase "
-                              "terminal width to display results correctly.[/bright_red]")
+                print_error("Your terminal width is too small. Increase "
+                            "terminal width to display results correctly.")
         except OSError:
             pass
 
@@ -48,11 +45,11 @@ def show_trade_anomalies(stats: TradingStats):
     trades = list(filter(lambda x: x.sell_reason == SellReason.STOPLOSS_AND_ROI, stats.trades))
 
     if len(trades) > 0:
-        print_warning("WARNING: Both Stoploss and ROI were triggered in the same candle")
-        print_warning("during the following trade(s):")
+        print_warning("Both Stoploss and ROI were triggered in the same candle, during the "
+                      "following trade(s):")
         for trade in trades:
             print_warning(f"- {trade.opened_at} ==> {trade.closed_at}")
-        print_warning("profit for affected trades will be set to 0%")
+        print_warning("Profit for affected trades will be set to 0%")
 
 
 def log_trades(stats: TradingStats):

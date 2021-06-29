@@ -1,14 +1,25 @@
+from rich import print as print_rich
+
+
 class ConsoleColors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+    WARNING = '[bright_yellow]'
+    ERROR = '[bright_red]'
 
 
 def print_warning(text):
-    print(f"{ConsoleColors.WARNING}{text}{ConsoleColors.ENDC}")
+    print_rich(f"[WARNING] {ConsoleColors.WARNING}{text}[/]")
+
+
+def print_error(text):
+    print_rich(f"[ERROR] {ConsoleColors.ERROR}{text}[/]")
+
+
+def print_config_error(text):
+    print_rich(f"[CONFIG ERROR] {ConsoleColors.ERROR}{text}[/]")
+
+def print_info(text):
+    print_rich(f"[INFO] {text}")
+
+
+def print_standard(text):
+    print_rich(text)

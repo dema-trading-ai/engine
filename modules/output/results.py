@@ -9,19 +9,15 @@ from rich import box
 # Files
 from utils.utils import CURRENT_VERSION
 
-FONT_BOLD = "\033[1m"
-FONT_RESET = "\033[0m"
-
 console = Console(color_system="truecolor", width=110)
 
 
 def show_signature():
-    print("================================================================================")
-    print("%s   DemaTrading.ai BACKTESTING ENGINE IS SUBJECTED TO THE GNU AGPL-3.0 License %s" %
-          (FONT_BOLD, FONT_RESET))
-    print("%s   Copyright © 2021 - DemaTrading.ai%s" %
-          (FONT_BOLD, FONT_RESET))
-    print("================================================================================")
+    console.print(
+        f"================================================================================\n"
+        f"   DemaTrading.ai BACKTESTING ENGINE IS SUBJECTED TO THE GNU AGPL-3.0 License\n"
+        f"   Copyright © 2021 - DemaTrading.ai\n"
+        f"================================================================================")
 
 
 def colorize(value, condition, symbol=""):

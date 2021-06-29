@@ -1,6 +1,5 @@
 # Libraries
 from datetime import datetime
-from rich import print as print_rich
 
 # Files
 from typing import Optional
@@ -11,6 +10,7 @@ from typing import Optional
 #
 # © 2021 DemaTrading.ai
 # ======================================================================
+from cli.print_utils import print_info
 from modules.stats.trade import SellReason, Trade
 from modules.stats.tradingmodule_config import TradingModuleConfig
 
@@ -92,7 +92,7 @@ class TradingModule:
 
     def open_trade(self, ohlcv: dict, data_dict: dict) -> None:
         if self.budget <= 0:
-            print_rich("[INFO] Budget is running low, cannot buy")
+            print_info("Budget is running low, cannot buy")
             return
 
         # Find available trade spaces
