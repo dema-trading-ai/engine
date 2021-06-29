@@ -2,7 +2,6 @@ import argparse
 import json
 import os
 from datetime import datetime
-from functools import cache
 from typing import TypedDict, Callable
 
 from utils.utils import get_project_root
@@ -15,11 +14,10 @@ CliActions = TypedDict("CliActions", {
 CLI_DESCR = "Dema Trading Engine"
 
 
-@cache
 def read_spec() -> list:
     spec_file_path = os.path.join(get_project_root(), "resources", "specification.json")
 
-    with open(spec_file_path, "r") as f:
+    with open(spec_file_path, "r", encoding='utf-8') as f:
         spec = f.read()
     return json.loads(spec)
 

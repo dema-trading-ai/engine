@@ -84,7 +84,7 @@ def read_config(config_path: str) -> dict:
         ' Starting up DemaTrading.ai BACKTESTING \n'
         '========================================')
     try:
-        with open(config_path or "config.json", 'r') as configfile:
+        with open(config_path or "config.json", 'r', encoding='utf-8') as configfile:
             data = configfile.read()
     except FileNotFoundError:
         raise FileNotFoundError(f"[ERROR] No config file found at {config_path}.")
@@ -118,23 +118,33 @@ def parse_timeframe(timeframe_str: str):
 
 
 def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtesting_till_now: bool) -> tuple:
-    test_from = backtesting_from
-    test_to = backtesting_to
-    test_till_now = backtesting_till_now
+    # Configure milliseconds
     today_ms = exchange.milliseconds()
+    backtesting_from_ms = exchange.parse8601("%sT00:00:00Z" % backtesting_from)
+    backtesting_to_ms = exchange.parse8601("%sT00:00:00Z" % backtesting_to)
 
-    backtesting_from = exchange.parse8601("%sT00:00:00Z" % test_from)
-    backtesting_to = exchange.parse8601("%sT00:00:00Z" % test_to)
+    # Get parsed dates
+    backtesting_from_parsed = datetime.fromtimestamp(backtesting_from_ms / 1000.0).strftime("%Y-%m-%d")
+    backtesting_to_parsed = datetime.fromtimestamp(backtesting_to_ms / 1000.0).strftime("%Y-%m-%d")
 
-    if test_till_now or today_ms < backtesting_to:
-        test_to = datetime.fromtimestamp(today_ms / 1000.0).strftime("%Y-%m-%d")
-        print('[INFO] Changed %s to %s.' % (backtesting_to, test_to))
-        backtesting_to = today_ms
+    # Define correct end date
+    if backtesting_till_now or today_ms < backtesting_to_ms:
+        if backtesting_till_now:
+            print("[INFO] Backtesting-till-now activated.")
+        else:
+            print("[INFO] Backtesting end date extends past current date.")
 
-    if backtesting_from >= backtesting_to:
+        backtesting_today = datetime.fromtimestamp(today_ms / 1000.0).strftime("%Y-%m-%d")
+        print('[INFO] Changed end date %s to %s.' % (backtesting_to_parsed, backtesting_today))
+        backtesting_to_ms = today_ms
+        backtesting_to_parsed = backtesting_today
+
+    # Check for incorrect configuration
+    if backtesting_from_ms >= backtesting_to_ms:
         raise Exception("[ERROR] Backtesting periods are configured incorrectly.")
-    print('[INFO] Gathering data from %s until %s.' % (test_from, test_to))
-    return backtesting_from, backtesting_to
+
+    print('[INFO] Gathering data from %s until %s.' % (backtesting_from_parsed, backtesting_to_parsed))
+    return backtesting_from_ms, backtesting_to_ms
 
 
 @asynccontextmanager

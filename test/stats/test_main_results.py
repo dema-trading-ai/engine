@@ -209,7 +209,7 @@ def test_dividing_assets():
 
 
 def test_n_trades():
-    """Given 'trades where made',
+    """Given 'trades were made',
     'number of trades' should 'display correct amount' """
     # Arrange
     fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE', 'COIN3/BASE'])
