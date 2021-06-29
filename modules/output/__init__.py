@@ -30,8 +30,9 @@ class OutputModule(object):
         try:
             terminal_width = os.get_terminal_size().columns
             if terminal_width < 108:  # minimal terminal width
-                console.print("[bright_yellow][ERROR] Your terminal width is too small. Increase "
-                              "terminal width to display results correctly. [/bright_yellow]")
+                console.print("[ERROR] [bright_red]Your terminal width is too small. Increase "
+                              "terminal width to display results correctly.[/bright_red]")
+            print(terminal_width)
         except OSError:
             pass
 

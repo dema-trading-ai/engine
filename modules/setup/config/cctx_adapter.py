@@ -1,15 +1,15 @@
 import ccxt.async_support as ccxt
-from rich import print
+from rich import print as print_rich
 
 from modules.setup.config.Exchanges import Exchange
 
 
 def create_cctx_exchange(exchange_name: Exchange, timeframe: str):
-    print('[INFO] Connecting to exchange...')
+    print_rich('[INFO] Connecting to exchange...')
 
     try:
         exchange = getattr(ccxt, exchange_name)()
-        print("[INFO] Connected to exchange: %s." % exchange_name)
+        print_rich("[INFO] Connected to exchange: %s." % exchange_name)
     except AttributeError:
         raise AttributeError("[ERROR] Exchange %s could not be found!" % exchange_name)
 

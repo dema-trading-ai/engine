@@ -1,6 +1,6 @@
 # Libraries
 from tqdm import tqdm
-from rich import print
+from rich import print as print_rich
 
 # Files
 from backtesting.strategy import Strategy
@@ -36,7 +36,7 @@ class BackTesting:
         self.btc_marketchange_ratio = config_module.btc_marketchange_ratio
 
     def start_backtesting(self) -> PairsData:
-        print('[INFO] Starting backtest...')
+        print_rich('[INFO] Starting backtest...')
 
         data_dict = self.populate_signals()
         return data_dict
@@ -73,6 +73,7 @@ class BackTesting:
                     notify_reason = "configured incorrectly"
             data_dict[pair] = indicators.to_dict('index')
         if notify:
-            print(
-                f"[WARNING] Dynamic stoploss {notify_reason}. Using standard stoploss of {self.config.stoploss}%.")
+            print_rich(
+                f"[WARNING] [bright_yellow]Dynamic stoploss {notify_reason}. Using standard "
+                f"stoploss of {self.config.stoploss}%.[/bright_yellow]")
         return data_dict

@@ -1,6 +1,6 @@
 # Libraries
 from datetime import datetime
-from rich import print
+from rich import print as print_rich
 
 # Files
 from typing import Optional
@@ -92,7 +92,7 @@ class TradingModule:
 
     def open_trade(self, ohlcv: dict, data_dict: dict) -> None:
         if self.budget <= 0:
-            print("[INFO] Budget is running low, cannot buy")
+            print_rich("[INFO] Budget is running low, cannot buy")
             return
 
         # Find available trade spaces

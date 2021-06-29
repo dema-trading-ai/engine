@@ -1,6 +1,6 @@
 from cli.arg_parse import read_spec, spec_type_to_python_type
 from modules.setup.config.cli import get_cli_config
-from rich import print
+from rich import print as print_rich
 
 
 def validate_and_read_cli(config: dict, args):
@@ -83,7 +83,7 @@ def validate_single_currency_in_pairs(config: dict):
 
 def config_error(*msgs: str):
     for m in msgs:
-        print("[CONFIG ERROR] " + m)
+        print_rich("[CONFIG ERROR] " + m)
     raise SystemExit
 
 
@@ -96,20 +96,20 @@ def validate_fee(config):
     try:
         input_fee = float(config["fee"])
     except ValueError:
-        print(
+        print_rich(
             f"[INFO] The inputted fee value is invalid, the algorithm will use the default value of {DEFAULT_FEE}% fee")
         return DEFAULT_FEE
 
     if input_fee > MAX_FEE:
-        print(
+        print_rich(
             f"[INFO] The inputted fee value is to big, the algorithm will use the default value of {MAX_FEE}% fee")
         return MAX_FEE
     elif input_fee < MIN_FEE:
-        print(
+        print_rich(
             f"[INFO] The inputted fee value is to small, the algorithm will use the default value of {MIN_FEE}% fee")
         return MIN_FEE
 
-    print(
+    print_rich(
         f"[INFO] The algorithm will use the inputted value of {input_fee}% as fee percentage.")
 
     config["fee"] = input_fee  # make sure its a float
