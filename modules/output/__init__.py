@@ -22,8 +22,6 @@ class OutputModule(object):
 
         show_trade_anomalies(stats)
 
-        show_signature()
-
         print("[INFO] Logging trades to " + "\033[1m" + "data/backtesting-data/trades_log.json" + "\033[0m...")
         log_trades(stats)
 
@@ -32,6 +30,8 @@ class OutputModule(object):
             print("[INFO] Creating plots in " + "\033[1m" + "data/backtesting-data/plots" + "\033[0m...")
             plot_per_coin(stats, config=self.config)
         print("[INFO] Backtest finished!")
+
+        show_signature()
 
 
 def show_trade_anomalies(stats: TradingStats):
