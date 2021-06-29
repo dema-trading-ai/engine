@@ -15,6 +15,7 @@ from .cctx_adapter import create_cctx_exchange
 from .currencies import get_currency_symbol
 from .validations import validate_and_read_cli
 from .load_strategy import load_strategy_from_config
+from rich import print
 
 msec = 1000
 minute = 60 * msec
@@ -80,9 +81,9 @@ class ConfigModule(object):
 
 def read_config(config_path: str) -> dict:
     print(
-        '======================================== \n'
-        ' Starting up DemaTrading.ai BACKTESTING \n'
-        '========================================')
+        '=================================== \n'
+        ' DemaTrading.ai BACKTESTING ENGINE \n'
+        '===================================')
     try:
         with open(config_path or "config.json", 'r', encoding='utf-8') as configfile:
             data = configfile.read()
@@ -141,7 +142,8 @@ def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtes
     if backtesting_from_ms >= backtesting_to_ms:
         raise Exception("[ERROR] Backtesting periods are configured incorrectly.")
 
-    print('[INFO] Gathering data from %s until %s.' % (backtesting_from_parsed, backtesting_to_parsed))
+    print(f'[INFO] Gathering data from {str(backtesting_from_parsed)} '
+                  f'until {str(backtesting_to_parsed)}.')
     return backtesting_from_ms, backtesting_to_ms
 
 

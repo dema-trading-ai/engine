@@ -33,8 +33,7 @@ class OutputModule(object):
                 console.print("[bright_yellow][ERROR] Your terminal width is too small. Increase "
                               "terminal width to display results correctly. [/bright_yellow]")
         except OSError:
-            console.print("[bright_yellow][WARNING] Please run in a standard terminal to display "
-                          "results correctly. [/bright_yellow]")
+            pass
 
         show_signature()
 

@@ -1,5 +1,6 @@
 from cli.arg_parse import read_spec, spec_type_to_python_type
 from modules.setup.config.cli import get_cli_config
+from rich import print
 
 
 def validate_and_read_cli(config: dict, args):

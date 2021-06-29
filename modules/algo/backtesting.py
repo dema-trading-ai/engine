@@ -1,6 +1,6 @@
 # Libraries
-
 from tqdm import tqdm
+from rich import print
 
 # Files
 from backtesting.strategy import Strategy
@@ -53,6 +53,7 @@ class BackTesting:
         notify = False
         notify_reason = ""
         stoploss_type = self.config.stoploss_type
+
         for pair in tqdm(self.data.keys(), desc="[INFO] Populating Indicators",
                          total=len(self.data.keys()), ncols=75):
             df = self.data[pair]

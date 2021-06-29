@@ -1,4 +1,5 @@
 import ccxt.async_support as ccxt
+from rich import print
 
 from modules.setup.config.Exchanges import Exchange
 

@@ -1,5 +1,6 @@
 # Libraries
 from datetime import datetime
+from rich import print
 
 # Files
 from typing import Optional
@@ -17,7 +18,6 @@ from modules.stats.tradingmodule_config import TradingModuleConfig
 class TradingModule:
 
     def __init__(self, config: TradingModuleConfig):
-        print("[INFO] Initializing trading-module...")
         self.config = config
         self.budget = float(self.config.starting_capital)
         self.realised_profit = self.budget

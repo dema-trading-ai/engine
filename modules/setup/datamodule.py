@@ -9,6 +9,7 @@ import pandas as pd
 import rapidjson
 from pandas import DataFrame
 import asyncio
+from rich import print
 
 # Files
 from modules.setup.config import ConfigModule
