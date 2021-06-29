@@ -9,18 +9,6 @@ from modules.stats.trading_stats import TradingStats
 
 
 def plot_sizes(subplot_indicator, df):
-    """
-    Method that calculates the amount of rows and height for the plot
-    :param subplot_indicator: list with indicators outside the price scale
-    :type subplot_indicator: list
-    :param df: dataframe
-    :type df: df
-    :return rows: amount of rows in the final plot
-    :rtype rows: int
-    :return height: height of all subplots
-    :rtype height: float
-    """
-
     rows = 1
     for ind in subplot_indicator:
         if ind in df.columns.values:
@@ -37,18 +25,6 @@ def plot_sizes(subplot_indicator, df):
 
 
 def add_buy_sell_signal(fig, df, dates):
-    """
-    Method that lists buy or sell signals over time
-    :param fig: Ongoing plot
-    :type fig: plotly figure
-    :param dates: points in time
-    :type dates: list
-    :param df: dataframe
-    :type df: df
-    :return: figure with added buy and sell signals
-    :rtype: fig
-    """
-
     buy_signals = df["buy"] * df["close"]
     sell_signals = df["sell"] * df["close"]
 
@@ -64,24 +40,6 @@ def add_buy_sell_signal(fig, df, dates):
 
 
 def add_buy_sell_points(fig, pair, dates, df, buypoints, sellpoints):
-    """
-    Method that lists buy or sell points over time
-    :param fig: Ongoing plot
-    :type fig: plotly figure
-    :param pair: pair of coins
-    :type pair: str
-    :param dates: points in time
-    :type dates: list
-    :param df: dataframe
-    :type df: df
-    :param buypoints: buy points in time
-    :type buypoints: dict
-    :param sellpoints: sell points in time
-    :type sellpoints: dict
-    :return: figure with added buy and sell points
-    :rtype: fig
-    """
-
     buy_points_value = []
     sell_points_value = []
     for x in range(len(dates)):
@@ -113,22 +71,6 @@ def add_buy_sell_points(fig, pair, dates, df, buypoints, sellpoints):
 
 
 def add_indicators(fig, dates, df, mainplot_indicators, subplot_indicators):
-    """
-    Method that adds indicators to plot
-    :param fig: Ongoing plot
-    :type fig: plotly figure
-    :param dates: points in time
-    :type dates: list
-    :param df: dataframe
-    :type df: df
-    :param mainplot_indicators: list with indicators on the price scale
-    :type mainplot_indicators: list
-    :param subplot_indicators: list with indicators outside the price scale
-    :type subplot_indicators: list
-    :return: figure with added buy and sell signals
-    :rtype: fig
-    """
-
     # add mainplot_indicator
     for ind in mainplot_indicators:
         if ind in df.columns.values:
@@ -151,12 +93,6 @@ def add_indicators(fig, dates, df, mainplot_indicators, subplot_indicators):
 
 
 def plot_per_coin(stats: TradingStats, config: StatsConfig):
-    """
-    Plot dataframe of a all coin pairs
-    :return: None
-    :rtype: None
-    """
-
     for pair in stats.df.keys():
 
         # create figure

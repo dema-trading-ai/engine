@@ -24,11 +24,14 @@ class OutputModule(object):
 
         show_signature()
 
+        print("[INFO] Logging trades to " + "\033[1m" + "data/backtesting-data/trades_log.json" + "\033[0m...")
         log_trades(stats)
 
         # plot graphs
         if self.config.plots:
+            print("[INFO] Creating plots in " + "\033[1m" + "data/backtesting-data/plots" + "\033[0m...")
             plot_per_coin(stats, config=self.config)
+        print("[INFO] Backtest finished!")
 
 
 def show_trade_anomalies(stats: TradingStats):
