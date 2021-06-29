@@ -27,7 +27,7 @@ def execute_for_args(actions: CliActions):
     parser = argparse.ArgumentParser(description=CLI_DESCR)
     parser.set_defaults(func=actions['default'])
     init_parser = parser.add_subparsers(dest="init").add_parser("init")
-    init_parser.add_argument("dir", type=str, nargs='?', default=os.getcwd())
+    init_parser.add_argument("dir", type=str, nargs='?', default=None)
     init_parser.set_defaults(func=actions['init'])
 
     for p in config_spec:

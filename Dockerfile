@@ -3,6 +3,7 @@ FROM python:3.9.1-slim-buster as base
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 ENV PYTHONIOENCODING=utf-8
+ENV RUNMODE=docker
 
 RUN mkdir /usr/src/engine/
 WORKDIR /usr/src/engine/
