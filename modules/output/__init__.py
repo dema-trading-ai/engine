@@ -61,5 +61,5 @@ def log_trades(stats: TradingStats):
 
     trades_json = json.dumps(trades_dict, indent=4, default=str)
 
-    with open('./data/backtesting-data/trades_log.json', 'w') as f:
+    with open('./data/backtesting-data/trades_log.json', 'w', encoding='utf-8') as f:
         f.write(trades_json)
