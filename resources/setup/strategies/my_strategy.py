@@ -1,15 +1,12 @@
 # Mandatory Imports
-from pandas import DataFrame
-
-# Optional Imports
 import talib.abstract as ta
-
+from pandas import DataFrame
 from backtesting.strategy import Strategy
 
 
-class MyStrategyAdvanced(Strategy):
+class MyStrategy(Strategy):
     """
-    This is an example custom strategy for advanced users, that inherits from the main Strategy class
+    This is an example custom strategy, that inherits from the main Strategy class
     """
 
     def generate_indicators(self, dataframe: DataFrame) -> DataFrame:
@@ -64,28 +61,6 @@ class MyStrategyAdvanced(Strategy):
                 (dataframe['volume'] > 0)
             ),
             'sell'] = 1
-
-        # END STRATEGY
-
-        return dataframe
-
-    def stoploss(self, dataframe: DataFrame) -> DataFrame:
-        """
-        Override this method if you want to dynamically change the stoploss 
-        for every trade. If not, the stoploss provided in config.json will
-        be returned.
-
-        IMPORTANT: this function is only called when in the config.json "stoploss-type" is:
-            ->  "stoploss-type": "dynamic"
-
-        :param dataframe: dataframe filled with indicators from generate_indicators
-        :type dataframe: Dataframe
-        :return: dataframe filled with dynamic stoploss signals
-        :rtype: DataFrame
-        """
-        # BEGIN STRATEGY
-
-        dataframe['stoploss'] = dataframe['ema5']
 
         # END STRATEGY
 

@@ -1,11 +1,13 @@
+# Libraries
 import json
 from typing import Optional
 from urllib.error import URLError
 from urllib.request import urlopen
-
-from cli.print_utils import print_warning
-from utils import CURRENT_VERSION
 import re
+
+# Files
+from cli.print_utils import print_warning, print_error
+from utils.utils import CURRENT_VERSION
 
 
 def print_warning_if_version_outdated():
@@ -19,7 +21,7 @@ def print_warning_if_version_outdated():
 
     latest_version_string = semver_to_string(get_latest_tag(repository_tags))
     print_warning(f"Update available {CURRENT_VERSION} → {latest_version_string}")
-    print_warning("Run 'docker-compose pull' to update")
+    print_warning("Run 'docker-compose pull' to update.")
 
 
 def semver_to_string(running_version):
@@ -59,5 +61,5 @@ def get_engine_repository_tags() -> Optional:
         tag_names = list(map(lambda x: x["name"], data_json))
         return tag_names
     except URLError as url_err:
-        print_warning("Error while checking version. REASON:" + repr(url_err))
+        print_error(f"Error while checking version. REASON: {repr(url_err)}")
     return None

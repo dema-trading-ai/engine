@@ -1,4 +1,5 @@
 # Libraries
+import os
 from pathlib import Path
 from pandas import DataFrame
 import pandas as pd
@@ -6,11 +7,11 @@ import rapidjson
 
 from modules.stats.trade import Trade
 
-CURRENT_VERSION = "v0.6.4"
+CURRENT_VERSION = "v0.7.0"
 
 
 def get_project_root():
-    return Path(__file__).parent
+    return Path(__file__).parent.parent
 
 
 def get_ohlcv_indicators() -> [str]:
@@ -52,7 +53,7 @@ def df_to_dict(df: DataFrame) -> dict:
     return df.to_dict('index')
 
 
-def dict_to_df(data: str) -> DataFrame:
+def str_to_df(data: str) -> DataFrame:
     """
     Method turns dictionary into dataframe
     """
@@ -63,14 +64,11 @@ def dict_to_df(data: str) -> DataFrame:
     return df
 
 
-def get_plot_indicators(config):
-    """
-    Method that initializes indicators
-    :param config: main configuration
-    :type config: dict
-    :return: None
-    :rtype: None
-    """
-
+def get_plot_indicators(config: dict):
     config.setdefault("mainplot_indicators", ['ema5', 'ema21'])
     config.setdefault("subplot_indicators", ['volume'])
+
+
+def is_running_in_docker():
+    mode_env = os.getenv("RUNMODE")
+    return mode_env == "docker"

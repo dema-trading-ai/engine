@@ -1,20 +1,22 @@
 # This module contains helper functions that have to do with the config
 # file, like validation and currency support
 
+# Libraries
 import json
 import re
 import sys
 from contextlib import asynccontextmanager
 from datetime import datetime
-
 import numpy as np
 
+# Files
+from utils.utils import get_plot_indicators
 from .strategy_definition import StrategyDefinition
 from .cctx_adapter import create_cctx_exchange
 from .currencies import get_currency_symbol
 from .validations import validate_and_read_cli
 from .load_strategy import load_strategy_from_config
-from utils import get_plot_indicators
+from cli.print_utils import print_info, print_standard
 
 msec = 1000
 minute = 60 * msec
@@ -63,7 +65,7 @@ class ConfigModule(object):
         return config_module
 
     async def load_btc_marketchange(self):
-        print("[INFO] Fetching marketchange of BTC/USDT...")
+        print_info("Fetching marketchange of BTC/USDT...")
         begin_data = await self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe=self.timeframe,
                                                      since=self.backtesting_from, limit=1)
         end_timestamp = int(np.floor(self.backtesting_to / self.timeframe_ms) * self.timeframe_ms) - self.timeframe_ms
@@ -79,12 +81,12 @@ class ConfigModule(object):
 
 
 def read_config(config_path: str) -> dict:
-    print(
-        '====================================== \n'
-        ' Starting up DemaTrading.ai BACKTESTING \n'
-        '======================================')
+    print_standard(
+        '=================================== \n'
+        ' DemaTrading.ai BACKTESTING ENGINE \n'
+        '===================================')
     try:
-        with open(config_path or "config.json", 'r') as configfile:
+        with open(config_path or "config.json", 'r', encoding='utf-8') as configfile:
             data = configfile.read()
     except FileNotFoundError:
         raise FileNotFoundError(f"[ERROR] No config file found at {config_path}.")
@@ -95,14 +97,12 @@ def read_config(config_path: str) -> dict:
 
 
 def print_pairs(config_json):
-    coins = ''
-    for i in config_json['pairs']:
-        coins += str(i) + ' '
-    print("[INFO] Watching pairs: %s." % coins)
+    pairs_string = ''.join([f'{pair} ' for pair in config_json['pairs']])
+    print_info("Watching pairs: %s." % pairs_string[:-1])
 
 
 def parse_timeframe(timeframe_str: str):
-    print('[INFO] Configuring timeframe...')
+    print_info('Configuring timeframe...')
 
     match = re.match(r"([0-9]+)([mdh])", timeframe_str, re.I)
     if not match:
@@ -118,23 +118,34 @@ def parse_timeframe(timeframe_str: str):
 
 
 def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtesting_till_now: bool) -> tuple:
-    test_from = backtesting_from
-    test_to = backtesting_to
-    test_till_now = backtesting_till_now
+    # Configure milliseconds
     today_ms = exchange.milliseconds()
+    backtesting_from_ms = exchange.parse8601("%sT00:00:00Z" % backtesting_from)
+    backtesting_to_ms = exchange.parse8601("%sT00:00:00Z" % backtesting_to)
 
-    backtesting_from = exchange.parse8601("%sT00:00:00Z" % test_from)
-    backtesting_to = exchange.parse8601("%sT00:00:00Z" % test_to)
+    # Get parsed dates
+    backtesting_from_parsed = datetime.fromtimestamp(backtesting_from_ms / 1000.0).strftime("%Y-%m-%d")
+    backtesting_to_parsed = datetime.fromtimestamp(backtesting_to_ms / 1000.0).strftime("%Y-%m-%d")
 
-    if test_till_now or today_ms < backtesting_to:
-        test_to = datetime.fromtimestamp(today_ms / 1000.0).strftime("%Y-%m-%d")
-        print('[INFO] Changed %s to %s.' % (backtesting_to, test_to))
-        backtesting_to = today_ms
+    # Define correct end date
+    if backtesting_till_now or today_ms < backtesting_to_ms:
+        if backtesting_till_now:
+            print_info("Backtesting-till-now activated.")
+        else:
+            print_info("Backtesting end date extends past current date.")
 
-    if backtesting_from >= backtesting_to:
+        backtesting_today = datetime.fromtimestamp(today_ms / 1000.0).strftime("%Y-%m-%d")
+        print_info('Changed end date %s to %s.' % (backtesting_to_parsed, backtesting_today))
+        backtesting_to_ms = today_ms
+        backtesting_to_parsed = backtesting_today
+
+    # Check for incorrect configuration
+    if backtesting_from_ms >= backtesting_to_ms:
         raise Exception("[ERROR] Backtesting periods are configured incorrectly.")
-    print('[INFO] Gathering data from %s until %s.' % (test_from, test_to))
-    return backtesting_from, backtesting_to
+
+    print_info(f'Gathering data from {str(backtesting_from_parsed)} '
+                  f'until {str(backtesting_to_parsed)}.')
+    return backtesting_from_ms, backtesting_to_ms
 
 
 @asynccontextmanager

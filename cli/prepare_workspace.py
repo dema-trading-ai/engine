@@ -1,41 +1,53 @@
 import os
+from functools import partial
 from pathlib import Path
 from shutil import copy2
 
-from cli.print_utils import print_warning
+from cli.directories import get_resource
+from utils.utils import is_running_in_docker
+from cli.print_utils import print_warning, print_info
 
 
-def prepare_workspace():
-    def from_to(file_name: str):
-        directory = os.getcwd()
-        return os.path.join(directory, file_name), os.path.join("./output/", file_name)
+def prepare_workspace(args):
+    output_directory = get_output_directory(args)
 
-    paths = [
-        from_to("./config.json"),
-        from_to("./docker-compose.yml"),
-        from_to("./strategies/my_strategy.py"),
-        from_to("./strategies/my_strategy_advanced.py"),
-        from_to("./strategies/indicator_sample.py"),
-        from_to("./README.md"),
-        from_to("./LICENSE"),
-    ]
-
-    output_directory = os.path.join(os.getcwd(), "./output/")
+    paths_to_copy = get_paths_to_copy(output_directory)
 
     Path(output_directory).mkdir(parents=True, exist_ok=True)
-
-    output_directory_contains_files = len(os.listdir(output_directory)) > 0
+    output_directory_contains_files = any(os.listdir(output_directory))
     if output_directory_contains_files:
-        print_warning("Files detected in current directory. Cancelling...")
+        print_warning("Files detected in current directory. Cancelling.")
         return
 
-    strategies_directory = from_to("./output/strategies")[0]
-    Path(strategies_directory).mkdir(parents=True, exist_ok=True)
+    Path(os.path.join(output_directory, "strategies")).mkdir(parents=True, exist_ok=True)
 
-    os.chown(strategies_directory, 1000, 1000)
-    for local_path, targetpath in paths:
-        copy2(local_path, targetpath)
-        os.chown(targetpath, 1000, 1000)
+    for local_path, target_path in paths_to_copy:
+        copy2(local_path, target_path)
 
-    print("Copied files...\n")
-    print("Run 'docker-compose up' to get started.")
+    print_info("Copied files.\n")
+    print_info("Run 'docker-compose up' to get started.")
+
+
+def get_output_directory(args):
+    dir_option = args.dir or ""
+
+    if is_running_in_docker():
+        return os.path.join(os.getcwd(), "output/", dir_option)
+    else:
+        return os.path.join(os.getcwd(), dir_option)
+
+
+def get_paths_to_copy(output_directory: str):
+    to_output = partial(get_src_destination, output_directory)
+    return [
+        to_output("./config.json"),
+        to_output("./.gitignore"),
+        to_output("./strategies/my_strategy.py"),
+        to_output("./strategies/my_strategy_advanced.py"),
+        to_output("./strategies/indicator_sample.py"),
+        to_output("./docker-compose.yml")
+    ]
+
+
+def get_src_destination(output_directory: str, file_name: str):
+    return os.path.join(get_resource("setup"), file_name), os.path.join(output_directory, file_name)
