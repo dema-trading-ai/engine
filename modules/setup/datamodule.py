@@ -165,9 +165,32 @@ class DataModule:
         final_timestamp = self.config.backtesting_from + (
                 timesteps_forward - self.config.timeframe_ms)  # last tick is excluded
 
+
         # Return correct backtesting period
         df = await self.check_backtesting_period(pair, df, final_timestamp)
+
+        try:
+            df.index.get_loc(self.config.backtesting_from)
+        except KeyError:
+            print_error("DATE NOT IN RANGE")
+
+            daterange = np.arange(self.config.backtesting_from,
+                                  self.config.backtesting_to,
+                                  self.config.timeframe_ms)
+
+            index_column = df.index.to_numpy().astype(np.int64)
+            diff = np.setdiff1d(daterange, index_column)
+
+
+            for i in diff:
+                df.loc[i] = [i, np.NaN, np.NaN, np.NaN, np.NaN, np.NaN, np.NaN, np.NaN,
+       np.NaN]
+                # df.loc[i] = [i, dfarray]
+            df = df.sort_index()
+
+            # self.config.backtesting_from = df.iat[0,0]
         begin_index = df.index.get_loc(self.config.backtesting_from)
+
         end_index = df.index.get_loc(final_timestamp)
         self.save_dataframe(pair, df)
         df = df[begin_index:end_index + 1]
@@ -184,6 +207,7 @@ class DataModule:
         :return: Dataframe with possibly additional info
         :rtype: DataFrame
         """
+        print("CHECK", pair, df)
         # Get backtesting period
         index_list = df.index.values
         df_begin = index_list[0]
