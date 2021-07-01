@@ -1,7 +1,7 @@
 from rich.console import Console
 
-console_standard = Console(color_system=None)
-console_color = Console(color_system="truecolor")
+console_standard = Console(color_system=None, width=200)
+console_color = Console(color_system="truecolor", width=200)
 
 
 class ConsoleColors:
