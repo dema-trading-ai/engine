@@ -52,7 +52,7 @@ jobs:
       - name: init
         run: ./engine init new-dir
       - name: run
-        run: ../engine
+        run: ../engine/engine
         working-directory: ./new-dir
   deploy:
     needs:
