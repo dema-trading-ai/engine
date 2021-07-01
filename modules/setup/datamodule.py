@@ -98,6 +98,8 @@ class DataModule:
         df['pair'] = pair
         df['buy'], df['sell'] = 0, 0  # default values
 
+        df = self.fill_missing_ticks(df)
+
         if save:
             print_info("[%s] %s candles downloaded." % (pair, len(index)))
             self.save_dataframe(pair, df)
@@ -169,28 +171,7 @@ class DataModule:
         # Return correct backtesting period
         df = await self.check_backtesting_period(pair, df, final_timestamp)
 
-        try:
-            df.index.get_loc(self.config.backtesting_from)
-        except KeyError:
-            print_error("DATE NOT IN RANGE")
-
-            daterange = np.arange(self.config.backtesting_from,
-                                  self.config.backtesting_to,
-                                  self.config.timeframe_ms)
-
-            index_column = df.index.to_numpy().astype(np.int64)
-            diff = np.setdiff1d(daterange, index_column)
-
-
-            for i in diff:
-                df.loc[i] = [i, np.NaN, np.NaN, np.NaN, np.NaN, np.NaN, np.NaN, np.NaN,
-       np.NaN]
-                # df.loc[i] = [i, dfarray]
-            df = df.sort_index()
-
-            # self.config.backtesting_from = df.iat[0,0]
         begin_index = df.index.get_loc(self.config.backtesting_from)
-
         end_index = df.index.get_loc(final_timestamp)
         self.save_dataframe(pair, df)
         df = df[begin_index:end_index + 1]
@@ -301,6 +282,24 @@ class DataModule:
 
             if n_missing > 0:
                 print_warning(f"Pair '{pair}' is missing {n_missing} ticks (rows)")
+
+
+    def fill_missing_ticks(self, df):
+        """
+        Replace missing ticks by NaN
+        :param df: Downloaded data
+        :type df: DataFrame
+        :return: Complete df of the whole daterange
+        :rtype: DataFrame
+        """
+        daterange = np.arange(self.config.backtesting_from,
+                              self.config.backtesting_to,
+                              self.config.timeframe_ms)
+
+        newdf = pd.DataFrame(np.nan, index=daterange, columns=df.keys())
+        newdf.update(df)
+        newdf["time"] = daterange
+        return newdf
 
 
 def is_same_backtesting_period(history_data) -> bool:
