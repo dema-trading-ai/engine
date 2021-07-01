@@ -90,7 +90,7 @@ class DataModule:
                                                                    limit=int(asked_ticks)) for [asked_ticks, start_date]
                                          in slice_request_payloads])
 
-        index = [candle[0] for results in results for candle in results]  # timestamps
+        index = [int(candle[0]) for results in results for candle in results]  # timestamps
         ohlcv_data = [candle for results in results for candle in results]
 
         # Create pandas DataFrame and adds pair info
@@ -146,9 +146,10 @@ class DataModule:
         filename = self.generate_datafile_name(pair)
         filepath = os.path.join("data/backtesting-data/", self.config.exchange_name, filename)
         try:
-            with open(filepath, 'r', encoding='utf-8') as datafile:
-                data = datafile.read()
-                df = str_to_df(data)
+            df = pd.read_feather(filepath, columns=get_ohlcv_indicators() + ["index"])
+            df.set_index("index", inplace=True)
+            df.index = df.index.map(int)
+
         except FileNotFoundError:
             print_error("Backtesting datafile was not found.")
             return None
@@ -170,6 +171,8 @@ class DataModule:
         begin_index = df.index.get_loc(self.config.backtesting_from)
         end_index = df.index.get_loc(final_timestamp)
         self.save_dataframe(pair, df)
+        df.index = df.index.map(str)
+
         df = df[begin_index:end_index + 1]
         return df
 
@@ -229,11 +232,7 @@ class DataModule:
         filepath = os.path.join("data/backtesting-data/", self.config.exchange_name, filename)
 
         # Convert pandas dataframe to json
-        df_dict = df_to_dict(df)
-
-        # Save json file
-        with open(filepath, 'w', encoding='utf-8') as outfile:
-            rapidjson.dump(df_dict, outfile, indent=4)
+        df.reset_index().to_feather(filepath)
 
     def generate_datafile_name(self, pair: str) -> str:
         """
@@ -243,7 +242,7 @@ class DataModule:
         :rtype: string
         """
         coin, base = pair.split('/')
-        return "data-{}{}{}.json".format(coin, base, self.config.timeframe)
+        return "data-{}{}{}.feather".format(coin, base, self.config.timeframe)
 
     def remove_backtesting_file(self, pair: str) -> None:
         """
