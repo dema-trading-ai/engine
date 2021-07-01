@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta
+
+import pandas as pd
 from tqdm import tqdm
 import numpy as np
 
@@ -232,7 +234,17 @@ class StatsModule:
 
         trades_per_coin = group_by(closed_trades, "pair")
 
+
         for key, closed_pair_trades in trades_per_coin.items():
+            test1 = self.trading_module.capital_per_timestamp
+            df = pd.DataFrame(self.frame_with_signals[key].values()).set_index("time")
+            df.index = [datetime.fromtimestamp(ms / 1000.0) for ms in df.index]
+            df_resample = df.resample('W', origin='start')
+            df_first = df_resample.first()
+            df_last = df_resample.last()
+            test = len(df)
+            test = ''
+
             seen_drawdown_per_coin = get_max_seen_drawdown_per_coin(
                 self.frame_with_signals[key],
                 closed_pair_trades,

@@ -244,6 +244,7 @@ class CoinInsights:
                                        colorize(round(c.market_change, 2), 0),
                                        colorize(round(c.max_seen_drawdown, 2), 0),
                                        colorize(round(c.max_realised_drawdown, 2), 0),
+                                       # c.winning_week,
                                        )
 
             coin_signal_table.add_row(c.pair,
@@ -283,6 +284,8 @@ class CoinInsights:
         coin_metrics_table.add_column("Market change (%)", justify=justification)
         coin_metrics_table.add_column("Max. seen drawdown (%)", justify=justification)
         coin_metrics_table.add_column("Max. realised drawdown (%)",
+                                      justify=justification)
+        coin_metrics_table.add_column("Winning weeks (W/D/L)",
                                       justify=justification)
         return coin_metrics_table
 
