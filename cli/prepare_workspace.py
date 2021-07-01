@@ -4,11 +4,12 @@ from pathlib import Path
 from shutil import copy2
 
 from cli.directories import get_resource
+from utils.utils import is_running_in_docker
 from cli.print_utils import print_warning, print_info
 
 
 def prepare_workspace(args):
-    output_directory = args.dir
+    output_directory = get_output_directory(args)
 
     paths_to_copy = get_paths_to_copy(output_directory)
 
@@ -25,6 +26,15 @@ def prepare_workspace(args):
 
     print_info("Copied files.\n")
     print_info("Run 'docker-compose up' to get started.")
+
+
+def get_output_directory(args):
+    dir_option = args.dir or ""
+
+    if is_running_in_docker():
+        return os.path.join(os.getcwd(), "output/", dir_option)
+    else:
+        return os.path.join(os.getcwd(), dir_option)
 
 
 def get_paths_to_copy(output_directory: str):
