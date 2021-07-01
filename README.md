@@ -5,16 +5,30 @@
 [![License](https://img.shields.io/github/license/dema-trading-ai/engine.svg)](https://github.com/dema-trading-ai/engine)
 [![Test PR/Push](https://github.com/dema-trading-ai/engine/actions/workflows/PR-Push-test.yml/badge.svg?branch=development)](https://github.com/dema-trading-ai/engine/actions/workflows/PR-Push-test.yml)
 
-#### [Go to full documentation](https://docs.dematrading.ai)
+The DemaTrading.ai Engine is an open source backtesting Engine for cryptocurrency trading as a 
+part of [DemaTrading](https://dematrading.ai/). The Engine is completely written in the 
+programming language Python. Some experience with Python makes this process easier, 
+however with some effort this project should be runnable for everyone, no matter your experience with coding.
 
-# Discord
+![Backtesting Results](./imgs/backtesting_results.png?raw=true "Backtesting Results")
+![Coin Insights](./imgs/coin_insights.png?raw=true "Coin Insights")
 
-Please join our Discord for updates, support, our community & more:
-https://discord.gg/WXxjtNzjEx
+##### [Go to full documentation](https://docs.dematrading.ai)
 
-# Running
 
-## Requirements for running with Docker (recommended)
+## Discord
+
+For any questions not covered by the documentation, or for further questions regarding the engine, 
+trading, your own strategies, your algorithms, or just a chit chat with like-minded individuals, 
+you are more than welcome join our Discord server, where we will facilitate whatever need you 
+may have.
+
+##### [Join Discord server](https://discord.gg/WXxjtNzjEx)
+
+
+## Running
+
+### Requirements for running with Docker (recommended)
 
 Running the Engine just takes a few simple things:
 
