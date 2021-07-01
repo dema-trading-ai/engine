@@ -45,8 +45,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: engine-macos
-      - name: talib
-        run: brew install ta-lib
       - name: list contents
         run: ls
       - name: set executable bit
