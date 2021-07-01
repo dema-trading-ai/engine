@@ -45,17 +45,17 @@ def add_buy_sell_signal(fig, df, dates):
 
 
 def add_buy_sell_points(fig, pair, dates, df, buypoints, sellpoints):
-    buy_points_value = []
-    sell_points_value = []
-    for x in range(len(dates)):
-        if dates[x] in buypoints[pair]:
-            buy_points_value.append(df[pair]["close"][x])
-        else:
-            buy_points_value.append(np.NaN)
-        if dates[x] in sellpoints[pair]:
-            sell_points_value.append(df[pair]["close"][x])
-        else:
-            sell_points_value.append(np.NaN)
+    buy_points_value = np.empty(len(dates))
+    sell_points_value = np.empty(len(dates))
+    buy_points_value[:] = np.nan
+    sell_points_value[:] = np.nan
+
+    close_ = df[pair]["close"]
+    for x, date in enumerate(dates):
+        if date in buypoints[pair]:
+            buy_points_value[x] = close_[x]
+        if date in sellpoints[pair]:
+            sell_points_value[x] = close_[x]
 
     fig.add_trace((go.Scatter(x=dates, y=buy_points_value,
                               mode='markers',
