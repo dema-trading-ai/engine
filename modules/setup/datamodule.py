@@ -30,6 +30,7 @@ day = 24 * hour
 
 class DataModule:
 
+    @staticmethod
     async def create(config: ConfigModule):
         print_info('Starting DemaTrading.ai data-module...')
         data_module = DataModule()
@@ -37,6 +38,18 @@ class DataModule:
         data_module.exchange = config.exchange
         await data_module.load_markets()
         return data_module
+
+    async def load_btc_marketchange(self):
+        print_info("Fetching marketchange of BTC/USDT...")
+        begin_data = await self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe=self.config.timeframe,
+                                                     since=self.config.backtesting_from, limit=1)
+        end_timestamp = int(np.floor(self.config.backtesting_to / self.config.timeframe_ms) * self.config.timeframe_ms) - self.config.timeframe_ms
+        end_data = await self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe=self.config.timeframe, since=end_timestamp,
+                                                   limit=1)
+
+        begin_close_value = begin_data[0][4]
+        end_close_value = end_data[0][4]
+        return end_close_value / begin_close_value
 
     async def load_historical_data(self) -> dict:
         dataframes = await asyncio.gather(*[self.get_pair_data(pair) for pair in self.config.pairs])
