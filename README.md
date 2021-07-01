@@ -26,7 +26,35 @@ may have.
 ##### [Join Discord server](https://discord.gg/WXxjtNzjEx)
 
 
-## Running
+## Installing
+There are multiple ways to run our Backtesting Engine. For each way, the installation steps are outlined below.
+We recommend using Docker to run the Backtesting Engine, but you can also use standard Python.
+
+!! Attention: Running without Docker? You will have to manually download this repository on your computer. 
+This can be done by either downloading the repository as a .zip file or the recommended way which is cloning the repository 
+using [Github Desktop](https://desktop.github.com/) (or something similar). For more information about cloning a repository see 
+[this](https://docs.github.com/en/desktop/contributing-and-collaborating-using-github-desktop/adding-and-cloning-repositories/cloning-and-forking-repositories-from-github-desktop) link.
+
+
+### Installing Code Editor
+To make your a life a lot easier during strategy development use a code editor such as [PyCharm](https://www.jetbrains.com/pycharm/) 
+(recommended) or [VSCode](https://code.visualstudio.com/).
+
+
+### Installing Docker (recommended)
+If you want to run the engine using Docker, you need to install Docker using the steps described [here](https://docs.docker.com/get-docker/).
+
+
+### Installing Python (alternative)
+If you want to run the engine using Python, you need the follow these steps.
+#### MacOS / Linux
+1. Installing Python 3.9.6, which can be done [here](https://www.python.org/downloads/).
+2. Installing Homebrew (recommended). This can be done by copying the following line into your terminal app:
+```
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+3. Download and install [Xcode12](https://developer.apple.com/download/)
+4. 
 
 ### Requirements for running with Docker (recommended)
 
@@ -48,7 +76,8 @@ Running the Engine just takes a few simple things:
 
 ## Running with Docker
 
-To initialize a directory for running our engine, run the command below. Note: this command needs to be run in an empty directory. This command will generate all necessary files for running the engine and developing strategies.
+To initialize a directory for running our engine, run the command below. Note: this command needs to be run in an empty directory. 
+This command will generate all necessary files for running the engine and developing strategies.
 
 ```
 docker run -t --rm -v "$(pwd):/usr/src/engine/output" dematrading/engine:stable init
