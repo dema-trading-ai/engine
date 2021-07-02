@@ -102,8 +102,7 @@ def add_indicators(fig, dates, df, mainplot_indicators, subplot_indicators):
 
 def plot_per_coin(stats: TradingStats, config: StatsConfig):
     Path("data/backtesting-data/plots/").mkdir(parents=True, exist_ok=True)
-    create_plot_per_pair = partial(plot_coin, config, stats)
-    processes = [Process(target=create_plot_per_pair, args=(key, value)) for key, value in stats.df.items()]
+    processes = [Process(target=plot_coin, args=(config, stats, key, value)) for key, value in stats.df.items()]
     for p in processes:
         p.start()
 
