@@ -26,7 +26,7 @@ def main():
 
 def run_engine(args):
     controller = MainController()
-    # asyncio.get_event_loop().run_until_complete(controller.run(args))
+    asyncio.get_event_loop().run_until_complete(controller.run(args))
 
 
 def run_init(args):
