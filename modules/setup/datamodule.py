@@ -90,7 +90,7 @@ class DataModule:
                                                                    limit=int(asked_ticks)) for [asked_ticks, start_date]
                                          in slice_request_payloads])
 
-        index = [int(candle[0]) for results in results for candle in results]  # timestamps
+        index = [str(candle[0]) for results in results for candle in results]  # timestamps
         ohlcv_data = [candle for results in results for candle in results]
 
         # Create pandas DataFrame and adds pair info
