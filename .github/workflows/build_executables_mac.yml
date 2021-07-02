@@ -26,6 +26,14 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-ci.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ./build
+            ./dist
+          key: ${{ runner.os }}-pyinstaller-
+          restore-keys: |
+            ${{ runner.os }}-pyinstaller
       - name: install requirements
         run: pip install -r requirements.txt
       - run: python main.py
