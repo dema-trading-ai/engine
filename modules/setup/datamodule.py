@@ -98,7 +98,10 @@ class DataModule:
         df['pair'] = pair
         df['buy'], df['sell'] = 0, 0  # default values
 
-        df = self.fill_missing_ticks(df)
+        # Create prior NaN data for premature coins
+        if self.config.backtesting_from != df.iat[0,0]:
+            print_warning(f"Pair '{pair}' did not exist at start-time")
+            df = self.fill_prior_missing_ticks(df)
 
         if save:
             print_info("[%s] %s candles downloaded." % (pair, len(index)))
@@ -188,7 +191,7 @@ class DataModule:
         :return: Dataframe with possibly additional info
         :rtype: DataFrame
         """
-        print("CHECK", pair, df)
+
         # Get backtesting period
         index_list = df.index.values
         df_begin = index_list[0]
@@ -284,7 +287,7 @@ class DataModule:
                 print_warning(f"Pair '{pair}' is missing {n_missing} ticks (rows)")
 
 
-    def fill_missing_ticks(self, df):
+    def fill_prior_missing_ticks(self, df):
         """
         Replace missing ticks by NaN
         :param df: Downloaded data
@@ -293,12 +296,12 @@ class DataModule:
         :rtype: DataFrame
         """
         daterange = np.arange(self.config.backtesting_from,
-                              self.config.backtesting_to,
+                              df.iat[0,0],
                               self.config.timeframe_ms)
 
-        newdf = pd.DataFrame(np.nan, index=daterange, columns=df.keys())
-        newdf.update(df)
-        newdf["time"] = daterange
+        nandf = pd.DataFrame(np.nan, index=daterange, columns=df.keys())
+        nandf["time"] = daterange
+        newdf = nandf.append(df)
         return newdf
 
 
