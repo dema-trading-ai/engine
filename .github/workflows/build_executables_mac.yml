@@ -60,7 +60,7 @@ jobs:
       - name: init
         run: ./engine init new-dir
       - name: run
-        run: ../engine/engine
+        run: ../engine
         working-directory: ./new-dir
   deploy:
     needs:
