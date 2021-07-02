@@ -97,6 +97,7 @@ class DataModule:
         df = DataFrame(ohlcv_data, index=index, columns=get_ohlcv_indicators()[:-3])
         df['pair'] = pair
         df['buy'], df['sell'] = 0, 0  # default values
+        df.index = df.index.map(str)
 
         if save:
             print_info("[%s] %s candles downloaded." % (pair, len(index)))
