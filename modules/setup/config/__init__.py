@@ -54,7 +54,6 @@ class ConfigModule(object):
                                                                                       backtesting_till_now)
 
         config_module.pairs = config["pairs"]
-        config_module.btc_marketchange_ratio = await config_module.load_btc_marketchange()
         config_module.fee = config["fee"]
         config_module.stoploss = config["stoploss"]
         config_module.stoploss_type = config["stoploss-type"]
@@ -63,18 +62,6 @@ class ConfigModule(object):
         config_module.roi = config["roi"]
         config_module.currency_symbol = get_currency_symbol(config_module.raw_config)
         return config_module
-
-    async def load_btc_marketchange(self):
-        print_info("Fetching marketchange of BTC/USDT...")
-        begin_data = await self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe=self.timeframe,
-                                                     since=self.backtesting_from, limit=1)
-        end_timestamp = int(np.floor(self.backtesting_to / self.timeframe_ms) * self.timeframe_ms) - self.timeframe_ms
-        end_data = await self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe=self.timeframe, since=end_timestamp,
-                                                   limit=1)
-
-        begin_close_value = begin_data[0][4]
-        end_close_value = end_data[0][4]
-        return end_close_value / begin_close_value
 
     async def close(self):
         await self.exchange.close()
