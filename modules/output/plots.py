@@ -2,6 +2,8 @@
 import multiprocessing
 import os
 from datetime import datetime
+from functools import partial
+from multiprocessing import Process
 
 import numpy as np
 import plotly.graph_objects as go
@@ -100,8 +102,13 @@ def add_indicators(fig, dates, df, mainplot_indicators, subplot_indicators):
 
 def plot_per_coin(stats: TradingStats, config: StatsConfig):
     Path("data/backtesting-data/plots/").mkdir(parents=True, exist_ok=True)
-    for key, value in stats.df.items():
-        plot_coin(config, stats, key, value)
+    create_plot_per_pair = partial(plot_coin, config, stats)
+    processes = [Process(target=create_plot_per_pair, args=(key, value)) for key, value in stats.df.items()]
+    for p in processes:
+        p.start()
+
+    for p in processes:
+        p.join()
 
 
 def plot_coin(config, stats, pair: str, pair_data):
@@ -144,5 +151,4 @@ def plot_coin(config, stats, pair: str, pair_data):
         os.remove("data/backtesting-data/binance/plot%s.html" % pair.replace("/", ""))
     except OSError:
         pass
-
     fig.write_html("data/backtesting-data/plots/plot%s.html" % pair.replace("/", ""))
