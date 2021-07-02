@@ -8,6 +8,7 @@ on:
       - development
 jobs:
   build:
+    timeout-minutes: 10
     env:
       TALIB_URL: TA_Lib-0.4.20-cp39-cp39-win_amd64.whl
     runs-on: windows-latest
@@ -62,6 +63,7 @@ jobs:
     needs:
       - build
     runs-on: windows-latest
+    timeout-minutes: 10
     steps:
       - name: list contents
         run: dir
