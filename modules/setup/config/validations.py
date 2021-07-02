@@ -31,18 +31,22 @@ def assert_given_else_default(config, spec):
 def assert_type(config, spec):
     param_value = config.get(spec["name"])
     t = spec["type"]
-    pt = spec_type_to_python_type(t)
-    good = isinstance(param_value, pt)
-    if t == "datetime":
-        # TODO implement datetime validation
-        good = True
-    elif t == "number" and isinstance(param_value, int):
-        # int also count as number / not only float allowed
-        good = True
+
+    good = is_value_of_type(param_value, t)
 
     if not good:
         print_config_error(f"You passed an invalid type to the '{spec['name']}' parameter.")
         print_config_error(f"This type should be a(n) {t}, it is {type(param_value)}.")
+
+
+def is_value_of_type(param_value, t):
+    if t == "datetime":
+        return True
+    elif t == "number":
+        return isinstance(param_value, int)
+    elif t == "bool":
+        return isinstance(param_value, bool)
+    return True
 
 
 def assert_min_max(config, spec):
