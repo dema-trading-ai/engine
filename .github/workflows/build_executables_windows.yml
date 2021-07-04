@@ -75,8 +75,6 @@ jobs:
           name: engine-windows
       - name: unzip
         run: Expand-Archive ./engine.zip .
-      - name: list contents
-        run: dir
       - name: init
         run: ./engine/engine.exe init new-dir
       - name: run
@@ -85,7 +83,6 @@ jobs:
         env:
           PYTHONLEGACYWINDOWSIOENCODING: true
           PYTHONIOENCODING: UTF-8
-      - run: echo ${{github.ref}}
   deploy:
     needs:
       - build
