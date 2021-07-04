@@ -55,7 +55,7 @@ jobs:
           PYTHONLEGACYWINDOWSIOENCODING: true
           PYTHONIOENCODING: UTF-8
       - name: build archive
-        run: zip -r ./engine.zip .
+        run: Compress-Archive . ./engine.zip
         working-directory: dist/engine
       - name: Archive built executable
         uses: actions/upload-artifact@v2
@@ -76,7 +76,7 @@ jobs:
         with:
           name: engine-windows
       - name: unzip
-        run: unzip ./engine.zip
+        run: Extract-Archive ./engine.zip
       - name: init
         run: ./engine.exe init new-dir
       - name: run
