@@ -1,4 +1,5 @@
 import asyncio
+import multiprocessing
 import os
 import sys
 from time import perf_counter
@@ -34,6 +35,7 @@ def run_init(args):
 
 
 if __name__ == "__main__":
+    multiprocessing.freeze_support()
     start_time = perf_counter()
     main()
     end_time = perf_counter()

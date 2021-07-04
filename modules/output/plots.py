@@ -1,7 +1,6 @@
 # Libraries
 import os
 from datetime import datetime
-from functools import partial
 from multiprocessing import Process
 
 import numpy as np

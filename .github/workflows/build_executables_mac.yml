@@ -43,8 +43,10 @@ jobs:
       - name: Archive built executable
         uses: actions/upload-artifact@v2
         with:
+          if-no-files-found: error
           name: engine-macos
           path: dist/engine
+
   test:
     needs:
       - build
