@@ -74,13 +74,13 @@ jobs:
         with:
           name: engine-windows
       - name: unzip
-        run: Expand-Archive ./engine.zip
+        run: Expand-Archive ./engine.zip .
       - name: list contents
         run: dir
       - name: init
-        run: ./engine.exe init new-dir
+        run: ./engine/engine.exe init new-dir
       - name: run
-        run: ../engine.exe
+        run: ../engine/engine.exe
         working-directory: ./new-dir
         env:
           PYTHONLEGACYWINDOWSIOENCODING: true
