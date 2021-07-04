@@ -69,14 +69,14 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 10
     steps:
-      - name: list contents
-        run: dir
       - name: exe
         uses: actions/download-artifact@v2
         with:
           name: engine-windows
       - name: unzip
         run: Expand-Archive ./engine.zip
+      - name: list contents
+        run: dir
       - name: init
         run: ./engine.exe init new-dir
       - name: run
@@ -105,4 +105,3 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.DO_SPACES_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SPACES_SECRET }}
-
