@@ -40,13 +40,14 @@ jobs:
       - run: python main.py
       - name: build executable
         run: python build_scripts/build.py
+      - name: build archive
+        run: zip -r dist/engine ./engine.zip
       - name: Archive built executable
         uses: actions/upload-artifact@v2
         with:
           if-no-files-found: error
           name: engine-macos
-          path: dist/engine
-
+          path: ./engine.zip
   test:
     needs:
       - build
@@ -56,6 +57,8 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: engine-macos
+      - name: unzip
+        run: unzip ./engine.zip
       - name: list contents
         run: ls
       - name: set executable bit
@@ -78,8 +81,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: engine-macos
-      - name: build archive
-        run: zip -j engine ./engine
       - run: ls -la
       - run: |
           aws s3 --endpoint=https://ams3.digitaloceanspaces.com cp ./engine.zip s3://engine-store/engine-macos-${GITHUB_REF##*/}.zip --acl "public-read"
