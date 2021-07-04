@@ -5,8 +5,8 @@ block_cipher = None
 
 added_files = [
     ('./resources/', 'resources/'),
-    ("LICENCE", "LICENCE"),
-    ("TA-Lib-LICENCE", "TA-Lib-LICENCE")
+    ("./LICENSE", "."),
+    ("./TA-Lib-LICENSE", ".")
 ]
 
 a = Analysis(['main.py'],
