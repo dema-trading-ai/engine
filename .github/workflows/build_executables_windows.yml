@@ -54,11 +54,15 @@ jobs:
         env:
           PYTHONLEGACYWINDOWSIOENCODING: true
           PYTHONIOENCODING: UTF-8
+      - name: build archive
+        run: zip -r ./engine.zip
+        working-directory: dist/engine
       - name: Archive built executable
         uses: actions/upload-artifact@v2
         with:
-          name: engine-windows
-          path: dist/engine
+          if-no-files-found: error
+          name: engine-macos
+          path: ./dist/engine/engine.zip
   test:
     needs:
       - build
@@ -71,6 +75,8 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: engine-windows
+      - name: unzip
+        run: unzip ./engine.zip
       - name: init
         run: ./engine.exe init new-dir
       - name: run
@@ -93,8 +99,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: engine-windows
-      - name: build archive
-        run: zip -j engine ./engine.exe
       - run: ls -la
       - run: |
           aws s3 --endpoint=https://ams3.digitaloceanspaces.com cp ./engine.zip s3://engine-store/engine-windows-${GITHUB_REF##*/}.zip --acl "public-read"
