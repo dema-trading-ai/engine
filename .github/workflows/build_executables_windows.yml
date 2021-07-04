@@ -55,7 +55,7 @@ jobs:
           PYTHONLEGACYWINDOWSIOENCODING: true
           PYTHONIOENCODING: UTF-8
       - name: build archive
-        run: zip -r ./engine.zip
+        run: zip -r ./engine.zip .
         working-directory: dist/engine
       - name: Archive built executable
         uses: actions/upload-artifact@v2

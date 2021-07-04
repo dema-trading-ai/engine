@@ -40,7 +40,7 @@ jobs:
       - name: build executable
         run: python build_scripts/build.py
       - name: build archive
-        run: zip -r ./engine.zip
+        run: zip -r ./engine.zip .
         working-directory: dist/engine
       - name: Archive built executable
         uses: actions/upload-artifact@v2
