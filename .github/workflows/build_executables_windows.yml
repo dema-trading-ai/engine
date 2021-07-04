@@ -74,7 +74,7 @@ jobs:
         with:
           name: engine-windows
       - name: unzip
-        run: Expand-Archive ./engine.zip
+        run: Expand-Archive ./engine.zip .
       - name: list contents
         run: dir
       - name: init
