@@ -311,7 +311,8 @@ class DataModule:
                               df.iat[0,0],
                               self.config.timeframe_ms)
 
-        nandf = pd.DataFrame(np.nan, index=daterange, columns=df.keys())
+
+        nandf = pd.DataFrame(np.nan, index=np.char.mod('%d', daterange), columns=df.keys())
         nandf["time"] = daterange
         newdf = nandf.append(df)
         return newdf
