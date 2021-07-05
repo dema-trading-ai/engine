@@ -1,10 +1,7 @@
 name: Test PR/Push
 on:
-  push:
-    branches: [feature/**, fix/**, development]
   pull_request:
-    branches: [development]
-   
+    branches: [development, main]
 jobs:
   pytest-test:
     runs-on: ubuntu-latest
