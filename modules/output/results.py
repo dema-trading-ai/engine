@@ -3,15 +3,13 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 import typing
 
-from rich.console import Console, JustifyMethod
+from rich.console import JustifyMethod
 from rich.table import Table
 from rich import box
 
 # Files
-from cli.print_utils import print_standard
+from cli.print_utils import print_standard, console_color
 from utils.utils import CURRENT_VERSION
-
-console = Console(color_system="truecolor", width=200)
 
 
 def show_signature():
@@ -114,7 +112,7 @@ class MainResults:
         table_grid.add_column(":robot: BACKTESTING RESULTS :robot:")
         table_grid.add_row(settings_table)
         table_grid.add_row(performance_table, trade_info_table)
-        console.print(table_grid)
+        console_color.print(table_grid)
 
     def create_trade_info_table(self, justification) -> Table:
         avg_trade_duration = format_time_difference(self.avg_trade_duration)
@@ -267,7 +265,7 @@ class CoinInsights:
         table_grid.add_row(coin_performance_table)
         table_grid.add_row(coin_metrics_table)
         table_grid.add_row(coin_signal_table)
-        console.print(table_grid)
+        console_color.print(table_grid)
 
     @staticmethod
     def create_coin_signals_table(justification) -> Table:
@@ -331,7 +329,7 @@ class LeftOpenTradeResult:
         table_grid = Table(box=box.SIMPLE)
         table_grid.add_column(":hourglass_flowing_sand: LEFT OPEN TRADES :hourglass_flowing_sand:")
         table_grid.add_row(left_open_trades_table)
-        console.print(table_grid)
+        console_color.print(table_grid)
 
     @staticmethod
     def create_left_open_trades_table(justification, currency_symbol) -> Table:

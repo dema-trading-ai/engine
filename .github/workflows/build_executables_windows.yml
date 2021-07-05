@@ -8,6 +8,7 @@ on:
       - development
 jobs:
   build:
+    timeout-minutes: 10
     env:
       TALIB_URL: TA_Lib-0.4.20-cp39-cp39-win_amd64.whl
     runs-on: windows-latest
@@ -38,6 +39,14 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-ci.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ./build
+            ./dist
+          key: ${{ runner.os }}-pyinstaller-
+          restore-keys: |
+            ${{ runner.os }}-pyinstaller
       - name: install requirements
         run: pip install -r requirements-ci.txt
       - name: build exe
@@ -45,31 +54,35 @@ jobs:
         env:
           PYTHONLEGACYWINDOWSIOENCODING: true
           PYTHONIOENCODING: UTF-8
+      - name: build archive
+        run: Compress-Archive . ./engine.zip
+        working-directory: dist/engine
       - name: Archive built executable
         uses: actions/upload-artifact@v2
         with:
+          if-no-files-found: error
           name: engine-windows
-          path: dist/engine.exe
+          path: ./dist/engine/engine.zip
   test:
     needs:
       - build
     runs-on: windows-latest
+    timeout-minutes: 10
     steps:
-      - name: list contents
-        run: dir
       - name: exe
         uses: actions/download-artifact@v2
         with:
           name: engine-windows
+      - name: unzip
+        run: Expand-Archive ./engine.zip .
       - name: init
-        run: ./engine.exe init new-dir
+        run: ./engine/engine.exe init new-dir
       - name: run
-        run: ../engine.exe
+        run: ../engine/engine.exe
         working-directory: ./new-dir
         env:
           PYTHONLEGACYWINDOWSIOENCODING: true
           PYTHONIOENCODING: UTF-8
-      - run: echo ${{github.ref}}
   deploy:
     needs:
       - build
@@ -83,12 +96,9 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: engine-windows
-      - name: build archive
-        run: zip -j engine ./engine.exe
       - run: ls -la
       - run: |
           aws s3 --endpoint=https://ams3.digitaloceanspaces.com cp ./engine.zip s3://engine-store/engine-windows-${GITHUB_REF##*/}.zip --acl "public-read"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.DO_SPACES_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SPACES_SECRET }}
-

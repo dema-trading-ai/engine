@@ -1,13 +1,14 @@
 # Libraries
 import os
 from pathlib import Path
+from typing import Literal
 from pandas import DataFrame
 import pandas as pd
 import rapidjson
 
 from modules.stats.trade import Trade
 
-CURRENT_VERSION = "v0.7.0"
+CURRENT_VERSION = "v0.7.1"
 
 
 def get_project_root():
@@ -72,3 +73,11 @@ def get_plot_indicators(config: dict):
 def is_running_in_docker():
     mode_env = os.getenv("RUNMODE")
     return mode_env == "docker"
+
+
+def get_verbosity():
+    return os.getenv("VERBOSITY") or "none"
+
+
+def is_verbosity(verbosity: Literal["debug", "none"]):
+    return get_verbosity() == verbosity
