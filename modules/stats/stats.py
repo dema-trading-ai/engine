@@ -71,14 +71,14 @@ def calculate_trade_durations(closed_trades):
 
 def get_market_drawdown(pairs: list, data_dict: dict) -> dict:
     market_drawdown = {}
-    total_drawdown = 0
+    total_drawdown = [0] * len(data_dict[pairs[0]])
     for pair in pairs:
         values_list = [data_dict[pair][d].get('close') for d in data_dict[pair]]
         coin_values = DataFrame(values_list, columns=['value'])
-        coin_drawdown = get_max_drawdown_ratio(coin_values)
-        market_drawdown[pair] = coin_drawdown
-        total_drawdown += coin_drawdown
-    market_drawdown['all'] = total_drawdown / len(pairs) if len(pairs) > 0 else 1
+        market_drawdown[pair] = get_max_drawdown_ratio(coin_values)
+        values_list = [x / values_list[0] for x in values_list]
+        total_drawdown = map(lambda x, y: x + y, total_drawdown, values_list)
+    market_drawdown['all'] = get_max_drawdown_ratio(DataFrame(total_drawdown, columns=['value']))
     return market_drawdown
 
 
