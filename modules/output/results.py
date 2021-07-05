@@ -173,11 +173,11 @@ class MainResults:
         performance_table.add_row('Market change coins',
                                   colorize(round(self.market_change_coins,
                                                  2), 0, '%'))
-        performance_table.add_row('Market drawdown coins',
-                                  colorize(round(self.market_drawdown_coins,
-                                                 2), 0, '%'))
         performance_table.add_row('Market change BTC',
                                   colorize(round(self.market_change_btc,
+                                                 2), 0, '%'))
+        performance_table.add_row('Market drawdown coins',
+                                  colorize(round(self.market_drawdown_coins,
                                                  2), 0, '%'))
         performance_table.add_row('Market drawdown BTC',
                                   colorize(round(self.market_drawdown_btc,
