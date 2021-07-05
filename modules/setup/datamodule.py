@@ -62,8 +62,7 @@ class DataModule:
         if 'BTC/USDT' in df.keys():
             bitcoin_df = df.get('BTC/USDT')
         else:
-            bitcoin_data = await self.get_pair_data('BTC/USDT')
-            bitcoin_df = bitcoin_data[1]
+            pair, bitcoin_df = await self.get_pair_data('BTC/USDT')
         bitcoin_values = bitcoin_df[['close']].rename(columns={'close': 'value'})
 
         bitcoin_drawdown = get_max_drawdown_ratio(bitcoin_values)
