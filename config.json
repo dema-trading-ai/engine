@@ -13,7 +13,7 @@
     "60": 4,
     "120": 3
   },
-  "pairs": ["BTC/USDT", "LTC/USDT", "ETH/USDT"],
+  "pairs": ["LTC/USDT", "ETH/USDT"],
   "currency": "USDT",
   "fee": 0.25,
   "strategy-name": "MyStrategy",

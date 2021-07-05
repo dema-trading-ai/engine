@@ -120,7 +120,7 @@ class StatsModule:
             trading_module.closed_trades,
             trading_module.budget,
             market_change,
-            0,
+            market_drawdown,
             best_trade_ratio,
             best_trade_pair,
             worst_trade_ratio,
@@ -139,7 +139,7 @@ class StatsModule:
         )
 
     def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float,
-                              market_change: dict, market_drawdown: float, best_trade_ratio: float,
+                              market_change: dict, market_drawdown: dict, best_trade_ratio: float,
                               best_trade_pair: str, worst_trade_ratio: float,
                               worst_trade_pair: str) -> MainResults:
         # Get total budget and calculate overall profit
@@ -174,8 +174,9 @@ class StatsModule:
                            tested_to=tested_to,
                            max_open_trades=self.config.max_open_trades,
                            market_change_coins=(market_change['all'] - 1) * 100,
+                           market_drawdown_coins=(market_drawdown['all'] - 1) * 100,
                            market_change_btc=(self.config.btc_marketchange_ratio - 1) * 100,
-                           market_drawdown_btc=market_drawdown,
+                           market_drawdown_btc=(self.config.btc_drawdown_ratio - 1) * 100,
                            starting_capital=self.config.starting_capital,
                            end_capital=budget,
                            overall_profit_percentage=overall_profit_percentage,

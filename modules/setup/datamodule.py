@@ -13,6 +13,7 @@ from cli.print_utils import print_info, print_error, print_warning
 
 # Files
 from modules.setup.config import ConfigModule
+from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
 from utils.utils import get_ohlcv_indicators
 
 # ======================================================================
@@ -54,6 +55,19 @@ class DataModule:
         begin_close_value = begin_data[0][4]
         end_close_value = end_data[0][4]
         return end_close_value / begin_close_value
+
+    async def load_btc_drawdown(self, df: dict):
+        print_info("Fetching market drawdown of BTC/USDT...")
+
+        if 'BTC/USDT' in df.keys():
+            bitcoin_df = df.get('BTC/USDT')
+        else:
+            bitcoin_data = await self.get_pair_data('BTC/USDT')
+            bitcoin_df = bitcoin_data[1]
+        bitcoin_values = bitcoin_df[['close']].rename(columns={'close': 'value'})
+
+        bitcoin_drawdown = get_max_drawdown_ratio(bitcoin_values)
+        return bitcoin_drawdown
 
     async def load_historical_data(self) -> dict:
         dataframes = await asyncio.gather(*[self.get_pair_data(pair) for pair in self.config.pairs])
