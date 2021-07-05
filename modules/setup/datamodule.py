@@ -181,10 +181,10 @@ class DataModule:
 
         # Return correct backtesting period
         df = await self.check_backtesting_period(pair, df, final_timestamp)
-        begin_index = df.index.get_loc(self.config.backtesting_from)
-        end_index = df.index.get_loc(final_timestamp)
-        self.save_dataframe(pair, df)
         df.index = df.index.map(str)
+        begin_index = df.index.get_loc(str(self.config.backtesting_from))
+        end_index = df.index.get_loc(str(final_timestamp))
+        self.save_dataframe(pair, df)
 
         df = df[begin_index:end_index + 1]
         return df
