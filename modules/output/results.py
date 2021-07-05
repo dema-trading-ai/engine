@@ -52,6 +52,7 @@ class MainResults:
     max_open_trades: int
     market_change_coins: float
     market_change_btc: float
+    market_drawdown_btc: float
     starting_capital: float
     end_capital: float
     overall_profit_percentage: float
@@ -176,6 +177,9 @@ class MainResults:
         performance_table.add_row('Market change BTC',
                                   colorize(round(self.market_change_btc,
                                                  2), 0, '%'))
+        performance_table.add_row('Market drawdown BTC',
+                                  colorize(round(self.market_drawdown_btc,
+                                                 2), 0, '%'))
         performance_table.add_row('Total fee paid',
                                   f"{round(self.total_fee_amount)} {currency_symbol}")
         return performance_table
@@ -209,6 +213,7 @@ class CoinInsights:
     profit: float
     n_trades: int
     market_change: float
+    market_drawdown: float
     max_seen_drawdown: float
     max_realised_drawdown: float
     avg_trade_duration: timedelta
@@ -242,6 +247,7 @@ class CoinInsights:
 
             coin_metrics_table.add_row(c.pair,
                                        colorize(round(c.market_change, 2), 0),
+                                       colorize(round(c.market_drawdown, 2), 0),
                                        colorize(round(c.max_seen_drawdown, 2), 0),
                                        colorize(round(c.max_realised_drawdown, 2), 0),
                                        )
@@ -281,6 +287,7 @@ class CoinInsights:
         coin_metrics_table = Table(title="Coin Metrics", box=box.ROUNDED, width=100)
         coin_metrics_table.add_column("Pair", justify=justification)
         coin_metrics_table.add_column("Market change (%)", justify=justification)
+        coin_metrics_table.add_column("Market drawdown (%)", justify=justification)
         coin_metrics_table.add_column("Max. seen drawdown (%)", justify=justification)
         coin_metrics_table.add_column("Max. realised drawdown (%)",
                                       justify=justification)
