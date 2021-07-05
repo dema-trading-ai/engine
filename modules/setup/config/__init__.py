@@ -29,6 +29,9 @@ class ConfigModule(object):
     timeframe: str
     timeframe_ms: int
 
+    def __init__(self):
+        self.exchange = None
+
     @staticmethod
     async def create(args):
         config_module = ConfigModule()
