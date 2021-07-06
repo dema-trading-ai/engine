@@ -10,6 +10,7 @@ from utils.utils import get_ohlcv_indicators
 StatsModuleFactory = [[], StatsModule]
 
 max_open_trades = 3
+max_exposure = 100
 STARTING_CAPITAL = 100.
 FEE_PERCENTAGE = 1
 
@@ -23,6 +24,7 @@ class StatsFixture:
     def __init__(self, pairs: list):
         self.stats_config = StatsConfig(
             max_open_trades=max_open_trades,
+            max_exposure=max_exposure,
             starting_capital=100,
             backtesting_from=1,
             backtesting_to=10,
@@ -41,6 +43,7 @@ class StatsFixture:
         self.trading_module_config = TradingModuleConfig(
             stoploss=STOPLOSS,
             max_open_trades=max_open_trades,
+            max_exposure=max_exposure,
             starting_capital=STARTING_CAPITAL,
             fee=FEE_PERCENTAGE,
             pairs=pairs,

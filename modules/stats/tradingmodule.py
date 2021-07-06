@@ -23,6 +23,7 @@ class TradingModule:
         self.realised_profit = self.budget
 
         self.max_open_trades = int(self.config.max_open_trades)
+        self.max_exposure = int(self.config.max_exposure)
         self.amount_of_pairs = len(self.config.pairs)
         self.fee = config.fee / 100
         self.sl_type = config.stoploss_type
@@ -102,7 +103,7 @@ class TradingModule:
             return
 
         # Define spend amount based on realised profit
-        spend_amount = (1. / self.amount_of_pairs) * self.realised_profit
+        spend_amount = (self.max_exposure / 100.) * self.realised_profit
         if spend_amount > self.budget:
             spend_amount = self.budget
 

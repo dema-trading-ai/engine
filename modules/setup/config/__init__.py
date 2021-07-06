@@ -59,6 +59,7 @@ class ConfigModule(object):
         config_module.stoploss = config["stoploss"]
         config_module.stoploss_type = config["stoploss-type"]
         config_module.max_open_trades = config["max-open-trades"]
+        config_module.max_exposure = config["max-exposure"]
         config_module.plots = config["plots"]
         config_module.tearsheet = config["tearsheet"]
         config_module.roi = config["roi"]

@@ -12,6 +12,7 @@ class StatsConfig:
     stoploss: float
     stoploss_type: str
     max_open_trades: int
+    max_exposure: int
     btc_marketchange_ratio: float
     backtesting_to: int
     backtesting_from: int
@@ -27,6 +28,7 @@ def to_stats_config(config: ConfigModule):
         stoploss=config.stoploss,
         stoploss_type=config.stoploss_type,
         max_open_trades=config.max_open_trades,
+        max_exposure=config.max_open_trades,
         btc_marketchange_ratio=config.btc_marketchange_ratio,
         backtesting_to=config.backtesting_to,
         backtesting_from=config.backtesting_from,

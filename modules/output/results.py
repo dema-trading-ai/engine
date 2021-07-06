@@ -48,6 +48,7 @@ class MainResults:
     tested_from: datetime
     tested_to: datetime
     max_open_trades: int
+    max_exposure: int
     market_change_coins: float
     market_change_btc: float
     starting_capital: float
@@ -195,6 +196,7 @@ class MainResults:
                                f"{round(self.starting_capital, 2)} {currency_symbol}")
         settings_table.add_row("Fee percentage", f"{self.fee} %")
         settings_table.add_row("Max. open trades", str(self.max_open_trades))
+        settings_table.add_row("Max. exposure", str(self.max_exposure))
         return settings_table
 
 
