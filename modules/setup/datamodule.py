@@ -1,4 +1,5 @@
 # Libraries
+import asyncio
 import os
 import sys
 from os import path
@@ -8,12 +9,11 @@ import numpy as np
 import pandas as pd
 import rapidjson
 from pandas import DataFrame
-import asyncio
-from cli.print_utils import print_info, print_error, print_warning
 
+from cli.print_utils import print_info, print_error, print_warning
 # Files
 from modules.setup.config import ConfigModule
-from utils.utils import str_to_df, df_to_dict, get_ohlcv_indicators
+from utils.utils import get_ohlcv_indicators
 
 # ======================================================================
 # DataModule is responsible for downloading OHLCV data, preparing it
@@ -30,6 +30,7 @@ day = 24 * hour
 
 class DataModule:
 
+    @staticmethod
     async def create(config: ConfigModule):
         print_info('Starting DemaTrading.ai data-module...')
         data_module = DataModule()
@@ -37,6 +38,18 @@ class DataModule:
         data_module.exchange = config.exchange
         await data_module.load_markets()
         return data_module
+
+    async def load_btc_marketchange(self):
+        print_info("Fetching marketchange of BTC/USDT...")
+        begin_data = await self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe=self.config.timeframe,
+                                                     since=self.config.backtesting_from, limit=1)
+        end_timestamp = int(np.floor(self.config.backtesting_to / self.config.timeframe_ms) * self.config.timeframe_ms) - self.config.timeframe_ms
+        end_data = await self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe=self.config.timeframe, since=end_timestamp,
+                                                   limit=1)
+
+        begin_close_value = begin_data[0][4]
+        end_close_value = end_data[0][4]
+        return end_close_value / begin_close_value
 
     async def load_historical_data(self) -> dict:
         dataframes = await asyncio.gather(*[self.get_pair_data(pair) for pair in self.config.pairs])
@@ -146,9 +159,9 @@ class DataModule:
         filename = self.generate_datafile_name(pair)
         filepath = os.path.join("data/backtesting-data/", self.config.exchange_name, filename)
         try:
-            with open(filepath, 'r', encoding='utf-8') as datafile:
-                data = datafile.read()
-                df = str_to_df(data)
+            df = pd.read_feather(filepath, columns=get_ohlcv_indicators() + ["index"])
+            df.set_index("index", inplace=True)
+
         except FileNotFoundError:
             print_error("Backtesting datafile was not found.")
             return None
@@ -170,6 +183,7 @@ class DataModule:
         begin_index = df.index.get_loc(self.config.backtesting_from)
         end_index = df.index.get_loc(final_timestamp)
         self.save_dataframe(pair, df)
+
         df = df[begin_index:end_index + 1]
         return df
 
@@ -229,11 +243,7 @@ class DataModule:
         filepath = os.path.join("data/backtesting-data/", self.config.exchange_name, filename)
 
         # Convert pandas dataframe to json
-        df_dict = df_to_dict(df)
-
-        # Save json file
-        with open(filepath, 'w', encoding='utf-8') as outfile:
-            rapidjson.dump(df_dict, outfile, indent=4)
+        df.reset_index().to_feather(filepath)
 
     def generate_datafile_name(self, pair: str) -> str:
         """
@@ -243,7 +253,7 @@ class DataModule:
         :rtype: string
         """
         coin, base = pair.split('/')
-        return "data-{}{}{}.json".format(coin, base, self.config.timeframe)
+        return "data-{}{}{}.feather".format(coin, base, self.config.timeframe)
 
     def remove_backtesting_file(self, pair: str) -> None:
         """
