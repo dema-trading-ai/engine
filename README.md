@@ -59,8 +59,8 @@ docker-compose up
 
 
 ## Running with Python (alternative)
-If you want to run the engine using Python, first you need to download Python 3.8.11 by clicking 
-[this](https://www.python.org/downloads/release/python-3811/) link. Furthermore, you will have to 
+If you want to run the engine using Python, first you need to download Python 3.8.6 by clicking 
+[this](https://www.python.org/downloads/release/python-386/) link. Furthermore, you will have to 
 manually download this repository on your computer. This can be done by either downloading the 
 repository as a .zip file or the recommended way which is cloning the repository 
 using [Github Desktop](https://desktop.github.com/) (or something similar). For more information 
@@ -69,11 +69,15 @@ link. To use the engine you need TA-lib, which can be installed using the follow
 correspond to your operating system.
 
 #### MacOS Installation
+> Note: if you're device is running on the M1 Chip by Apple Silicon, please follow the 
+installation instruction described in our [docs](https://docs.dematrading.ai/getting_started/installation/installation/#apple-silicon-m1-chip).
+
 1. Install Homebrew (optional). This can be done by running the following command in your 
 terminal:
 ```
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
+
 2. Install TA-lib library by running this command:
 ```
 brew install ta-lib
@@ -85,6 +89,7 @@ pip install ta-lib
 
 #### Linux Installation
 1. Download [ta-lib-0.4.0-src.tar.gz](http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz).
+
 2. Run the following commands:
 ```
 $ tar -xzf ta-lib-0.4.0-src.tar.gz
@@ -110,7 +115,7 @@ cd [PATH/TO/DOWNLOADS/FOLDER]
 
 4. Install the TA-lib wheel by running this command:
 ```
-pip install TA_Lib‑0.4.19‑cp39‑cp39‑win_amd64.whl
+pip install [TA_Lib-wheel].whl
 ```
 
 ### Running the Engine
@@ -118,19 +123,21 @@ pip install TA_Lib‑0.4.19‑cp39‑cp39‑win_amd64.whl
 ```
 cd [PATH/TO/ENGINE/DIRECTORY]
 ```
+
 2. Install all other needed dependencies by running this command:
 ```
 pip install -r requirements.txt
 ```
+
 3. Run the engine by running this command:
 ```
 python3 main.py
 ```
 
 
-### Developing
+# Developing
 To start developing your very own strategy, we suggest reading our [docs](https://docs.dematrading.ai/getting_started/strategies/strategyexamples/) 
-to read about the possibilities.
+for more information.
 > To give you a headstart, we included a sample strategy which can be found in 
 /resources/setup/strategies/my_strategy.py
 
@@ -145,8 +152,7 @@ For feature requests or suggestions, please write a message in our [Discord](htt
 under #engine-support.
 
 
-## License
-
+# License
 This project is licensed under AGPL-3.0 License. It is not allowed to use this project to run any live trading instances. This project is for strategy testing only, if you want to monetise your strategy you can contact us. We can also help you to optimise your strategy. Any questions regarding this project? Feel free to get in touch using the contactform at https://DemaTrading.ai. 
 
 
