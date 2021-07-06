@@ -1,4 +1,5 @@
 # Libraries
+import asyncio
 import os
 import sys
 from os import path
@@ -8,12 +9,11 @@ import numpy as np
 import pandas as pd
 import rapidjson
 from pandas import DataFrame
-import asyncio
-from cli.print_utils import print_info, print_error, print_warning
 
+from cli.print_utils import print_info, print_error, print_warning
 # Files
 from modules.setup.config import ConfigModule
-from utils.utils import str_to_df, df_to_dict, get_ohlcv_indicators
+from utils.utils import get_ohlcv_indicators
 
 # ======================================================================
 # DataModule is responsible for downloading OHLCV data, preparing it
@@ -103,7 +103,7 @@ class DataModule:
                                                                    limit=int(asked_ticks)) for [asked_ticks, start_date]
                                          in slice_request_payloads])
 
-        index = [str(candle[0]) for results in results for candle in results]  # timestamps
+        index = [candle[0] for results in results for candle in results]  # timestamps
         ohlcv_data = [candle for results in results for candle in results]
 
         # Create pandas DataFrame and adds pair info
@@ -161,7 +161,6 @@ class DataModule:
         try:
             df = pd.read_feather(filepath, columns=get_ohlcv_indicators() + ["index"])
             df.set_index("index", inplace=True)
-            df.index = df.index.map(int)
 
         except FileNotFoundError:
             print_error("Backtesting datafile was not found.")
@@ -181,9 +180,8 @@ class DataModule:
 
         # Return correct backtesting period
         df = await self.check_backtesting_period(pair, df, final_timestamp)
-        df.index = df.index.map(str)
-        begin_index = df.index.get_loc(str(self.config.backtesting_from))
-        end_index = df.index.get_loc(str(final_timestamp))
+        begin_index = df.index.get_loc(self.config.backtesting_from)
+        end_index = df.index.get_loc(final_timestamp)
         self.save_dataframe(pair, df)
 
         df = df[begin_index:end_index + 1]
