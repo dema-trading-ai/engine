@@ -60,6 +60,7 @@ class ConfigModule(object):
         config_module.stoploss_type = config["stoploss-type"]
         config_module.max_open_trades = config["max-open-trades"]
         config_module.plots = config["plots"]
+        config_module.tearsheet = config["tearsheet"]
         config_module.roi = config["roi"]
         config_module.currency_symbol = get_currency_symbol(config_module.raw_config)
         return config_module

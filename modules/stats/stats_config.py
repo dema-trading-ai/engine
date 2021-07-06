@@ -16,6 +16,7 @@ class StatsConfig:
     backtesting_to: int
     backtesting_from: int
     plots: bool
+    tearsheet: bool
     starting_capital: float
     currency_symbol: Literal["USDT"]
 
@@ -30,6 +31,7 @@ def to_stats_config(config: ConfigModule):
         backtesting_to=config.backtesting_to,
         backtesting_from=config.backtesting_from,
         plots=config.plots,
+        tearsheet=config.tearsheet,
         starting_capital=config.starting_capital,
         currency_symbol=config.currency_symbol,
         mainplot_indicators=config.mainplot_indicators,
