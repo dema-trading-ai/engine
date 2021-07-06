@@ -4,15 +4,16 @@
 [![License](https://img.shields.io/github/license/dema-trading-ai/engine.svg)](https://github.com/dema-trading-ai/engine)
 [![Test PR/Push](https://github.com/dema-trading-ai/engine/actions/workflows/PR-Push-test.yml/badge.svg?branch=development)](https://github.com/dema-trading-ai/engine/actions/workflows/PR-Push-test.yml)
 
-![DemaTrading](./imgs/DemaTrading-text-transparant.png?raw=true "DemaTrading")
+<p align="center">
+  <img width="460" height="300" src="https://github.com/dema-trading-ai/engine/raw/feat/update-readme/imgs/DemaTrading-text-transparant.png">
+</p>
 
 The DemaTrading.ai Engine is an open source backtesting Engine for cryptocurrency trading as a 
 part of [DemaTrading](https://dematrading.ai/). The Engine is completely written in the 
 programming language Python. Some experience with Python makes this process easier, 
 however with some effort this project should be runnable for everyone, no matter your experience with coding.
 
-![Backtesting Results](./imgs/backtesting_results.png?raw=true "Backtesting Results")
-![Coin Insights](./imgs/coin_insights.png?raw=true "Coin Insights")
+![Backtesting Results](https://github.com/dema-trading-ai/engine/raw/feat/update-readme/imgs/backtesting-results.png)
 
 ##### [Go to full documentation](https://docs.dematrading.ai)
 
