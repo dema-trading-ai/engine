@@ -19,7 +19,7 @@ however with some effort this project should be runnable for everyone, no matter
 ##### [Go to full documentation](https://docs.dematrading.ai)
 
 
-## Discord
+# Discord
 
 For any questions not covered by the documentation, or for further questions regarding the engine, 
 trading, your own strategies, your algorithms, or just a chit chat with like-minded individuals, 
@@ -29,21 +29,21 @@ may have.
 ##### [Join Discord server](https://discord.gg/WXxjtNzjEx)
 
 
-## Running
+# Running
 There are multiple ways to run our Backtesting Engine. For each way, the installation steps are outlined below.
 We recommend using Docker to run the Backtesting Engine, but you can also use standard Python.
 
-##### Installing Code Editor
+#### Installing Code Editor
 To make your a life a lot easier during strategy development use a code editor such as [PyCharm](https://www.jetbrains.com/pycharm/) 
 (recommended) or [VSCode](https://code.visualstudio.com/).
 
 
-### Running with Docker (recommended)
+## Running with Docker (recommended)
 If you want to run the engine using Docker, you need to install Docker using the steps described 
 [here](https://docs.docker.com/get-docker/). After installing you need to run Docker in the 
 background.
 
-##### Docker Commands
+#### Docker Commands
 To run the engine you have to open a terminal of choice and enter the commands described below. 
 1. This command will initialize a directory containing all the necessary files for running the
 engine and developing strategies:
@@ -58,7 +58,7 @@ docker-compose up
 ```
 
 
-### Running with Python (alternative)
+## Running with Python (alternative)
 If you want to run the engine using Python, first you need to download Python 3.8.11 by clicking 
 [this](https://www.python.org/downloads/release/python-3811/) link. Furthermore, you will have to 
 manually download this repository on your computer. This can be done by either downloading the 
@@ -68,7 +68,7 @@ about cloning a repository see [this](https://docs.github.com/en/desktop/contrib
 link. To use the engine you need TA-lib, which can be installed using the following steps that 
 correspond to your operating system.
 
-##### MacOS Installation
+#### MacOS Installation
 1. Install Homebrew (optional). This can be done by running the following command in your 
 terminal:
 ```
@@ -83,7 +83,7 @@ OR if you you skipped Step 1. you can run this command (requires [Xcode12](https
 pip install ta-lib
 ```
 
-##### Linux Installation
+#### Linux Installation
 1. Download [ta-lib-0.4.0-src.tar.gz](http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz).
 2. Run the following commands:
 ```
@@ -94,7 +94,7 @@ $ make
 $ sudo make install
 ```
 
-##### Windows Installation
+#### Windows Installation
 1. Find your current operating system. This can be found in system settings (either 32-bit or 
 64-bit)
 
@@ -113,7 +113,7 @@ cd [PATH/TO/DOWNLOADS/FOLDER]
 pip install TA_Lib‑0.4.19‑cp39‑cp39‑win_amd64.whl
 ```
 
-#### Running the Engine
+### Running the Engine
 1. Change to the engine directory by running this command:
 ```
 cd [PATH/TO/ENGINE/DIRECTORY]
