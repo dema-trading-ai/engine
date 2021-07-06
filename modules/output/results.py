@@ -211,6 +211,9 @@ class CoinInsights:
     market_change: float
     max_seen_drawdown: float
     max_realised_drawdown: float
+    win_weeks: int
+    draw_weeks: int
+    loss_weeks: int
     avg_trade_duration: timedelta
     longest_trade_duration: timedelta
     shortest_trade_duration: timedelta
@@ -244,7 +247,7 @@ class CoinInsights:
                                        colorize(round(c.market_change, 2), 0),
                                        colorize(round(c.max_seen_drawdown, 2), 0),
                                        colorize(round(c.max_realised_drawdown, 2), 0),
-                                       # c.winning_week,
+                                       f"{c.win_weeks} / {c.draw_weeks} / {c.loss_weeks}",
                                        )
 
             coin_signal_table.add_row(c.pair,

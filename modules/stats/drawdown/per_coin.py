@@ -1,15 +1,20 @@
 import pandas as pd
 import numpy as np
 
-from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
 from modules.stats.trade import Trade
 
 
-def get_max_seen_drawdown_per_coin(signal_dict, closed_pair_trades: [Trade], fee_percentage: float):
+def get_cum_profit_ratio_per_coin(signal_dict, closed_pair_trades: [Trade], fee_percentage: float,
+                                  realised_drawdown=False):
     trades_opened_closed_timestamps = map_trades_to_opened_closed_timestamps(closed_pair_trades)
 
     values = signal_dict.values()
     df = pd.DataFrame(values).set_index("time")
+
+    # Check if we want to calculate realised drawdown
+    if realised_drawdown:
+        trade_timestamps = get_trade_timestamps(closed_pair_trades)
+        df = pd.concat([df, trade_timestamps], axis=1, join="inner")
 
     # Copy first row to zero index to save asset value before applying fees
     df = with_copied_initial_row(df)
@@ -19,7 +24,7 @@ def get_max_seen_drawdown_per_coin(signal_dict, closed_pair_trades: [Trade], fee
 
     df["value"] = df["profit_ratio"].cumprod()
 
-    return get_max_drawdown_ratio(df)
+    return df
 
 
 def with_copied_initial_row(df) -> pd.DataFrame:
@@ -58,23 +63,3 @@ def get_trade_timestamps(closed_pair_trades):
         trade_timestamps_list.append(int(trade.closed_at.timestamp() * 1000))
     trade_timestamps = pd.DataFrame(trade_timestamps_list, columns=["time"]).set_index("time")
     return trade_timestamps
-
-
-def get_max_realised_drawdown_per_coin(signal_dict, closed_pair_trades: [Trade], fee_percentage: float):
-    trades_open_closed_timestamps = map_trades_to_opened_closed_timestamps(closed_pair_trades)
-    trade_timestamps = get_trade_timestamps(closed_pair_trades)
-
-    values = signal_dict.values()
-    df = pd.DataFrame(values).set_index("time")
-
-    df = pd.concat([df, trade_timestamps], axis=1, join="inner")
-
-    # Copy first row to zero index to save asset value before applying fees
-    df = with_copied_initial_row(df)
-
-    apply_profit_ratio(df, trades_open_closed_timestamps)
-    add_trade_fee(df, fee_percentage, trades_open_closed_timestamps)
-
-    df["value"] = df["profit_ratio"].cumprod()
-
-    return get_max_drawdown_ratio(df)
