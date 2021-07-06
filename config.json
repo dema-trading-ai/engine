@@ -20,5 +20,5 @@
   "strategies-folder": "resources/setup/strategies",
   "plots": true,
   "mainplot_indicators": ["ema5", "ema21"],
-  "subplot_indicators": ["volume"]
+  "subplot_indicators": [["volume"]]
 }

@@ -16,8 +16,7 @@ from modules.stats.trading_stats import TradingStats
 def plot_sizes(subplot_indicator, df):
     rows = 1
     for ind in subplot_indicator:
-        if ind in df.columns.values:
-            rows += 1
+        rows += 1
 
     height = [1]
     for i in range(rows - 1):
@@ -86,13 +85,14 @@ def add_indicators(fig, dates, df, mainplot_indicators, subplot_indicators):
 
     # add subplot_indicator
     plots = 2
-    for ind in subplot_indicators:
-        if ind in df.columns.values:
-            fig.add_trace((go.Scatter(x=dates, y=df[ind], name=ind,
-                                      line=dict(width=2, dash='solid'))), row=plots, col=1)
-            plots += 1
-        else:
-            print_warning(f"Unable to plot {ind}. No {ind} found in strategy.")
+    for ind_group in subplot_indicators:
+        for ind in ind_group:
+            if ind in df.columns.values:
+                fig.add_trace((go.Scatter(x=dates, y=df[ind], name=ind,
+                                          line=dict(width=2, dash='solid'))), row=plots, col=1)
+            else:
+                print_warning(f"Unable to plot {ind}. No {ind} found in strategy.")
+        plots += 1
 
     return fig
 
@@ -130,7 +130,9 @@ def plot_per_coin(stats: TradingStats, config: StatsConfig):
         fig.update_xaxes(range=[dates[0], dates[-1]])
         fig.update_layout(
             title='%s Chart' % pair,
-            yaxis_title=pair)
+            yaxis_title=pair,
+            template='ggplot2',
+            dragmode='pan')
 
         # remove plots if they already existed in the binance folder.
         # used to remove plots made by older version so users don't by accident open old plots.
@@ -139,6 +141,8 @@ def plot_per_coin(stats: TradingStats, config: StatsConfig):
             os.remove("data/backtesting-data/binance/plot%s.html" % pair.replace("/", ""))
         except OSError:
             pass
+
+        fig.show(config={'scrollZoom': True})
 
         Path("data/backtesting-data/plots/").mkdir(parents=True, exist_ok=True)
         fig.write_html("data/backtesting-data/plots/plot%s.html" % pair.replace("/", ""))
