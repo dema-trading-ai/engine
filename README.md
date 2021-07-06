@@ -5,7 +5,7 @@
 [![Test PR/Push](https://github.com/dema-trading-ai/engine/actions/workflows/PR-Push-test.yml/badge.svg?branch=development)](https://github.com/dema-trading-ai/engine/actions/workflows/PR-Push-test.yml)
 
 <p align="center">
-  <img width="460" height="300" src="https://github.com/dema-trading-ai/engine/raw/feat/update-readme/imgs/DemaTrading-text-transparant.png">
+  <img src="https://github.com/dema-trading-ai/engine/raw/feat/update-readme/imgs/DemaTrading-text-transparant.png">
 </p>
 
 The DemaTrading.ai Engine is an open source backtesting Engine for cryptocurrency trading as a 
