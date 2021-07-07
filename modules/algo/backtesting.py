@@ -33,7 +33,6 @@ class BackTesting:
         self.data = data
         self.backtesting_from = config_module.backtesting_from
         self.backtesting_to = config_module.backtesting_to
-        self.btc_marketchange_ratio = config_module.btc_marketchange_ratio
 
     def start_backtesting(self) -> PairsData:
         print_info('Starting backtest...')

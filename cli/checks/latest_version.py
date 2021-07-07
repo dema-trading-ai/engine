@@ -60,6 +60,6 @@ def get_engine_repository_tags() -> Optional:
         data_json = json.loads(response.read())
         tag_names = list(map(lambda x: x["name"], data_json))
         return tag_names
-    except URLError as url_err:
-        print_error(f"Error while checking version. REASON: {repr(url_err)}")
+    except URLError:
+        print_error("Error while checking version.")
     return None

@@ -10,3 +10,4 @@ python-rapidjson==1.0
 rich==10.3.0
 ta-lib==0.4.19
 pyinstaller~=4.3
+pyarrow==4.0.1

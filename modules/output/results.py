@@ -3,15 +3,13 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 import typing
 
-from rich.console import Console, JustifyMethod
+from rich.console import JustifyMethod
 from rich.table import Table
 from rich import box
 
 # Files
-from cli.print_utils import print_standard
+from cli.print_utils import print_standard, console_color
 from utils.utils import CURRENT_VERSION
-
-console = Console(color_system="truecolor", width=200)
 
 
 def show_signature():
@@ -51,7 +49,9 @@ class MainResults:
     tested_to: datetime
     max_open_trades: int
     market_change_coins: float
+    market_drawdown_coins: float
     market_change_btc: float
+    market_drawdown_btc: float
     starting_capital: float
     end_capital: float
     overall_profit_percentage: float
@@ -113,7 +113,7 @@ class MainResults:
         table_grid.add_column(":robot: BACKTESTING RESULTS :robot:")
         table_grid.add_row(settings_table)
         table_grid.add_row(performance_table, trade_info_table)
-        console.print(table_grid)
+        console_color.print(table_grid)
 
     def create_trade_info_table(self, justification) -> Table:
         avg_trade_duration = format_time_difference(self.avg_trade_duration)
@@ -176,6 +176,12 @@ class MainResults:
         performance_table.add_row('Market change BTC',
                                   colorize(round(self.market_change_btc,
                                                  2), 0, '%'))
+        performance_table.add_row('Market drawdown coins',
+                                  colorize(round(self.market_drawdown_coins,
+                                                 2), 0, '%'))
+        performance_table.add_row('Market drawdown BTC',
+                                  colorize(round(self.market_drawdown_btc,
+                                                 2), 0, '%'))
         performance_table.add_row('Total fee paid',
                                   f"{round(self.total_fee_amount)} {currency_symbol}")
         return performance_table
@@ -209,6 +215,7 @@ class CoinInsights:
     profit: float
     n_trades: int
     market_change: float
+    market_drawdown: float
     max_seen_drawdown: float
     max_realised_drawdown: float
     win_weeks: int
@@ -245,6 +252,7 @@ class CoinInsights:
 
             coin_metrics_table.add_row(c.pair,
                                        colorize(round(c.market_change, 2), 0),
+                                       colorize(round(c.market_drawdown, 2), 0),
                                        colorize(round(c.max_seen_drawdown, 2), 0),
                                        colorize(round(c.max_realised_drawdown, 2), 0),
                                        f"{c.win_weeks} / {c.draw_weeks} / {c.loss_weeks}",
@@ -265,7 +273,7 @@ class CoinInsights:
         table_grid.add_row(coin_performance_table)
         table_grid.add_row(coin_metrics_table)
         table_grid.add_row(coin_signal_table)
-        console.print(table_grid)
+        console_color.print(table_grid)
 
     @staticmethod
     def create_coin_signals_table(justification) -> Table:
@@ -285,6 +293,7 @@ class CoinInsights:
         coin_metrics_table = Table(title="Coin Metrics", box=box.ROUNDED, width=100)
         coin_metrics_table.add_column("Pair", justify=justification)
         coin_metrics_table.add_column("Market change (%)", justify=justification)
+        coin_metrics_table.add_column("Market drawdown (%)", justify=justification)
         coin_metrics_table.add_column("Max. seen drawdown (%)", justify=justification)
         coin_metrics_table.add_column("Max. realised drawdown (%)",
                                       justify=justification)
@@ -330,7 +339,7 @@ class LeftOpenTradeResult:
         table_grid = Table(box=box.SIMPLE)
         table_grid.add_column(":hourglass_flowing_sand: LEFT OPEN TRADES :hourglass_flowing_sand:")
         table_grid.add_row(left_open_trades_table)
-        console.print(table_grid)
+        console_color.print(table_grid)
 
     @staticmethod
     def create_left_open_trades_table(justification, currency_symbol) -> Table:

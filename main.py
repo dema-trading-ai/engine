@@ -1,10 +1,13 @@
 import asyncio
+import multiprocessing
 import os
 import sys
+from time import perf_counter
 
 from cli.arg_parse import execute_for_args
 from cli.checks.latest_version import print_warning_if_version_outdated
 from cli.prepare_workspace import prepare_workspace
+from cli.print_utils import print_debug
 from main_controller import MainController
 
 # Hack, PyInstaller + rich on windows in github actions fails because it cannot find encoding of stdout, this sets
@@ -32,4 +35,8 @@ def run_init(args):
 
 
 if __name__ == "__main__":
+    multiprocessing.freeze_support()
+    start_time = perf_counter()
     main()
+    end_time = perf_counter()
+    print_debug(f"Elapsed time: {end_time - start_time}s")
