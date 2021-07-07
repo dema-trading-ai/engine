@@ -5,7 +5,7 @@
 [![Test PR/Push](https://github.com/dema-trading-ai/engine/actions/workflows/PR-Push-test.yml/badge.svg?branch=development)](https://github.com/dema-trading-ai/engine/actions/workflows/PR-Push-test.yml)
 
 <p align="center">
-  <img src="https://github.com/dema-trading-ai/engine/raw/feat/update-readme/imgs/DemaTrading-text-transparant.png">
+  <img src="imgs/DemaTrading-text-transparant.png">
 </p>
 
 # Engine
