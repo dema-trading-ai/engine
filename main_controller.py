@@ -10,7 +10,8 @@ from modules.stats.tradingmodule_config import create_trading_module_config
 
 class MainController:
 
-    async def run(self, args) -> None:
+    @staticmethod
+    async def run(args) -> None:
         async with create_config_module(args) as config:
             data_module = await DataModule.create(config)
             setup_module = SetupModule(config, data_module)
@@ -18,7 +19,9 @@ class MainController:
             algo_module = await setup_module.setup()
             df, dict_with_signals = algo_module.run()
 
-            stats_config = to_stats_config(config, await data_module.load_btc_marketchange())
+            stats_config = to_stats_config(config,
+                                           await data_module.load_btc_marketchange(),
+                                           await data_module.load_btc_drawdown(df))
 
             trading_module_config = create_trading_module_config(config)
             trading_module = TradingModule(trading_module_config)
