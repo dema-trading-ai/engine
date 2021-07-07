@@ -94,7 +94,7 @@ class DataModule:
     async def load_markets(self) -> None:
         await self.exchange.load_markets()
 
-    async def download_data_for_pair(self, pair: str, data_from: int, data_to: int, save: bool = True) -> DataFrame:
+    async def download_data_for_pair(self, pair: str, data_from: int, data_to: int, save: bool = True, start: bool = True) -> DataFrame:
         start_date = data_from
         fetch_ohlcv_limit = 1000
 
@@ -124,13 +124,14 @@ class DataModule:
         df['buy'], df['sell'] = 0, 0  # default values
 
         # Create prior NaN data for premature coins
-        if self.config.backtesting_from != df.iat[0,0]:
-            print_warning(f"Pair '{pair}' did not exist at start-time")
-            df = self.fill_prior_missing_ticks(df)
+        if start:
+            if self.config.backtesting_from != df.iat[0,0]:
+                df = self.fill_prior_missing_ticks(df, pair)
 
         if save:
             print_info("[%s] %s candles downloaded." % (pair, len(index)))
             self.save_dataframe(pair, df)
+
         return df
 
     def is_datafolder_exist(self, pair: str) -> bool:
@@ -210,7 +211,7 @@ class DataModule:
         if self.config.backtesting_from < df_begin:
             print_info("Incomplete datafile. Downloading extra candle(s)...")
             notify = False
-            prev_df = await self.download_data_for_pair(pair, self.config.backtesting_from, df_begin, False)
+            prev_df = await self.download_data_for_pair(pair, self.config.backtesting_from, df_begin, save=False)
             df = pd.concat([prev_df, df])
             extra_candles += len(prev_df.index)
 
@@ -220,7 +221,7 @@ class DataModule:
                 print_info("Incomplete datafile. Downloading extra candle(s)...")
             new_df = await self.download_data_for_pair(pair, df_end + self.config.timeframe_ms,
                                                        self.config.backtesting_to,
-                                                       False)
+                                                       save=False, start=False)
             df = pd.concat([df, new_df])
             extra_candles += len(new_df.index)
 
@@ -261,7 +262,7 @@ class DataModule:
                 print_warning(f"Pair '{pair}' is missing {n_missing} ticks (rows)")
 
 
-    def fill_prior_missing_ticks(self, df):
+    def fill_prior_missing_ticks(self, df, pair):
         """
         Replace missing ticks by NaN
         :param df: Downloaded data
@@ -273,7 +274,7 @@ class DataModule:
                               df.iat[0,0],
                               self.config.timeframe_ms)
 
-
+        print_warning(f"Pair '{pair}' did not exist at start-time")
         nandf = pd.DataFrame(np.nan, index=daterange, columns=df.keys())
         nandf["time"] = daterange
         newdf = nandf.append(df)
