@@ -30,11 +30,11 @@ def get_winning_weeks_per_coin(signal_dict: dict, cum_profit_ratio):
 
 def get_winning_weeks_for_portfolio(capital_per_timestamp, coin_stats):
     coins = list(coin_stats.keys())
-    combined_market_change_df = coin_stats[coins[0]]['market_change_weekly']
+    market_change_weekly_first_coin = coin_stats[coins[0]]['market_change_weekly']
 
-    if combined_market_change_df is not None:   # is None if no trades are made
+    if market_change_weekly_first_coin is not None:   # is None if no trades are made
         # Combine market change of multiple coins into one dataframe
-        combined_market_change_df = DataFrame(combined_market_change_df, columns=[coins[0]])
+        combined_market_change_df = DataFrame(market_change_weekly_first_coin, columns=[coins[0]])
         for coin in coins[1:]:
             combined_market_change_df[coin] = coin_stats[coin]['market_change_weekly']
 
