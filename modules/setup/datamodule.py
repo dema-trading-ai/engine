@@ -13,7 +13,7 @@ from cli.print_utils import print_info, print_error, print_warning
 
 # Files
 from modules.setup.config import ConfigModule
-from utils.utils import str_to_df, df_to_dict, get_ohlcv_indicators, parse_timeframe
+from utils.utils import get_ohlcv_indicators, parse_timeframe
 
 # ======================================================================
 # DataModule is responsible for downloading OHLCV data, preparing it
