@@ -52,25 +52,6 @@ def calculate_worth_of_open_trades(open_trades: [Trade]) -> float:
     return return_value
 
 
-def df_to_dict(df: DataFrame) -> dict:
-    """
-    Method turns dataframe into dictionary
-    """
-    df.index = df.index.map(str)
-    return df.to_dict('index')
-
-
-def str_to_df(data: str) -> DataFrame:
-    """
-    Method turns dictionary into dataframe
-    """
-    indicators = get_ohlcv_indicators()
-    json_file = rapidjson.loads(data)
-    df = pd.DataFrame.from_dict(json_file, orient='index', columns=indicators)
-    df.index = df.index.map(int)
-    return df
-
-
 def get_plot_indicators(config: dict):
     config.setdefault("mainplot_indicators", ['ema5', 'ema21'])
     config.setdefault("subplot_indicators", ['volume'])

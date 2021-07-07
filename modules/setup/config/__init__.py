@@ -29,6 +29,21 @@ class ConfigModule(object):
     timeframe: str
     timeframe_ms: int
 
+    def __init__(self):
+        self.subplot_indicators = None
+        self.mainplot_indicators = None
+        self.currency_symbol = None
+        self.starting_capital = None
+        self.plots = None
+        self.backtesting_from = None
+        self.backtesting_to = None
+        self.max_open_trades = None
+        self.stoploss_type = None
+        self.stoploss = None
+        self.fee = None
+        self.strategy_definition = None
+        self.exchange = None
+
     @staticmethod
     async def create(args):
         config_module = ConfigModule()

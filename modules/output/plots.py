@@ -1,7 +1,6 @@
 # Libraries
 import os
 from datetime import datetime
-from functools import partial
 from multiprocessing import Process
 
 import numpy as np
@@ -55,9 +54,9 @@ def add_buy_sell_points(fig, pair, dates, df, buypoints, sellpoints):
     close_ = df[pair]["close"]
     for x, date in enumerate(dates):
         if date in buypoints[pair]:
-            buy_points_value[x] = close_[x]
+            buy_points_value[x] = close_.iloc[x]
         if date in sellpoints[pair]:
-            sell_points_value[x] = close_[x]
+            sell_points_value[x] = close_.iloc[x]
 
     fig.add_trace((go.Scattergl(x=dates, y=buy_points_value,
                                 mode='markers',
