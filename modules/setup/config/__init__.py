@@ -10,7 +10,7 @@ from datetime import datetime
 import numpy as np
 
 # Files
-from utils.utils import get_plot_indicators
+from utils.utils import get_plot_indicators, parse_timeframe
 from .strategy_definition import StrategyDefinition
 from .cctx_adapter import create_cctx_exchange
 from .currencies import get_currency_symbol
@@ -88,22 +88,6 @@ def print_pairs(config_json):
     print_info("Watching pairs: %s." % pairs_string[:-1])
 
 
-def parse_timeframe(timeframe_str: str):
-    print_info('Configuring timeframe...')
-
-    match = re.match(r"([0-9]+)([mdh])", timeframe_str, re.I)
-    if not match:
-        raise Exception("[ERROR] Error whilst parsing timeframe")
-    items = re.split(r'([0-9]+)', timeframe_str)
-    if items[2] == 'm':
-        timeframe_time = int(items[1]) * minute
-    elif items[2] == 'h':
-        timeframe_time = int(items[1]) * hour
-    else:
-        raise Exception("[ERROR] Error whilst parsing timeframe")  # TODO
-    return timeframe_time
-
-
 def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtesting_till_now: bool) -> tuple:
     # Configure milliseconds
     today_ms = exchange.milliseconds()
@@ -133,6 +117,21 @@ def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtes
     print_info(f'Gathering data from {str(backtesting_from_parsed)} '
                   f'until {str(backtesting_to_parsed)}.')
     return backtesting_from_ms, backtesting_to_ms
+
+
+def get_additional_pairs(strategy) -> list:
+    """
+    Gets the additional pairs from a strategy, if any.
+    Coin and timeframe validation are done at the download step, just like normal coins
+    :param strategy: The strategy
+    :return: List of additional pairs
+    """
+    additional_pairs = []
+    additional_pairs_method = getattr(strategy, "additional_pairs", None)
+    if callable(additional_pairs_method):
+        additional_pairs = additional_pairs_method()
+
+    return additional_pairs
 
 
 @asynccontextmanager

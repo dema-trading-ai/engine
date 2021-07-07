@@ -12,13 +12,30 @@ class MyStrategyAdvanced(Strategy):
     This is an example custom strategy for advanced users, that inherits from the main Strategy class
     """
 
-    def generate_indicators(self, dataframe: DataFrame) -> DataFrame:
+    def additional_pairs(self):
+        """
+        Specify The additional pairs in tuple format; ("pair", "timeframe")
+        :return: list
+        """
+        return [
+            ("BTC/USDT", "4h"),
+            ("ETH/USDT", "4h")
+        ]
+
+    def generate_indicators(self, dataframe: DataFrame, additional_pairs) -> DataFrame:
         """
         :param dataframe: All passed candles (current candle included!) with OHLCV data
         :type dataframe: DataFrame
         :return: Dataframe filled with indicator-data
         :rtype: DataFrame
         """
+        # Select the BTC/USDT pair from the additional_pairs list
+        add_btc_data = additional_pairs['BTC/USDT']
+        # Add your indicators like usual
+        add_btc_data['rsi'] = ta.RSI(add_btc_data, timeperiod=14)
+        # Finally merge the additional btc data with the standard dataframe
+        dataframe = self.join_additional_data(dataframe, add_btc_data, self.timeframe, "4h")
+
         # RSI - Relative Strength Index
         dataframe['rsi'] = ta.RSI(dataframe, timeperiod=14)
 
