@@ -1,9 +1,12 @@
 from datetime import datetime, timedelta
+
+from pandas import DataFrame
 from tqdm import tqdm
 import numpy as np
 
 from modules.output.results import CoinInsights, MainResults, LeftOpenTradeResult
 from modules.pairs_data import PairsData
+from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
 from modules.stats.drawdown.per_coin import get_max_seen_drawdown_per_coin, get_max_realised_drawdown_per_coin
 from modules.stats.drawdown.for_portfolio import get_max_seen_drawdown_for_portfolio, \
     get_max_realised_drawdown_for_portfolio
@@ -66,6 +69,19 @@ def calculate_trade_durations(closed_trades):
     return avg_trade_duration, longest_trade_duration, shortest_trade_duration
 
 
+def get_market_drawdown(pairs: list, data_dict: dict) -> dict:
+    market_drawdown = {}
+    pairs_profit_ratios_sum = [0] * len(data_dict[pairs[0]])
+    for pair in pairs:
+        values_list = [data_dict[pair][d].get('close') for d in data_dict[pair]]
+        close_prices_df = DataFrame(values_list, columns=['value'])
+        market_drawdown[pair] = get_max_drawdown_ratio(close_prices_df)
+        profit_ratios = [x / values_list[0] for x in values_list]
+        pairs_profit_ratios_sum = map(lambda x, y: x + y, pairs_profit_ratios_sum, profit_ratios)
+    market_drawdown['all'] = get_max_drawdown_ratio(DataFrame(pairs_profit_ratios_sum, columns=['value']))
+    return market_drawdown
+
+
 class StatsModule:
     buy_points = None
     sell_points = None
@@ -86,15 +102,17 @@ class StatsModule:
                 tick_dict = pair_dict[tick]
                 self.trading_module.tick(tick_dict, pair_dict)
 
-        market_change = self.get_market_change(pairs)
-        return self.generate_backtesting_result(market_change)
 
-    def generate_backtesting_result(self,
-                                    market_change: dict) -> TradingStats:
+        market_change = self.get_market_change(pairs)
+        market_drawdown = get_market_drawdown(pairs, self.frame_with_signals)
+        return self.generate_backtesting_result(market_change, market_drawdown)
+
+
+    def generate_backtesting_result(self, market_change: dict, market_drawdown: dict) -> TradingStats:
 
         trading_module = self.trading_module
 
-        coin_results = self.generate_coin_results(trading_module.closed_trades, market_change)
+        coin_results = self.generate_coin_results(trading_module.closed_trades, market_change, market_drawdown)
         best_trade_ratio, best_trade_pair, worst_trade_ratio, worst_trade_pair = \
             calculate_best_worst_trade(trading_module.closed_trades)
         open_trade_results = self.get_left_open_trades_results(trading_module.open_trades)
@@ -104,6 +122,7 @@ class StatsModule:
             trading_module.closed_trades,
             trading_module.budget,
             market_change,
+            market_drawdown,
             best_trade_ratio,
             best_trade_pair,
             worst_trade_ratio,
@@ -122,7 +141,7 @@ class StatsModule:
         )
 
     def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float,
-                              market_change: dict, best_trade_ratio: float,
+                              market_change: dict, market_drawdown: dict, best_trade_ratio: float,
                               best_trade_pair: str, worst_trade_ratio: float,
                               worst_trade_pair: str) -> MainResults:
         # Get total budget and calculate overall profit
@@ -157,7 +176,9 @@ class StatsModule:
                            tested_to=tested_to,
                            max_open_trades=self.config.max_open_trades,
                            market_change_coins=(market_change['all'] - 1) * 100,
+                           market_drawdown_coins=(market_drawdown['all'] - 1) * 100,
                            market_change_btc=(self.config.btc_marketchange_ratio - 1) * 100,
+                           market_drawdown_btc=(self.config.btc_drawdown_ratio - 1) * 100,
                            starting_capital=self.config.starting_capital,
                            end_capital=budget,
                            overall_profit_percentage=overall_profit_percentage,
@@ -183,7 +204,7 @@ class StatsModule:
                            fee=self.config.fee,
                            total_fee_amount=self.trading_module.total_fee_paid)
 
-    def generate_coin_results(self, closed_trades: [Trade], market_change: dict) -> [list, dict]:
+    def generate_coin_results(self, closed_trades: [Trade], market_change: dict, market_drawdown: dict) -> [list, dict]:
         stats = self.calculate_statistics_per_coin(closed_trades)
         new_stats = []
 
@@ -194,6 +215,7 @@ class StatsModule:
             coin_insight = CoinInsights(pair=coin,
                                         n_trades=stats[coin]['amount_of_trades'],
                                         market_change=(market_change[coin] - 1) * 100,
+                                        market_drawdown=(market_drawdown[coin] - 1) * 100,
                                         cum_profit_percentage=stats[coin]['cum_profit_prct'],
                                         total_profit_percentage=(stats[coin]['total_profit_ratio'] - 1) * 100,
                                         avg_profit_percentage=avg_profit_prct,
