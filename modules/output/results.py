@@ -68,6 +68,9 @@ class MainResults:
     avg_trade_duration: timedelta
     longest_trade_duration: timedelta
     shortest_trade_duration: timedelta
+    win_weeks: int
+    draw_weeks: int
+    lose_weeks: int
     max_seen_drawdown: float
     drawdown_from: int
     drawdown_to: int
@@ -144,6 +147,8 @@ class MainResults:
         trade_info_table.add_row('Shortest trade duration', str(shortest_trade_duration))
         trade_info_table.add_row('Avg. trade duration', str(avg_trade_duration))
         trade_info_table.add_row('Longest trade duration', str(longest_trade_duration))
+        trade_info_table.add_row('Winning weeks (W/D/L)', f'{self.win_weeks} / {self.draw_weeks}'
+                                                          f' / {self.lose_weeks}')
         return trade_info_table
 
     def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown_from_string, drawdown_to_string,
