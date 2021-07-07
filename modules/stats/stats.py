@@ -1,8 +1,7 @@
 from datetime import datetime, timedelta
-
-from pandas import DataFrame
 from tqdm import tqdm
 import numpy as np
+from collections import defaultdict
 
 from modules.output.results import CoinInsights, MainResults, LeftOpenTradeResult
 from modules.pairs_data import PairsData
@@ -11,114 +10,17 @@ from modules.stats.drawdown.per_coin import get_cum_profit_ratio_per_coin
 from modules.stats.drawdown.for_portfolio import get_max_seen_drawdown_for_portfolio, \
     get_max_realised_drawdown_for_portfolio
 from modules.stats.drawdown.per_trade import get_max_seen_drawdown_per_trade
+from modules.stats.metrics.market_change import get_market_change, get_market_drawdown
+from modules.stats.metrics.trades import calculate_best_worst_trade, get_number_of_losing_trades, \
+    get_number_of_consecutive_losing_trades, calculate_trade_durations
+from modules.stats.metrics.winning_weeks import get_winning_weeks_per_coin
 from modules.stats.stats_config import StatsConfig
 from modules.stats.trade import Trade, SellReason
 from modules.stats.trading_stats import TradingStats
 from modules.stats.tradingmodule import TradingModule
-from collections import defaultdict
 
 from utils.dict import group_by
 from utils.utils import calculate_worth_of_open_trades
-
-
-def calculate_best_worst_trade(closed_trades: [Trade]):
-    best_trade_ratio = -np.inf
-    best_trade_pair = ""
-    worst_trade_ratio = np.inf
-    worst_trade_pair = ""
-
-    if len(closed_trades) > 0:
-        best_trade = max(closed_trades,
-                         key=lambda trade: trade.profit_ratio, default=-np.inf)
-        best_trade_ratio = best_trade.profit_ratio
-        best_trade_pair = best_trade.pair
-
-        worst_trade = min(closed_trades,
-                          key=lambda trade: trade.profit_ratio, default=np.inf)
-        worst_trade_ratio = worst_trade.profit_ratio
-        worst_trade_pair = worst_trade.pair
-
-    return best_trade_ratio, best_trade_pair, worst_trade_ratio, worst_trade_pair
-
-
-def get_number_of_losing_trades(closed_trades: [Trade]) -> int:
-    nr_losing_trades = sum(1 for trade in closed_trades if trade.profit_ratio <= 1)
-    return nr_losing_trades
-
-
-def get_number_of_consecutive_losing_trades(closed_trades: [Trade]):
-    nr_consecutive_trades = 0
-    temp_nr_consecutive_trades = 0
-    for trade in closed_trades:
-        if trade.profit_ratio <= 1:
-            temp_nr_consecutive_trades += 1
-        else:
-            temp_nr_consecutive_trades = 0
-        nr_consecutive_trades = max(temp_nr_consecutive_trades, nr_consecutive_trades)
-    return nr_consecutive_trades
-
-
-def calculate_trade_durations(closed_trades: [Trade]):
-    if len(closed_trades) > 0:
-        shortest_trade_duration = min(trade.closed_at - trade.opened_at for trade in closed_trades)
-        longest_trade_duration = max(trade.closed_at - trade.opened_at for trade in closed_trades)
-        total_trade_duration = sum((trade.closed_at - trade.opened_at for trade in closed_trades), timedelta())
-        avg_trade_duration = total_trade_duration / len(closed_trades)
-    else:
-        avg_trade_duration = longest_trade_duration = shortest_trade_duration = timedelta(0)
-    return avg_trade_duration, longest_trade_duration, shortest_trade_duration
-
-
-def get_market_change(ticks: list, pairs: list, data_dict: dict) -> dict:
-    market_change = {}
-    total_change = 0
-    for pair in pairs:
-        begin_value = data_dict[pair][ticks[0]]['close']
-        end_value = data_dict[pair][ticks[-1]]['close']
-        coin_change = end_value / begin_value
-        market_change[pair] = coin_change
-        total_change += coin_change
-    market_change['all'] = total_change / len(pairs) if len(pairs) > 0 else 1
-    return market_change
-
-
-def get_winning_weeks_per_coin(signal_dict: dict, cum_profit_ratio) -> list:
-    # Create dataframes
-    ohlcv_df = DataFrame(signal_dict.values()).set_index("time")
-    cum_profit_ratio = cum_profit_ratio.iloc[1:]
-
-    # Refactor index of dataframes
-    datetime_index = [datetime.fromtimestamp(ms / 1000.0) for ms in ohlcv_df.index]
-    ohlcv_df.index = datetime_index
-    cum_profit_ratio.index = datetime_index
-
-    # Resample dataframes to one week
-    coin_close_price_weekly = ohlcv_df['close'].resample('W', origin='start').ohlc()
-    cum_profit_ratio_weekly = cum_profit_ratio['profit_ratio'].resample('W', origin='start').prod()
-
-    # Calculate market change
-    market_change_weekly = \
-        coin_close_price_weekly['close'] / coin_close_price_weekly['open']
-
-    # Define the winning weeks
-    wins = len(cum_profit_ratio_weekly[cum_profit_ratio_weekly > market_change_weekly])
-    losses = len(cum_profit_ratio_weekly[cum_profit_ratio_weekly < market_change_weekly])
-    draws = len(cum_profit_ratio_weekly) - wins - losses
-
-    return [wins, draws, losses]
-
-
-def get_market_drawdown(pairs: list, data_dict: dict) -> dict:
-    market_drawdown = {}
-    pairs_profit_ratios_sum = [0] * len(data_dict[pairs[0]])
-    for pair in pairs:
-        values_list = [data_dict[pair][d].get('close') for d in data_dict[pair]]
-        close_prices_df = DataFrame(values_list, columns=['value'])
-        market_drawdown[pair] = get_max_drawdown_ratio(close_prices_df)
-        profit_ratios = [x / values_list[0] for x in values_list]
-        pairs_profit_ratios_sum = map(lambda x, y: x + y, pairs_profit_ratios_sum, profit_ratios)
-    market_drawdown['all'] = get_max_drawdown_ratio(DataFrame(pairs_profit_ratios_sum, columns=['value']))
-    return market_drawdown
 
 
 class StatsModule:
@@ -201,7 +103,8 @@ class StatsModule:
         worst_trade_profit_percentage = (worst_trade_ratio - 1) * 100 \
             if worst_trade_ratio != np.inf else 0
 
-        avg_trade_duration, longest_trade_duration, shortest_trade_duration = calculate_trade_durations(closed_trades)
+        avg_trade_duration, longest_trade_duration, shortest_trade_duration = \
+            calculate_trade_durations(closed_trades)
 
         tested_from = datetime.fromtimestamp(self.config.backtesting_from / 1000)
         tested_to = datetime.fromtimestamp(self.config.backtesting_to / 1000)
