@@ -277,10 +277,10 @@ class StatsModule:
                 "loss_weeks": 0
             } for pair in self.frame_with_signals.keys()
         }
-
         trades_per_coin = group_by(closed_trades, "pair")
 
-        for key, closed_pair_trades in trades_per_coin.items():
+        for key, closed_pair_trades in tqdm(trades_per_coin.items(), desc='[INFO] Calculating statistics',
+                                            total=len(per_coin_stats), ncols=75):
             # Calculate max seen drawdown ratio
             seen_cum_profit_ratio_df = get_cum_profit_ratio_per_coin(
                 self.frame_with_signals[key],
@@ -314,32 +314,31 @@ class StatsModule:
                     seen_cum_profit_ratio_df
             )
 
-        for trade in closed_trades:
-            # Update average profit
-            per_coin_stats[trade.pair]['cum_profit_prct'] += (trade.profit_ratio - 1) * 100
+            for trade in closed_pair_trades:
+                # Update average profit
+                per_coin_stats[key]['cum_profit_prct'] += (trade.profit_ratio - 1) * 100
 
-            # Update total profit percentage and amount
-            per_coin_stats[trade.pair]['total_profit_ratio'] = \
-                per_coin_stats[trade.pair]['total_profit_ratio'] * trade.profit_ratio
+                # Update total profit percentage and amount
+                per_coin_stats[key]['total_profit_ratio'] = \
+                    per_coin_stats[key]['total_profit_ratio'] * trade.profit_ratio
 
-            # Update profit and amount of trades
-            per_coin_stats[trade.pair]['total_profit_amount'] += trade.profit_dollar
-            per_coin_stats[trade.pair]['amount_of_trades'] += 1
-            per_coin_stats[trade.pair]['sell_reasons'][trade.sell_reason] += 1
+                # Update profit and amount of trades
+                per_coin_stats[key]['total_profit_amount'] += trade.profit_dollar
+                per_coin_stats[key]['amount_of_trades'] += 1
+                per_coin_stats[key]['sell_reasons'][trade.sell_reason] += 1
 
-            # Check for max realised drawdown
-            if per_coin_stats[trade.pair]['drawdown_ratio'] < per_coin_stats[trade.pair]['max_realised_ratio']:
-                per_coin_stats[trade.pair]['max_realised_ratio'] = per_coin_stats[trade.pair]['drawdown_ratio']
+                # Check for max realised drawdown
+                if per_coin_stats[key]['drawdown_ratio'] < per_coin_stats[key]['max_realised_ratio']:
+                    per_coin_stats[key]['max_realised_ratio'] = per_coin_stats[key]['drawdown_ratio']
 
-            # Sum total times
-            if per_coin_stats[trade.pair]['total_duration'] is None:
-                per_coin_stats[trade.pair]['total_duration'] = trade.closed_at - trade.opened_at
-            else:
-                per_coin_stats[trade.pair]['total_duration'] += trade.closed_at - trade.opened_at
+                # Sum total times
+                if per_coin_stats[key]['total_duration'] is None:
+                    per_coin_stats[key]['total_duration'] = trade.closed_at - trade.opened_at
+                else:
+                    per_coin_stats[key]['total_duration'] += trade.closed_at - trade.opened_at
         return per_coin_stats
 
     def calculate_statistics_for_plots(self, closed_trades, open_trades):
-
         # Used for plotting
         self.buy_points = {pair: [] for pair in self.frame_with_signals.keys()}
         self.sell_points = {pair: [] for pair in self.frame_with_signals.keys()}
