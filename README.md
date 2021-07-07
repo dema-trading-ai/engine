@@ -14,7 +14,7 @@ part of [DemaTrading](https://dematrading.ai/). The Engine is completely written
 programming language Python. Some experience with Python makes this process easier, 
 however with some effort this project should be runnable for everyone, no matter your experience with coding.
 
-![Backtesting Results](imgs/DemaTrading-text-transparant.png/backtesting-results.png)
+![Backtesting Results](imgs/backtesting-results.png)
 
 ##### [Go to full documentation](https://docs.dematrading.ai)
 
