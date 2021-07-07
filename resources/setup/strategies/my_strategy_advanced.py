@@ -18,8 +18,7 @@ class MyStrategyAdvanced(Strategy):
         :return: list
         """
         return [
-            ("BTC/USDT", "4h"),
-            ("ETH/USDT", "4h")
+            ("BTC/USDT", "4h")
         ]
 
     def generate_indicators(self, dataframe: DataFrame, additional_pairs) -> DataFrame:
