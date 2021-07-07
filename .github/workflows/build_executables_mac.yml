@@ -9,6 +9,7 @@ on:
 jobs:
   build:
     runs-on: macos-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
@@ -26,16 +27,27 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-ci.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ./build
+            ./dist
+          key: ${{ runner.os }}-pyinstaller-
+          restore-keys: |
+            ${{ runner.os }}-pyinstaller
       - name: install requirements
         run: pip install -r requirements.txt
-      - run: python main.py
       - name: build executable
         run: python build_scripts/build.py
+      - name: build archive
+        run: zip -r ./engine.zip .
+        working-directory: dist/engine
       - name: Archive built executable
         uses: actions/upload-artifact@v2
         with:
+          if-no-files-found: error
           name: engine-macos
-          path: dist/engine
+          path: ./dist/engine/engine.zip
   test:
     needs:
       - build
@@ -45,10 +57,8 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: engine-macos
-      - name: talib
-        run: brew install ta-lib
-      - name: list contents
-        run: ls
+      - name: unzip
+        run: unzip ./engine.zip
       - name: set executable bit
         run: chmod +x ./engine
       - name: init
@@ -69,8 +79,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: engine-macos
-      - name: build archive
-        run: zip -j engine ./engine
       - run: ls -la
       - run: |
           aws s3 --endpoint=https://ams3.digitaloceanspaces.com cp ./engine.zip s3://engine-store/engine-macos-${GITHUB_REF##*/}.zip --acl "public-read"

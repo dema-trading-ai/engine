@@ -29,6 +29,7 @@ class StatsFixture:
             backtesting_from=1,
             backtesting_to=10,
             btc_marketchange_ratio=1,
+            btc_drawdown_ratio=1,
             fee=FEE_PERCENTAGE,
 
             stoploss=STOPLOSS,
