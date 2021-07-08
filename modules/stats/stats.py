@@ -102,7 +102,7 @@ class StatsModule:
                 tick_dict = pair_dict[tick]
                 self.trading_module.tick(tick_dict, pair_dict)
 
-        market_change = get_market_change(ticks, pairs, self.frame_with_signals)
+        market_change = get_market_change(self.df, pairs, self.frame_with_signals)
         market_drawdown = get_market_drawdown(pairs, self.frame_with_signals)
         return self.generate_backtesting_result(market_change, market_drawdown)
 
@@ -330,12 +330,15 @@ class StatsModule:
         return left_open_trade_stats
 
 
-def get_market_change(ticks: list, pairs: list, data_dict: dict) -> dict:
+def get_market_change(df, pairs: list, data_dict: dict) -> dict:
     market_change = {}
     total_change = 0
     for pair in pairs:
-        begin_value = data_dict[pair][ticks[0]]['close']
-        end_value = data_dict[pair][ticks[-1]]['close']
+        first_valid_tick = df[pair]['close'].first_valid_index()
+        last_valid_tick = df[pair]['close'].last_valid_index()
+
+        begin_value = data_dict[pair][first_valid_tick]['close']
+        end_value = data_dict[pair][last_valid_tick]['close']
         coin_change = end_value / begin_value
         market_change[pair] = coin_change
         total_change += coin_change
