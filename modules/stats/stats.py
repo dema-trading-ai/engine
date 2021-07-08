@@ -6,7 +6,7 @@ from collections import defaultdict
 from modules.output.results import CoinInsights, MainResults, LeftOpenTradeResult
 from modules.pairs_data import PairsData
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
-from modules.stats.drawdown.per_coin import get_cum_profit_ratio_per_coin
+from modules.stats.drawdown.per_coin import get_seen_cum_profit_ratio_per_coin, get_realised_profit_ratio
 from modules.stats.drawdown.for_portfolio import get_max_seen_drawdown_for_portfolio, \
     get_max_realised_drawdown_for_portfolio
 from modules.stats.drawdown.per_trade import get_max_seen_drawdown_per_trade
@@ -202,7 +202,7 @@ class StatsModule:
         for key, closed_pair_trades in tqdm(trades_per_coin.items(), desc='[INFO] Calculating statistics',
                                             total=len(per_coin_stats), ncols=75):
             # Calculate max seen drawdown ratio
-            seen_cum_profit_ratio_df = get_cum_profit_ratio_per_coin(
+            seen_cum_profit_ratio_df = get_seen_cum_profit_ratio_per_coin(
                 self.frame_with_signals[key],
                 closed_pair_trades,
                 self.config.fee
@@ -210,11 +210,10 @@ class StatsModule:
             per_coin_stats[key]["max_seen_ratio"] = get_max_drawdown_ratio(seen_cum_profit_ratio_df)
 
             # Calculate max realised drawdown ratio
-            realised_cum_profit_ratio_df = get_cum_profit_ratio_per_coin(
+            realised_cum_profit_ratio_df = get_realised_profit_ratio(
                 self.frame_with_signals[key],
                 closed_pair_trades,
                 self.config.fee,
-                realised_drawdown=True
             )
             per_coin_stats[key]["max_realised_ratio"] = \
                 get_max_drawdown_ratio(realised_cum_profit_ratio_df)
