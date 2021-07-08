@@ -28,15 +28,15 @@ def get_winning_weeks_per_coin(signal_dict: dict, cum_profit_ratio):
     return wins, draws, losses, market_change_weekly
 
 
-def get_winning_weeks_for_portfolio(capital_per_timestamp, coin_stats):
-    coins = list(coin_stats.keys())
-    market_change_weekly_first_coin = coin_stats[coins[0]]['market_change_weekly']
+def get_winning_weeks_for_portfolio(capital_per_timestamp, market_change_weekly):
+    coins = list(market_change_weekly.keys())
+    market_change_weekly_first_coin = market_change_weekly[coins[0]]
 
     if market_change_weekly_first_coin is not None:   # is None if no trades are made
         # Combine market change of multiple coins into one dataframe
         combined_market_change_df = DataFrame(market_change_weekly_first_coin, columns=[coins[0]])
         for coin in coins[1:]:
-            combined_market_change_df[coin] = coin_stats[coin]['market_change_weekly']
+            combined_market_change_df[coin] = market_change_weekly[coin]
 
         # Calculate average market change
         combined_market_change_df['avg_market_change'] = combined_market_change_df.mean(axis=1)
