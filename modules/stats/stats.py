@@ -6,7 +6,7 @@ from collections import defaultdict
 from modules.output.results import CoinInsights, MainResults, LeftOpenTradeResult
 from modules.pairs_data import PairsData
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
-from modules.stats.drawdown.per_coin import get_seen_cum_profit_ratio_per_coin, get_realised_profit_ratio
+from modules.stats.metrics.profit_ratio import get_seen_cum_profit_ratio_per_coin, get_realised_profit_ratio
 from modules.stats.drawdown.for_portfolio import get_max_seen_drawdown_for_portfolio, \
     get_max_realised_drawdown_for_portfolio
 from modules.stats.drawdown.per_trade import get_max_seen_drawdown_per_trade
