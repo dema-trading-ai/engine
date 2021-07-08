@@ -99,7 +99,7 @@ class StatsModule:
         )
 
         # Find amount of winning, draw and losing weeks for portfolio
-        win_weeks, draw_weeks, lose_weeks = get_winning_weeks_for_portfolio(
+        win_weeks, draw_weeks, loss_weeks = get_winning_weeks_for_portfolio(
             self.trading_module.capital_per_timestamp,
             coin_stats
         )
@@ -146,7 +146,7 @@ class StatsModule:
                            shortest_trade_duration=shortest_trade_duration,
                            win_weeks=win_weeks,
                            draw_weeks=draw_weeks,
-                           lose_weeks=lose_weeks,
+                           loss_weeks=loss_weeks,
                            max_seen_drawdown=(max_seen_drawdown['drawdown']-1) * 100,
                            drawdown_from=max_seen_drawdown['from'],
                            drawdown_to=max_seen_drawdown['to'],
