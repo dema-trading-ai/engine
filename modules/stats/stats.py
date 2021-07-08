@@ -75,8 +75,10 @@ def get_market_drawdown(pairs: list, data_dict: dict) -> dict:
     for pair in pairs:
         values_list = [data_dict[pair][d].get('close') for d in data_dict[pair]]
         close_prices_df = DataFrame(values_list, columns=['value'])
+        close_prices_df.dropna(inplace=True)
+        close_prices_df.reset_index(inplace=True, drop=True)
         market_drawdown[pair] = get_max_drawdown_ratio(close_prices_df)
-        profit_ratios = [x / values_list[0] for x in values_list]
+        profit_ratios = [x / close_prices_df['value'].iloc[0] for x in close_prices_df['value']]
         pairs_profit_ratios_sum = map(lambda x, y: x + y, pairs_profit_ratios_sum, profit_ratios)
     market_drawdown['all'] = get_max_drawdown_ratio(DataFrame(pairs_profit_ratios_sum, columns=['value']))
     return market_drawdown
