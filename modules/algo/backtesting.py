@@ -25,12 +25,13 @@ class BackTesting:
     sellpoints = {}
     df = {}
 
-    def __init__(self, data: dict, config_module: ConfigModule, strategy: Strategy):
+    def __init__(self, data: dict, config_module: ConfigModule, strategy: Strategy, additional_pairs_data):
         self.config = config_module
         self.starting_capital = config_module.starting_capital
         self.currency_symbol = config_module.currency_symbol
         self.strategy = strategy
         self.data = data
+        self.additional_pairs_data = additional_pairs_data
         self.backtesting_from = config_module.backtesting_from
         self.backtesting_to = config_module.backtesting_to
 
@@ -56,7 +57,11 @@ class BackTesting:
         for pair in tqdm(self.data.keys(), desc="[INFO] Populating Indicators",
                          total=len(self.data.keys()), ncols=75):
             df = self.data[pair]
-            indicators = self.strategy.generate_indicators(df)
+            try:
+                indicators = self.strategy.generate_indicators(df, self.additional_pairs_data)
+            except TypeError:
+                indicators = self.strategy.generate_indicators(df)
+
             indicators = self.strategy.buy_signal(indicators)
             indicators = self.strategy.sell_signal(indicators)
             self.df[pair] = indicators.copy()
