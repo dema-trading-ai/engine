@@ -5,7 +5,7 @@
 [![Test PR/Push](https://github.com/dema-trading-ai/engine/actions/workflows/PR-Push-test.yml/badge.svg?branch=development)](https://github.com/dema-trading-ai/engine/actions/workflows/PR-Push-test.yml)
 
 <p align="center">
-  <img src="https://github.com/dema-trading-ai/engine/raw/feat/update-readme/imgs/DemaTrading-text-transparant.png">
+  <img src="imgs/DemaTrading-text-transparant.png">
 </p>
 
 # Engine
@@ -14,7 +14,7 @@ part of [DemaTrading](https://dematrading.ai/). The Engine is completely written
 programming language Python. Some experience with Python makes this process easier, 
 however with some effort this project should be runnable for everyone, no matter your experience with coding.
 
-![Backtesting Results](https://github.com/dema-trading-ai/engine/raw/feat/update-readme/imgs/backtesting-results.png)
+![Backtesting Results](imgs/backtesting-results.png)
 
 ##### [Go to full documentation](https://docs.dematrading.ai)
 

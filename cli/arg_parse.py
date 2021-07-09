@@ -46,7 +46,7 @@ def spec_type_to_python_type(t: str):
         return str
     elif t == "int":
         return int
-    elif t == "number":
+    elif t == "number" or t == "float":
         return float
     elif t == "dict":
         return dict
