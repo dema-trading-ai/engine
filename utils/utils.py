@@ -5,10 +5,16 @@ from typing import Literal
 from pandas import DataFrame
 import pandas as pd
 import rapidjson
+import re
 
 from modules.stats.trade import Trade
 
 CURRENT_VERSION = "v0.7.1"
+
+msec = 1000
+minute = 60 * msec
+hour = 60 * minute
+day = 24 * hour
 
 
 def get_project_root():
@@ -62,3 +68,17 @@ def get_verbosity():
 
 def is_verbosity(verbosity: Literal["debug", "none"]):
     return get_verbosity() == verbosity
+
+
+def parse_timeframe(timeframe_str: str):
+    match = re.match(r"([0-9]+)([mdh])", timeframe_str, re.I)
+    if not match:
+        raise Exception("[ERROR] Error whilst parsing timeframe")
+    items = re.split(r'([0-9]+)', timeframe_str)
+    if items[2] == 'm':
+        timeframe_time = int(items[1]) * minute
+    elif items[2] == 'h':
+        timeframe_time = int(items[1]) * hour
+    else:
+        raise Exception("[ERROR] Error whilst parsing timeframe")  # TODO
+    return timeframe_time
