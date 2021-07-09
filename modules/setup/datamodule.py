@@ -68,14 +68,14 @@ class DataModule:
         bitcoin_drawdown = get_max_drawdown_ratio(bitcoin_values)
         return bitcoin_drawdown
 
-    async def load_historical_data(self, pairs, check_period=True) -> dict:
+    async def load_historical_data(self, pairs, check_backtesting_period=True) -> dict:
         dataframes = await asyncio.gather(*[self.get_pair_data(pair, self.config.timeframe) if not isinstance(pair, tuple)
                                             else self.get_pair_data(pair[0], pair[1]) for pair in pairs])   # if tuple then additional pair and timeframe comes specified with it
 
         history_data = {key: value for [key, value] in dataframes}
 
         self.warn_if_missing_ticks(history_data)
-        if not is_same_backtesting_period(history_data) and check_period:
+        if check_backtesting_period and not is_same_backtesting_period(history_data):
             raise Exception("[ERROR] Dataframes don't have equal backtesting periods.")
         return history_data
 

@@ -67,21 +67,28 @@ class Strategy(abc.ABC):
         """
         return
 
-    def join_additional_data(self, dataframe, additional, timeframe, timeframe_additional, ffill=True):
+    def join_additional_data(self, dataframe, additional_pair, original_timeframe, timeframe_additional, ffill=True):
         """
-        This function is responsible for joining the additional data to the original dataframe
+        This function is responsible for joining the additional data to the original dataframe. This is only possible
+        if the additional timeframe is larger than the original timeframe. Furthermore some precautions have been taken
+        such that candles are matched together without a looking in the future bias.
+        :param dataframe: original Dataframe
+        :param additional_pair: Dataframe of the additional pair
+        :param original_timeframe: timeframe of original dataframe
+        :param timeframe_additional: timeframe of additional dataframe
+        :param ffill: Wether to forward fill the joined dataframe (recommended)
         """
-        add_df = additional.copy()
+        add_df = additional_pair.copy()
         pair = add_df['pair'].unique()[0]
 
-        timeframe_minutes = parse_timeframe(timeframe)
-        timeframe_minutes_additional = parse_timeframe(timeframe_additional)
+        timeframe_ms = parse_timeframe(original_timeframe)
+        timeframe_ms_additional = parse_timeframe(timeframe_additional)
 
-        if timeframe_minutes == timeframe_minutes_additional:
+        if timeframe_ms == timeframe_ms_additional:
             add_df['date_merge'] = add_df["time"]
-        elif timeframe_minutes < timeframe_minutes_additional:
+        elif timeframe_ms < timeframe_ms_additional:
             add_df['date_merge'] = (
-                    add_df["time"] + pd.to_timedelta(timeframe_minutes_additional, 'ms').seconds * 1000 - pd.to_timedelta(timeframe_minutes, 'ms').seconds * 1000
+                    add_df["time"] + pd.to_timedelta(timeframe_ms_additional, 'ms').seconds * 1000 - pd.to_timedelta(timeframe_ms, 'ms').seconds * 1000
             )
         else:
             raise ValueError("[Additional Data] Cannot join faster timeframe to slower timeframe")
