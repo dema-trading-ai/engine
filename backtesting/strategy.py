@@ -76,7 +76,7 @@ class Strategy(abc.ABC):
         :param additional_pair: Dataframe of the additional pair
         :param original_timeframe: timeframe of original dataframe
         :param timeframe_additional: timeframe of additional dataframe
-        :param ffill: Wether to forward fill the joined dataframe (recommended)
+        :param ffill: Whether to forward fill the joined dataframe (recommended)
         """
         add_df = additional_pair.copy()
         pair = add_df['pair'].unique()[0]
