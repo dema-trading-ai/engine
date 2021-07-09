@@ -2,4 +2,5 @@
 # These code owners will be notified and auto-asked for reviews of pull requests
 # that change things in files that they own.
 
-requirements*.txt @keebrev
+requirements.txt @keebrev
+requirements-ci.txt @keebrev
