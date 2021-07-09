@@ -209,6 +209,26 @@ class MockOHLCVWithSignal(dict, object):
         self.add_entry(open=10, high=10, low=8, close=8, volume=1, buy=0, sell=0)
         self.add_entry(open=8, high=8, low=2, close=2, volume=1, buy=0, sell=0)
 
+    def test_scenario_up_100_one_trade_down_20(self):
+        """
+        Chart flow:
+        1. Trend goes up 100%
+        2. Trend goes down 20%
+        """
+        self.add_entry(open=5, high=5, low=5, close=5, volume=1, buy=1, sell=0)
+        self.add_entry(open=5, high=10, low=5, close=10, volume=1, buy=0, sell=1)
+        self.add_entry(open=10, high=10, low=8, close=8, volume=1, buy=0, sell=0)
+
+    def test_scenario_down_40_one_trade_up_80(self):
+        """
+        Chart flow:
+        1. Trend goes down 40%
+        2. Trend goes up 80%
+        """
+        self.add_entry(open=5, high=5, low=5, close=5, volume=1, buy=1, sell=0)
+        self.add_entry(open=5, high=5, low=3, close=3, volume=1, buy=0, sell=1)
+        self.add_entry(open=3, high=5.4, low=3, close=5.4, volume=1, buy=0, sell=0)
+
     def multiply_price(self, multiplier: float, trade_action: TradeAction = TradeAction.NOTHING):
 
         if trade_action == TradeAction.BUY:
