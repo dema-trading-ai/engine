@@ -2,6 +2,7 @@ from modules.algo import AlgoModule
 from modules.algo.backtesting import BackTesting
 from modules.setup.config import print_pairs, load_strategy_from_config, get_additional_pairs, ConfigModule
 from modules.setup.datamodule import DataModule
+from utils.utils import parse_timeframe
 
 
 class SetupModule(object):
@@ -19,6 +20,10 @@ class SetupModule(object):
 
         additional_pairs = get_additional_pairs(strategy)
         additional_ohlcv_pair_frames = await self.data_module.load_historical_data(additional_pairs, check_backtesting_period=False)
+
+        # Reset original timeframe
+        self.config.timeframe = strategy.timeframe
+        self.config.timeframe_ms = parse_timeframe(strategy.timeframe)
 
         backtesting_module = BackTesting(ohlcv_pair_frames, self.config, strategy, additional_ohlcv_pair_frames)
 
