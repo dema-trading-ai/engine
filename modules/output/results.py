@@ -68,6 +68,9 @@ class MainResults:
     avg_trade_duration: timedelta
     longest_trade_duration: timedelta
     shortest_trade_duration: timedelta
+    win_weeks: int
+    draw_weeks: int
+    loss_weeks: int
     max_seen_drawdown: float
     drawdown_from: int
     drawdown_to: int
@@ -144,6 +147,8 @@ class MainResults:
         trade_info_table.add_row('Shortest trade duration', str(shortest_trade_duration))
         trade_info_table.add_row('Avg. trade duration', str(avg_trade_duration))
         trade_info_table.add_row('Longest trade duration', str(longest_trade_duration))
+        trade_info_table.add_row('Winning weeks (W/D/L)', f'{self.win_weeks} / {self.draw_weeks}'
+                                                          f' / {self.loss_weeks}')
         return trade_info_table
 
     def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown_from_string, drawdown_to_string,
@@ -218,6 +223,9 @@ class CoinInsights:
     market_drawdown: float
     max_seen_drawdown: float
     max_realised_drawdown: float
+    win_weeks: int
+    draw_weeks: int
+    loss_weeks: int
     avg_trade_duration: timedelta
     longest_trade_duration: timedelta
     shortest_trade_duration: timedelta
@@ -252,6 +260,7 @@ class CoinInsights:
                                        colorize(round(c.market_drawdown, 2), 0),
                                        colorize(round(c.max_seen_drawdown, 2), 0),
                                        colorize(round(c.max_realised_drawdown, 2), 0),
+                                       f"{c.win_weeks} / {c.draw_weeks} / {c.loss_weeks}",
                                        )
 
             coin_signal_table.add_row(c.pair,
@@ -292,6 +301,8 @@ class CoinInsights:
         coin_metrics_table.add_column("Market drawdown (%)", justify=justification)
         coin_metrics_table.add_column("Max. seen drawdown (%)", justify=justification)
         coin_metrics_table.add_column("Max. realised drawdown (%)",
+                                      justify=justification)
+        coin_metrics_table.add_column("Winning weeks (W/D/L)",
                                       justify=justification)
         return coin_metrics_table
 
