@@ -18,7 +18,7 @@ class SetupModule(object):
         strategy.timeframe = self.config.timeframe
 
         additional_pairs = get_additional_pairs(strategy)
-        additional_ohlcv_pair_frames = await self.data_module.load_historical_data(additional_pairs, check_period=False)
+        additional_ohlcv_pair_frames = await self.data_module.load_historical_data(additional_pairs, check_backtesting_period=False)
 
         backtesting_module = BackTesting(ohlcv_pair_frames, self.config, strategy, additional_ohlcv_pair_frames)
 

@@ -32,7 +32,8 @@ class MyStrategyAdvanced(Strategy):
         add_btc_data = additional_pairs['BTC/USDT']
         # Add your indicators like usual
         add_btc_data['rsi'] = ta.RSI(add_btc_data, timeperiod=14)
-        # Finally merge the additional btc data with the standard dataframe
+        # Finally merge the additional btc data with the standard dataframe.
+        # The new column will have the following format: ['<column>_<pair>_<timeframe>']
         dataframe = self.join_additional_data(dataframe, add_btc_data, self.timeframe, "4h")
 
         # RSI - Relative Strength Index
@@ -97,7 +98,8 @@ class MyStrategyAdvanced(Strategy):
                     (dataframe['mfi'] < 16.0) &
                     (dataframe['fastd'] > dataframe['fastk']) &
                     (dataframe['fastd'] > 0)
-                )
+                ) &
+                (dataframe['rsi_BTC/USDT_4h'] < 30)     # additional pair usage
             ),
             'buy'] = 1
 
