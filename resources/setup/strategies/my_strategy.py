@@ -9,10 +9,12 @@ class MyStrategy(Strategy):
     This is an example custom strategy, that inherits from the main Strategy class
     """
 
-    def generate_indicators(self, dataframe: DataFrame) -> DataFrame:
+    def generate_indicators(self, dataframe: DataFrame, additional_pairs=None) -> DataFrame:
         """
         :param dataframe: All passed candles (current candle included!) with OHLCV data
         :type dataframe: DataFrame
+        :param additional_pairs: Possible additional pairs with specified timeframe
+        :type additional_pairs: dict
         :return: Dataframe filled with indicator-data
         :rtype: DataFrame
         """

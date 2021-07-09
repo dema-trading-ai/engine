@@ -14,7 +14,7 @@ from cli.print_utils import print_info, print_error, print_warning
 # Files
 from modules.setup.config import ConfigModule
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
-from utils.utils import get_ohlcv_indicators
+from utils.utils import get_ohlcv_indicators, parse_timeframe
 
 # ======================================================================
 # DataModule is responsible for downloading OHLCV data, preparing it
@@ -62,23 +62,27 @@ class DataModule:
         if 'BTC/USDT' in df.keys():
             bitcoin_df = df.get('BTC/USDT')
         else:
-            pair, bitcoin_df = await self.get_pair_data('BTC/USDT')
+            pair, bitcoin_df = await self.get_pair_data('BTC/USDT', self.config.timeframe)
         bitcoin_values = bitcoin_df[['close']].rename(columns={'close': 'value'})
 
         bitcoin_drawdown = get_max_drawdown_ratio(bitcoin_values)
         return bitcoin_drawdown
 
-    async def load_historical_data(self) -> dict:
-        dataframes = await asyncio.gather(*[self.get_pair_data(pair) for pair in self.config.pairs])
+    async def load_historical_data(self, pairs, check_backtesting_period=True) -> dict:
+        dataframes = await asyncio.gather(*[self.get_pair_data(pair, self.config.timeframe) if not isinstance(pair, tuple)
+                                            else self.get_pair_data(pair[0], pair[1]) for pair in pairs])   # if tuple then additional pair and timeframe comes specified with it
 
         history_data = {key: value for [key, value] in dataframes}
 
         self.warn_if_missing_ticks(history_data)
-        if not is_same_backtesting_period(history_data):
+        if check_backtesting_period and not is_same_backtesting_period(history_data):
             raise Exception("[ERROR] Dataframes don't have equal backtesting periods.")
         return history_data
 
-    async def get_pair_data(self, pair):
+    async def get_pair_data(self, pair, timeframe):
+        self.config.timeframe = timeframe
+        self.config.timeframe_ms = parse_timeframe(timeframe)
+
         if self.is_datafolder_exist(pair):
             print_info("Reading datafile for %s." % pair)
             try:
