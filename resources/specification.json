@@ -19,7 +19,7 @@
   {
     "name": "starting-capital",
     "min": 1.0,
-    "type": "number",
+    "type": "float",
     "cli": {
       "short": "cap"
     }
@@ -45,11 +45,19 @@
   },
   {
     "name": "stoploss",
-    "type": "number",
+    "type": "float",
     "default": -0.5,
     "max": 0,
     "cli": {
       "short": "sl"
+    }
+  },
+    {
+    "name": "plots",
+    "type": "bool",
+    "default": true,
+    "cli": {
+      "short": "plots"
     }
   },
   {
@@ -91,7 +99,7 @@
   {
     "name": "fee",
     "description": "fee as percentage, FI: \"0.25%\" ",
-    "type": "number",
+    "type": "float",
     "default": 0.25,
     "min": 0,
     "max": 100

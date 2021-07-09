@@ -41,20 +41,31 @@ def execute_for_args(actions: CliActions):
     args.func(args)
 
 
-def spec_type_to_python_type(t: str) -> type:
+def spec_type_to_python_type(t: str):
     if t == "string":
         return str
     elif t == "int":
         return int
-    elif t == "number":
+    elif t == "number" or t == "float":
         return float
     elif t == "dict":
         return dict
     elif t == "list":
         return list
     elif t == "bool":
-        return bool
+        return str2bool
     elif t == "datetime":
         return datetime
     else:
         raise Exception
+
+
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('true', '1'):
+        return True
+    elif v.lower() in ('false', '0'):
+        return False
+    else:
+        return None

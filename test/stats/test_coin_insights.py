@@ -361,3 +361,24 @@ def test_trade_length_four_trades():
     assert stats.coin_results[0].avg_trade_duration == timedelta(microseconds=1500)
     assert stats.coin_results[0].longest_trade_duration == timedelta(microseconds=3000)
     assert stats.coin_results[0].shortest_trade_duration == timedelta(microseconds=1000)
+
+
+def test_winning_weeks():
+    """week is defined as winning when trade profit > market change"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade_down_20()
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_40_one_trade_up_80()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.coin_results[0].win_weeks == 1
+    assert stats.coin_results[0].loss_weeks == stats.coin_results[0].draw_weeks == 0
+    assert stats.coin_results[1].loss_weeks == 1
+    assert stats.coin_results[1].win_weeks == stats.coin_results[0].draw_weeks == 0
+    assert stats.main_results.loss_weeks == 1
+    assert stats.main_results.win_weeks == stats.main_results.draw_weeks == 0

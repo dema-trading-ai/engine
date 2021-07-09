@@ -49,7 +49,9 @@ class MainResults:
     tested_to: datetime
     max_open_trades: int
     market_change_coins: float
+    market_drawdown_coins: float
     market_change_btc: float
+    market_drawdown_btc: float
     starting_capital: float
     end_capital: float
     overall_profit_percentage: float
@@ -66,6 +68,9 @@ class MainResults:
     avg_trade_duration: timedelta
     longest_trade_duration: timedelta
     shortest_trade_duration: timedelta
+    win_weeks: int
+    draw_weeks: int
+    loss_weeks: int
     max_seen_drawdown: float
     drawdown_from: int
     drawdown_to: int
@@ -142,6 +147,8 @@ class MainResults:
         trade_info_table.add_row('Shortest trade duration', str(shortest_trade_duration))
         trade_info_table.add_row('Avg. trade duration', str(avg_trade_duration))
         trade_info_table.add_row('Longest trade duration', str(longest_trade_duration))
+        trade_info_table.add_row('Winning weeks (W/D/L)', f'{self.win_weeks} / {self.draw_weeks}'
+                                                          f' / {self.loss_weeks}')
         return trade_info_table
 
     def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown_from_string, drawdown_to_string,
@@ -173,6 +180,12 @@ class MainResults:
                                                  2), 0, '%'))
         performance_table.add_row('Market change BTC',
                                   colorize(round(self.market_change_btc,
+                                                 2), 0, '%'))
+        performance_table.add_row('Market drawdown coins',
+                                  colorize(round(self.market_drawdown_coins,
+                                                 2), 0, '%'))
+        performance_table.add_row('Market drawdown BTC',
+                                  colorize(round(self.market_drawdown_btc,
                                                  2), 0, '%'))
         performance_table.add_row('Total fee paid',
                                   f"{round(self.total_fee_amount)} {currency_symbol}")
@@ -207,8 +220,12 @@ class CoinInsights:
     profit: float
     n_trades: int
     market_change: float
+    market_drawdown: float
     max_seen_drawdown: float
     max_realised_drawdown: float
+    win_weeks: int
+    draw_weeks: int
+    loss_weeks: int
     avg_trade_duration: timedelta
     longest_trade_duration: timedelta
     shortest_trade_duration: timedelta
@@ -240,8 +257,10 @@ class CoinInsights:
 
             coin_metrics_table.add_row(c.pair,
                                        colorize(round(c.market_change, 2), 0),
+                                       colorize(round(c.market_drawdown, 2), 0),
                                        colorize(round(c.max_seen_drawdown, 2), 0),
                                        colorize(round(c.max_realised_drawdown, 2), 0),
+                                       f"{c.win_weeks} / {c.draw_weeks} / {c.loss_weeks}",
                                        )
 
             coin_signal_table.add_row(c.pair,
@@ -279,8 +298,11 @@ class CoinInsights:
         coin_metrics_table = Table(title="Coin Metrics", box=box.ROUNDED, width=100)
         coin_metrics_table.add_column("Pair", justify=justification)
         coin_metrics_table.add_column("Market change (%)", justify=justification)
+        coin_metrics_table.add_column("Market drawdown (%)", justify=justification)
         coin_metrics_table.add_column("Max. seen drawdown (%)", justify=justification)
         coin_metrics_table.add_column("Max. realised drawdown (%)",
+                                      justify=justification)
+        coin_metrics_table.add_column("Winning weeks (W/D/L)",
                                       justify=justification)
         return coin_metrics_table
 
