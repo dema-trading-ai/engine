@@ -16,6 +16,7 @@ ATTENTION:
 DO NOT USE THIS FILE TO IMPLEMENT YOUR STRATEGY. INSTEAD, USE my_strategy.py IN THE "strategies" FOLDER!
 """
 
+
 class Strategy(abc.ABC):
     """
     This module defines the abstract base class (abc) that every strategy must inherit from.
@@ -24,10 +25,12 @@ class Strategy(abc.ABC):
     timeframe: str
 
     @abc.abstractmethod
-    def generate_indicators(self, dataframe: DataFrame) -> DataFrame:
+    def generate_indicators(self, dataframe: DataFrame, additional_pairs=None) -> DataFrame:
         """
         :param dataframe: All passed candles (current candle included!) with OHLCV data
         :type dataframe: DataFrame
+        :param additional_pairs: Possible additional pairs with specified timeframe
+        :type additional_pairs: dict
         :return: Dataframe filled with indicator-data
         :rtype: DataFrame
         """
