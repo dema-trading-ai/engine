@@ -277,6 +277,7 @@ class DataModule:
         print_warning(f"Pair '{pair}' did not exist at start-time")
         nandf = pd.DataFrame(np.nan, index=daterange, columns=df.keys())
         nandf["time"] = daterange
+        nandf["pair"] = pair
         newdf = nandf.append(df)
         return newdf
 
