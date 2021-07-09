@@ -10,7 +10,7 @@ from datetime import datetime
 import numpy as np
 
 # Files
-from utils.utils import get_plot_indicators
+from utils.utils import get_plot_indicators, parse_timeframe
 from .strategy_definition import StrategyDefinition
 from .cctx_adapter import create_cctx_exchange
 from .currencies import get_currency_symbol
@@ -28,6 +28,21 @@ class ConfigModule(object):
     raw_config: dict
     timeframe: str
     timeframe_ms: int
+
+    def __init__(self):
+        self.subplot_indicators = None
+        self.mainplot_indicators = None
+        self.currency_symbol = None
+        self.starting_capital = None
+        self.plots = None
+        self.backtesting_from = None
+        self.backtesting_to = None
+        self.max_open_trades = None
+        self.stoploss_type = None
+        self.stoploss = None
+        self.fee = None
+        self.strategy_definition = None
+        self.exchange = None
 
     @staticmethod
     async def create(args):
@@ -54,7 +69,6 @@ class ConfigModule(object):
                                                                                       backtesting_till_now)
 
         config_module.pairs = config["pairs"]
-        config_module.btc_marketchange_ratio = await config_module.load_btc_marketchange()
         config_module.fee = config["fee"]
         config_module.stoploss = config["stoploss"]
         config_module.stoploss_type = config["stoploss-type"]
@@ -63,18 +77,6 @@ class ConfigModule(object):
         config_module.roi = config["roi"]
         config_module.currency_symbol = get_currency_symbol(config_module.raw_config)
         return config_module
-
-    async def load_btc_marketchange(self):
-        print_info("Fetching marketchange of BTC/USDT...")
-        begin_data = await self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe=self.timeframe,
-                                                     since=self.backtesting_from, limit=1)
-        end_timestamp = int(np.floor(self.backtesting_to / self.timeframe_ms) * self.timeframe_ms) - self.timeframe_ms
-        end_data = await self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe=self.timeframe, since=end_timestamp,
-                                                   limit=1)
-
-        begin_close_value = begin_data[0][4]
-        end_close_value = end_data[0][4]
-        return end_close_value / begin_close_value
 
     async def close(self):
         await self.exchange.close()
@@ -99,22 +101,6 @@ def read_config(config_path: str) -> dict:
 def print_pairs(config_json):
     pairs_string = ''.join([f'{pair} ' for pair in config_json['pairs']])
     print_info("Watching pairs: %s." % pairs_string[:-1])
-
-
-def parse_timeframe(timeframe_str: str):
-    print_info('Configuring timeframe...')
-
-    match = re.match(r"([0-9]+)([mdh])", timeframe_str, re.I)
-    if not match:
-        raise Exception("[ERROR] Error whilst parsing timeframe")
-    items = re.split(r'([0-9]+)', timeframe_str)
-    if items[2] == 'm':
-        timeframe_time = int(items[1]) * minute
-    elif items[2] == 'h':
-        timeframe_time = int(items[1]) * hour
-    else:
-        raise Exception("[ERROR] Error whilst parsing timeframe")  # TODO
-    return timeframe_time
 
 
 def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtesting_till_now: bool) -> tuple:
@@ -146,6 +132,21 @@ def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtes
     print_info(f'Gathering data from {str(backtesting_from_parsed)} '
                   f'until {str(backtesting_to_parsed)}.')
     return backtesting_from_ms, backtesting_to_ms
+
+
+def get_additional_pairs(strategy) -> list:
+    """
+    Gets the additional pairs from a strategy, if any.
+    Coin and timeframe validation are done at the download step, just like normal coins
+    :param strategy: The strategy
+    :return: List of additional pairs
+    """
+    additional_pairs = []
+    additional_pairs_method = getattr(strategy, "additional_pairs", None)
+    if callable(additional_pairs_method):
+        additional_pairs = additional_pairs_method()
+
+    return additional_pairs
 
 
 @asynccontextmanager
