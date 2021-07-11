@@ -127,10 +127,8 @@ class DataModule:
         df['pair'] = pair
         df['buy'], df['sell'] = 0, 0  # default values
 
-        # Create prior NaN data for premature coins
-        if start:
-            if self.config.backtesting_from != df.iat[0,0]:
-                df = self.fill_prior_missing_ticks(df, pair)
+        # Create missing NaN data
+        df = self.fill_missing_ticks(df, pair, data_from, data_to)
 
         if save:
             print_info("[%s] %s candles downloaded." % (pair, len(index)))
@@ -252,21 +250,14 @@ class DataModule:
         os.remove(filepath)
 
     def warn_if_missing_ticks(self, history_data: dict) -> None:
-        date_range = np.arange(self.config.backtesting_from,
-                               self.config.backtesting_to,
-                               self.config.timeframe_ms)
 
         for pair, data in history_data.items():
-            # Check if dates are missing dates
-            index_column = data.index.to_numpy().astype(np.int64)
-            diff = np.setdiff1d(date_range, index_column)
-            n_missing = len(diff)
+            n_missing = data['close'].isnull().sum()
 
             if n_missing > 0:
                 print_warning(f"Pair '{pair}' is missing {n_missing} ticks (rows)")
 
-
-    def fill_prior_missing_ticks(self, df, pair):
+    def fill_missing_ticks(self, df, pair, data_from, data_to):
         """
         Replace missing ticks by NaN
         :param df: Downloaded data
@@ -274,16 +265,17 @@ class DataModule:
         :return: Complete df of the whole daterange
         :rtype: DataFrame
         """
-        daterange = np.arange(self.config.backtesting_from,
-                              df.iat[0,0],
+        daterange = np.arange(data_from,
+                              data_to,
                               self.config.timeframe_ms)
 
-        print_warning(f"Pair '{pair}' did not exist at start-time")
+        # print_warning(f"Pair '{pair}' did not exist at start-time")
         nandf = pd.DataFrame(np.nan, index=daterange, columns=df.keys())
         nandf["time"] = daterange
         nandf["pair"] = pair
-        newdf = nandf.append(df)
-        return newdf
+
+        nandf.update(df)
+        return nandf
 
 
 def is_same_backtesting_period(history_data) -> bool:
