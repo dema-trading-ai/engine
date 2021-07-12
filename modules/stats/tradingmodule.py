@@ -105,7 +105,7 @@ class TradingModule:
             return
 
         # Define spend amount based on realised profit
-        spend_amount = (1. / self.max_open_trades) * self.realised_profit
+        spend_amount = (1. / min(self.max_open_trades, self.amount_of_pairs)) * self.realised_profit
         if spend_amount > self.budget:
             spend_amount = self.budget
 
