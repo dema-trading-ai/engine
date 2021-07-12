@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Optional
 
 # Files
-from cli.print_utils import print_info
+from cli.print_utils import print_info, print_warning
 from modules.stats.trade import SellReason, Trade
 from modules.stats.tradingmodule_config import TradingModuleConfig
 
@@ -24,6 +24,9 @@ class TradingModule:
 
         self.max_open_trades = int(self.config.max_open_trades)
         self.amount_of_pairs = len(self.config.pairs)
+        if self.amount_of_pairs < self.max_open_trades:
+            print_warning("Not all trading funds are used; amount of whitelisted pairs is smaller than max open trades.")
+
         self.fee = config.fee / 100
         self.sl_type = config.stoploss_type
         self.sl_perc = float(config.stoploss)
@@ -102,7 +105,7 @@ class TradingModule:
             return
 
         # Define spend amount based on realised profit
-        spend_amount = (1. / self.amount_of_pairs) * self.realised_profit
+        spend_amount = (1. / self.max_open_trades) * self.realised_profit
         if spend_amount > self.budget:
             spend_amount = self.budget
 
