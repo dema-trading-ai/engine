@@ -25,7 +25,7 @@ class TradingModule:
         self.max_open_trades = int(self.config.max_open_trades)
         self.amount_of_pairs = len(self.config.pairs)
         if self.amount_of_pairs < self.max_open_trades:
-            print_warning("Not all trading funds are used; amount of whitelisted pairs is smaller than max open trades.")
+            print_warning("max_open_trades exceeds amount of pairs in whitelist. max_open_trades will be limited to the amount of pairs in whitelist.")
 
         self.fee = config.fee / 100
         self.sl_type = config.stoploss_type
