@@ -25,6 +25,7 @@ jobs:
           WITH_V: true  # Adds a `v` in front of the tag
           RELEASE_BRANCHES: release/stable
   publish_package:
+    environment: "executable_release"
     runs-on: ubuntu-latest
     needs: generate-new-tag
     steps:
