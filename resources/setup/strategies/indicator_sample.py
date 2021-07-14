@@ -2,6 +2,7 @@
 import talib.abstract as ta
 from pandas import DataFrame
 from backtesting.strategy import Strategy
+from modules.setup.config import qtpylib_methods as qtpylib
 
 
 class IndicatorSample(Strategy):
@@ -67,6 +68,50 @@ class IndicatorSample(Strategy):
         # RSI
         # dataframe['rsi'] = ta.RSI(dataframe)
 
+        # Absolute Strength Histogram
+        # def absolute_strength_histogram(dataframe, length=9, smooth=3, mode="RSI"):
+        #     """
+        #     Absolute Strenght Index. Returns smoothed bulls, smoothed bears, and difference
+        #     :param dataframe: Dataframe with values
+        #     :param length: Period of Evaluation
+        #     :param smooth: Period of Smoothing
+        #     :param mode: Indicator method. Choose from: ["RSI", "STOCHASTIC", "ADX"]
+        #     :return:
+        #     """
+        #     df = dataframe.copy()
+        #
+        #     if mode == "RSI":
+        #         df['bulls'] = 0.5 * (abs(df['close'] - df['close'].shift(1)) + (df['close'] - df['close'].shift(1)))
+        #         df['bears'] = 0.5 * (abs(df['close'] - df['close'].shift(1)) - (df['close'] - df['close'].shift(1)))
+        #
+        #     elif mode == "STOCHASTIC":
+        #         df['lowest_bars'] = df['close'].rolling(length).min()
+        #         df['highest_bars'] = df['close'].rolling(length).max()
+        #
+        #         df['bulls'] = df['close'] - df['lowest_bars']
+        #         df['bears'] = df['highest_bars'] - df['close']
+        #
+        #     elif mode == "ADX":
+        #         df['bulls'] = 0.5 * (abs(df['high'] - df['high'].shift(1)) + (df['high'] - df['high'].shift(1)))
+        #         df['bears'] = 0.5 * (abs(df['low'].shift(1) - df['low']) + (df['low'].shift(1) - df['low']))
+        #     else:
+        #         raise ValueError("Mode not implemented yet, use RSI, STOCHASTIC or ADX")
+        #
+        #     df['avg_bulls'] = ta.EMA(df['bulls'], timeperiod=length)
+        #     df['avg_bears'] = ta.EMA(df['bears'], timeperiod=length)
+        #
+        #     df['smoothed_bulls'] = ta.EMA(df['avg_bulls'], timeperiod=smooth)
+        #     df['smoothed_bears'] = ta.EMA(df['avg_bears'], timeperiod=smooth)
+        #
+        #     df['difference'] = abs(df['smoothed_bulls'] - df['smoothed_bears'])
+        #
+        #     return df['smoothed_bulls'], df['smoothed_bears'], df['difference']
+        #
+        # ash = absolute_strength_histogram(dataframe, length=9, smooth=3, mode="RSI")
+        # dataframe['smth_bulls'] = ash[0]
+        # dataframe['smth_bears'] = ash[1]
+        # dataframe['difference'] = ash[2]
+
         # # Inverse Fisher transform on RSI: values [-1.0, 1.0] (https://goo.gl/2JGGoy)
         # rsi = 0.1 * (dataframe['rsi'] - 50)
         # dataframe['fisher_rsi'] = (np.exp(2 * rsi) - 1) / (np.exp(2 * rsi) + 1)
@@ -90,6 +135,28 @@ class IndicatorSample(Strategy):
         # dataframe['fastd_rsi'] = stoch_rsi['fastd']
         # dataframe['fastk_rsi'] = stoch_rsi['fastk']
 
+        # # Stochastic RSI (Different implementation that corresponds with TradingView
+        # def stoch_rsi(dataframe, period=14, smoothD=3, smoothK=3, rsi_period=14):
+        #     """
+        #     Returns the Stochastic RSI that replicates the TradingView's STOCHRSI
+        #     :param dataframe: The dataframe
+        #     :param period: rolling length
+        #     :param smoothD: Smoothing value
+        #     :param smoothK: Smoothing value
+        #     :param rsi_period: Length of the RSI used.
+        #     :return:
+        #     """
+        #     df = dataframe.copy()
+        #     df['rsi'] = ta.RSI(df, timeperiod=rsi_period)
+        #     stochrsi = (df['rsi'] - df['rsi'].rolling(period).min()) / (df['rsi'].rolling(period).max() - df['rsi'].rolling(period).min())
+        #     df['srsi_k'] = stochrsi.rolling(smoothK).mean() * 100
+        #     df['srsi_d'] = df['srsi_k'].rolling(smoothD).mean()
+        #     return df['srsi_k'], df['srsi_d']
+        #
+        # stoch_rsi = stoch_rsi(dataframe, period=14, smoothD=3, smoothK=3, rsi_period=14)
+        # dataframe['srsi_k'] = stoch_rsi[0]
+        # dataframe['srsi_d'] = stoch_rsi[1]
+
         # MACD
         # macd = ta.MACD(dataframe)
         # dataframe['macd'] = macd['macd']
@@ -103,6 +170,21 @@ class IndicatorSample(Strategy):
         # dataframe['roc'] = ta.ROC(dataframe)
 
         # Overlap Studies
+
+        # Rolling VWAP
+        # dataframe['rvwap'] = qtpylib.rolling_vwap(dataframe, window=200)
+
+        # def VWMA(source, volume, length):
+        #     """
+        #     The vwma function returns volume-weighted moving average of 'source' for 'length' bars back.
+        #     :param source: Prices to process
+        #     :param volume: Volume
+        #     :param length: Number of candles
+        #     :return: VWMA
+        #     """
+        #     return ta.SMA(source * volume, length) / ta.SMA(volume, length)
+        #
+        # dataframe['vwma20'] = VWMA(dataframe['close'], dataframe['volume'], 20)
 
         # Bollinger Bands
         # bollinger = qtpylib.bollinger_bands(qtpylib.typical_price(dataframe), window=20, stds=2)
@@ -210,6 +292,43 @@ class IndicatorSample(Strategy):
 
         # # Three Inside Up/Down: values [0, -100, 100]
         # dataframe['CDL3INSIDE'] = ta.CDL3INSIDE(dataframe) # values [0, -100, 100]
+
+        # Ichimoku Cloud
+        # def ichimoku_cloud(dataframe, conversion_length=9, base_line_length=26, lead_length=52, displacement=26):
+        #     """
+        #     Ichimoku Cloud, replicates TradingView version.
+        #     :param dataframe: Dataframe
+        #     :param conversion_length: Conversion Line Length
+        #     :param base_line_length: Base Line Length
+        #     :param lead_length: Lead Line Length
+        #     :param displacement: The displacement
+        #     :return: Conversion Line, Base Line, Lead Line 1, Lead Line 2
+        #     """
+        #     df = dataframe.copy()
+        #     conversion_period_high = df['high'].rolling(conversion_length).max()
+        #     conversion_period_low = df['low'].rolling(conversion_length).min()
+        #     df['ichi_conversion'] = (conversion_period_high + conversion_period_low) / 2
+        #
+        #     # Kijun-sen (Base Line): (x-period high + x-period low) / 2
+        #     base_period_high = df['high'].rolling(base_line_length).max()
+        #     base_period_low = df['low'].rolling(base_line_length).min()
+        #     df['ichi_base_line'] = (base_period_high + base_period_low) / 2
+        #
+        #     # Senkou Span A (Leading Span A): (Conversion Line + Base Line) / 2
+        #     df['ichi_lead_line1'] = ((df['ichi_conversion'] + df['ichi_base_line']) / 2).shift(displacement - 1)
+        #
+        #     # Senkou Span B (Leading Span B): (x-period high + x-period low) / 2
+        #     lead_period_high = df['high'].rolling(lead_length).max()
+        #     lead_period_low = df['low'].rolling(lead_length).min()
+        #     df['ichi_lead_line2'] = ((lead_period_high + lead_period_low) / 2).shift(displacement - 1)
+        #
+        #     return df['ichi_conversion'], df['ichi_base_line'], df['ichi_lead_line1'], df['ichi_lead_line2']
+        #
+        # ichimoku_cloud = ichimoku_cloud(dataframe, conversion_length=9, base_line_length=26, lead_length=52, displacement=26)
+        # dataframe['ichi_conversion'] = ichimoku_cloud[0]
+        # dataframe['ichi_base_line'] = ichimoku_cloud[1]
+        # dataframe['ichi_lead_line1'] = ichimoku_cloud[2]
+        # dataframe['ichi_lead_line2'] = ichimoku_cloud[3]
 
         return dataframe
 
