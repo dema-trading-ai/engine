@@ -8,6 +8,7 @@ on:
 jobs:
   publish_package:
     runs-on: ubuntu-latest
+    environment: "executable_release"
     steps:
       -
         name: Set up QEMU
