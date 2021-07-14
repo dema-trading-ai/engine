@@ -9,7 +9,7 @@ from modules.pairs_data import PairsData
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
 from modules.stats.metrics.profit_ratio import get_seen_cum_profit_ratio_per_coin, get_realised_profit_ratio
 from modules.stats.drawdown.for_portfolio import get_max_seen_drawdown_for_portfolio, \
-    get_max_realised_drawdown_for_portfolio
+    get_max_realised_drawdown_for_portfolio, get_equity_plot
 from modules.stats.drawdown.per_trade import get_max_seen_drawdown_per_trade
 from modules.stats.metrics.market_change import get_market_change, get_market_drawdown
 from modules.stats.metrics.trades import calculate_best_worst_trade, get_number_of_losing_trades, \
@@ -98,6 +98,8 @@ class StatsModule:
         max_seen_drawdown = get_max_seen_drawdown_for_portfolio(
             self.trading_module.capital_per_timestamp
         )
+
+        get_equity_plot(self.trading_module.capital_per_timestamp)
 
         # Find amount of winning, draw and losing weeks for portfolio
         win_weeks, draw_weeks, loss_weeks = get_winning_weeks_for_portfolio(

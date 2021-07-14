@@ -1,4 +1,6 @@
 import pandas as pd
+import plotly.express as px
+import datetime
 
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
 
@@ -28,3 +30,12 @@ def get_max_realised_drawdown_for_portfolio(realised_profits_per_timestamp: dict
     max_realised_drawdown = get_max_drawdown_ratio(df)
 
     return max_realised_drawdown
+
+
+def get_equity_plot(capital_per_timestamp: dict):
+    capital_per_timestamp.pop(0, None)
+    x = list(capital_per_timestamp.keys())
+    y = list(capital_per_timestamp.values())
+    fig = px.line(x=x, y=y)
+    fig.show()
+    return True
