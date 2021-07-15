@@ -32,4 +32,3 @@ def inject_hyperopt_parameters(strategy):
         property_implementation = params[type(property_value)](property_value, name)
         pro = property(property_implementation)
         setattr(strategy_class, name, pro)
-    pass
