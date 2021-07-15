@@ -3,11 +3,13 @@ from modules.setup.config import ConfigModule
 
 
 class AlgoModule(object):
-    def __init__(self, config_module: ConfigModule, backtesting_module: BackTesting):
-        self.backtesting_module = backtesting_module
+    def __init__(self, config_module: ConfigModule, ohlcv_pair_frames, strategy, additional_ohlcv_pair_frames):
+        self.ohlcv_pair_frames = ohlcv_pair_frames
+        self.strategy = strategy
+        self.additional_ohlcv_pair_frames = additional_ohlcv_pair_frames
         self.config_module = config_module
 
     def run(self):
-        dict_with_signals = self.backtesting_module.start_backtesting()
-        df = self.backtesting_module.df
-        return df, dict_with_signals
+        backtesting_module = BackTesting(self.ohlcv_pair_frames, self.config_module, self.strategy,
+                                         self.additional_ohlcv_pair_frames)
+        return backtesting_module.start_backtesting()
