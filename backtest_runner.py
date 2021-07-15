@@ -20,7 +20,7 @@ class BacktestRunner:
         self.df = df
         self.strategy = strategy
 
-    def execute_backtest(self):
+    def run_backtest(self):
         df, dict_with_signals = self.algo_module.run()
         trading_module = TradingModule(self.trading_module_config)
         stats_module = StatsModule(self.stats_config, dict_with_signals, trading_module, df)
@@ -28,11 +28,11 @@ class BacktestRunner:
 
     def run_hyperopt_iteration(self, trial: Trial) -> float:
         self.strategy.trial = trial
-        stats = self.execute_backtest()
+        stats = self.run_backtest()
         return self.strategy.loss_function(stats)
 
-    def execute_outputted_backtest(self):
-        stats = self.execute_backtest()
+    def run_outputted_backtest(self):
+        stats = self.run_backtest()
         OutputModule(self.stats_config).output(stats)
 
 

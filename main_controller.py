@@ -22,4 +22,4 @@ class MainController:
                 study.optimize(objective, n_trials=100)
                 print_info(f"Best results {study.best_params}")
             else:
-                runner.execute_outputted_backtest()
+                runner.run_outputted_backtest()
