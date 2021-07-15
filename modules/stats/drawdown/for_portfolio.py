@@ -33,6 +33,8 @@ def get_max_realised_drawdown_for_portfolio(realised_profits_per_timestamp: dict
 
 
 def get_equity_plot(capital_per_timestamp: dict):
+    # TODO: Move this function to the plots file.
+    # TODO: Fix format x-axis (timestamps)
     capital_per_timestamp.pop(0, None)
     x = list(capital_per_timestamp.keys())
     y = list(capital_per_timestamp.values())
