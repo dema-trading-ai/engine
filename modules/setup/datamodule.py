@@ -98,7 +98,7 @@ class DataModule:
     async def load_markets(self) -> None:
         await self.exchange.load_markets()
 
-    async def download_data_for_pair(self, pair: str, data_from: int, data_to: int, save: bool = True, start: bool = True) -> DataFrame:
+    async def download_data_for_pair(self, pair: str, data_from: int, data_to: int, save: bool = True) -> DataFrame:
         start_date = data_from
         fetch_ohlcv_limit = 1000
 
