@@ -9,6 +9,7 @@ from rich import box
 
 # Files
 from cli.print_utils import print_standard, console_color
+from modules.public.trading_stats import MainResults
 from utils.utils import CURRENT_VERSION
 
 
@@ -43,167 +44,139 @@ def format_time_difference(avg_trade_duration_unformatted: timedelta) -> str:
     return avg_trade_duration
 
 
-@dataclass
-class MainResults:
-    tested_from: datetime
-    tested_to: datetime
-    max_open_trades: int
-    market_change_coins: float
-    market_drawdown_coins: float
-    market_change_btc: float
-    market_drawdown_btc: float
-    starting_capital: float
-    end_capital: float
-    overall_profit_percentage: float
-    n_trades: int
-    n_average_trades: float
-    n_left_open_trades: int
-    n_trades_with_loss: int
-    n_consecutive_losses: int
-    max_realised_drawdown: float
-    worst_trade_profit_percentage: float
-    worst_trade_pair: str
-    best_trade_profit_percentage: float
-    best_trade_pair: str
-    avg_trade_duration: timedelta
-    longest_trade_duration: timedelta
-    shortest_trade_duration: timedelta
-    max_seen_drawdown: float
-    drawdown_from: int
-    drawdown_to: int
-    drawdown_at: int
-    stoploss: float
-    stoploss_type: str
-    fee: float
-    total_fee_amount: float
+def show_mainresults(self: MainResults, currency_symbol: str):
+    # Update variables for prettier terminal output
+    drawdown_from_string = timestamp_to_string(self.drawdown_from)
+    drawdown_to_string = timestamp_to_string(self.drawdown_to)
+    drawdown_at_string = timestamp_to_string(self.drawdown_at)
 
-    def show(self, currency_symbol: str):
-        # Update variables for prettier terminal output
-        drawdown_from_string = timestamp_to_string(self.drawdown_from)
-        drawdown_to_string = timestamp_to_string(self.drawdown_to)
-        drawdown_at_string = timestamp_to_string(self.drawdown_at)
+    tested_from_string = self.tested_from.strftime('%Y-%m-%d ''%H:%M')
+    tested_to_string = self.tested_to.strftime('%Y-%m-%d ''%H:%M')
 
-        tested_from_string = self.tested_from.strftime('%Y-%m-%d ''%H:%M')
-        tested_to_string = self.tested_to.strftime('%Y-%m-%d ''%H:%M')
+    justification: JustifyMethod = "left"
 
-        justification: JustifyMethod = "left"
+    # Settings table
+    settings_table = create_settings_table(self,
+                                           currency_symbol,
+                                           justification,
+                                           tested_from_string,
+                                           tested_to_string
+                                           )
 
-        # Settings table
-        settings_table = self.create_settings_table(
-            currency_symbol,
-            justification,
-            tested_from_string,
-            tested_to_string
-        )
+    # Performance table
+    performance_table = create_performance_table(self,
+                                                 currency_symbol,
+                                                 drawdown_at_string,
+                                                 drawdown_from_string,
+                                                 drawdown_to_string,
+                                                 justification
+                                                 )
 
-        # Performance table
-        performance_table = self.create_performance_table(
-            currency_symbol,
-            drawdown_at_string,
-            drawdown_from_string,
-            drawdown_to_string,
-            justification
-        )
+    # Trade info table
+    trade_info_table = create_trade_info_table(self, justification)
 
-        # Trade info table
-        trade_info_table = self.create_trade_info_table(justification)
+    # Create grid for all tables
+    table_grid = Table(box=box.SIMPLE)
+    table_grid.add_column(":robot: BACKTESTING RESULTS :robot:")
+    table_grid.add_row(settings_table)
+    table_grid.add_row(performance_table, trade_info_table)
+    console_color.print(table_grid)
 
-        # Create grid for all tables
-        table_grid = Table(box=box.SIMPLE)
-        table_grid.add_column(":robot: BACKTESTING RESULTS :robot:")
-        table_grid.add_row(settings_table)
-        table_grid.add_row(performance_table, trade_info_table)
-        console_color.print(table_grid)
 
-    def create_trade_info_table(self, justification) -> Table:
-        avg_trade_duration = format_time_difference(self.avg_trade_duration)
-        longest_trade_duration = format_time_difference(self.longest_trade_duration)
-        shortest_trade_duration = format_time_difference(self.shortest_trade_duration)
+def create_trade_info_table(self, justification) -> Table:
+    avg_trade_duration = format_time_difference(self.avg_trade_duration)
+    longest_trade_duration = format_time_difference(self.longest_trade_duration)
+    shortest_trade_duration = format_time_difference(self.shortest_trade_duration)
 
-        trade_info_table = Table(box=box.ROUNDED)
-        trade_info_table.add_column("Trade Info "
-                                    ":mag:",
-                                    justify=justification,
-                                    style="magenta")
-        trade_info_table.add_column(justify=justification)
-        trade_info_table.add_row('Amount of trades', str(self.n_trades))
-        trade_info_table.add_row('Avg. trades per day',
-                                 str(round(self.n_average_trades, 2)))
-        trade_info_table.add_row('Left-open trades', str(self.n_left_open_trades))
-        trade_info_table.add_row('Trades with loss', str(self.n_trades_with_loss))
-        trade_info_table.add_row('Most consecutive losses',
-                                 str(self.n_consecutive_losses))
-        trade_info_table.add_row(f'Best trade',
-                                 colorize(round(
-                                     self.best_trade_profit_percentage, 2),
-                                     0, f'% ({self.best_trade_pair})'))
-        trade_info_table.add_row(f'Worst trade',
-                                 colorize(round(
-                                     self.worst_trade_profit_percentage, 2),
-                                     0, f'% ({self.worst_trade_pair})'))
-        trade_info_table.add_row('Shortest trade duration', str(shortest_trade_duration))
-        trade_info_table.add_row('Avg. trade duration', str(avg_trade_duration))
-        trade_info_table.add_row('Longest trade duration', str(longest_trade_duration))
-        return trade_info_table
+    trade_info_table = Table(box=box.ROUNDED)
+    trade_info_table.add_column("Trade Info "
+                                ":mag:",
+                                justify=justification,
+                                style="magenta")
+    trade_info_table.add_column(justify=justification)
+    trade_info_table.add_row('Amount of trades', str(self.n_trades))
+    trade_info_table.add_row('Avg. trades per day',
+                             str(round(self.n_average_trades, 2)))
+    trade_info_table.add_row('Left-open trades', str(self.n_left_open_trades))
+    trade_info_table.add_row('Trades with loss', str(self.n_trades_with_loss))
+    trade_info_table.add_row('Most consecutive losses',
+                             str(self.n_consecutive_losses))
+    trade_info_table.add_row(f'Best trade',
+                             colorize(round(
+                                 self.best_trade_profit_percentage, 2),
+                                 0, f'% ({self.best_trade_pair})'))
+    trade_info_table.add_row(f'Worst trade',
+                             colorize(round(
+                                 self.worst_trade_profit_percentage, 2),
+                                 0, f'% ({self.worst_trade_pair})'))
+    trade_info_table.add_row('Shortest trade duration', str(shortest_trade_duration))
+    trade_info_table.add_row('Avg. trade duration', str(avg_trade_duration))
+    trade_info_table.add_row('Longest trade duration', str(longest_trade_duration))
+    trade_info_table.add_row('Winning weeks (W/D/L)', f'{self.win_weeks} / {self.draw_weeks}'
+                                                      f' / {self.loss_weeks}')
+    return trade_info_table
 
-    def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown_from_string, drawdown_to_string,
-                                 justification) -> Table:
-        performance_table = Table(box=box.ROUNDED)
-        performance_table.add_column("Performance "
-                                     ":chart_with_upwards_trend:", justify=justification,
-                                     style="cyan", width=25)
-        performance_table.add_column(justify=justification, width=20)
-        performance_table.add_row('End capital',
-                                  colorize(round(self.end_capital, 2),
-                                           round(self.starting_capital, 2),
-                                           str(currency_symbol)))
-        performance_table.add_row('Overall profit',
-                                  colorize(round(
-                                      self.overall_profit_percentage, 2), 0, '%'))
-        performance_table.add_row('Max. realised drawdown',
-                                  colorize(round(self.max_realised_drawdown,
-                                                 2), 0, '%'))
-        performance_table.add_row('Max. seen drawdown',
-                                  colorize(round(self.max_seen_drawdown,
-                                                 2), 0, '%'))
-        performance_table.add_row('Max. seen drawdown from',
-                                  drawdown_from_string)
-        performance_table.add_row('Max. seen drawdown to', drawdown_to_string)
-        performance_table.add_row('Max. seen drawdown at', drawdown_at_string)
-        performance_table.add_row('Market change coins',
-                                  colorize(round(self.market_change_coins,
-                                                 2), 0, '%'))
-        performance_table.add_row('Market change BTC',
-                                  colorize(round(self.market_change_btc,
-                                                 2), 0, '%'))
-        performance_table.add_row('Market drawdown coins',
-                                  colorize(round(self.market_drawdown_coins,
-                                                 2), 0, '%'))
-        performance_table.add_row('Market drawdown BTC',
-                                  colorize(round(self.market_drawdown_btc,
-                                                 2), 0, '%'))
-        performance_table.add_row('Total fee paid',
-                                  f"{round(self.total_fee_amount)} {currency_symbol}")
-        return performance_table
 
-    def create_settings_table(self, currency_symbol, justification, tested_from_string, tested_to_string) -> Table:
-        settings_table = Table(box=box.ROUNDED)
-        settings_table.add_column("Settings "
-                                  ":wrench:",
-                                  justify=justification,
-                                  width=25)
-        settings_table.add_column(justify=justification, width=20)
-        settings_table.add_row("Engine version", CURRENT_VERSION)
-        settings_table.add_row("Backtesting from", tested_from_string)
-        settings_table.add_row("Backtesting to", tested_to_string)
-        stoploss_setting = f"{self.stoploss} % ({self.stoploss_type})" if \
-            self.stoploss_type != 'dynamic' else self.stoploss_type
-        settings_table.add_row("Stoploss", stoploss_setting)
-        settings_table.add_row("Start capital",
-                               f"{round(self.starting_capital, 2)} {currency_symbol}")
-        settings_table.add_row("Fee percentage", f"{self.fee} %")
-        settings_table.add_row("Max. open trades", str(self.max_open_trades))
-        return settings_table
+def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown_from_string, drawdown_to_string,
+                             justification) -> Table:
+    performance_table = Table(box=box.ROUNDED)
+    performance_table.add_column("Performance "
+                                 ":chart_with_upwards_trend:", justify=justification,
+                                 style="cyan", width=25)
+    performance_table.add_column(justify=justification, width=20)
+    performance_table.add_row('End capital',
+                              colorize(round(self.end_capital, 2),
+                                       round(self.starting_capital, 2),
+                                       str(currency_symbol)))
+    performance_table.add_row('Overall profit',
+                              colorize(round(
+                                  self.overall_profit_percentage, 2), 0, '%'))
+    performance_table.add_row('Max. realised drawdown',
+                              colorize(round(self.max_realised_drawdown,
+                                             2), 0, '%'))
+    performance_table.add_row('Max. seen drawdown',
+                              colorize(round(self.max_seen_drawdown,
+                                             2), 0, '%'))
+    performance_table.add_row('Max. seen drawdown from',
+                              drawdown_from_string)
+    performance_table.add_row('Max. seen drawdown to', drawdown_to_string)
+    performance_table.add_row('Max. seen drawdown at', drawdown_at_string)
+    performance_table.add_row('Market change coins',
+                              colorize(round(self.market_change_coins,
+                                             2), 0, '%'))
+    performance_table.add_row('Market change BTC',
+                              colorize(round(self.market_change_btc,
+                                             2), 0, '%'))
+    performance_table.add_row('Market drawdown coins',
+                              colorize(round(self.market_drawdown_coins,
+                                             2), 0, '%'))
+    performance_table.add_row('Market drawdown BTC',
+                              colorize(round(self.market_drawdown_btc,
+                                             2), 0, '%'))
+    performance_table.add_row('Total fee paid',
+                              f"{round(self.total_fee_amount)} {currency_symbol}")
+    return performance_table
+
+
+def create_settings_table(self: MainResults, currency_symbol, justification, tested_from_string,
+                          tested_to_string) -> Table:
+    settings_table = Table(box=box.ROUNDED)
+    settings_table.add_column("Settings "
+                              ":wrench:",
+                              justify=justification,
+                              width=25)
+    settings_table.add_column(justify=justification, width=20)
+    settings_table.add_row("Engine version", CURRENT_VERSION)
+    settings_table.add_row("Backtesting from", tested_from_string)
+    settings_table.add_row("Backtesting to", tested_to_string)
+    stoploss_setting = f"{self.stoploss} % ({self.stoploss_type})" if \
+        self.stoploss_type != 'dynamic' else self.stoploss_type
+    settings_table.add_row("Stoploss", stoploss_setting)
+    settings_table.add_row("Start capital",
+                           f"{round(self.starting_capital, 2)} {currency_symbol}")
+    settings_table.add_row("Fee percentage", f"{self.fee} %")
+    settings_table.add_row("Max. open trades", str(self.max_open_trades))
+    return settings_table
 
 
 @dataclass
@@ -218,6 +191,9 @@ class CoinInsights:
     market_drawdown: float
     max_seen_drawdown: float
     max_realised_drawdown: float
+    win_weeks: int
+    draw_weeks: int
+    loss_weeks: int
     avg_trade_duration: timedelta
     longest_trade_duration: timedelta
     shortest_trade_duration: timedelta
@@ -252,6 +228,7 @@ class CoinInsights:
                                        colorize(round(c.market_drawdown, 2), 0),
                                        colorize(round(c.max_seen_drawdown, 2), 0),
                                        colorize(round(c.max_realised_drawdown, 2), 0),
+                                       f"{c.win_weeks} / {c.draw_weeks} / {c.loss_weeks}",
                                        )
 
             coin_signal_table.add_row(c.pair,
@@ -292,6 +269,8 @@ class CoinInsights:
         coin_metrics_table.add_column("Market drawdown (%)", justify=justification)
         coin_metrics_table.add_column("Max. seen drawdown (%)", justify=justification)
         coin_metrics_table.add_column("Max. realised drawdown (%)",
+                                      justify=justification)
+        coin_metrics_table.add_column("Winning weeks (W/D/L)",
                                       justify=justification)
         return coin_metrics_table
 
