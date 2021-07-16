@@ -3,6 +3,7 @@ import os
 
 from cli.print_utils import print_warning, print_error, print_info
 from modules.output.plots_per_coin import plot_per_coin
+from modules.output.equity_plot import equity_plot
 from modules.output.results import show_signature, CoinInsights, LeftOpenTradeResult, show_mainresults
 from modules.public.trading_stats import TradingStats
 from modules.stats.stats_config import StatsConfig
@@ -42,6 +43,7 @@ class OutputModule(object):
         if self.config.plots:
             print_info("Creating plots in " + FONT_BOLD + "data/backtesting-data/plots" + FONT_RESET + "...")
             plot_per_coin(stats, config=self.config)
+            equity_plot(stats.capital_per_timestamp)
         print_info("Backtest finished!")
 
         show_signature()
