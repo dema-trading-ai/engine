@@ -1,14 +1,17 @@
 # Libraries
 import abc
 
+from optuna import Trial
 from pandas import DataFrame
 import pandas as pd
-from utils.utils import parse_timeframe
+
+from modules.public.trading_stats import TradingStats
 # ======================================================================
 # Strategy-class is responsible for populating indicators / signals
 #
 # © 2021 DemaTrading.ai
 # ======================================================================
+from utils.utils import parse_timeframe
 
 """
 ATTENTION: 
@@ -22,6 +25,7 @@ class Strategy(abc.ABC):
     This module defines the abstract base class (abc) that every strategy must inherit from.
     Methods defined in strategies/*.py will overwrite these methods.
     """
+    trial: Trial = None
     timeframe: str
 
     @abc.abstractmethod
@@ -106,3 +110,6 @@ class Strategy(abc.ABC):
             dataframe = dataframe.ffill()
 
         return dataframe
+
+    def loss_function(self, stats: TradingStats) -> float:
+        raise Exception("loss_function not implemented")

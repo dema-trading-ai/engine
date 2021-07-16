@@ -1,32 +1,25 @@
 # Files
-from modules.output import OutputModule
-from modules.setup.config import create_config_module
-from modules.setup import SetupModule, DataModule
-from modules.stats.stats import StatsModule
-from modules.stats.stats_config import to_stats_config
-from modules.stats.tradingmodule import TradingModule
-from modules.stats.tradingmodule_config import create_trading_module_config
+
+import optuna
+from optuna import Trial
+
+from backtest_runner import create_backtest_runner
+from cli.print_utils import print_info
 
 
 class MainController:
 
     @staticmethod
     async def run(args) -> None:
-        async with create_config_module(args) as config:
-            data_module = await DataModule.create(config)
-            setup_module = SetupModule(config, data_module)
+        async with create_backtest_runner(args) as runner:
 
-            algo_module = await setup_module.setup()
-            df, dict_with_signals = algo_module.run()
+            if args.alpha_hyperopt:
+                study = optuna.create_study()
 
-            stats_config = to_stats_config(config,
-                                           await data_module.load_btc_marketchange(),
-                                           await data_module.load_btc_drawdown(df))
+                def objective(trial: Trial):
+                    return runner.run_hyperopt_iteration(trial)
 
-            trading_module_config = create_trading_module_config(config)
-            trading_module = TradingModule(trading_module_config)
-            stats_module = StatsModule(stats_config, dict_with_signals, trading_module, df)
-
-            stats = stats_module.analyze()
-
-            OutputModule(stats_config).output(stats)
+                study.optimize(objective, n_trials=100)
+                print_info(f"Best results {study.best_params}")
+            else:
+                runner.run_outputted_backtest()
