@@ -21,9 +21,9 @@ class BacktestRunner:
         self.strategy = strategy
 
     def run_backtest(self):
-        df, dict_with_signals = self.algo_module.run()
+        pair_dicts, dict_with_signals = self.algo_module.run()
         trading_module = TradingModule(self.trading_module_config)
-        stats_module = StatsModule(self.stats_config, dict_with_signals, trading_module, df)
+        stats_module = StatsModule(self.stats_config, dict_with_signals, trading_module, pair_dicts)
         return stats_module.analyze()
 
     def run_hyperopt_iteration(self, trial: Trial) -> float:
