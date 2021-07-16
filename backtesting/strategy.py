@@ -29,7 +29,7 @@ class Strategy(abc.ABC):
     timeframe: str
 
     @abc.abstractmethod
-    def generate_indicators(self, dataframe: DataFrame, additional_pairs=None) -> DataFrame:
+    def generate_indicators(self, dataframe: DataFrame) -> DataFrame:
         """
         :param dataframe: All passed candles (current candle included!) with OHLCV data
         :type dataframe: DataFrame
