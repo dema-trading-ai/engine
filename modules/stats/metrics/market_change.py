@@ -1,6 +1,8 @@
+import pandas as pd
 from pandas import DataFrame
 
-from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
+from modules.stats.drawdown.drawdown import get_max_drawdown_ratio, get_max_drawdown_ratio_series
+from utils.utils import get_ohlcv_indicators
 
 
 def get_market_change(df, pairs: list, data_dict: dict) -> dict:
@@ -24,12 +26,10 @@ def get_market_drawdown(pairs: list, data_dict: dict) -> dict:
     market_drawdown = {}
     pairs_profit_ratios_sum = [0] * len(data_dict[pairs[0]])
     for pair in pairs:
-        values_list = [data_dict[pair][d].get('close') for d in data_dict[pair]]
-        close_prices_df = DataFrame(values_list, columns=['value'])
-        close_prices_df.dropna(inplace=True)
-        close_prices_df.reset_index(inplace=True, drop=True)
-        market_drawdown[pair] = get_max_drawdown_ratio(close_prices_df)
-        profit_ratios = [x / close_prices_df['value'].iloc[0] for x in close_prices_df['value']]
+        df = pd.DataFrame.from_dict(data_dict[pair], orient='index', columns=get_ohlcv_indicators())
+        closes = df["close"].dropna()
+        market_drawdown[pair] = get_max_drawdown_ratio_series(closes)
+        profit_ratios = closes / closes.iloc[0]
         pairs_profit_ratios_sum = map(lambda x, y: x + y, pairs_profit_ratios_sum, profit_ratios)
     market_drawdown['all'] = get_max_drawdown_ratio(DataFrame(pairs_profit_ratios_sum, columns=['value']))
     return market_drawdown
