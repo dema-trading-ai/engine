@@ -54,4 +54,4 @@ class TradingStats:
     sellpoints: dict
     df: DataFrame
     trades: list
-    tradingmodule: classmethod
+    capital_per_timestamp: dict

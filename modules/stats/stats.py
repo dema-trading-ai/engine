@@ -80,7 +80,7 @@ class StatsModule:
             sellpoints=self.sell_points,
             df=self.df,
             trades=self.trading_module.open_trades + self.trading_module.closed_trades,
-            tradingmodule=self.trading_module
+            capital_per_timestamp=self.trading_module.capital_per_timestamp
         )
 
     def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float,

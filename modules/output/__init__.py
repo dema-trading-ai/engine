@@ -43,7 +43,7 @@ class OutputModule(object):
         if self.config.plots:
             print_info("Creating plots in " + FONT_BOLD + "data/backtesting-data/plots" + FONT_RESET + "...")
             plot_per_coin(stats, config=self.config)
-            equity_plot(stats.tradingmodule)
+            equity_plot(stats.capital_per_timestamp)
         print_info("Backtest finished!")
 
         show_signature()

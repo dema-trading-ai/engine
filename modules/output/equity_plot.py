@@ -4,9 +4,9 @@ import pandas as pd
 
 from plotly import graph_objects as go
 
-def equity_plot(tradingmodule):
+def equity_plot(capital_dict):
     Path("data/backtesting-data/plots/equity").mkdir(parents=True, exist_ok=True)
-    df = pd.DataFrame(list(tradingmodule.capital_per_timestamp.items()))
+    df = pd.DataFrame(list(capital_dict.items()))
 
     # remove first value since its 0
     df.drop(index=df.index[0],
