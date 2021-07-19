@@ -22,7 +22,7 @@ class MyStrategyAdvanced(Strategy):
             ("BTC/USDT", "4h")
         ]
 
-    def generate_indicators(self, dataframe: DataFrame, additional_pairs=None) -> DataFrame:
+    def generate_indicators(self, dataframe: DataFrame, additional_pairs) -> DataFrame:
         """
         :param dataframe: All passed candles (current candle included!) with OHLCV data
         :type dataframe: DataFrame
