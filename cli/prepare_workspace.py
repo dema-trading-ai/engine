@@ -58,9 +58,9 @@ def print_init_instruction(args):
         if args.dir:
             print_info(f"Run \"cd \'{args.dir}\' ; docker-compose up\"")
         else:
-            print_info(f"Run \"docker-compose up\"")
+            print_info("Run \"docker-compose up\"")
     else:
         if args.dir:
             print_info(f"Run \"cd \'{args.dir}\' ; engine\"")
         else:
-            print_info(f"Run \"engine\"")
+            print_info("Run \"engine\"")
