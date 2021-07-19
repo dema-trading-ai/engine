@@ -25,7 +25,7 @@ def prepare_workspace(args):
         copy2(local_path, target_path)
 
     print_info("Copied files.\n")
-    print_info("Run 'docker-compose up' to get started.")
+    print_init_instruction(args)
 
 
 def get_output_directory(args):
@@ -51,3 +51,16 @@ def get_paths_to_copy(output_directory: str):
 
 def get_src_destination(output_directory: str, file_name: str):
     return os.path.join(get_resource("setup"), file_name), os.path.join(output_directory, file_name)
+
+
+def print_init_instruction(args):
+    if is_running_in_docker():
+        if args.dir:
+            print_info(f"Run \"cd \'{args.dir}\' ; docker-compose up\"")
+        else:
+            print_info(f"Run \"docker-compose up\"")
+    else:
+        if args.dir:
+            print_info(f"Run \"cd \'{args.dir}\' ; engine\"")
+        else:
+            print_info(f"Run \"engine\"")
