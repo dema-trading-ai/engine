@@ -92,7 +92,7 @@ def create_trade_info_table(self, justification) -> Table:
     trade_info_table.add_column("Trade Info "
                                 ":mag:",
                                 justify=justification,
-                                style="magenta")
+                                style="white")
     trade_info_table.add_column(justify=justification)
     trade_info_table.add_row('Amount of trades', str(self.n_trades))
     trade_info_table.add_row('Avg. trades per day',
@@ -122,7 +122,7 @@ def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown
     performance_table = Table(box=box.ROUNDED)
     performance_table.add_column("Performance "
                                  ":chart_with_upwards_trend:", justify=justification,
-                                 style="cyan", width=25)
+                                 style="white", width=25)
     performance_table.add_column(justify=justification, width=20)
     performance_table.add_row('End capital',
                               colorize(round(self.end_capital, 2),
