@@ -2,7 +2,9 @@
   {
     "name": "exchange",
     "default": "binance",
-    "options": ["binance"],
+    "options": [
+      "binance"
+    ],
     "type": "string"
   },
   {
@@ -52,7 +54,7 @@
       "short": "sl"
     }
   },
-    {
+  {
     "name": "plots",
     "type": "bool",
     "default": true,
@@ -63,7 +65,11 @@
   {
     "name": "stoploss-type",
     "default": "standard",
-    "options": ["standard", "trailing", "dynamic"],
+    "options": [
+      "standard",
+      "trailing",
+      "dynamic"
+    ],
     "type": "string",
     "cli": {
       "short": "sl_type"
@@ -94,7 +100,11 @@
     "name": "currency",
     "default": "USDT",
     "type": "string",
-    "options": ["USDT", "BTC", "ETH"]
+    "options": [
+      "USDT",
+      "BTC",
+      "ETH"
+    ]
   },
   {
     "name": "fee",
@@ -115,5 +125,13 @@
     "name": "strategies-folder",
     "type": "string",
     "default": "strategies"
+  },
+  {
+    "name": "alpha-hyperopt",
+    "type": "bool",
+    "default": false,
+    "cli": {
+      "short": "hy"
+    }
   }
 ]

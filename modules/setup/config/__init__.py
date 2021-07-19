@@ -15,7 +15,6 @@ from .strategy_definition import StrategyDefinition
 from .cctx_adapter import create_cctx_exchange
 from .currencies import get_currency_symbol
 from .validations import validate_and_read_cli
-from .load_strategy import load_strategy_from_config
 from cli.print_utils import print_info, print_standard
 
 msec = 1000
@@ -149,12 +148,3 @@ def get_additional_pairs(strategy) -> list:
     return additional_pairs
 
 
-@asynccontextmanager
-async def create_config_module(args):
-    config_module = None
-    try:
-        config_module = await ConfigModule.create(args)
-        yield config_module
-    finally:
-        if config_module is not None:
-            await config_module.close()
