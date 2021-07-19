@@ -127,9 +127,13 @@ class DataModule:
         df['pair'] = pair
         df['buy'], df['sell'] = 0, 0  # default values
 
+        # Create missing NaN data
+        df = self.fill_missing_ticks(df, pair, data_from, data_to)
+
         if save:
             print_info("[%s] %s candles downloaded." % (pair, len(index)))
             self.save_dataframe(pair, df)
+
         return df
 
     def is_datafolder_exist(self, pair: str) -> bool:
@@ -175,8 +179,10 @@ class DataModule:
         final_timestamp = self.config.backtesting_from + (
                 timesteps_forward - self.config.timeframe_ms)  # last tick is excluded
 
+
         # Return correct backtesting period
         df = await self.check_backtesting_period(pair, df, final_timestamp)
+
         begin_index = df.index.get_loc(self.config.backtesting_from)
         end_index = df.index.get_loc(final_timestamp)
         self.save_dataframe(pair, df)
@@ -185,6 +191,17 @@ class DataModule:
         return df
 
     async def check_backtesting_period(self, pair: str, df: DataFrame, final_timestamp: int) -> DataFrame:
+        """
+        :param pair: Certain coin pair in "AAA/BBB" format
+        :type pair: string
+        :param df: Dataframe containing backtest information
+        :type df: DataFrame
+        :param final_timestamp: Timestamp to which the dataframe has gathered info
+        :type final_timestamp: int
+        :return: Dataframe with possibly additional info
+        :rtype: DataFrame
+        """
+
         # Get backtesting period
         index_list = df.index.values
         df_begin = index_list[0]
@@ -196,7 +213,7 @@ class DataModule:
         if self.config.backtesting_from < df_begin:
             print_info("Incomplete datafile. Downloading extra candle(s)...")
             notify = False
-            prev_df = await self.download_data_for_pair(pair, self.config.backtesting_from, df_begin, False)
+            prev_df = await self.download_data_for_pair(pair, self.config.backtesting_from, df_begin, save=False)
             df = pd.concat([prev_df, df])
             extra_candles += len(prev_df.index)
 
@@ -206,7 +223,7 @@ class DataModule:
                 print_info("Incomplete datafile. Downloading extra candle(s)...")
             new_df = await self.download_data_for_pair(pair, df_end + self.config.timeframe_ms,
                                                        self.config.backtesting_to,
-                                                       False)
+                                                       save=False, start=False)
             df = pd.concat([df, new_df])
             extra_candles += len(new_df.index)
 
@@ -233,18 +250,32 @@ class DataModule:
         os.remove(filepath)
 
     def warn_if_missing_ticks(self, history_data: dict) -> None:
-        date_range = np.arange(self.config.backtesting_from,
-                               self.config.backtesting_to,
-                               self.config.timeframe_ms)
 
         for pair, data in history_data.items():
-            # Check if dates are missing dates
-            index_column = data.index.to_numpy().astype(np.int64)
-            diff = np.setdiff1d(date_range, index_column)
-            n_missing = len(diff)
+            n_missing = data['close'].isnull().sum()
 
             if n_missing > 0:
                 print_warning(f"Pair '{pair}' is missing {n_missing} ticks (rows)")
+
+    def fill_missing_ticks(self, df, pair, data_from, data_to):
+        """
+        Replace missing ticks by NaN
+        :param df: Downloaded data
+        :type df: DataFrame
+        :return: Complete df of the whole daterange
+        :rtype: DataFrame
+        """
+        daterange = np.arange(data_from,
+                              data_to,
+                              self.config.timeframe_ms)
+
+        # print_warning(f"Pair '{pair}' did not exist at start-time")
+        nandf = pd.DataFrame(np.nan, index=daterange, columns=df.keys())
+        nandf["time"] = daterange
+        nandf["pair"] = pair
+
+        nandf.update(df)
+        return nandf
 
 
 def is_same_backtesting_period(history_data) -> bool:
