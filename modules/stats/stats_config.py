@@ -10,7 +10,7 @@ class StatsConfig:
     stoploss: float
     stoploss_type: str
     max_open_trades: int
-    exposure_per_trade: int
+    exposure_per_trade: float
     btc_marketchange_ratio: float
     btc_drawdown_ratio: float
     backtesting_to: int
