@@ -8,7 +8,7 @@ from modules.setup.config import ConfigModule
 class TradingModuleConfig:
     fee: float
     max_open_trades: int
-    exposure_per_trade: int
+    exposure_per_trade: float
     pairs: Sequence
     roi: dict
     starting_capital: float
