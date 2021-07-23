@@ -11,3 +11,5 @@ rich==10.3.0
 ta-lib==0.4.20
 pyinstaller~=4.3
 pyarrow==4.0.1
+optuna==2.8.0
+openpyxl==3.0.7

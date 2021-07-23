@@ -10,7 +10,7 @@ from utils.utils import get_ohlcv_indicators
 StatsModuleFactory = [[], StatsModule]
 
 max_open_trades = 3
-max_exposure = 100
+exposure_per_trade = 100
 STARTING_CAPITAL = 100.
 FEE_PERCENTAGE = 1
 
@@ -24,7 +24,7 @@ class StatsFixture:
     def __init__(self, pairs: list):
         self.stats_config = StatsConfig(
             max_open_trades=max_open_trades,
-            max_exposure=max_exposure,
+            exposure_per_trade=exposure_per_trade,
             starting_capital=100,
             backtesting_from=1,
             backtesting_to=10,
@@ -44,7 +44,7 @@ class StatsFixture:
         self.trading_module_config = TradingModuleConfig(
             stoploss=STOPLOSS,
             max_open_trades=max_open_trades,
-            max_exposure=max_exposure,
+            exposure_per_trade=exposure_per_trade,
             starting_capital=STARTING_CAPITAL,
             fee=FEE_PERCENTAGE,
             pairs=pairs,
@@ -55,6 +55,8 @@ class StatsFixture:
         self.frame_with_signals = MockPairFrame(pairs)
 
     def create(self):
-        df = pd.DataFrame.from_dict(self.frame_with_signals, orient='index', columns=OHLCV_INDICATORS)
+        pair_df = {k: pd.DataFrame.from_dict(v, orient='index', columns=OHLCV_INDICATORS) for k, v in
+                   self.frame_with_signals.items()}
+
         trading_module = TradingModule(self.trading_module_config)
-        return StatsModule(self.stats_config, self.frame_with_signals, trading_module, df)
+        return StatsModule(self.stats_config, self.frame_with_signals, trading_module, pair_df)

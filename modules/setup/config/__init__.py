@@ -15,7 +15,6 @@ from .strategy_definition import StrategyDefinition
 from .cctx_adapter import create_cctx_exchange
 from .currencies import get_currency_symbol
 from .validations import validate_and_read_cli
-from .load_strategy import load_strategy_from_config
 from cli.print_utils import print_info, print_standard
 
 msec = 1000
@@ -38,6 +37,7 @@ class ConfigModule(object):
         self.backtesting_from = None
         self.backtesting_to = None
         self.max_open_trades = None
+        self.exposure_per_trade = None
         self.stoploss_type = None
         self.stoploss = None
         self.fee = None
@@ -73,7 +73,7 @@ class ConfigModule(object):
         config_module.stoploss = config["stoploss"]
         config_module.stoploss_type = config["stoploss-type"]
         config_module.max_open_trades = config["max-open-trades"]
-        config_module.max_exposure = config["max-exposure"]
+        config_module.exposure_per_trade = config["exposure-per-trade"]
         config_module.plots = config["plots"]
         config_module.tearsheet = config["tearsheet"]
         config_module.roi = config["roi"]
@@ -151,12 +151,3 @@ def get_additional_pairs(strategy) -> list:
     return additional_pairs
 
 
-@asynccontextmanager
-async def create_config_module(args):
-    config_module = None
-    try:
-        config_module = await ConfigModule.create(args)
-        yield config_module
-    finally:
-        if config_module is not None:
-            await config_module.close()

@@ -4,8 +4,10 @@ from tqdm import tqdm
 import numpy as np
 from collections import defaultdict
 
+from cli.print_utils import print_info
 from modules.output.results import CoinInsights, MainResults, LeftOpenTradeResult
-from modules.pairs_data import PairsData
+from modules.public.pairs_data import PairsData
+from modules.public.trading_stats import TradingStats
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
 from modules.stats.metrics.profit_ratio import get_seen_cum_profit_ratio_per_coin, get_realised_profit_ratio
 from modules.stats.drawdown.for_portfolio import get_max_seen_drawdown_for_portfolio, \
@@ -18,7 +20,6 @@ from modules.stats.metrics.winning_weeks import get_winning_weeks_per_coin, \
     get_winning_weeks_for_portfolio
 from modules.stats.stats_config import StatsConfig
 from modules.stats.trade import Trade, SellReason
-from modules.stats.trading_stats import TradingStats
 from modules.stats.tradingmodule import TradingModule
 
 from utils.dict import group_by
@@ -26,10 +27,10 @@ from utils.utils import calculate_worth_of_open_trades
 
 
 class StatsModule:
-    buy_points = None
-    sell_points = None
 
     def __init__(self, config: StatsConfig, frame_with_signals: PairsData, trading_module: TradingModule, df):
+        self.buy_points = None
+        self.buy_points = None
         self.df = df
         self.config = config
         self.trading_module = trading_module
@@ -38,31 +39,29 @@ class StatsModule:
     def analyze(self) -> TradingStats:
         pairs = list(self.frame_with_signals.keys())
         ticks = list(self.frame_with_signals[pairs[0]].keys()) if pairs else []
-
-        for tick in tqdm(ticks, desc='[INFO] Backtesting', total=len(ticks), ncols=75):
+        print_info("Backtesting")
+        for tick in ticks:
             for pair in pairs:
                 pair_dict = self.frame_with_signals[pair]
                 tick_dict = pair_dict[tick]
                 self.trading_module.tick(tick_dict, pair_dict)
 
-        market_change = get_market_change(ticks, pairs, self.frame_with_signals)
+        market_change = get_market_change(self.df, pairs, self.frame_with_signals)
         market_drawdown = get_market_drawdown(pairs, self.frame_with_signals)
         return self.generate_backtesting_result(market_change, market_drawdown)
 
     def generate_backtesting_result(self, market_change: dict, market_drawdown: dict) -> TradingStats:
-        trading_module = self.trading_module
-
-        coin_results, market_change_weekly = self.generate_coin_results(trading_module.closed_trades,
+        coin_results, market_change_weekly = self.generate_coin_results(self.trading_module.closed_trades,
                                                                         market_change,
                                                                         market_drawdown)
         best_trade_ratio, best_trade_pair, worst_trade_ratio, worst_trade_pair = \
-            calculate_best_worst_trade(trading_module.closed_trades)
-        open_trade_results = self.get_left_open_trades_results(trading_module.open_trades)
+            calculate_best_worst_trade(self.trading_module.closed_trades)
+        open_trade_results = self.get_left_open_trades_results(self.trading_module.open_trades)
 
         main_results = self.generate_main_results(
-            trading_module.open_trades,
-            trading_module.closed_trades,
-            trading_module.budget,
+            self.trading_module.open_trades,
+            self.trading_module.closed_trades,
+            self.trading_module.budget,
             market_change,
             market_drawdown,
             best_trade_ratio,
@@ -70,7 +69,7 @@ class StatsModule:
             worst_trade_ratio,
             worst_trade_pair,
             market_change_weekly)
-        self.calculate_statistics_for_plots(trading_module.closed_trades, trading_module.open_trades)
+        self.calculate_statistics_for_plots(self.trading_module.closed_trades, self.trading_module.open_trades)
 
         return TradingStats(
             main_results=main_results,
@@ -80,7 +79,8 @@ class StatsModule:
             buypoints=self.buy_points,
             sellpoints=self.sell_points,
             df=self.df,
-            trades=trading_module.open_trades + trading_module.closed_trades
+            trades=self.trading_module.open_trades + self.trading_module.closed_trades,
+            capital_per_timestamp=self.trading_module.capital_per_timestamp
         )
 
     def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float,
@@ -125,7 +125,7 @@ class StatsModule:
         return MainResults(tested_from=tested_from,
                            tested_to=tested_to,
                            max_open_trades=self.config.max_open_trades,
-                           max_exposure=self.config.max_exposure,
+                           exposure_per_trade=self.config.exposure_per_trade,
                            market_change_coins=(market_change['all'] - 1) * 100,
                            market_drawdown_coins=(market_drawdown['all'] - 1) * 100,
                            market_change_btc=(self.config.btc_marketchange_ratio - 1) * 100,
@@ -138,7 +138,7 @@ class StatsModule:
                            n_left_open_trades=len(open_trades),
                            n_trades_with_loss=nr_losing_trades,
                            n_consecutive_losses=nr_consecutive_losing_trades,
-                           max_realised_drawdown=(max_realised_drawdown-1) * 100,
+                           max_realised_drawdown=(max_realised_drawdown - 1) * 100,
                            worst_trade_profit_percentage=worst_trade_profit_percentage,
                            worst_trade_pair=worst_trade_pair,
                            best_trade_profit_percentage=best_trade_profit_percentage,
@@ -149,7 +149,7 @@ class StatsModule:
                            win_weeks=win_weeks,
                            draw_weeks=draw_weeks,
                            loss_weeks=loss_weeks,
-                           max_seen_drawdown=(max_seen_drawdown['drawdown']-1) * 100,
+                           max_seen_drawdown=(max_seen_drawdown['drawdown'] - 1) * 100,
                            drawdown_from=max_seen_drawdown['from'],
                            drawdown_to=max_seen_drawdown['to'],
                            drawdown_at=max_seen_drawdown['at'],
@@ -214,8 +214,8 @@ class StatsModule:
         market_change_weekly = {pair: None for pair in self.frame_with_signals.keys()}
         trades_per_coin = group_by(closed_trades, "pair")
 
-        for key, closed_pair_trades in tqdm(trades_per_coin.items(), desc='[INFO] Calculating statistics',
-                                            total=len(per_coin_stats), ncols=75):
+        print_info("Calculating statistics")
+        for key, closed_pair_trades in trades_per_coin.items():
             # Calculate max seen drawdown ratio
             seen_cum_profit_ratio_df = get_seen_cum_profit_ratio_per_coin(
                 self.frame_with_signals[key],
@@ -235,17 +235,17 @@ class StatsModule:
 
             # Find avg, longest and shortest trade durations
             per_coin_stats[key]["avg_trade_duration"], \
-                per_coin_stats[key]["longest_trade_duration"], \
-                per_coin_stats[key]["shortest_trade_duration"] = \
+            per_coin_stats[key]["longest_trade_duration"], \
+            per_coin_stats[key]["shortest_trade_duration"] = \
                 calculate_trade_durations(closed_pair_trades)
 
             # Find winning, draw and losing weeks for current coin
             per_coin_stats[key]["win_weeks"], \
-                per_coin_stats[key]["draw_weeks"], \
-                per_coin_stats[key]["loss_weeks"], \
-                market_change_weekly[key] = get_winning_weeks_per_coin(
-                    self.frame_with_signals[key],
-                    seen_cum_profit_ratio_df
+            per_coin_stats[key]["draw_weeks"], \
+            per_coin_stats[key]["loss_weeks"], \
+            market_change_weekly[key] = get_winning_weeks_per_coin(
+                self.frame_with_signals[key],
+                seen_cum_profit_ratio_df
             )
 
             for trade in closed_pair_trades:
@@ -302,3 +302,4 @@ class StatsModule:
 
             left_open_trade_stats.append(left_open_trade_results)
         return left_open_trade_stats
+
