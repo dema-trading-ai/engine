@@ -175,7 +175,7 @@ def create_settings_table(self: MainResults, currency_symbol, justification, tes
                            f"{round(self.starting_capital, 2)} {currency_symbol}")
     settings_table.add_row("Fee percentage", f"{self.fee} %")
     settings_table.add_row("Max. open trades", str(self.max_open_trades))
-    #settings_table.add_row("Max. exposure", str(self.exposure_per_trade))
+    settings_table.add_row("Max. exposure per trade", str(self.exposure_per_trade))
     return settings_table
 
 
