@@ -57,13 +57,16 @@ class BackTesting:
         print_info("Populating Indicators")
         for pair in self.data.keys():
             df = self.data[pair].copy()
+            cleandf = df.dropna().copy()
+
             try:
-                indicators = self.strategy.generate_indicators(df, self.additional_pairs_data)
+                indicators = self.strategy.generate_indicators(cleandf, self.additional_pairs_data)
             except TypeError:
-                indicators = self.strategy.generate_indicators(df)
+                indicators = self.strategy.generate_indicators(cleandf)
 
             indicators = self.strategy.buy_signal(indicators)
             indicators = self.strategy.sell_signal(indicators)
+            indicators = indicators.append(df.loc[df["close"].isnull()]).sort_index()
             self.df[pair] = indicators.copy()
             if stoploss_type == "dynamic":
                 stoploss = self.strategy.stoploss(indicators)
