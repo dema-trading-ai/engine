@@ -34,6 +34,7 @@ class ConfigModule(object):
         self.currency_symbol = None
         self.starting_capital = None
         self.plots = None
+        self.tearsheet = None
         self.backtesting_from = None
         self.backtesting_to = None
         self.max_open_trades = None

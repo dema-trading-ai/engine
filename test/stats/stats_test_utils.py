@@ -36,6 +36,7 @@ class StatsFixture:
             stoploss_type="standard",
             currency_symbol="USDT",
             plots=False,
+            tearsheet=False,
 
             mainplot_indicators=[],
             subplot_indicators=[]
