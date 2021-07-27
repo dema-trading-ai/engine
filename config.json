@@ -2,7 +2,7 @@
   "exchange": "binance",
   "timeframe": "5m",
   "max-open-trades": 3,
-  "exposure-per-trade": 1,
+  "exposure-per-trade": 100,
   "starting-capital": 1000,
   "backtesting-from": "2021-03-11",
   "backtesting-to": "2021-03-15",
