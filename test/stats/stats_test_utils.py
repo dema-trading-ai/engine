@@ -25,7 +25,6 @@ class StatsFixture:
         self.stats_config = StatsConfig(
             max_open_trades=max_open_trades,
             exposure_per_trade=exposure_per_trade,
-            tearsheet=False,
             starting_capital=100,
             backtesting_from=1,
             backtesting_to=10,
