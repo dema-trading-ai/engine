@@ -52,6 +52,8 @@ class StatsFixture:
         self.frame_with_signals = MockPairFrame(pairs)
 
     def create(self):
-        df = pd.DataFrame.from_dict(self.frame_with_signals, orient='index', columns=OHLCV_INDICATORS)
+        pair_df = {k: pd.DataFrame.from_dict(v, orient='index', columns=OHLCV_INDICATORS) for k, v in
+                   self.frame_with_signals.items()}
+
         trading_module = TradingModule(self.trading_module_config)
-        return StatsModule(self.stats_config, self.frame_with_signals, trading_module, df)
+        return StatsModule(self.stats_config, self.frame_with_signals, trading_module, pair_df)
