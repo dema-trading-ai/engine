@@ -10,7 +10,7 @@ from utils.utils import get_ohlcv_indicators
 StatsModuleFactory = [[], StatsModule]
 
 max_open_trades = 3
-exposure_per_trade = 100
+exposure_per_trade = 1.
 STARTING_CAPITAL = 100.
 FEE_PERCENTAGE = 1
 
