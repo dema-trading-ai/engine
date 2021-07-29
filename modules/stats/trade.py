@@ -51,6 +51,8 @@ class Trade:
         # Stoploss configurations
         self.sl_type = sl_type
         self.sl_perc = sl_perc
+        self.sl_sell_time = None
+        self.sl_ratio = None
         self.update_profits()
 
     def close_trade(self, reason: SellReason, date: datetime) -> None:
@@ -130,15 +132,16 @@ class Trade:
         for timestamp in data_dict.keys():
             if int(timestamp) > time:
                 ohlcv = data_dict[timestamp]
+
+                # Check if lowest ratio crossed trail ratio
+                lowest_ratio = (ohlcv['low'] * self.currency_amount) / self.starting_amount
+                if lowest_ratio <= trail_ratio:
+                    return ohlcv['time'], trail_ratio
+
                 # Update trail ratio
                 stoploss_ratio = (ohlcv['high'] * self.currency_amount) * (1-stoploss_perc) / self.starting_amount
                 if stoploss_ratio > trail_ratio:
                     trail_ratio = stoploss_ratio
-
-                # Check if lowest ratio crossed trail ratio
-                lowest_ratio = ((ohlcv['low'] * self.currency_amount) * stoploss_perc) / self.starting_amount
-                if lowest_ratio <= trail_ratio:
-                    return ohlcv['time'], trail_ratio
         return np.NaN, np.NaN
 
     def dynamic_stoploss(self, data_dict: dict, time: int) -> tuple:
