@@ -52,7 +52,11 @@ def plot_coin(config, stats, pair: str, pair_data):
     fig.update_xaxes(range=[dates[0], dates[-1]])
     fig.update_layout(
         title='%s Chart' % pair,
-        yaxis_title=pair)
+        yaxis_title=pair,
+        template='ggplot2',
+        dragmode='pan')
+
+    fig.show(config={'scrollZoom': True})
 
     # remove plots if they already existed in the binance folder.
     # used to remove plots made by older version so users don't by accident open old plots.

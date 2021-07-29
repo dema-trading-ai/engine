@@ -2,6 +2,7 @@
   "exchange": "binance",
   "timeframe": "5m",
   "max-open-trades": 3,
+  "exposure-per-trade": 100,
   "starting-capital": 1000,
   "backtesting-from": "2021-03-11",
   "backtesting-to": "2021-03-15",
@@ -19,6 +20,7 @@
   "strategy-name": "MyStrategy",
   "strategies-folder": "resources/setup/strategies",
   "plots": true,
+  "tearsheet": true,
   "mainplot_indicators": ["ema5", "ema21"],
-  "subplot_indicators": ["volume"]
+  "subplot_indicators": [["volume"]]
 }

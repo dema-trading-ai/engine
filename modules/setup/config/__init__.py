@@ -34,9 +34,11 @@ class ConfigModule(object):
         self.currency_symbol = None
         self.starting_capital = None
         self.plots = None
+        self.tearsheet = None
         self.backtesting_from = None
         self.backtesting_to = None
         self.max_open_trades = None
+        self.exposure_per_trade = None
         self.stoploss_type = None
         self.stoploss = None
         self.fee = None
@@ -72,7 +74,9 @@ class ConfigModule(object):
         config_module.stoploss = config["stoploss"]
         config_module.stoploss_type = config["stoploss-type"]
         config_module.max_open_trades = config["max-open-trades"]
+        config_module.exposure_per_trade = config.get("exposure-per-trade", 100.) / 100.
         config_module.plots = config["plots"]
+        config_module.tearsheet = config.get("tearsheet", False)
         config_module.roi = config["roi"]
         config_module.currency_symbol = get_currency_symbol(config_module.raw_config)
         return config_module
@@ -146,5 +150,3 @@ def get_additional_pairs(strategy) -> list:
         additional_pairs = additional_pairs_method()
 
     return additional_pairs
-
-

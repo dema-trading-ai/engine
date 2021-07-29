@@ -1,5 +1,6 @@
 import json
 import os
+import pandas as pd
 
 from cli.print_utils import print_warning, print_error, print_info
 from modules.output.plots_per_coin import plot_per_coin
@@ -38,6 +39,11 @@ class OutputModule(object):
 
         print_info("Logging trades to " + FONT_BOLD + "data/backtesting-data/trades_log.json" + FONT_RESET + "...")
         log_trades(stats)
+
+        # write orders to a  tearsheet
+        if self.config.tearsheet and len(stats.trades):
+            print_info("Logging trades to " + FONT_BOLD + "data/backtesting-data/tearsheet.xlsx" + FONT_RESET + "...")
+            create_tearsheet(stats.trades)
 
         # plot graphs
         if self.config.plots:
@@ -81,3 +87,11 @@ def log_trades(stats: TradingStats):
 
     with open('./data/backtesting-data/trades_log.json', 'w', encoding='utf-8') as f:
         f.write(trades_json)
+
+def create_tearsheet(trades):
+    dict_count = len(trades)
+    df = pd.DataFrame(trades[0].__dict__, index=[0])
+    for i in range(1,dict_count-1):
+        df = df.append(trades[i].__dict__, ignore_index=True)
+
+    df.to_excel('data/backtesting-data/tearsheet.xlsx')
