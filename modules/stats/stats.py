@@ -125,6 +125,7 @@ class StatsModule:
         return MainResults(tested_from=tested_from,
                            tested_to=tested_to,
                            max_open_trades=self.config.max_open_trades,
+                           exposure_per_trade=self.config.exposure_per_trade,
                            market_change_coins=(market_change['all'] - 1) * 100,
                            market_drawdown_coins=(market_drawdown['all'] - 1) * 100,
                            market_change_btc=(self.config.btc_marketchange_ratio - 1) * 100,

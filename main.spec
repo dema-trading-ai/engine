@@ -12,7 +12,10 @@ added_files = [
 a = Analysis(['main.py'],
              binaries=[],
              datas=added_files,
-             hiddenimports=["talib"],
+             hiddenimports=[
+                 "talib",
+                 "modules.setup.config.qtpylib_methods",
+                 "modules.public.technical_indicators"],
              hookspath=["./hooks"],
              runtime_hooks=[],
              excludes=[],
