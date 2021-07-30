@@ -6,6 +6,6 @@ def transform_subplot_config(subplot_indicators: list):
     if len(subplot_indicators) == 0:
         return []
 
-    if type(subplot_indicators[0]) == list:
+    if isinstance(subplot_indicators[0], list):
         return subplot_indicators
     return [[item] for item in subplot_indicators]
