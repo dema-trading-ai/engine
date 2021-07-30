@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 from cli.print_utils import print_warning
 
 
-def plot_sizes(subplot_indicator, df):
+def plot_sizes(subplot_indicator):
     rows = 1 + len(subplot_indicator)
 
     height = [1]
@@ -76,14 +76,12 @@ def add_indicators(fig, dates, df, mainplot_indicators, subplot_indicators):
             print_warning(f"Unable to plot {ind}. No {ind} found in strategy.")
 
     # add subplot_indicator
-    plots = 2
-    for ind_group in subplot_indicators:
+    for index, ind_group in enumerate(subplot_indicators):
         for ind in ind_group:
             if ind in df.columns.values:
                 fig.add_trace((go.Scattergl(x=dates, y=df[ind], name=ind,
-                                          line=dict(width=2, dash='solid'))), row=plots, col=1)
+                                            line=dict(width=2, dash='solid'))), row=2 + index, col=1)
             else:
                 print_warning(f"Unable to plot {ind}. No {ind} found in strategy.")
-        plots += 1
 
     return fig

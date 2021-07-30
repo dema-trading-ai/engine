@@ -3,14 +3,12 @@
 
 # Libraries
 import json
-import re
 import sys
-from contextlib import asynccontextmanager
 from datetime import datetime
-import numpy as np
 
 # Files
 from utils.utils import get_plot_indicators, parse_timeframe
+from .legacy_transforms import transform_subplot_config
 from .strategy_definition import StrategyDefinition
 from .cctx_adapter import create_cctx_exchange
 from .currencies import get_currency_symbol
@@ -53,7 +51,7 @@ class ConfigModule(object):
         get_plot_indicators(config)
 
         config_module.mainplot_indicators = config["mainplot_indicators"]
-        config_module.subplot_indicators = config["subplot_indicators"]
+        config_module.subplot_indicators = transform_subplot_config(config["subplot_indicators"])
         config_module.starting_capital = float(config["starting-capital"])
         config_module.raw_config = config  # TODO remove, should be typed
         exchange_str = config["exchange"]
