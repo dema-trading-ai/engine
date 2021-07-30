@@ -23,7 +23,7 @@ def plot_per_coin(stats: TradingStats, config: StatsConfig):
 
 def plot_coin(config, stats, pair: str, pair_data):
     # create figure
-    rows, height = plot_sizes(config.subplot_indicators, pair_data)
+    rows, height = plot_sizes(config.subplot_indicators)
     fig = make_subplots(rows=rows, cols=1, row_heights=height, vertical_spacing=0.02, shared_xaxes=True)
     # slider blocks subplots otherwise
     if rows > 1:
@@ -52,7 +52,9 @@ def plot_coin(config, stats, pair: str, pair_data):
     fig.update_xaxes(range=[dates[0], dates[-1]])
     fig.update_layout(
         title='%s Chart' % pair,
-        yaxis_title=pair)
+        yaxis_title=pair,
+        template='ggplot2',
+        dragmode='pan')
 
     # remove plots if they already existed in the binance folder.
     # used to remove plots made by older version so users don't by accident open old plots.
@@ -61,4 +63,4 @@ def plot_coin(config, stats, pair: str, pair_data):
         os.remove("data/backtesting-data/binance/plot%s.html" % pair.replace("/", ""))
     except OSError:
         pass
-    fig.write_html("data/backtesting-data/plots/plot%s.html" % pair.replace("/", ""))
+    fig.write_html("data/backtesting-data/plots/plot%s.html" % pair.replace("/", ""), config={'scrollZoom': True})
