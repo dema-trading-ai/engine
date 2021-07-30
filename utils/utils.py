@@ -9,7 +9,7 @@ import re
 
 from modules.stats.trade import Trade
 
-CURRENT_VERSION = "v0.7.4"
+CURRENT_VERSION = "v0.7.5"
 
 msec = 1000
 minute = 60 * msec
