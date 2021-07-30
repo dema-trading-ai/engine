@@ -54,7 +54,7 @@ def calculate_worth_of_open_trades(open_trades: [Trade]) -> float:
 
 def get_plot_indicators(config: dict):
     config.setdefault("mainplot_indicators", ['ema5', 'ema21'])
-    config.setdefault("subplot_indicators", ['volume'])
+    config.setdefault("subplot_indicators", [['volume']])
 
 
 def is_running_in_docker():

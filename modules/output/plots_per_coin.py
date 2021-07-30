@@ -23,7 +23,7 @@ def plot_per_coin(stats: TradingStats, config: StatsConfig):
 
 def plot_coin(config, stats, pair: str, pair_data):
     # create figure
-    rows, height = plot_sizes(config.subplot_indicators, pair_data)
+    rows, height = plot_sizes(config.subplot_indicators)
     fig = make_subplots(rows=rows, cols=1, row_heights=height, vertical_spacing=0.02, shared_xaxes=True)
     # slider blocks subplots otherwise
     if rows > 1:
