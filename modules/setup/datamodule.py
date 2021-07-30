@@ -223,7 +223,7 @@ class DataModule:
                 print_info("Incomplete datafile. Downloading extra candle(s)...")
             new_df = await self.download_data_for_pair(pair, df_end + self.config.timeframe_ms,
                                                        self.config.backtesting_to,
-                                                       save=False, start=False)
+                                                       save=False)
             df = pd.concat([df, new_df])
             extra_candles += len(new_df.index)
 

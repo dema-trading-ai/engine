@@ -1,10 +1,11 @@
 # Files
+import sys
 from typing import Tuple
 
 from backtesting.strategy import Strategy
 from modules.public.pairs_data import PairsData
 from modules.setup.config import ConfigModule
-from cli.print_utils import print_info, print_warning
+from cli.print_utils import print_info, print_warning, print_error
 
 
 # ======================================================================
@@ -79,6 +80,12 @@ class BackTesting:
                     notify = True
                     notify_reason = "configured incorrectly"
             data_dict[pair] = indicators.to_dict('index')
+            if not self.df[pair][['open', 'high', 'low', 'close', 'volume', 'pair']].equals(
+                    df[['open', 'high', 'low', 'close', 'volume', 'pair']]
+            ):
+                print_error(
+                    "Cannot set OHLCV data in strategy.")
+                sys.exit()
         if notify:
             print_warning(f"Dynamic stoploss {notify_reason}. Using standard stoploss of "
                           f"{self.config.stoploss}%.")

@@ -43,7 +43,6 @@ def format_time_difference(avg_trade_duration_unformatted: timedelta) -> str:
         avg_trade_duration = '-'
     return avg_trade_duration
 
-
 def show_mainresults(self: MainResults, currency_symbol: str):
     # Update variables for prettier terminal output
     drawdown_from_string = timestamp_to_string(self.drawdown_from)
@@ -176,6 +175,7 @@ def create_settings_table(self: MainResults, currency_symbol, justification, tes
                            f"{round(self.starting_capital, 2)} {currency_symbol}")
     settings_table.add_row("Fee percentage", f"{self.fee} %")
     settings_table.add_row("Max. open trades", str(self.max_open_trades))
+    settings_table.add_row("Exposure per trade", str(self.exposure_per_trade * 100) + " %")
     return settings_table
 
 

@@ -2,7 +2,8 @@
 import talib.abstract as ta
 from pandas import DataFrame
 from backtesting.strategy import Strategy
-
+from modules.setup.config import qtpylib_methods as qtpylib
+from modules.public import technical_indicators as indicator
 
 class IndicatorSample(Strategy):
     """
@@ -23,9 +24,9 @@ class IndicatorSample(Strategy):
         dataframe['ema5'] = ta.EMA(dataframe, timeperiod=5)
         dataframe['ema21'] = ta.EMA(dataframe, timeperiod=21)
 
-        # Momentum Indicators
-        # ------------------------------------
-        # ADX
+        # # Momentum Indicators
+        # # ------------------------------------
+        # # ADX
         # dataframe['adx'] = ta.ADX(dataframe)
 
         # # Plus Directional Indicator / Movement
@@ -64,8 +65,14 @@ class IndicatorSample(Strategy):
         # # Commodity Channel Index: values [Oversold:-100, Overbought:100]
         # dataframe['cci'] = ta.CCI(dataframe)
 
-        # RSI
+        # # RSI
         # dataframe['rsi'] = ta.RSI(dataframe)
+
+        # # Absolute Strength Histogram
+        # ash = indicator.absolute_strength_histogram(dataframe, length=9, smooth=3, mode="RSI")
+        # dataframe['smth_bulls'] = ash[0]
+        # dataframe['smth_bears'] = ash[1]
+        # dataframe['difference'] = ash[2]
 
         # # Inverse Fisher transform on RSI: values [-1.0, 1.0] (https://goo.gl/2JGGoy)
         # rsi = 0.1 * (dataframe['rsi'] - 50)
@@ -79,7 +86,7 @@ class IndicatorSample(Strategy):
         # dataframe['slowd'] = stoch['slowd']
         # dataframe['slowk'] = stoch['slowk']
 
-        # Stochastic Fast
+        # # Stochastic Fast
         # stoch_fast = ta.STOCHF(dataframe)
         # dataframe['fastd'] = stoch_fast['fastd']
         # dataframe['fastk'] = stoch_fast['fastk']
@@ -90,28 +97,43 @@ class IndicatorSample(Strategy):
         # dataframe['fastd_rsi'] = stoch_rsi['fastd']
         # dataframe['fastk_rsi'] = stoch_rsi['fastk']
 
-        # MACD
+        # # Stochastic RSI (Different implementation that corresponds with TradingView
+        # stoch_rsi = indicator.stoch_rsi(dataframe, period=14, smooth_d=3, smooth_k=3, rsi_period=14)
+        # dataframe['srsi_k'] = stoch_rsi[0]
+        # dataframe['srsi_d'] = stoch_rsi[1]
+
+        # # MACD
         # macd = ta.MACD(dataframe)
         # dataframe['macd'] = macd['macd']
         # dataframe['macdsignal'] = macd['macdsignal']
         # dataframe['macdhist'] = macd['macdhist']
 
-        # MFI
+        # # MFI
         # dataframe['mfi'] = ta.MFI(dataframe)
 
         # # ROC
         # dataframe['roc'] = ta.ROC(dataframe)
 
-        # Overlap Studies
+        # # Overlap Studies
 
-        # Bollinger Bands
+        # # Rolling VWAP
+        # dataframe['rvwap'] = qtpylib.rolling_vwap(dataframe, window=200)
+
+        # # Volume Weighted Moving Average
+        # dataframe['vwma20'] = indicator.VWMA(dataframe['close'], dataframe['volume'], 20)
+
+        # # Bollinger Bands
         # bollinger = qtpylib.bollinger_bands(qtpylib.typical_price(dataframe), window=20, stds=2)
         # dataframe['bb_lowerband'] = bollinger['lower']
         # dataframe['bb_middleband'] = bollinger['mid']
         # dataframe['bb_upperband'] = bollinger['upper']
-        # dataframe["bb_percent"] = ((dataframe["close"] - dataframe["bb_lowerband"]) / (dataframe["bb_upperband"] - dataframe["bb_lowerband"]))
+        # dataframe["bb_percent"] = (
+        #       (dataframe["close"] - dataframe["bb_lowerband"]) /
+        #       (dataframe["bb_upperband"] - dataframe["bb_lowerband"])
+        # )
         # dataframe["bb_width"] = ((dataframe["bb_upperband"] - dataframe["bb_lowerband"]) / dataframe["bb_middleband"])
-        # Bollinger Bands - Weighted (EMA based instead of SMA)
+
+        # # Bollinger Bands - Weighted (EMA based instead of SMA)
         # weighted_bollinger = qtpylib.weighted_bollinger_bands(
         #     qtpylib.typical_price(dataframe), window=20, stds=2
         # )
@@ -143,18 +165,19 @@ class IndicatorSample(Strategy):
         # dataframe['sma50'] = ta.SMA(dataframe, timeperiod=50)
         # dataframe['sma100'] = ta.SMA(dataframe, timeperiod=100)
 
-        # Parabolic SAR
+        # # Parabolic SAR
         # dataframe['sar'] = ta.SAR(dataframe)
 
-        # TEMA - Triple Exponential Moving Average
+        # # TEMA - Triple Exponential Moving Average
         # dataframe['tema'] = ta.TEMA(dataframe, timeperiod=21)
 
-        # Hilbert Transform Indicator - SineWave
+        # # Hilbert Transform Indicator - SineWave
         # hilbert = ta.HT_SINE(dataframe)
         # dataframe['htsine'] = hilbert['sine']
         # dataframe['htleadsine'] = hilbert['leadsine']
 
-        # Pattern Recognition - Bullish candlestick patterns
+        # # Pattern Recognition - Bullish candlestick patterns
+
         # # Hammer: values [0, 100]
         # dataframe['CDLHAMMER'] = ta.CDLHAMMER(dataframe)
 
@@ -192,7 +215,8 @@ class IndicatorSample(Strategy):
         # # Evening Star: values [0, 100]
         # dataframe['CDLEVENINGSTAR'] = ta.CDLEVENINGSTAR(dataframe)
 
-        # Pattern Recognition - Bullish/Bearish candlestick patterns
+        # # Pattern Recognition - Bullish/Bearish candlestick patterns
+
         # # Three Line Strike: values [0, -100, 100]
         # dataframe['CDL3LINESTRIKE'] = ta.CDL3LINESTRIKE(dataframe)
 
@@ -210,6 +234,15 @@ class IndicatorSample(Strategy):
 
         # # Three Inside Up/Down: values [0, -100, 100]
         # dataframe['CDL3INSIDE'] = ta.CDL3INSIDE(dataframe) # values [0, -100, 100]
+
+        # # Ichimoku Cloud
+        # ichimoku_cloud = indicator.ichimoku_cloud(
+        #           dataframe, conversion_length=9, base_line_length=26, lead_length=52, displacement=26
+        # )
+        # dataframe['ichi_conversion'] = ichimoku_cloud[0]
+        # dataframe['ichi_base_line'] = ichimoku_cloud[1]
+        # dataframe['ichi_lead_line1'] = ichimoku_cloud[2]
+        # dataframe['ichi_lead_line2'] = ichimoku_cloud[3]
 
         return dataframe
 

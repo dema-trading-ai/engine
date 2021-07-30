@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from test.stats.stats_test_utils import StatsFixture
 
 
@@ -49,7 +51,9 @@ def test_trailing_stoploss():
 
     fixture.frame_with_signals['COIN/BASE'] \
         .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
+        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=0, sell=0) \
         .add_entry(open=1, high=2, low=1, close=2, volume=1, buy=0, sell=0) \
+        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=0, sell=0) \
         .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=0) \
         .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=0, sell=0)
 
@@ -60,6 +64,7 @@ def test_trailing_stoploss():
     stats = fixture.create().analyze()
 
     # Assert
+    assert stats.trades[0].closed_at == datetime.fromtimestamp(5/1000)
     assert stats.main_results.end_capital == 147.015
 
 
