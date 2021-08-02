@@ -30,7 +30,7 @@ class StatsModule:
 
     def __init__(self, config: StatsConfig, frame_with_signals: PairsData, trading_module: TradingModule, df):
         self.buy_points = None
-        self.buy_points = None
+        self.sell_points = None
         self.df = df
         self.config = config
         self.trading_module = trading_module
@@ -274,17 +274,17 @@ class StatsModule:
 
     def calculate_statistics_for_plots(self, closed_trades, open_trades):
         # Used for plotting
-        self.buy_points = {pair: [] for pair in self.frame_with_signals.keys()}
-        self.sell_points = {pair: [] for pair in self.frame_with_signals.keys()}
+        self.buy_points = {pair: {} for pair in self.frame_with_signals.keys()}
+        self.sell_points = {pair: {} for pair in self.frame_with_signals.keys()}
 
         for trade in closed_trades:
             # Save buy/sell signals
-            self.buy_points[trade.pair].append(trade.opened_at)
-            self.sell_points[trade.pair].append(trade.closed_at)
+            self.buy_points[trade.pair][trade.opened_at] = trade.open
+            self.sell_points[trade.pair][trade.closed_at] = trade.close
 
         for trade in open_trades:
             # Save buy/sell signals
-            self.buy_points[trade.pair].append(trade.opened_at)
+            self.buy_points[trade.pair][trade.opened_at] = trade.open
 
     def get_left_open_trades_results(self, open_trades: [Trade]) -> list:
         left_open_trade_stats = []
