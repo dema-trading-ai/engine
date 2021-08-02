@@ -45,7 +45,7 @@ def plot_coin(config, stats, pair: str, pair_data):
     # add buy and sell signals
     fig = add_buy_sell_signal(fig, pair_data, dates)
     # add actual buy and sell moments
-    fig = add_buy_sell_points(fig, pair, dates, stats.df, stats.buypoints, stats.sellpoints)
+    fig = add_buy_sell_points(fig, pair, dates, stats.buypoints, stats.sellpoints)
     # add indicators
     fig = add_indicators(fig, dates, pair_data, config.mainplot_indicators, config.subplot_indicators)
 
