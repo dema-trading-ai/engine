@@ -9,7 +9,7 @@
 </p>
 
 # Engine
-The DemaTrading.ai Engine is an open source backtesting Engine for cryptocurrency trading as a 
+The DemaTrading.ai Engine is an open source backtesting Engine for cryptocurrency bot trading as a 
 part of [DemaTrading](https://dematrading.ai/). The Engine is completely written in the 
 programming language Python. Some experience with Python makes this process easier, 
 however with some effort this project should be runnable for everyone, no matter your experience with coding.
