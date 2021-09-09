@@ -13,7 +13,7 @@ from .strategy_definition import StrategyDefinition
 from .cctx_adapter import create_cctx_exchange
 from .currencies import get_currency_symbol
 from .validations import validate_and_read_cli
-from cli.print_utils import print_info, print_standard
+from cli.print_utils import print_info, print_standard, print_warning
 
 msec = 1000
 minute = 60 * msec
@@ -73,6 +73,9 @@ class ConfigModule(object):
         config_module.stoploss_type = config["stoploss-type"]
         config_module.max_open_trades = config["max-open-trades"]
         config_module.exposure_per_trade = config.get("exposure-per-trade", 100.) / 100.
+        if config_module.exposure_per_trade > 1.0:
+            config_module.exposure_per_trade = 1.0
+            print_warning("Exposure cannot be higher than 100. It has been reset to 100.")
         config_module.plots = config["plots"]
         config_module.tearsheet = config.get("tearsheet", False)
         config_module.roi = config["roi"]
