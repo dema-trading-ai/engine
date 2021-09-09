@@ -1,8 +1,6 @@
-import typing_extensions
-
-from cli.arg_parse import read_spec, spec_type_to_python_type
+from cli.arg_parse import read_spec
 from modules.setup.config.cli import get_cli_config
-from cli.print_utils import print_info, print_config_error, print_warning
+from cli.print_utils import print_config_error, print_warning
 
 
 def validate_and_read_cli(config: dict, args):
