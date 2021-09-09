@@ -1,6 +1,8 @@
+import typing_extensions
+
 from cli.arg_parse import read_spec, spec_type_to_python_type
 from modules.setup.config.cli import get_cli_config
-from cli.print_utils import print_info, print_config_error
+from cli.print_utils import print_info, print_config_error, print_warning
 
 
 def validate_and_read_cli(config: dict, args):
@@ -8,7 +10,6 @@ def validate_and_read_cli(config: dict, args):
     config.update(get_cli_config(args))
     validate_by_spec(config, config_spec)
     validate_single_currency_in_pairs(config)
-    validate_fee(config)
 
 
 def validate_by_spec(config, config_spec):
@@ -49,14 +50,22 @@ def is_value_of_type(param_value, t):
     return True
 
 
+def change_to_default(config, spec):
+    default_value = spec.get("default")
+    print_warning(f"Setting {spec['name']} to default value: {default_value}")
+    config[spec['name']] = default_value
+
+
 def assert_min_max(config, spec):
     param_value = config.get(spec["name"])
     min_ = spec.get("min")
     max_ = spec.get("max")
     if min_ is not None and param_value < min_:
         print_config_error(f"{spec['name']} = {param_value} is under the minimum value {min_}.")
+        change_to_default(config, spec)
     if max_ is not None and param_value > max_:
         print_config_error(f"{spec['name']} = {param_value} is above the maximum value {max_}.")
+        change_to_default(config, spec)
 
 
 def assert_in_options(config, spec):
@@ -84,31 +93,3 @@ def validate_single_currency_in_pairs(config: dict):
         if not pair[1] == currency:
             print_config_error("You can only use pairs that have the base currency you specified.")
             print_config_error("e.g., if you specified 'USDT' as your currency, you cannot add 'BTC/EUR' as a pair")
-
-
-DEFAULT_FEE = 0.25
-MAX_FEE = 0.5
-MIN_FEE = 0.1
-
-
-def validate_fee(config):
-    try:
-        input_fee = float(config["fee"])
-    except ValueError:
-        print_info(
-            f"The inputted fee value is invalid, the algorithm will use the default value of {DEFAULT_FEE}% fee")
-        return DEFAULT_FEE
-
-    if input_fee > MAX_FEE:
-        print_info(
-            f"The inputted fee value is to big, the algorithm will use the default value of {MAX_FEE}% fee")
-        return MAX_FEE
-    elif input_fee < MIN_FEE:
-        print_info(
-            f"The inputted fee value is to small, the algorithm will use the default value of {MIN_FEE}% fee")
-        return MIN_FEE
-
-    print_info(
-        f"The algorithm will use the inputted value of {input_fee}% as fee percentage.")
-
-    config["fee"] = input_fee  # make sure its a float
