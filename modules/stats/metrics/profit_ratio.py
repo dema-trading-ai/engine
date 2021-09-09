@@ -1,7 +1,9 @@
+from datetime import datetime
+
 import pandas as pd
 import numpy as np
 
-from modules.stats.trade import Trade
+from modules.stats.trade import Trade, SellReason
 
 
 def get_seen_cum_profit_ratio_per_coin(signal_dict, closed_pair_trades: [Trade], fee_percentage: float):
@@ -16,10 +18,18 @@ def get_realised_profit_ratio(signal_dict, closed_pair_trades: [Trade], fee_perc
     return get_profit_ratio(df, fee_percentage, closed_pair_trades)
 
 
+def correct_for_stoploss_roi(df, closed_pair_trades):
+    df["corrected_close"] = df["close"]
+    for trade in closed_pair_trades:
+        if trade.sell_reason == SellReason.ROI or trade.sell_reason == SellReason.STOPLOSS:
+            df.loc[datetime.timestamp(trade.closed_at) * 1000, "corrected_close"] = trade.close
+
+
 def get_profit_ratio(df, fee_percentage, closed_pair_trades):
     trades_opened_closed_timestamps = map_trades_to_opened_closed_timestamps(closed_pair_trades)
     # Copy first row to zero index to save asset value before applying fees
     df = with_copied_initial_row(df)
+    correct_for_stoploss_roi(df, closed_pair_trades)
     apply_profit_ratio(df, trades_opened_closed_timestamps)
     add_trade_fee(df, fee_percentage, trades_opened_closed_timestamps)
     df["value"] = df["profit_ratio"].cumprod()
@@ -44,7 +54,7 @@ def apply_profit_ratio(df, trades_open_closed):
         idx = np.searchsorted(df.index, open_timestamp)
         open_timestamp = df.index[max(0, idx + 1)]
 
-        df.loc[open_timestamp: close, "profit_ratio"] = (df["close"] / df["close"].shift(1))
+        df.loc[open_timestamp: close, "profit_ratio"] = (df["corrected_close"] / df["corrected_close"].shift(1))
     df["profit_ratio"] = df["profit_ratio"].fillna(1)
 
 
