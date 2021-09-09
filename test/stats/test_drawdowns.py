@@ -309,6 +309,42 @@ def test_drawdown_multiple_pairs():
     assert stats.main_results.n_consecutive_losses == 4
 
 
+def test_drawdown_with_stoploss_one_trade():
+    """Given stoploss hit, coin insight drawdown should be correct"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_one_trade()
+
+    fixture.trading_module_config.stoploss = -50
+    fixture.stats_config.stoploss = -50
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert math.isclose(stats.coin_results[0].max_seen_drawdown, -72.2222222222)
+    assert math.isclose(stats.coin_results[0].max_realised_drawdown, -50.5)
+
+
+def test_drawdown_with_stoploss_multiple_trades():
+    """Given stoploss hit, coin insight drawdown should be correct"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+
+    fixture.trading_module_config.stoploss = -50
+    fixture.stats_config.stoploss = -50
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert math.isclose(stats.coin_results[0].max_seen_drawdown, -50.5)
+    assert math.isclose(stats.coin_results[0].max_realised_drawdown, -50.5)
+
+
 def test_seen_drawdown_up_down():
     """Given 'one trade', 'seen_drawdown' should 'reflect actual'"""
     # Arrange
