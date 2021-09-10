@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 
-from tqdm import tqdm
 import numpy as np
 from collections import defaultdict
 
@@ -8,7 +7,7 @@ from cli.print_utils import print_info
 from modules.output.results import CoinInsights, MainResults, LeftOpenTradeResult
 from modules.public.pairs_data import PairsData
 from modules.public.trading_stats import TradingStats
-from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
+from modules.stats.drawdown.drawdown import get_max_drawdown_ratio, get_max_drawdown_ratio_without_buy_rows
 from modules.stats.metrics.profit_ratio import get_seen_cum_profit_ratio_per_coin, get_realised_profit_ratio
 from modules.stats.drawdown.for_portfolio import get_max_seen_drawdown_for_portfolio, \
     get_max_realised_drawdown_for_portfolio
@@ -30,7 +29,7 @@ class StatsModule:
 
     def __init__(self, config: StatsConfig, frame_with_signals: PairsData, trading_module: TradingModule, df):
         self.buy_points = None
-        self.buy_points = None
+        self.sell_points = None
         self.df = df
         self.config = config
         self.trading_module = trading_module
@@ -95,6 +94,7 @@ class StatsModule:
         max_realised_drawdown = get_max_realised_drawdown_for_portfolio(
             self.trading_module.realised_profits_per_timestamp
         )
+
         max_seen_drawdown = get_max_seen_drawdown_for_portfolio(
             self.trading_module.capital_per_timestamp
         )
@@ -231,7 +231,7 @@ class StatsModule:
                 self.config.fee,
             )
             per_coin_stats[key]["max_realised_ratio"] = \
-                get_max_drawdown_ratio(realised_cum_profit_ratio_df)
+                get_max_drawdown_ratio_without_buy_rows(realised_cum_profit_ratio_df)
 
             # Find avg, longest and shortest trade durations
             per_coin_stats[key]["avg_trade_duration"], \
@@ -274,17 +274,17 @@ class StatsModule:
 
     def calculate_statistics_for_plots(self, closed_trades, open_trades):
         # Used for plotting
-        self.buy_points = {pair: [] for pair in self.frame_with_signals.keys()}
-        self.sell_points = {pair: [] for pair in self.frame_with_signals.keys()}
+        self.buy_points = {pair: {} for pair in self.frame_with_signals.keys()}
+        self.sell_points = {pair: {} for pair in self.frame_with_signals.keys()}
 
         for trade in closed_trades:
             # Save buy/sell signals
-            self.buy_points[trade.pair].append(trade.opened_at)
-            self.sell_points[trade.pair].append(trade.closed_at)
+            self.buy_points[trade.pair][trade.opened_at] = trade.open
+            self.sell_points[trade.pair][trade.closed_at] = trade.close
 
         for trade in open_trades:
             # Save buy/sell signals
-            self.buy_points[trade.pair].append(trade.opened_at)
+            self.buy_points[trade.pair][trade.opened_at] = trade.open
 
     def get_left_open_trades_results(self, open_trades: [Trade]) -> list:
         left_open_trade_stats = []

@@ -7,7 +7,7 @@ import re
 
 # Files
 from cli.print_utils import print_warning, print_error
-from utils.utils import CURRENT_VERSION
+from utils.utils import CURRENT_VERSION, is_running_in_docker, is_running_as_executable
 
 
 def print_warning_if_version_outdated():
@@ -21,7 +21,13 @@ def print_warning_if_version_outdated():
 
     latest_version_string = semver_to_string(get_latest_tag(repository_tags))
     print_warning(f"Update available {CURRENT_VERSION} → {latest_version_string}")
-    print_warning("Run 'docker-compose pull' to update.")
+    if is_running_in_docker():
+        print_warning("Run 'docker-compose pull' to update. See https://docs.dematrading.ai for more information.")
+    elif is_running_as_executable():
+        print_warning("Check the documentation (https://docs.dematrading.ai) for instructions on how to update.")
+    else:  # git
+        print_warning("Update local version with `main` branch using `git pull origin main`. See "
+                      "https://docs.dematrading.ai for more information.")
 
 
 def semver_to_string(running_version):
