@@ -14,12 +14,13 @@
   },
   {
     "name": "max-open-trades",
-    "default": "10",
+    "default": 3,
     "min": 1,
     "type": "int"
   },
   {
     "name": "starting-capital",
+    "default": 1000,
     "min": 1.0,
     "type": "float",
     "cli": {
@@ -111,8 +112,8 @@
     "description": "fee as percentage, FI: \"0.25%\" ",
     "type": "float",
     "default": 0.25,
-    "min": 0,
-    "max": 100
+    "min": 0.1,
+    "max": 0.5
   },
   {
     "name": "strategy-name",

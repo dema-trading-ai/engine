@@ -1,15 +1,13 @@
 # Libraries
 import os
+import re
+import sys
 from pathlib import Path
 from typing import Literal
-from pandas import DataFrame
-import pandas as pd
-import rapidjson
-import re
 
 from modules.stats.trade import Trade
 
-CURRENT_VERSION = "v0.7.5"
+CURRENT_VERSION = "v0.7.6"
 
 msec = 1000
 minute = 60 * msec
@@ -60,6 +58,13 @@ def get_plot_indicators(config: dict):
 def is_running_in_docker():
     mode_env = os.getenv("RUNMODE")
     return mode_env == "docker"
+
+
+def is_running_as_executable():
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        return True
+    else:
+        return False
 
 
 def get_verbosity():
