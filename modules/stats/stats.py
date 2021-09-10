@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 
-from tqdm import tqdm
 import numpy as np
 from collections import defaultdict
 
@@ -8,7 +7,7 @@ from cli.print_utils import print_info
 from modules.output.results import CoinInsights, MainResults, LeftOpenTradeResult
 from modules.public.pairs_data import PairsData
 from modules.public.trading_stats import TradingStats
-from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
+from modules.stats.drawdown.drawdown import get_max_drawdown_ratio, get_max_drawdown_ratio_without_buy_rows
 from modules.stats.metrics.profit_ratio import get_seen_cum_profit_ratio_per_coin, get_realised_profit_ratio
 from modules.stats.drawdown.for_portfolio import get_max_seen_drawdown_for_portfolio, \
     get_max_realised_drawdown_for_portfolio
@@ -95,6 +94,7 @@ class StatsModule:
         max_realised_drawdown = get_max_realised_drawdown_for_portfolio(
             self.trading_module.realised_profits_per_timestamp
         )
+
         max_seen_drawdown = get_max_seen_drawdown_for_portfolio(
             self.trading_module.capital_per_timestamp
         )
@@ -231,7 +231,7 @@ class StatsModule:
                 self.config.fee,
             )
             per_coin_stats[key]["max_realised_ratio"] = \
-                get_max_drawdown_ratio(realised_cum_profit_ratio_df)
+                get_max_drawdown_ratio_without_buy_rows(realised_cum_profit_ratio_df)
 
             # Find avg, longest and shortest trade durations
             per_coin_stats[key]["avg_trade_duration"], \
