@@ -244,6 +244,9 @@ class IndicatorSample(Strategy):
         # dataframe['ichi_lead_line1'] = ichimoku_cloud[2]
         # dataframe['ichi_lead_line2'] = ichimoku_cloud[3]
 
+        # # Heikin Ashi candles
+        # heikin_dataframe = indicator.heikin_dataframe(dataframe)
+
         return dataframe
 
     def buy_signal(self, dataframe: DataFrame) -> DataFrame:
