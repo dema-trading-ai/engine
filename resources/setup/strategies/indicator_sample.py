@@ -165,6 +165,9 @@ class IndicatorSample(Strategy):
         # dataframe['sma50'] = ta.SMA(dataframe, timeperiod=50)
         # dataframe['sma100'] = ta.SMA(dataframe, timeperiod=100)
 
+        # HMA - Hull Moving Average
+        # dataframe['hma20'] = indicator.HMA(dataframe, timeperiod=20)
+
         # # Parabolic SAR
         # dataframe['sar'] = ta.SAR(dataframe)
 
@@ -243,6 +246,11 @@ class IndicatorSample(Strategy):
         # dataframe['ichi_base_line'] = ichimoku_cloud[1]
         # dataframe['ichi_lead_line1'] = ichimoku_cloud[2]
         # dataframe['ichi_lead_line2'] = ichimoku_cloud[3]
+
+        # # Heikin Ashi candles
+        # heikin_dataframe = indicator.heikin_dataframe(dataframe)
+        # You can then use the Heikin Ashi candles like so:
+        # dataframe['rsi_heikin'] = ta.RSI(heikin_dataframe, timeperiod=14)
 
         return dataframe
 
