@@ -249,7 +249,7 @@ class IndicatorSample(Strategy):
 
         # # Heikin Ashi candles
         # heikin_dataframe = indicator.heikin_dataframe(dataframe)
-        # You can then use it like so:
+        # You can then use the Heikin Ashi candles like so:
         # dataframe['rsi_heikin'] = ta.RSI(heikin_dataframe, timeperiod=14)
 
         return dataframe
