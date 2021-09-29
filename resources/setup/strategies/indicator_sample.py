@@ -165,6 +165,9 @@ class IndicatorSample(Strategy):
         # dataframe['sma50'] = ta.SMA(dataframe, timeperiod=50)
         # dataframe['sma100'] = ta.SMA(dataframe, timeperiod=100)
 
+        # HMA - Hull Moving Average
+        # dataframe['hma20'] = indicator.HMA(dataframe, timeperiod=20)
+
         # # Parabolic SAR
         # dataframe['sar'] = ta.SAR(dataframe)
 
@@ -246,6 +249,8 @@ class IndicatorSample(Strategy):
 
         # # Heikin Ashi candles
         # heikin_dataframe = indicator.heikin_dataframe(dataframe)
+        # You can then use it like so:
+        # dataframe['rsi_heikin'] = ta.RSI(heikin_dataframe, timeperiod=14)
 
         return dataframe
 

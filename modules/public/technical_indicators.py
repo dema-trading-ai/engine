@@ -1,5 +1,7 @@
 import talib.abstract as ta
 import pandas as pd
+import numpy as np
+
 
 def absolute_strength_histogram(dataframe, length=9, smooth=3, mode="RSI"):
     """
@@ -131,3 +133,14 @@ def heikin_dataframe(dataframe):
     heikin_dataframe = pd.DataFrame(heikin_dict)
 
     return heikin_dataframe
+
+
+def HMA(dataframe, timeperiod):
+    """
+    This function returns the Hull Moving Average, calculated over the close values of a dataframe.
+    Reference: https://github.com/DeviaVir/zenbot/issues/1426
+    :param dataframe: The candle dataframe
+    :param timeperiod: The timeperiod of the HMA
+    :return: The Hull Moving Average
+    """
+    return ta.WMA(2*ta.WMA(dataframe['close'], timeperiod // 2) - ta.WMA(dataframe['close'], timeperiod), int(np.floor(np.sqrt(timeperiod))))
