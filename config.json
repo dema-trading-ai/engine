@@ -21,6 +21,7 @@
   "strategies-folder": "resources/setup/strategies",
   "plots": true,
   "tearsheet": false,
+  "export-result": false,
   "mainplot_indicators": ["ema5", "ema21"],
   "subplot_indicators": [["volume"]]
 }
