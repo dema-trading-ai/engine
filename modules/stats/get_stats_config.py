@@ -15,6 +15,7 @@ def get_stats_config(config: ConfigModule, btc_marketchange_ratio: float, btc_dr
         backtesting_from=config.backtesting_from,
         plots=config.plots,
         tearsheet=config.tearsheet,
+        export_result=config.export_result,
         starting_capital=config.starting_capital,
         currency_symbol=config.currency_symbol,
         mainplot_indicators=config.mainplot_indicators,

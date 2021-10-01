@@ -1,3 +1,4 @@
+import dataclasses
 import json
 import os
 import pandas as pd
@@ -9,6 +10,7 @@ from modules.output.results import show_signature, CoinInsights, LeftOpenTradeRe
 from modules.public.trading_stats import TradingStats
 from modules.stats.stats_config import StatsConfig
 from modules.stats.trade import SellReason
+from modules.setup.config.strategy_definition import StrategyDefinition
 
 FONT_BOLD = "\033[1m"
 FONT_RESET = "\033[0m"
@@ -20,7 +22,7 @@ class OutputModule(object):
     def __init__(self, config: StatsConfig):
         self.config = config
 
-    def output(self, stats: TradingStats):
+    def output(self, stats: TradingStats, strategy_definition: StrategyDefinition):
         # print tables
         show_mainresults(stats.main_results, self.config.currency_symbol)
         CoinInsights.show(stats.coin_results, self.config.currency_symbol)
@@ -51,6 +53,11 @@ class OutputModule(object):
             plot_per_coin(stats, config=self.config)
             equity_plot(stats.capital_per_timestamp)
         print_info("Backtest finished!")
+
+        # Export backtest result as JSON
+        if self.config.export_result:
+            print_info("Exporting backtest report to " + FONT_BOLD + "data/backtesting-data/backtest_result.json" + FONT_RESET + "...")
+            export_backtest_result(stats, strategy_definition)
 
         show_signature()
 
@@ -90,6 +97,7 @@ def log_trades(stats: TradingStats):
     with open('./data/backtesting-data/trades_log.json', 'w', encoding='utf-8') as f:
         f.write(trades_json)
 
+
 def create_tearsheet(trades):
     dict_count = len(trades)
     df = pd.DataFrame(trades[0].__dict__, index=[0])
@@ -97,3 +105,9 @@ def create_tearsheet(trades):
         df = df.append(trades[i].__dict__, ignore_index=True)
 
     df.to_excel('data/backtesting-data/tearsheet.xlsx')
+
+    
+def export_backtest_result(stats, strategy_definition):
+    with open(f"data/backtesting-data/{strategy_definition.strategy_name}_backtest_result.json", 'w') as f:
+        json.dump(dataclasses.asdict(stats.main_results), default=str, fp=f)
+

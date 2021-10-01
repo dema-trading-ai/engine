@@ -17,5 +17,6 @@ class StatsConfig:
     backtesting_from: int
     plots: bool
     tearsheet: bool
+    export_result: bool
     starting_capital: float
     currency_symbol: Literal["USDT"]
