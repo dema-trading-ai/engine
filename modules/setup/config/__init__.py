@@ -127,7 +127,7 @@ def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtes
 
         backtesting_today = datetime.fromtimestamp(today_ms / 1000.0).strftime("%Y-%m-%d")
         print_info('Changed end date %s to %s.' % (backtesting_to_parsed, backtesting_today))
-        backtesting_to_ms = today_ms
+        backtesting_to_ms = exchange.parse8601("%sT00:00:00Z" % backtesting_today)
         backtesting_to_parsed = backtesting_today
 
     # Check for incorrect configuration

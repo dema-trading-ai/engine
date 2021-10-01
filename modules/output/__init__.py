@@ -75,18 +75,20 @@ def show_trade_anomalies(stats: TradingStats):
 
 def log_trades(stats: TradingStats):
     trades_dict = {}
-    for trade in stats.trades:
+    for i, trade in enumerate(stats.trades):
         trade_dict = {'status': trade.status,
                       'opened_at': trade.opened_at,
                       'closed_at': trade.closed_at,
                       'pair': trade.pair,
                       'open_price': trade.open,
+                      'close_price': trade.close,
                       'fee_paid': trade.fee,
                       'starting_amount': trade.starting_amount,
                       'capital': trade.capital,
                       'currency_amount': trade.currency_amount,
                       'sell_reason': trade.sell_reason}
-        trades_dict[str(trade.opened_at)] = trade_dict
+
+        trades_dict[i] = trade_dict
 
     trades_dict = dict(sorted(trades_dict.items()))
 
@@ -99,12 +101,13 @@ def log_trades(stats: TradingStats):
 def create_tearsheet(trades):
     dict_count = len(trades)
     df = pd.DataFrame(trades[0].__dict__, index=[0])
-    for i in range(1,dict_count-1):
+    for i in range(1, dict_count):
         df = df.append(trades[i].__dict__, ignore_index=True)
 
     df.to_excel('data/backtesting-data/tearsheet.xlsx')
 
-
+    
 def export_backtest_result(stats, strategy_definition):
     with open(f"data/backtesting-data/{strategy_definition.strategy_name}_backtest_result.json", 'w') as f:
         json.dump(dataclasses.asdict(stats.main_results), default=str, fp=f)
+
