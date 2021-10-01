@@ -33,6 +33,7 @@ class ConfigModule(object):
         self.starting_capital = None
         self.plots = None
         self.tearsheet = None
+        self.export_result = None
         self.backtesting_from = None
         self.backtesting_to = None
         self.max_open_trades = None
@@ -77,6 +78,7 @@ class ConfigModule(object):
             print_warning(f"Warning: Exposure is not 100% (default), this means that every trade will use {config_module.exposure_per_trade * 100}% funds per trade until either all funds are used or max open trades are open.")
         config_module.plots = config["plots"]
         config_module.tearsheet = config.get("tearsheet", False)
+        config_module.export_result = config.get("export_result", False)
         config_module.roi = config["roi"]
         config_module.currency_symbol = get_currency_symbol(config_module.raw_config)
         return config_module

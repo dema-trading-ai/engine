@@ -1,6 +1,6 @@
 {
   "exchange": "binance",
-  "timeframe": "5m",
+  "timeframe": "1h",
   "max-open-trades": 3,
   "exposure-per-trade": 100,
   "starting-capital": 1000,
@@ -19,8 +19,9 @@
   "fee": 0.25,
   "strategy-name": "MyStrategy",
   "strategies-folder": "resources/setup/strategies",
-  "plots": true,
+  "plots": false,
   "tearsheet": false,
+  "export_result": true,
   "mainplot_indicators": ["ema5", "ema21"],
   "subplot_indicators": [["volume"]]
 }

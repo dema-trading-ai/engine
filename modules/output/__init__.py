@@ -1,3 +1,4 @@
+import dataclasses
 import json
 import os
 import pandas as pd
@@ -52,6 +53,11 @@ class OutputModule(object):
             equity_plot(stats.capital_per_timestamp)
         print_info("Backtest finished!")
 
+        # Export backtest result as JSON
+        if self.config.export_result:
+            print_info("Exporting backtest report to " + FONT_BOLD + "data/backtesting-data/backtest_result.json" + FONT_RESET + "...")
+            export_backtest_result(stats)
+
         show_signature()
 
 
@@ -88,6 +94,7 @@ def log_trades(stats: TradingStats):
     with open('./data/backtesting-data/trades_log.json', 'w', encoding='utf-8') as f:
         f.write(trades_json)
 
+
 def create_tearsheet(trades):
     dict_count = len(trades)
     df = pd.DataFrame(trades[0].__dict__, index=[0])
@@ -95,3 +102,8 @@ def create_tearsheet(trades):
         df = df.append(trades[i].__dict__, ignore_index=True)
 
     df.to_excel('data/backtesting-data/tearsheet.xlsx')
+
+
+def export_backtest_result(stats):
+    with open("data/backtesting-data/backtest_result.json", 'w') as f:
+        json.dump(dataclasses.asdict(stats.main_results), default=str, fp=f)
