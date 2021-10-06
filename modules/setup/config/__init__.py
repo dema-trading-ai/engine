@@ -66,7 +66,8 @@ class ConfigModule(object):
         backtesting_to = config["backtesting-to"]
         config_module.backtesting_from, config_module.backtesting_to = config_from_to(config_module.exchange,
                                                                                       backtesting_from, backtesting_to,
-                                                                                      backtesting_till_now)
+                                                                                      backtesting_till_now,
+                                                                                      config_module.timeframe_ms)
 
         config_module.pairs = config["pairs"]
         config_module.fee = config["fee"]
@@ -108,7 +109,7 @@ def print_pairs(config_json):
     print_info("Watching pairs: %s." % pairs_string[:-1])
 
 
-def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtesting_till_now: bool) -> tuple:
+def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtesting_till_now: bool, timeframe_ms: int) -> tuple:
     # Configure milliseconds
     today_ms = exchange.milliseconds()
     backtesting_from_ms = exchange.parse8601("%sT00:00:00Z" % backtesting_from)
@@ -125,10 +126,17 @@ def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtes
         else:
             print_info("Backtesting end date extends past current date.")
 
-        backtesting_today = datetime.fromtimestamp(today_ms / 1000.0).strftime("%Y-%m-%d")
-        print_info('Changed end date %s to %s.' % (backtesting_to_parsed, backtesting_today))
-        backtesting_to_ms = exchange.parse8601("%sT00:00:00Z" % backtesting_today)
-        backtesting_to_parsed = backtesting_today
+        # Get timestamp of most recent closed candle (= without live candle data)
+        backtesting_to_ms = today_ms - (today_ms % timeframe_ms)
+
+        # Get end date (backtesting_to) in local timezone format
+        backtesting_to_parsed_local = datetime.fromtimestamp(backtesting_to_ms / 1000.0).strftime("%Y-%m-%d %H:%M")
+
+        # Inform user that the end date was overruled
+        print_info('Changed end date %s to %s.' % (backtesting_to_parsed, backtesting_to_parsed_local))
+
+        # Use end date as iso8601 timestamp (= date/time string containing timezone information)
+        backtesting_to_parsed = exchange.iso8601(backtesting_to_ms)
 
     # Check for incorrect configuration
     if backtesting_from_ms >= backtesting_to_ms:
