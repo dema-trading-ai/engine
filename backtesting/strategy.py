@@ -109,7 +109,6 @@ class Strategy(abc.ABC):
         if ffill:
             dataframe = dataframe.ffill()
 
-        # reset time column back as index
         dataframe.set_index('time', drop=False, inplace=True)
 
         return dataframe
