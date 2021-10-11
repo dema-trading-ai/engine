@@ -126,17 +126,13 @@ def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtes
         else:
             print_info("Backtesting end date extends past current date.")
 
-        # Get timestamp of most recent closed candle (= without live candle data)
-        backtesting_to_ms = today_ms - (today_ms % timeframe_ms)
-
-        # Get end date (backtesting_to) in local timezone format
-        backtesting_to_parsed_local = datetime.fromtimestamp(backtesting_to_ms / 1000.0).strftime("%Y-%m-%d %H:%M")
-
-        # Inform user that the end date was overruled
-        print_info('Changed end date %s to %s.' % (backtesting_to_parsed, backtesting_to_parsed_local))
-
-        # Use end date as iso8601 timestamp (= date/time string containing timezone information)
-        backtesting_to_parsed = exchange.iso8601(backtesting_to_ms)
+        last_closed_candle_ms = today_ms - (today_ms % timeframe_ms)
+        backtesting_to_ms = last_closed_candle_ms
+        last_closed_candle_datetime = datetime.fromtimestamp(last_closed_candle_ms / 1000.0).strftime("%Y-%m-%d %H:%M")
+        
+        print_info('Changed end date %s to %s.' % (backtesting_to_parsed, last_closed_candle_datetime))
+        
+        backtesting_to_parsed = exchange.iso8601(last_closed_candle_ms)
 
     # Check for incorrect configuration
     if backtesting_from_ms >= backtesting_to_ms:
