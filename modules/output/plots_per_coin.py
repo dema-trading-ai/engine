@@ -63,4 +63,4 @@ def plot_coin(config, stats, pair: str, pair_data):
         os.remove("data/backtesting-data/binance/plot%s.html" % pair.replace("/", ""))
     except OSError:
         pass
-    fig.write_html("data/backtesting-data/plots/plot%s.html" % pair.replace("/", ""), config={'scrollZoom': True}, auto_open=True)
+    fig.write_html("data/backtesting-data/plots/plot%s.html" % pair.replace("/", ""), config={'scrollZoom': True})
