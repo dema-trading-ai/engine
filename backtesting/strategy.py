@@ -109,6 +109,8 @@ class Strategy(abc.ABC):
         if ffill:
             dataframe = dataframe.ffill()
 
+        dataframe.set_index('time', drop=False, inplace=True)
+
         return dataframe
 
     def loss_function(self, stats: TradingStats) -> float:

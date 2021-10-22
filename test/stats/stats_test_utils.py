@@ -37,6 +37,7 @@ class StatsFixture:
             currency_symbol="USDT",
             plots=False,
             tearsheet=False,
+            export_result=False,
 
             mainplot_indicators=[],
             subplot_indicators=[]

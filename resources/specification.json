@@ -134,5 +134,13 @@
     "cli": {
       "short": "hy"
     }
+  },
+  {
+    "name": "export_result",
+    "type": "bool",
+    "default": false,
+    "cli": {
+      "short": "ex"
+    }
   }
 ]

@@ -10,7 +10,7 @@ jobs:
       - name: Run Pytest and create a coverage report
         uses: actions/setup-python@v2
         with:
-          python-version: 3.x
+          python-version: 3.9
       - run: |
           pip install pytest-cov
           pip install -r requirements-ci.txt

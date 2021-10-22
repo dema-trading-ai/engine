@@ -38,6 +38,7 @@ class Trade:
         self.current = ohlcv['close']
         self.opened_at = date
         self.closed_at = None
+        self.close = None
         self.fee = fee
         self.sell_reason = SellReason.NONE
 
