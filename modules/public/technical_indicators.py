@@ -1,4 +1,6 @@
 import talib.abstract as ta
+import pandas as pd
+import numpy as np
 
 
 def absolute_strength_histogram(dataframe, length=9, smooth=3, mode="RSI"):
@@ -98,3 +100,47 @@ def ichimoku_cloud(dataframe, conversion_length=9, base_line_length=26, lead_len
     df['ichi_lead_line2'] = ((lead_period_high + lead_period_low) / 2).shift(displacement - 1)
 
     return df['ichi_conversion'], df['ichi_base_line'], df['ichi_lead_line1'], df['ichi_lead_line2']
+
+
+def heikin_dataframe(dataframe):
+    """
+    This function returns a dataframe with heikin ashi candles, based on the original dataframe passed to it as
+    an argument
+    :param dataframe: The original ohlcv candle dataframe
+    :return: Heikin Ashi candle dataframe
+    """
+    # Heikin Open = (Open of Prev. Bar + Close of Prev. Bar) / 2
+    dataframe['heikin_open'] = (dataframe['open'].shift(1) + dataframe['close'].shift(1)) / 2
+
+    # Heikin Close = (Open + High + Low + Close) / 4
+    dataframe['heikin_close'] = (dataframe['open'] + dataframe['high'] + dataframe['low'] + dataframe['close']) / 4
+
+    # Heikin Low = Min[Low,  Open, Close] - (same as candlesticks)
+    dataframe['heikin_low'] = dataframe['low']
+
+    # Heikin high = Max[Low,  Open, Close] - (same as candlesticks)
+    dataframe['heikin_high'] = dataframe['high']
+
+    # Make a separate dict for the heikin values
+    heikin_dict = {
+        'open': dataframe['heikin_open'],
+        'high': dataframe['heikin_high'],
+        'low': dataframe['heikin_low'],
+        'close': dataframe['heikin_close'],
+        'volume': dataframe['volume']
+    }
+
+    heikin_dataframe = pd.DataFrame(heikin_dict)
+
+    return heikin_dataframe
+
+
+def HMA(dataframe, timeperiod):
+    """
+    This function returns the Hull Moving Average, calculated over the close values of a dataframe.
+    Reference: https://github.com/DeviaVir/zenbot/issues/1426
+    :param dataframe: The candle dataframe
+    :param timeperiod: The timeperiod of the HMA
+    :return: The Hull Moving Average
+    """
+    return ta.WMA(2*ta.WMA(dataframe['close'], timeperiod // 2) - ta.WMA(dataframe['close'], timeperiod), int(np.floor(np.sqrt(timeperiod))))

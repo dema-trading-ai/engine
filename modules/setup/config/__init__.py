@@ -33,6 +33,7 @@ class ConfigModule(object):
         self.starting_capital = None
         self.plots = None
         self.tearsheet = None
+        self.export_result = None
         self.backtesting_from = None
         self.backtesting_to = None
         self.max_open_trades = None
@@ -65,7 +66,8 @@ class ConfigModule(object):
         backtesting_to = config["backtesting-to"]
         config_module.backtesting_from, config_module.backtesting_to = config_from_to(config_module.exchange,
                                                                                       backtesting_from, backtesting_to,
-                                                                                      backtesting_till_now)
+                                                                                      backtesting_till_now,
+                                                                                      config_module.timeframe_ms)
 
         config_module.pairs = config["pairs"]
         config_module.fee = config["fee"]
@@ -77,6 +79,7 @@ class ConfigModule(object):
             print_warning(f"Warning: Exposure is not 100% (default), this means that every trade will use {config_module.exposure_per_trade * 100}% funds per trade until either all funds are used or max open trades are open.")
         config_module.plots = config["plots"]
         config_module.tearsheet = config.get("tearsheet", False)
+        config_module.export_result = config.get("export-result", False)
         config_module.roi = config["roi"]
         config_module.currency_symbol = get_currency_symbol(config_module.raw_config)
         return config_module
@@ -106,7 +109,7 @@ def print_pairs(config_json):
     print_info("Watching pairs: %s." % pairs_string[:-1])
 
 
-def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtesting_till_now: bool) -> tuple:
+def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtesting_till_now: bool, timeframe_ms: int) -> tuple:
     # Configure milliseconds
     today_ms = exchange.milliseconds()
     backtesting_from_ms = exchange.parse8601("%sT00:00:00Z" % backtesting_from)
@@ -123,10 +126,13 @@ def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtes
         else:
             print_info("Backtesting end date extends past current date.")
 
-        backtesting_today = datetime.fromtimestamp(today_ms / 1000.0).strftime("%Y-%m-%d")
-        print_info('Changed end date %s to %s.' % (backtesting_to_parsed, backtesting_today))
-        backtesting_to_ms = today_ms
-        backtesting_to_parsed = backtesting_today
+        last_closed_candle_ms = today_ms - (today_ms % timeframe_ms)
+        backtesting_to_ms = last_closed_candle_ms
+        last_closed_candle_datetime = datetime.fromtimestamp(last_closed_candle_ms / 1000.0).strftime("%Y-%m-%d %H:%M")
+        
+        print_info('Changed end date %s to %s.' % (backtesting_to_parsed, last_closed_candle_datetime))
+        
+        backtesting_to_parsed = exchange.iso8601(last_closed_candle_ms)
 
     # Check for incorrect configuration
     if backtesting_from_ms >= backtesting_to_ms:

@@ -33,7 +33,7 @@ class BacktestRunner:
 
     def run_outputted_backtest(self):
         stats = self.run_backtest()
-        OutputModule(self.stats_config).output(stats)
+        OutputModule(self.stats_config).output(stats, self.module.strategy_definition)
 
 
 @asynccontextmanager
