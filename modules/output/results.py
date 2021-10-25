@@ -43,6 +43,7 @@ def format_time_difference(avg_trade_duration_unformatted: timedelta) -> str:
         avg_trade_duration = '-'
     return avg_trade_duration
 
+
 def show_mainresults(self: MainResults, currency_symbol: str):
     # Update variables for prettier terminal output
     drawdown_from_string = timestamp_to_string(self.drawdown_from)
