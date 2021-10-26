@@ -23,11 +23,6 @@ from utils.utils import get_ohlcv_indicators, parse_timeframe
 # © 2021 DemaTrading.ai
 # ======================================================================
 
-milliseconds = 1000
-minute = 60 * milliseconds
-hour = 60 * minute
-day = 24 * hour
-
 
 class DataModule:
 
