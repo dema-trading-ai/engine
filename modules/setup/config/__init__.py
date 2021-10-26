@@ -27,6 +27,7 @@ class ConfigModule(object):
     timeframe_ms: int
 
     def __init__(self):
+        self.plot_log_scale = None
         self.subplot_indicators = None
         self.mainplot_indicators = None
         self.currency_symbol = None
@@ -53,6 +54,7 @@ class ConfigModule(object):
 
         config_module.mainplot_indicators = config["mainplot_indicators"]
         config_module.subplot_indicators = transform_subplot_config(config["subplot_indicators"])
+        config_module.plot_log_scale = config["plot_log_scale"]
         config_module.starting_capital = float(config["starting-capital"])
         config_module.raw_config = config  # TODO remove, should be typed
         exchange_str = config["exchange"]

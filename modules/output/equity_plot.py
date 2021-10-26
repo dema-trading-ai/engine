@@ -4,7 +4,10 @@ import pandas as pd
 
 from plotly import graph_objects as go
 
-def equity_plot(capital_dict):
+from modules.stats.stats_config import StatsConfig
+
+
+def equity_plot(capital_dict, config: StatsConfig):
     Path("data/backtesting-data/plots/equity").mkdir(parents=True, exist_ok=True)
     df = pd.DataFrame(list(capital_dict.items()))
 
@@ -21,5 +24,8 @@ def equity_plot(capital_dict):
     # create figure
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=dates, y=df[1], fill='tozeroy'))  # fill down to xaxis
-    fig.update_yaxes(range=[min_value, max_value])
+    if config.plot_log_scale:
+        fig.update_layout(yaxis_type="log")
+    else:
+        fig.update_yaxes(range=[min_value, max_value])
     fig.write_html("data/backtesting-data/plots/equity/equityplot.html", auto_open=False)
