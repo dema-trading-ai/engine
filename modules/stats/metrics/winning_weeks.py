@@ -46,6 +46,7 @@ def get_winning_weeks_for_portfolio(capital_per_timestamp, market_change_weekly)
                                              index=capital_per_timestamp.keys(),
                                              columns=['capital']).iloc[1:]
 
+        profit_ratio = capital_per_timestamp_df['capital'].div(capital_per_timestamp_df['capital'].shift(1))
         # Set index to datetime and resample to one week
         capital_per_timestamp_df.index = \
             [datetime.fromtimestamp(ms / 1000.0) for ms in capital_per_timestamp_df.index]
@@ -56,10 +57,11 @@ def get_winning_weeks_for_portfolio(capital_per_timestamp, market_change_weekly)
             capital_per_timestamp_weekly['close'] / capital_per_timestamp_weekly['open']
 
         # Define the winning weeks
-        wins = len(capital_per_timestamp_weekly[capital_per_timestamp_weekly['weekly_profit'] >
-                                                combined_market_change_df['avg_market_change']])
-        losses = len(capital_per_timestamp_weekly[capital_per_timestamp_weekly['weekly_profit'] <
-                                                  combined_market_change_df['avg_market_change']])
+        wins = len(capital_per_timestamp_weekly[capital_per_timestamp_weekly['weekly_profit'].round(10) >
+                                                combined_market_change_df['avg_market_change'].round(10)])
+        losses = len(capital_per_timestamp_weekly[capital_per_timestamp_weekly['weekly_profit'].round(10) <
+                                                  combined_market_change_df['avg_market_change'].round(10)])
         draws = len(capital_per_timestamp_weekly) - wins - losses
+
         return wins, draws, losses
     return 0, 0, 0
