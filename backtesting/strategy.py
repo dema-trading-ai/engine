@@ -103,7 +103,7 @@ class Strategy(abc.ABC):
         add_df.columns = [f"{col}_{pair}_{timeframe_additional}" for col in add_df.columns]
 
         dataframe = pd.merge(dataframe, add_df, left_on='time',
-                             right_on=f'date_merge_{pair}_{timeframe_additional}', how='left')
+                             right_on=f'date_merge_{pair}_{timeframe_additional}', how='left').set_index('time', drop=False)
         dataframe = dataframe.drop(f'date_merge_{pair}_{timeframe_additional}', axis=1)
 
         if ffill:
