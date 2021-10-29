@@ -64,6 +64,14 @@
     }
   },
   {
+    "name": "plot_log_scale",
+    "type": "dict",
+    "default": {
+      "equity": true,
+      "per_coin": false
+    }
+  },
+  {
     "name": "stoploss-type",
     "default": "standard",
     "options": [
