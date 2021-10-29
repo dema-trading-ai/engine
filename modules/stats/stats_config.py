@@ -16,6 +16,7 @@ class StatsConfig:
     btc_drawdown_ratio: float
     backtesting_to: int
     backtesting_from: int
+    timeframe: str
     plots: bool
     tearsheet: bool
     export_result: bool
