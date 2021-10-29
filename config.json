@@ -20,7 +20,10 @@
   "strategy-name": "MyStrategy",
   "strategies-folder": "resources/setup/strategies",
   "plots": true,
-  "plot_log_scale": false,
+  "plot_log_scale": {
+    "equity": true,
+    "per_coin": false
+  },
   "tearsheet": false,
   "export-result": false,
   "mainplot_indicators": ["ema5", "ema21"],

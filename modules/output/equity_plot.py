@@ -24,7 +24,7 @@ def equity_plot(capital_dict, config: StatsConfig):
     # create figure
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=dates, y=df[1], fill='tozeroy'))  # fill down to xaxis
-    if config.plot_log_scale:
+    if config.plot_log_scale['equity']:
         fig.update_layout(yaxis_type="log")
     else:
         fig.update_yaxes(range=[min_value, max_value])

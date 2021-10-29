@@ -4,7 +4,7 @@ from typing import Literal
 
 @dataclass
 class StatsConfig:
-    plot_log_scale: bool
+    plot_log_scale: dict
     mainplot_indicators: list
     subplot_indicators: list
     fee: float
