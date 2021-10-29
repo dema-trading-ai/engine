@@ -169,6 +169,8 @@ class StatsModule:
 
             coin_insight = CoinInsights(pair=coin,
                                         n_trades=stats[coin]['amount_of_trades'],
+                                        n_wins=stats[coin]['amount_of_winning_trades'],
+                                        n_losses=stats[coin]['amount_of_losing_trades'],
                                         market_change=(market_change[coin] - 1) * 100,
                                         market_drawdown=(market_drawdown[coin] - 1) * 100,
                                         cum_profit_percentage=stats[coin]['cum_profit_prct'],
@@ -197,6 +199,8 @@ class StatsModule:
                 'total_profit_ratio': 1.0,
                 'total_profit_amount': 0.0,
                 'amount_of_trades': 0,
+                'amount_of_winning_trades': 0,
+                'amount_of_losing_trades': 0,
                 'peak_ratio': 1.0,
                 'drawdown_ratio': 1.0,
                 'total_ratio': 1.0,
@@ -260,6 +264,10 @@ class StatsModule:
                 # Update profit and amount of trades
                 per_coin_stats[key]['total_profit_amount'] += trade.profit_dollar
                 per_coin_stats[key]['amount_of_trades'] += 1
+                if trade.profit_ratio > 1:
+                    per_coin_stats[key]['amount_of_winning_trades'] += 1
+                if trade.profit_ratio < 1:
+                    per_coin_stats[key]['amount_of_losing_trades'] += 1
                 per_coin_stats[key]['sell_reasons'][trade.sell_reason] += 1
 
                 # Check for max realised drawdown
