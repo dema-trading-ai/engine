@@ -1,3 +1,5 @@
+import sys
+
 from cli.arg_parse import read_spec
 from modules.setup.config.cli import get_cli_config
 from cli.print_utils import print_config_error, print_warning
@@ -72,16 +74,15 @@ def assert_in_options(config, spec):
     if options is None:
         return
     if param_value not in options:
-        print_config_error(f"spec['name'] = {param_value} is not a valid option, choose one from: "
+        print_config_error(f"{spec['name']} = {param_value} is not a valid option, choose one from: "
                            f"{options}.")
+        sys.exit()
 
 
 def validate_single_currency_in_pairs(config: dict):
     """Checks whether every pair (e.g., BTC/USDT) contains
     the same currency as specified under the name 'currency'
     in the configuration.
-    :param config: json configuration
-    :type config: dict
     """
     pairs = config["pairs"]
     currency = config["currency"]
@@ -91,3 +92,4 @@ def validate_single_currency_in_pairs(config: dict):
         if not pair[1] == currency:
             print_config_error("You can only use pairs that have the base currency you specified.")
             print_config_error("e.g., if you specified 'USDT' as your currency, you cannot add 'BTC/EUR' as a pair")
+            sys.exit()
