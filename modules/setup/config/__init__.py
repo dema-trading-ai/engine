@@ -13,7 +13,7 @@ from .strategy_definition import StrategyDefinition
 from .cctx_adapter import create_cctx_exchange
 from .currencies import get_currency_symbol
 from .validations import validate_and_read_cli
-from cli.print_utils import print_info, print_standard, print_warning, print_error
+from cli.print_utils import print_info, print_standard, print_warning
 
 msec = 1000
 minute = 60 * msec
@@ -118,12 +118,8 @@ def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtes
     backtesting_to_ms = exchange.parse8601("%sT00:00:00Z" % backtesting_to)
 
     # Get parsed dates
-    try:
-        backtesting_from_parsed = datetime.fromtimestamp(backtesting_from_ms / 1000.0).strftime("%Y-%m-%d")
-        backtesting_to_parsed = datetime.fromtimestamp(backtesting_to_ms / 1000.0).strftime("%Y-%m-%d")
-    except TypeError:
-        print_error("Backtesting periods are formatted incorrectly. The correct format is YYYY-MM-DD.")
-        sys.exit()
+    backtesting_from_parsed = datetime.fromtimestamp(backtesting_from_ms / 1000.0).strftime("%Y-%m-%d")
+    backtesting_to_parsed = datetime.fromtimestamp(backtesting_to_ms / 1000.0).strftime("%Y-%m-%d")
 
     # Define correct end date
     if backtesting_till_now or today_ms < backtesting_to_ms:
