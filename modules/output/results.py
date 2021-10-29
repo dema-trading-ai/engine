@@ -168,6 +168,7 @@ def create_settings_table(self: MainResults, currency_symbol, justification, tes
     settings_table.add_row("Engine version", CURRENT_VERSION)
     settings_table.add_row("Backtesting from", tested_from_string)
     settings_table.add_row("Backtesting to", tested_to_string)
+    settings_table.add_row("Timeframe", self.timeframe)
     stoploss_setting = f"{self.stoploss} % ({self.stoploss_type})" if \
         self.stoploss_type != 'dynamic' else self.stoploss_type
     settings_table.add_row("Stoploss", stoploss_setting)
