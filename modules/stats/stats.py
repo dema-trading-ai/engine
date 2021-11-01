@@ -35,6 +35,9 @@ class StatsModule:
         self.trading_module = trading_module
         self.frame_with_signals = frame_with_signals
 
+        if self.config.stoploss_type == 'standard':
+            self.config.stoploss_type = 'static'
+
     def analyze(self) -> TradingStats:
         pairs = list(self.frame_with_signals.keys())
         ticks = list(self.frame_with_signals[pairs[0]].keys()) if pairs else []
