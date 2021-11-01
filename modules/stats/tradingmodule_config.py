@@ -13,7 +13,7 @@ class TradingModuleConfig:
     roi: dict
     starting_capital: float
     stoploss: float
-    stoploss_type: Literal["standard", "trailing", "dynamic"]
+    stoploss_type: Literal["static", "trailing", "dynamic"]
 
 
 def create_trading_module_config(config: ConfigModule):

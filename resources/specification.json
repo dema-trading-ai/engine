@@ -65,8 +65,9 @@
   },
   {
     "name": "stoploss-type",
-    "default": "standard",
+    "default": "static",
     "options": [
+      "static",
       "standard",
       "trailing",
       "dynamic"
