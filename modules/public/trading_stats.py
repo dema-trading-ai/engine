@@ -10,6 +10,7 @@ from modules.public.pairs_data import PairsData
 class MainResults:
     tested_from: datetime
     tested_to: datetime
+    timeframe: str
     max_open_trades: int
     exposure_per_trade: float
     market_change_coins: float

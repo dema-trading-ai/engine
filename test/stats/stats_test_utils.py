@@ -28,12 +28,13 @@ class StatsFixture:
             starting_capital=100,
             backtesting_from=1,
             backtesting_to=10,
+            timeframe='1ms',
             btc_marketchange_ratio=1,
             btc_drawdown_ratio=1,
             fee=FEE_PERCENTAGE,
 
             stoploss=STOPLOSS,
-            stoploss_type="standard",
+            stoploss_type="static",
             currency_symbol="USDT",
             plots=False,
             tearsheet=False,
@@ -50,7 +51,7 @@ class StatsFixture:
             starting_capital=STARTING_CAPITAL,
             fee=FEE_PERCENTAGE,
             pairs=pairs,
-            stoploss_type="standard",
+            stoploss_type="static",
             roi={"0": int(9999999999)}
         )
 
