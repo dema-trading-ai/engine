@@ -13,7 +13,7 @@ from .strategy_definition import StrategyDefinition
 from .cctx_adapter import create_cctx_exchange
 from .currencies import get_currency_symbol
 from .validations import validate_and_read_cli
-from cli.print_utils import print_info, print_standard, print_warning
+from cli.print_utils import print_info, print_standard, print_warning, print_error
 
 msec = 1000
 minute = 60 * msec
@@ -116,8 +116,12 @@ def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtes
     backtesting_to_ms = exchange.parse8601("%sT00:00:00Z" % backtesting_to)
 
     # Get parsed dates
-    backtesting_from_parsed = datetime.fromtimestamp(backtesting_from_ms / 1000.0).strftime("%Y-%m-%d")
-    backtesting_to_parsed = datetime.fromtimestamp(backtesting_to_ms / 1000.0).strftime("%Y-%m-%d")
+    try:
+        backtesting_from_parsed = datetime.fromtimestamp(backtesting_from_ms / 1000.0).strftime("%Y-%m-%d")
+        backtesting_to_parsed = datetime.fromtimestamp(backtesting_to_ms / 1000.0).strftime("%Y-%m-%d")
+    except TypeError:
+        print_error("Backtesting periods are formatted incorrectly. The correct format is YYYY-MM-DD.")
+        sys.exit()
 
     # Define correct end date
     if backtesting_till_now or today_ms < backtesting_to_ms:
@@ -129,9 +133,9 @@ def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtes
         last_closed_candle_ms = today_ms - (today_ms % timeframe_ms)
         backtesting_to_ms = last_closed_candle_ms
         last_closed_candle_datetime = datetime.fromtimestamp(last_closed_candle_ms / 1000.0).strftime("%Y-%m-%d %H:%M")
-        
+
         print_info('Changed end date %s to %s.' % (backtesting_to_parsed, last_closed_candle_datetime))
-        
+
         backtesting_to_parsed = exchange.iso8601(last_closed_candle_ms)
 
     # Check for incorrect configuration
