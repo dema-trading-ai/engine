@@ -7,7 +7,7 @@ from typing import Literal
 
 from modules.stats.trade import Trade
 
-CURRENT_VERSION = "v0.7.7"
+CURRENT_VERSION = "v0.7.8"
 
 MILLISECONDS = 1000
 MINUTE = 60 * MILLISECONDS
