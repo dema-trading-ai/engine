@@ -189,6 +189,8 @@ class CoinInsights:
     avg_profit_percentage: float
     profit: float
     n_trades: int
+    n_wins: int
+    n_losses: int
     market_change: float
     market_drawdown: float
     max_seen_drawdown: float
@@ -230,11 +232,11 @@ class CoinInsights:
                                        colorize(round(c.market_drawdown, 2), 0),
                                        colorize(round(c.max_seen_drawdown, 2), 0),
                                        colorize(round(c.max_realised_drawdown, 2), 0),
-                                       f"{c.win_weeks} / {c.draw_weeks} / {c.loss_weeks}",
+                                       f"{c.win_weeks} / {c.draw_weeks}/ {c.loss_weeks}",
                                        )
 
             coin_signal_table.add_row(c.pair,
-                                      str(c.n_trades),
+                                      f"{c.n_trades} ([bright_green]{c.n_wins}[/bright_green]/[bright_red]{c.n_losses}[/bright_red])",
                                       str(shortest_trade_duration),
                                       str(avg_trade_duration),
                                       str(longest_trade_duration),
@@ -254,7 +256,7 @@ class CoinInsights:
     def create_coin_signals_table(justification) -> Table:
         coin_signal_table = Table(title="Coin Signals", box=box.ROUNDED, width=100)
         coin_signal_table.add_column("Pair", justify=justification)
-        coin_signal_table.add_column("Trades", justify=justification)
+        coin_signal_table.add_column("Trades (W/L)", justify=justification)
         coin_signal_table.add_column("Shortest trade duration", justify=justification)
         coin_signal_table.add_column("Avg. trade duration", justify=justification)
         coin_signal_table.add_column("Longest trade duration", justify=justification)
