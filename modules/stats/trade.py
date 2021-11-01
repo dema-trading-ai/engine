@@ -57,16 +57,6 @@ class Trade:
         self.update_profits()
 
     def close_trade(self, reason: SellReason, date: datetime) -> None:
-        """
-        Closes this trade and updates stats according to latest data.
-
-        :param reason: reason why trade is closed
-        :type reason: string
-        :param date: date at which trade is opened
-        :type date: datetime
-        :return: None
-        :rtype: None
-        """
         self.status = 'closed'
         self.sell_reason = reason
         self.close = self.current
@@ -94,14 +84,16 @@ class Trade:
             if 'stoploss' in ohlcv:
                 self.sl_sell_time, self.sl_ratio = self.dynamic_stoploss(data_dict, ohlcv['time'])
             else:
-                self.sl_type = 'standard'   # when dynamic not configured use normal stoploss
-        if self.sl_type == 'standard':
+                self.sl_type = 'static'   # when dynamic not configured use static stoploss
+        if self.sl_type == 'standard':   # for backwards compatability - can be removed in the future
+            self.sl_type = 'static'
+        if self.sl_type == 'static':
             self.sl_ratio = 1 - (abs(self.sl_perc) / 100)
         elif self.sl_type == 'trailing':
             self.sl_sell_time, self.sl_ratio = self.trailing_stoploss(data_dict, ohlcv['time'])
 
     def check_for_sl(self, ohlcv: dict) -> bool:
-        if self.sl_type == 'standard':
+        if self.sl_type == 'static':
             lowest_ratio = (ohlcv['low'] * self.currency_amount) / self.starting_amount
             if lowest_ratio <= self.sl_ratio:
                 self.current = (self.sl_ratio * self.starting_amount) / self.currency_amount
