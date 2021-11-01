@@ -84,7 +84,7 @@ class BackTesting:
                     df[['open', 'high', 'low', 'close', 'volume', 'pair']]
             ):
                 print_error(
-                    "Cannot overwrite OHLCV data in strategy.")
+                    "It is not allowed to edit OHLCV data in your strategy. In order to use edited OHLCV data, be sure to save it in a different variable.")
                 sys.exit()
         if notify:
             print_warning(f"Dynamic stoploss {notify_reason}. Using standard stoploss of "
