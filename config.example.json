@@ -7,7 +7,7 @@
   "backtesting-from": "2021-03-11",
   "backtesting-to": "2021-03-22",
   "backtesting-till-now": "False",
-  "stoploss-type": "standard",
+  "stoploss-type": "static",
   "stoploss": "-20",
   "roi": {
     "0": 5,

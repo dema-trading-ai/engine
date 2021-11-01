@@ -7,12 +7,12 @@ from typing import Literal
 
 from modules.stats.trade import Trade
 
-CURRENT_VERSION = "v0.7.7"
+CURRENT_VERSION = "v0.7.8"
 
-msec = 1000
-minute = 60 * msec
-hour = 60 * minute
-day = 24 * hour
+MILLISECONDS = 1000
+MINUTE = 60 * MILLISECONDS
+HOUR = 60 * MINUTE
+DAY = 24 * HOUR
 
 
 def get_project_root():
@@ -81,9 +81,9 @@ def parse_timeframe(timeframe_str: str):
         raise Exception("[ERROR] Error whilst parsing timeframe")
     items = re.split(r'([0-9]+)', timeframe_str)
     if items[2] == 'm':
-        timeframe_time = int(items[1]) * minute
+        timeframe_time = int(items[1]) * MINUTE
     elif items[2] == 'h':
-        timeframe_time = int(items[1]) * hour
+        timeframe_time = int(items[1]) * HOUR
     else:
         raise Exception("[ERROR] Error whilst parsing timeframe")  # TODO
     return timeframe_time

@@ -47,8 +47,6 @@ class BackTesting:
         Populates indicators
         Populates buy signal
         Populates sell signal
-        :return: dict containing OHLCV data per pair
-        @param trial:
         """
         data_dict = {}
         notify = False
@@ -84,9 +82,12 @@ class BackTesting:
                     df[['open', 'high', 'low', 'close', 'volume', 'pair']]
             ):
                 print_error(
-                    "Cannot set OHLCV data in strategy.")
+                    "It is not allowed to edit OHLCV data in your strategy. In order to use edited OHLCV data, be sure to save it in a different variable.")
                 sys.exit()
         if notify:
-            print_warning(f"Dynamic stoploss {notify_reason}. Using standard stoploss of "
+            print_warning(f"Dynamic stoploss {notify_reason}. Using static stoploss of "
                           f"{self.config.stoploss}%.")
+        if stoploss_type == 'standard':
+            self.config.stoploss_type = 'static'
+            print_warning(f"The use of 'standard' is deprecated. Using static stoploss of {self.config.stoploss}%.")
         return data_dict
