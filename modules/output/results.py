@@ -112,7 +112,7 @@ def create_trade_info_table(self, justification) -> Table:
     trade_info_table.add_row('Shortest trade duration', str(shortest_trade_duration))
     trade_info_table.add_row('Avg. trade duration', str(avg_trade_duration))
     trade_info_table.add_row('Longest trade duration', str(longest_trade_duration))
-    trade_info_table.add_row('Winning weeks (W/D/L)', f'{self.win_weeks} / {self.draw_weeks}'
+    trade_info_table.add_row('Weekly market perf. (W/D/L)', f'{self.win_weeks} / {self.draw_weeks}'
                                                       f' / {self.loss_weeks}')
     return trade_info_table
 
@@ -274,7 +274,7 @@ class CoinInsights:
         coin_metrics_table.add_column("Max. seen drawdown (%)", justify=justification)
         coin_metrics_table.add_column("Max. realised drawdown (%)",
                                       justify=justification)
-        coin_metrics_table.add_column("Winning weeks (W/D/L)",
+        coin_metrics_table.add_column("Weekly market perf. (W/D/L)",
                                       justify=justification)
         return coin_metrics_table
 
