@@ -20,11 +20,14 @@ minute = 60 * msec
 hour = 60 * minute
 day = 24 * hour
 
+STRATEGY_NAME: str
+
 
 class ConfigModule(object):
     raw_config: dict
     timeframe: str
     timeframe_ms: int
+    strategy_name: str
 
     def __init__(self):
         self.subplot_indicators = None
@@ -58,6 +61,7 @@ class ConfigModule(object):
         exchange_str = config["exchange"]
         config_module.timeframe = config["timeframe"]
         config_module.timeframe_ms = parse_timeframe(config_module.timeframe)
+        ConfigModule.strategy_name = config['strategy-name']
         config_module.strategy_definition = StrategyDefinition(config['strategy-name'], config['strategies-folder'])
         config_module.exchange_name = exchange_str
         config_module.exchange = create_cctx_exchange(config_module.exchange_name, config_module.timeframe)

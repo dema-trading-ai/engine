@@ -11,6 +11,7 @@ from rich import box
 from cli.print_utils import print_standard, console_color
 from modules.public.trading_stats import MainResults
 from utils.utils import CURRENT_VERSION
+from modules.setup.config import ConfigModule
 
 
 def show_signature():
@@ -167,6 +168,7 @@ def create_settings_table(self: MainResults, currency_symbol, justification, tes
                               width=25)
     settings_table.add_column(justify=justification, width=20)
     settings_table.add_row("Engine version", CURRENT_VERSION)
+    settings_table.add_row("Strategy", ConfigModule.strategy_name)
     settings_table.add_row("Backtesting from", tested_from_string)
     settings_table.add_row("Backtesting to", tested_to_string)
     settings_table.add_row("Timeframe", self.timeframe)
