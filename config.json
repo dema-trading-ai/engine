@@ -7,7 +7,7 @@
   "backtesting-from": "2020-09-01",
   "backtesting-to": "2021-09-01",
   "backtesting-till-now": false,
-  "stoploss-type": "standard",
+  "stoploss-type": "static",
   "stoploss": -10,
   "roi": {
     "0": 5,

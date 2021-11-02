@@ -34,7 +34,7 @@ class StatsFixture:
             fee=FEE_PERCENTAGE,
 
             stoploss=STOPLOSS,
-            stoploss_type="standard",
+            stoploss_type="static",
             currency_symbol="USDT",
             plots=False,
             plot_log_scale={"equity": False, "per_plot": False},
@@ -52,7 +52,7 @@ class StatsFixture:
             starting_capital=STARTING_CAPITAL,
             fee=FEE_PERCENTAGE,
             pairs=pairs,
-            stoploss_type="standard",
+            stoploss_type="static",
             roi={"0": int(9999999999)}
         )
 
