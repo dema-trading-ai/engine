@@ -54,8 +54,19 @@ def plot_coin(config, stats, pair: str, pair_data):
         title='%s Chart' % pair,
         yaxis_title=pair,
         template='ggplot2',
-        dragmode='pan')
-    if config.plot_log_scale['per_coin']:
-        fig.update_layout(yaxis_type="log")
+        dragmode='pan',
+        updatemenus=[
+            dict(
+                buttons=[
+                     dict(label="Linear scale",
+                          method="relayout",
+                          args=[{"yaxis.type": "linear"}]),
+                     dict(label="Log scale",
+                          method="relayout",
+                          args=[{"yaxis.type": "log"}])
+                ]
+            )
+        ]
+    )
 
     fig.write_html("data/backtesting-data/plots/plot%s.html" % pair.replace("/", ""), config={'scrollZoom': True})

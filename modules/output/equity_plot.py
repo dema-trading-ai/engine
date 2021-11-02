@@ -4,10 +4,8 @@ import pandas as pd
 
 from plotly import graph_objects as go
 
-from modules.stats.stats_config import StatsConfig
 
-
-def equity_plot(capital_dict, config: StatsConfig):
+def equity_plot(capital_dict):
     Path("data/backtesting-data/plots/equity").mkdir(parents=True, exist_ok=True)
     df = pd.DataFrame(list(capital_dict.items()))
 
@@ -24,8 +22,19 @@ def equity_plot(capital_dict, config: StatsConfig):
     # create figure
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=dates, y=df[1], fill='tozeroy'))  # fill down to xaxis
-    if config.plot_log_scale['equity']:
-        fig.update_layout(yaxis_type="log")
-    else:
-        fig.update_yaxes(range=[min_value, max_value])
+    fig.update_layout(
+        updatemenus=[
+            dict(
+                buttons=[
+                     dict(label="Log scale",
+                          method="relayout",
+                          args=[{"yaxis.type": "log"}]),
+                     dict(label="Linear scale",
+                          method="relayout",
+                          args=[{"yaxis.type": "linear"}])
+                ]
+            )
+        ]
+    )
+    fig.update_layout(yaxis_type="log")
     fig.write_html("data/backtesting-data/plots/equity/equityplot.html", auto_open=False)
