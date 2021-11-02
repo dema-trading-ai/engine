@@ -37,7 +37,6 @@ class StatsFixture:
             stoploss_type="static",
             currency_symbol="USDT",
             plots=False,
-            plot_log_scale={"equity": False, "per_plot": False},
             tearsheet=False,
             export_result=False,
 
