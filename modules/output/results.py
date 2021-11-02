@@ -78,7 +78,7 @@ def show_mainresults(self: MainResults, currency_symbol: str):
 
     # Create grid for all tables
     table_grid = Table(box=box.SIMPLE)
-    table_grid.add_column(":robot: BACKTESTING RESULTS :robot:")
+    table_grid.add_column(f":robot: {ConfigModule.strategy_name}'s backtest brought to you by DemaTrading.ai's engine :robot:")
     table_grid.add_row(settings_table)
     table_grid.add_row(performance_table, trade_info_table)
     console_color.print(table_grid)
