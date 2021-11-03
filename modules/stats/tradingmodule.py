@@ -185,6 +185,7 @@ class TradingModule:
         self.total_capital_open_trades[ohlcv['time']] = \
             self.total_capital_open_trades.get(ohlcv['time'], 0) + trade.capital
 
+    # TODO: Do something here with the budget and capital
     def update_budget_per_timestamp(self, ohlcv: dict) -> None:
         self.budget_per_timestamp[ohlcv['time']] = self.budget
 

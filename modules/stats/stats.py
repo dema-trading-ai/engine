@@ -20,6 +20,7 @@ from modules.stats.metrics.winning_weeks import get_winning_weeks_per_coin, \
 from modules.stats.stats_config import StatsConfig
 from modules.stats.trade import Trade, SellReason
 from modules.stats.tradingmodule import TradingModule
+from read_trade_logs import parse_trade_json
 
 from utils.dict import group_by
 from utils.utils import calculate_worth_of_open_trades
@@ -52,7 +53,21 @@ class StatsModule:
         market_drawdown = get_market_drawdown(pairs, self.frame_with_signals)
         return self.generate_backtesting_result(market_change, market_drawdown)
 
+    def generate_fake_trading_module(self):
+        budget, closed_trades = parse_trade_json()
+        open_trades = []
+        trading_module_config = self.trading_module.config
+        fake_trading_module = TradingModule(trading_module_config)
+        fake_trading_module.closed_trades = closed_trades
+        fake_trading_module.open_trades = open_trades
+        fake_trading_module.budget = budget
+        return fake_trading_module
+
     def generate_backtesting_result(self, market_change: dict, market_drawdown: dict) -> TradingStats:
+
+        # This is for the json trades
+        self.trading_module = self.generate_fake_trading_module()
+
         coin_results, market_change_weekly = self.generate_coin_results(self.trading_module.closed_trades,
                                                                         market_change,
                                                                         market_drawdown)
