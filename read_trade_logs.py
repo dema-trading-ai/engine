@@ -20,6 +20,10 @@ def parse_trade_json():
     data = read_trade_log()
 
     for k, v in data.items():
+        if v['status'] == 'open':
+            # Skip open trades for now
+            continue
+
         opened_at = datetime.datetime.strptime(v['opened_at'], "%Y-%m-%d %H-%M-%S")
         fake_ohlcv = {'pair': v['pair'], 'open': v['open_price'], 'close': v['close_price']}
 

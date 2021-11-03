@@ -53,20 +53,21 @@ class StatsModule:
         market_drawdown = get_market_drawdown(pairs, self.frame_with_signals)
         return self.generate_backtesting_result(market_change, market_drawdown)
 
-    def generate_fake_trading_module(self):
+    def generate_multibot_trading_module(self):
         budget, closed_trades = parse_trade_json()
         open_trades = []
         trading_module_config = self.trading_module.config
-        fake_trading_module = TradingModule(trading_module_config)
-        fake_trading_module.closed_trades = closed_trades
-        fake_trading_module.open_trades = open_trades
-        fake_trading_module.budget = budget
-        return fake_trading_module
+        multi_trading_module = TradingModule(trading_module_config)
+        multi_trading_module.closed_trades = closed_trades
+        multi_trading_module.open_trades = open_trades
+        multi_trading_module.budget = budget
+
+        return multi_trading_module
 
     def generate_backtesting_result(self, market_change: dict, market_drawdown: dict) -> TradingStats:
 
         # This is for the json trades
-        self.trading_module = self.generate_fake_trading_module()
+        self.trading_module = self.generate_multibot_trading_module()
 
         coin_results, market_change_weekly = self.generate_coin_results(self.trading_module.closed_trades,
                                                                         market_change,
