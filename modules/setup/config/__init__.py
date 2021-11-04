@@ -136,7 +136,7 @@ def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtes
 
         print_info('Changed end date %s to %s.' % (backtesting_to_parsed, last_closed_candle_datetime))
 
-        backtesting_to_parsed = exchange.iso8601(last_closed_candle_ms)
+        backtesting_to_parsed = last_closed_candle_datetime
 
     # Check for incorrect configuration
     if backtesting_from_ms >= backtesting_to_ms:
