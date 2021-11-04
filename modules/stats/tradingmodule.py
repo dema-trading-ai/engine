@@ -98,6 +98,7 @@ class TradingModule:
         if self.budget <= 0:
             print_info("Budget is running low, cannot buy")
             return
+
         # Find available trade spaces
         open_trades = len(self.open_trades)
         available_spaces = self.max_open_trades - open_trades
