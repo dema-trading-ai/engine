@@ -1,4 +1,5 @@
 from datetime import datetime
+from math import log10
 from pathlib import Path
 import pandas as pd
 
@@ -22,19 +23,27 @@ def equity_plot(capital_dict):
     # create figure
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=dates, y=df[1], fill='tozeroy'))  # fill down to xaxis
+    # fig.update_yaxes(range=[min_value, max_value])
+
     fig.update_layout(
         updatemenus=[
             dict(
                 buttons=[
-                     dict(label="Log scale",
-                          method="relayout",
-                          args=[{"yaxis.type": "log"}]),
-                     dict(label="Linear scale",
-                          method="relayout",
-                          args=[{"yaxis.type": "linear"}])
-                ]
+                    dict(label="Toggle Log / Linear Scale",
+                         method="relayout",
+                         args=[
+                             {"yaxis.type": "log",
+                              "yaxis.autorange": False,
+                              "yaxis.range": [log10(min_value), log10(max_value)]}],
+                         args2=[
+                             {"yaxis.type": "linear",
+                              "yaxis.autorange": False,
+                              "yaxis.range": [min_value, max_value]}],
+                         ),
+                ],
+                type="buttons"
             )
         ]
     )
-    fig.update_layout(yaxis_type="log")
+    fig.update_layout(yaxis_type="log", yaxis_range=[log10(min_value), log10(max_value)])
     fig.write_html("data/backtesting-data/plots/equity/equityplot.html", auto_open=False)
