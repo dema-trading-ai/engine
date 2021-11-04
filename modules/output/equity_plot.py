@@ -6,7 +6,7 @@ import pandas as pd
 from plotly import graph_objects as go
 
 
-def equity_plot(capital_dict):
+def equity_plot(capital_dict, strategy_name):
     Path("data/backtesting-data/plots/equity").mkdir(parents=True, exist_ok=True)
     df = pd.DataFrame(list(capital_dict.items()))
 
@@ -43,7 +43,9 @@ def equity_plot(capital_dict):
                 ],
                 type="buttons"
             )
-        ]
+        ],
+        title_text=f"Equity Plot ({strategy_name}) by DemaTrading.ai",
+        title_x=0.5
     )
     fig.update_layout(yaxis_type="log", yaxis_range=[log10(min_value), log10(max_value)])
     fig.write_html("data/backtesting-data/plots/equity/equityplot.html", auto_open=False)
