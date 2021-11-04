@@ -20,6 +20,10 @@ def get_max_seen_drawdown_for_portfolio(capital_per_timestamp: dict):
     else:
         max_seen_drawdown["to"] = 0
 
+    # if drawdown is from the very first timestep
+    if max_seen_drawdown["from"] == 0:
+        max_seen_drawdown["from"] = df.index[1]
+
     return max_seen_drawdown
 
 
