@@ -41,7 +41,8 @@ class StatsFixture:
             export_result=False,
 
             mainplot_indicators=[],
-            subplot_indicators=[]
+            subplot_indicators=[],
+            strategy_definition=object()
         )
 
         self.trading_module_config = TradingModuleConfig(

@@ -4,6 +4,7 @@ from modules.stats.stats_config import StatsConfig
 
 def get_stats_config(config: ConfigModule, btc_marketchange_ratio: float, btc_drawdown_ratio: float) -> StatsConfig:
     return StatsConfig(
+        strategy_definition=config.strategy_definition,
         fee=config.fee,
         stoploss=config.stoploss,
         stoploss_type=config.stoploss_type,
