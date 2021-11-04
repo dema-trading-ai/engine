@@ -62,11 +62,20 @@ class StatsModule:
         multi_trading_module.open_trades = open_trades
         multi_trading_module.budget = budget
 
+        realised_profits_per_timestamp = {}
+        realised_profit = 0
+        for trade in closed_trades:
+            realised_profit += trade.profit_dollar
+            realised_profits_per_timestamp[int(datetime.timestamp(trade.closed_at)*1000)] = realised_profit
+
+        multi_trading_module.realised_profit = realised_profit
+        multi_trading_module.realised_profits_per_timestamp = realised_profits_per_timestamp
+
         return multi_trading_module
 
     def generate_backtesting_result(self, market_change: dict, market_drawdown: dict) -> TradingStats:
 
-        # This is for the json trades
+        # This is for running the back test engine from a json trade log
         self.trading_module = self.generate_multibot_trading_module()
 
         coin_results, market_change_weekly = self.generate_coin_results(self.trading_module.closed_trades,
@@ -119,10 +128,13 @@ class StatsModule:
         )
 
         # Find amount of winning, draw and losing weeks for portfolio
-        win_weeks, draw_weeks, loss_weeks = get_winning_weeks_for_portfolio(
-            self.trading_module.capital_per_timestamp,
-            market_change_weekly
-        )
+        # win_weeks, draw_weeks, loss_weeks = get_winning_weeks_for_portfolio(
+        #     self.trading_module.capital_per_timestamp,
+        #     market_change_weekly
+        # )
+        win_weeks = 0
+        draw_weeks = 0
+        loss_weeks = 0
 
         nr_losing_trades = get_number_of_losing_trades(closed_trades)
         nr_consecutive_losing_trades = get_number_of_consecutive_losing_trades(closed_trades)
