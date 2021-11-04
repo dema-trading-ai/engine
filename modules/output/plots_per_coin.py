@@ -58,13 +58,12 @@ def plot_coin(config, stats, pair: str, pair_data):
         updatemenus=[
             dict(
                 buttons=[
-                     dict(label="Linear scale",
+                     dict(label="Toggle Log / Linear Scale",
                           method="relayout",
-                          args=[{"yaxis.type": "linear"}]),
-                     dict(label="Log scale",
-                          method="relayout",
-                          args=[{"yaxis.type": "log"}])
-                ]
+                          args=[{"yaxis.type": "linear"}],
+                          args2=[{"yaxis.type": "log"}])
+                ],
+                type="buttons"
             )
         ]
     )
