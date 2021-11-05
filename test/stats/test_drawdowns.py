@@ -97,8 +97,8 @@ def test_simple_seen_drawdown():
 
     # Assert
     assert math.isclose(stats.main_results.max_seen_drawdown, -50.995)
-    assert stats.main_results.drawdown_from == 0
-    assert stats.main_results.drawdown_to == 0
+    assert stats.main_results.drawdown_from == 1  # not zero, because the first row is copied for fee calc purposes
+    assert stats.main_results.drawdown_to == 0  # zero, because the drawdown hasn't ended yet
     assert stats.main_results.drawdown_at == 2
 
 
@@ -114,7 +114,7 @@ def test_simple_no_seen_drawdown():
 
     # Assert
     assert math.isclose(stats.main_results.max_seen_drawdown, -1)
-    assert stats.main_results.drawdown_from == 0
+    assert stats.main_results.drawdown_from == 1
     assert stats.main_results.drawdown_to == 2
     assert stats.main_results.drawdown_at == 1
     
@@ -176,7 +176,7 @@ def test_multiple_periods_seen_drawdown_easy():
 
     # Assert
     assert math.isclose(stats.main_results.max_seen_drawdown, -59.1625)
-    assert stats.main_results.drawdown_from == 0
+    assert stats.main_results.drawdown_from == 1
     assert stats.main_results.drawdown_to == 0
     assert stats.main_results.drawdown_at == 2
 
