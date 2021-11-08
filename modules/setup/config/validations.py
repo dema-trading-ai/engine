@@ -36,8 +36,7 @@ def assert_type(config, spec):
     good = is_value_of_type(param_value, t)
 
     if not good:
-        print_config_error(f"You passed an invalid type to the '{spec['name']}' parameter.")
-        print_config_error(f"This type should be a(n) {t}, it is {type(param_value)}.")
+        raise TypeError(f"You passed an invalid type to the '{spec['name']}' parameter.\nThis parameter should be of type {str(t)[8:-2]}, but it is {str(type(param_value))[8:-2]}.")
 
 
 def is_value_of_type(param_value, t) -> bool:
