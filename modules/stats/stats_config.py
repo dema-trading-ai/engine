@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Literal
 
+
 @dataclass
 class StatsConfig:
     strategy_definition: object

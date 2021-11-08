@@ -11,7 +11,6 @@ from rich import box
 from cli.print_utils import print_standard, console_color
 from modules.public.trading_stats import MainResults
 from utils.utils import CURRENT_VERSION
-from modules.setup.config import ConfigModule
 
 
 def show_signature():
@@ -78,7 +77,7 @@ def show_mainresults(self: MainResults, currency_symbol: str):
 
     # Create grid for all tables
     table_grid = Table(box=box.SIMPLE)
-    table_grid.add_column(f":robot: {ConfigModule.strategy_name}'s backtest brought to you by DemaTrading.ai's Engine :robot:")
+    table_grid.add_column(f":robot: {self.strategy_name}'s backtest brought to you by DemaTrading.ai's Engine :robot:")
     table_grid.add_row(settings_table)
     table_grid.add_row(performance_table, trade_info_table)
     console_color.print(table_grid)
@@ -168,7 +167,7 @@ def create_settings_table(self: MainResults, currency_symbol, justification, tes
                               width=25)
     settings_table.add_column(justify=justification, width=20)
     settings_table.add_row("Engine version", CURRENT_VERSION)
-    settings_table.add_row("Strategy", ConfigModule.strategy_name)
+    settings_table.add_row("Strategy", self.strategy_name)
     settings_table.add_row("Backtesting from", tested_from_string)
     settings_table.add_row("Backtesting to", tested_to_string)
     settings_table.add_row("Timeframe", self.timeframe)
