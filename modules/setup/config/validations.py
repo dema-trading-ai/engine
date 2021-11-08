@@ -1,6 +1,6 @@
 import sys
 
-from cli.arg_parse import read_spec
+from cli.arg_parse import read_spec, spec_type_to_python_type
 from modules.setup.config.cli import get_cli_config
 from cli.print_utils import print_config_error, print_warning
 
@@ -31,7 +31,7 @@ def assert_given_else_default(config, spec):
 
 def assert_type(config, spec):
     param_value = config.get(spec["name"])
-    t = spec["type"]
+    t = spec_type_to_python_type(spec["type"])
 
     good = is_value_of_type(param_value, t)
 
@@ -40,14 +40,11 @@ def assert_type(config, spec):
         print_config_error(f"This type should be a(n) {t}, it is {type(param_value)}.")
 
 
-def is_value_of_type(param_value, t):
-    if t == "datetime":
-        return True
-    elif t == "number":
-        return isinstance(param_value, int)
-    elif t == "bool":
-        return isinstance(param_value, bool)
-    return True
+def is_value_of_type(param_value, t) -> bool:
+    # Coerces ints to floats
+    param_value, t = check_for_float(param_value, t)
+
+    return isinstance(param_value, t)
 
 
 def change_to_default(config, spec):
@@ -93,3 +90,12 @@ def validate_single_currency_in_pairs(config: dict):
             print_config_error("You can only use pairs that have the base currency you specified.")
             print_config_error("e.g., if you specified 'USDT' as your currency, you cannot add 'BTC/EUR' as a pair")
             sys.exit()
+
+
+def check_for_float(param_value: int, t: type) -> tuple[float, type]:
+    """
+    Checks if the given param_value is an int. If so, coerces it to a float, and changes the expected type to float. Otherwise, returns what is input.
+    """
+    if type(param_value) == int:
+        return float(param_value), float
+    return param_value, t
