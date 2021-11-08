@@ -95,6 +95,6 @@ def check_for_float(param_value: int, t: type) -> tuple[float, type]:
     """
     Checks if the given param_value is an int. If so, coerces it to a float, and changes the expected type to float. Otherwise, returns what is input.
     """
-    if type(param_value) == int:
+    if isinstance(type(param_value), int):
         return float(param_value), float
     return param_value, t
