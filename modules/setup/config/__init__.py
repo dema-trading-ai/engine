@@ -20,8 +20,6 @@ minute = 60 * msec
 hour = 60 * minute
 day = 24 * hour
 
-STRATEGY_NAME: str
-
 
 class ConfigModule(object):
     raw_config: dict
