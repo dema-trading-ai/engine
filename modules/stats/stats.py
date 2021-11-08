@@ -128,7 +128,7 @@ class StatsModule:
         return MainResults(tested_from=tested_from,
                            tested_to=tested_to,
                            timeframe=self.config.timeframe,
-                           strategy_name=self.config.strategy_definition.strategy_name,
+                           strategy_name=self.config.strategy_name,
                            max_open_trades=self.config.max_open_trades,
                            exposure_per_trade=self.config.exposure_per_trade,
                            market_change_coins=(market_change['all'] - 1) * 100,

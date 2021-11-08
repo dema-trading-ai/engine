@@ -5,6 +5,7 @@ from typing import Literal
 @dataclass
 class StatsConfig:
     strategy_definition: object
+    strategy_name: str
     mainplot_indicators: list
     subplot_indicators: list
     fee: float
