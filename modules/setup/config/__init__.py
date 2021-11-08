@@ -42,6 +42,7 @@ class ConfigModule(object):
         self.stoploss = None
         self.fee = None
         self.strategy_definition = None
+        self.strategy_name = None
         self.exchange = None
 
     @staticmethod
@@ -59,6 +60,7 @@ class ConfigModule(object):
         config_module.timeframe = config["timeframe"]
         config_module.timeframe_ms = parse_timeframe(config_module.timeframe)
         config_module.strategy_definition = StrategyDefinition(config['strategy-name'], config['strategies-folder'])
+        config_module.strategy_name = config_module.strategy_definition.strategy_name
         config_module.exchange_name = exchange_str
         config_module.exchange = create_cctx_exchange(config_module.exchange_name, config_module.timeframe)
         backtesting_till_now = config["backtesting-till-now"]
