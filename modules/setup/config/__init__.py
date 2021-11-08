@@ -76,9 +76,9 @@ class ConfigModule(object):
         config_module.stoploss = config["stoploss"]
         config_module.stoploss_type = config["stoploss-type"]
         config_module.max_open_trades = config["max-open-trades"]
-        config_module.exposure_per_trade = config.get("exposure-per-trade", 100.) / 100.
+        config_module.exposure_per_trade = config["exposure-per-trade"] / 100
         if config_module.exposure_per_trade > 1.0:
-            print_warning(f"Warning: Exposure is not 100% (default), this means that every trade will use {config_module.exposure_per_trade * 100}% funds per trade until either all funds are used or max open trades are open.")
+            print_warning(f"Warning: Exposure is not 100% (default), this means that every trade will use {round(config_module.exposure_per_trade * 100)}% funds per trade until either all funds are used or max open trades are open.")
         config_module.plots = config["plots"]
         config_module.tearsheet = config.get("tearsheet", False)
         config_module.export_result = config.get("export-result", False)
