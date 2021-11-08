@@ -53,19 +53,8 @@ def spec_type_to_python_type(t: str):
     elif t == "list":
         return list
     elif t == "bool":
-        return str2bool
+        return bool
     elif t == "datetime":
         return datetime
     else:
         raise Exception
-
-
-def str2bool(v):
-    if isinstance(v, bool):
-        return v
-    if v.lower() in ('true', '1'):
-        return True
-    elif v.lower() in ('false', '0'):
-        return False
-    else:
-        return None
