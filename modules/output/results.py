@@ -112,6 +112,8 @@ def create_trade_info_table(self, justification) -> Table:
     trade_info_table.add_row('Shortest trade duration', str(shortest_trade_duration))
     trade_info_table.add_row('Avg. trade duration', str(avg_trade_duration))
     trade_info_table.add_row('Longest trade duration', str(longest_trade_duration))
+    trade_info_table.add_row('Profitable weeks (W/D/L)', f'{self.prof_weeks_win} / {self.prof_weeks_draw}'
+                                                      f' / {self.prof_weeks_loss}')
     trade_info_table.add_row('Winning weeks (W/D/L)', f'{self.win_weeks} / {self.draw_weeks}'
                                                       f' / {self.loss_weeks}')
     return trade_info_table
@@ -195,6 +197,9 @@ class CoinInsights:
     market_drawdown: float
     max_seen_drawdown: float
     max_realised_drawdown: float
+    prof_weeks_win: int
+    prof_weeks_draw: int
+    prof_weeks_loss: int
     win_weeks: int
     draw_weeks: int
     loss_weeks: int
@@ -232,7 +237,8 @@ class CoinInsights:
                                        colorize(round(c.market_drawdown, 2), 0),
                                        colorize(round(c.max_seen_drawdown, 2), 0),
                                        colorize(round(c.max_realised_drawdown, 2), 0),
-                                       f"{c.win_weeks} / {c.draw_weeks}/ {c.loss_weeks}",
+                                       f"{c.win_weeks} / {c.draw_weeks} / {c.loss_weeks}",
+                                       f"{c.prof_weeks_win} / {c.prof_weeks_draw} / {c.prof_weeks_loss}",
                                        )
 
             coin_signal_table.add_row(c.pair,
@@ -275,6 +281,8 @@ class CoinInsights:
         coin_metrics_table.add_column("Max. realised drawdown (%)",
                                       justify=justification)
         coin_metrics_table.add_column("Winning weeks (W/D/L)",
+                                      justify=justification)
+        coin_metrics_table.add_column("Profitable weeks (W/D/L)",
                                       justify=justification)
         return coin_metrics_table
 
