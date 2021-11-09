@@ -11,6 +11,7 @@ class MainResults:
     tested_from: datetime
     tested_to: datetime
     timeframe: str
+    strategy_name: str
     max_open_trades: int
     exposure_per_trade: float
     market_change_coins: float
