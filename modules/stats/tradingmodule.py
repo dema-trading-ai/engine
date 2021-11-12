@@ -23,7 +23,7 @@ class TradingModule:
         self.realised_profit = self.budget
 
         self.max_open_trades = int(self.config.max_open_trades)
-        self.exposure_per_trade = float(self.config.exposure_per_trade or 1.)
+        self.exposure_per_trade = float(self.config.exposure_per_trade)
         self.amount_of_pairs = len(self.config.pairs)
         if self.amount_of_pairs < self.max_open_trades:
             print_warning("max_open_trades exceeds amount of pairs in whitelist. max_open_trades will be limited to the amount of pairs in whitelist.")
