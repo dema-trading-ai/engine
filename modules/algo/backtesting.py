@@ -6,6 +6,7 @@ from backtesting.strategy import Strategy
 from modules.public.pairs_data import PairsData
 from modules.setup.config import ConfigModule
 from cli.print_utils import print_info, print_warning, print_error
+from modules.setup.config.validations import validate_dynamic_stoploss
 
 
 # ======================================================================
@@ -69,14 +70,8 @@ class BackTesting:
             self.df[pair] = indicators.copy()
             if stoploss_type == "dynamic":
                 stoploss = self.strategy.stoploss(indicators)
-                if stoploss is None:  # stoploss not configured
-                    notify = True
-                    notify_reason = "not configured"
-                elif 'stoploss' in stoploss.columns:
-                    indicators['stoploss'] = stoploss['stoploss']
-                else:  # stoploss wrongly configured
-                    notify = True
-                    notify_reason = "configured incorrectly"
+                validate_dynamic_stoploss(stoploss)
+                indicators['stoploss'] = stoploss['stoploss']
             data_dict[pair] = indicators.to_dict('index')
             if not self.df[pair][['open', 'high', 'low', 'close', 'volume', 'pair']].equals(
                     df[['open', 'high', 'low', 'close', 'volume', 'pair']]

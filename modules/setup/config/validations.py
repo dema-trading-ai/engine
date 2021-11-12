@@ -1,8 +1,9 @@
 import sys
+from pandas import DataFrame
 
 from cli.arg_parse import read_spec, spec_type_to_python_type
 from modules.setup.config.cli import get_cli_config
-from cli.print_utils import print_config_error, print_warning
+from cli.print_utils import print_config_error, print_warning, print_error
 
 
 def validate_and_read_cli(config: dict, args):
@@ -18,6 +19,16 @@ def validate_by_spec(config, config_spec):
         assert_type(config, param_spec)
         assert_in_options(config, param_spec)
         assert_min_max(config, param_spec)
+
+
+def validate_dynamic_stoploss(stoploss: DataFrame) -> None:
+    if stoploss is None or 'stoploss' not in stoploss.columns:
+        print_error('Dynamic stoploss not configured')
+        sys.exit()
+
+    if stoploss['stoploss'].dtypes != 'float64':
+        print_error(f"You passed an invalid type to the stoploss parameter. This parameter should be of type float, but it is {stoploss['stoploss'].dtypes}.")
+        sys.exit()
 
 
 def assert_given_else_default(config, spec):
@@ -36,7 +47,8 @@ def assert_type(config, spec):
     good = is_value_of_type(param_value, t)
 
     if not good:
-        raise TypeError(f"You passed an invalid type to the '{spec['name']}' parameter.\nThis parameter should be of type {str(t)[8:-2]}, but it is {str(type(param_value))[8:-2]}.")
+        print_error(f"You passed an invalid type to the '{spec['name']}' parameter. This parameter should be of type {str(t)[8:-2]}, but it is {str(type(param_value))[8:-2]}.")
+        sys.exit()
 
 
 def is_value_of_type(param_value, t) -> bool:
