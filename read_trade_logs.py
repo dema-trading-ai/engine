@@ -40,4 +40,4 @@ def parse_trade_json():
     return budget, closed_trades
 
 
-
+# read_trade_log()
