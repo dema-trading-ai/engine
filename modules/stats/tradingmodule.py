@@ -105,6 +105,7 @@ class TradingModule:
             return
 
         if self.budget <= 0:
+            self.rejected_buy_signal += 1
             print_info("Budget is running low, cannot buy")
             return
 
