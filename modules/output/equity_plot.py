@@ -17,7 +17,7 @@ def equity_plot(capital_dict, strategy_name):
 
     # get dates and y range
     dates = [datetime.fromtimestamp(time / 1000) for time in df[0]]
-    min_value = int(df[1].min() - 10)
+    min_value = max(int(df[1].min() - 10), 1)
     max_value = int(df[1].max() + 10)
 
     # create figure
