@@ -1,5 +1,6 @@
 import sys
 from pandas import DataFrame
+from typing import Tuple
 
 from cli.arg_parse import read_spec, spec_type_to_python_type
 from modules.setup.config.cli import get_cli_config
@@ -103,7 +104,7 @@ def validate_single_currency_in_pairs(config: dict):
             sys.exit()
 
 
-def check_for_float(param_value: int, t: type) -> tuple[float, type]:
+def check_for_float(param_value: int, t: type) -> Tuple[float, type]:
     """
     Checks if the given param_value is an int. If so, coerces it to a float, and changes the expected type to float. Otherwise, returns what is input.
     """
