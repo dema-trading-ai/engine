@@ -70,7 +70,8 @@ class StatsModule:
             best_trade_pair,
             worst_trade_ratio,
             worst_trade_pair,
-            market_change_weekly)
+            market_change_weekly,
+            self.trading_module.rejected_buy_signal)
         self.calculate_statistics_for_plots(self.trading_module.closed_trades, self.trading_module.open_trades)
 
         return TradingStats(
@@ -88,7 +89,7 @@ class StatsModule:
     def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float,
                               market_change: dict, market_drawdown: dict, best_trade_ratio: float,
                               best_trade_pair: str, worst_trade_ratio: float,
-                              worst_trade_pair: str, market_change_weekly: dict) -> MainResults:
+                              worst_trade_pair: str, market_change_weekly: dict, rejected_buy_signal: int) -> MainResults:
         # Get total budget and calculate overall profit
         budget += calculate_worth_of_open_trades(open_trades)
         overall_profit_percentage = ((budget - self.config.starting_capital) / self.config.starting_capital) * 100
@@ -161,7 +162,8 @@ class StatsModule:
                            stoploss=self.config.stoploss,
                            stoploss_type=self.config.stoploss_type,
                            fee=self.config.fee,
-                           total_fee_amount=self.trading_module.total_fee_paid)
+                           total_fee_amount=self.trading_module.total_fee_paid,
+                           rejected_buy_signal=rejected_buy_signal)
 
     def generate_coin_results(self, closed_trades: [Trade], market_change: dict, market_drawdown: dict) -> [list, dict]:
         stats, market_change_weekly = self.calculate_statistics_per_coin(closed_trades)

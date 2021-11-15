@@ -41,6 +41,7 @@ class TradingModule:
         self.lowest_total_capital_open_trades = {}
         self.highest_total_capital_open_trades = {}
         self.total_fee_paid = 0
+        self.rejected_buy_signal = 0
 
     def tick(self, ohlcv: dict, data_dict: dict) -> None:
         trade = self.find_open_trade(ohlcv['pair'])
@@ -100,6 +101,7 @@ class TradingModule:
         open_trades = len(self.open_trades)
         available_spaces = self.max_open_trades - open_trades
         if available_spaces == 0:
+            self.rejected_buy_signal += 1
             return
 
         if self.budget <= 0:
