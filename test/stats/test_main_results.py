@@ -409,3 +409,69 @@ def test_trade_length_four_trades():
     assert stats.main_results.avg_trade_duration == timedelta(microseconds=1500)
     assert stats.main_results.longest_trade_duration == timedelta(microseconds=3000)
     assert stats.main_results.shortest_trade_duration == timedelta(microseconds=1000)
+
+
+def test_rejected_buy_signal_no_rejection():
+    # No rejected buy signal
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE', 'COIN3/BASE'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade_no_sell()
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_up_100_one_trade_no_sell()
+    fixture.frame_with_signals['COIN3/BASE'].test_scenario_up_100_one_trade_no_sell()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    assert stats.main_results.rejected_buy_signal == 0
+
+
+def test_rejected_buy_signal_reject_max_open_trades():
+    # One rejected buy signal due to max_open_trade being hit
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE', 'COIN3/BASE', 'COIN4/BASE'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade_no_sell()
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_up_100_one_trade_no_sell()
+    fixture.frame_with_signals['COIN3/BASE'].test_scenario_up_100_one_trade_no_sell()
+    fixture.frame_with_signals['COIN4/BASE'].test_scenario_up_100_one_trade_no_sell()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    assert stats.main_results.rejected_buy_signal == 1
+
+
+def test_rejected_buy_signal_reject_low_budget():
+    # Three rejected buy signals due to low budget
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.trading_module_config.starting_capital = 0
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    assert stats.main_results.rejected_buy_signal == 3
+
+
+def test_rejected_buy_signal_reject_exposure():
+    # One rejected buy signal due to high exposure
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE'])
+
+    fixture.trading_module_config.exposure_per_trade = 200
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_one_trade()
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_10_up_100_down_75_one_trade()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    assert stats.main_results.rejected_buy_signal == 1

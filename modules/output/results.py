@@ -102,6 +102,7 @@ def create_trade_info_table(self, justification) -> Table:
                              str(round(self.n_average_trades, 2)))
     trade_info_table.add_row('Left-open trades', str(self.n_left_open_trades))
     trade_info_table.add_row('Trades with loss', str(self.n_trades_with_loss))
+    trade_info_table.add_row('Rejected buy signals', str(self.rejected_buy_signal))
     trade_info_table.add_row('Most consecutive losses',
                              str(self.n_consecutive_losses))
     trade_info_table.add_row(f'Best trade',
