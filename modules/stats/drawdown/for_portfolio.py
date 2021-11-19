@@ -1,4 +1,5 @@
 import pandas as pd
+import empyrical as ep
 
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
 
@@ -32,3 +33,25 @@ def get_max_realised_drawdown_for_portfolio(realised_profits_per_timestamp: dict
     max_realised_drawdown = get_max_drawdown_ratio(df)
 
     return max_realised_drawdown
+
+
+def get_sharpe_ratio(capital_per_timestamp: dict) -> float:
+    # capital = pd.Series(capital_per_timestamp.values())
+    df = pd.DataFrame.from_dict(capital_per_timestamp, columns=['value'], orient='index')
+    df.drop(labels=0, inplace=True)
+    df['index_1'] = df.index
+    df['index_1'] = pd.to_datetime(df['index_1'], unit='ms')
+    df.set_index('index_1', drop=True, inplace=True)
+    df1 = df.resample('D').sum()
+    print(df1)
+    returns = []
+    capital_list = list(capital_per_timestamp.values())
+    for capital in capital_list:
+        if capital_list.index(capital) == 0:
+            diff = 0
+        else:
+            diff = (capital / capital_list[capital_list.index(capital) - 1]) - 1
+        returns.append(diff)
+    df = pd.Series(returns)
+    sharpe_ratio = ep.sharpe_ratio(df)
+    return sharpe_ratio

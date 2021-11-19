@@ -10,7 +10,7 @@ from modules.public.trading_stats import TradingStats
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio, get_max_drawdown_ratio_without_buy_rows
 from modules.stats.metrics.profit_ratio import get_seen_cum_profit_ratio_per_coin, get_realised_profit_ratio
 from modules.stats.drawdown.for_portfolio import get_max_seen_drawdown_for_portfolio, \
-    get_max_realised_drawdown_for_portfolio
+    get_max_realised_drawdown_for_portfolio, get_sharpe_ratio
 from modules.stats.drawdown.per_trade import get_max_seen_drawdown_per_trade
 from modules.stats.metrics.market_change import get_market_change, get_market_drawdown
 from modules.stats.metrics.trades import calculate_best_worst_trade, get_number_of_losing_trades, \
@@ -102,6 +102,9 @@ class StatsModule:
             self.trading_module.capital_per_timestamp
         )
 
+        sharpe_ratio = get_sharpe_ratio(self.trading_module.capital_per_timestamp
+                                        )
+
         # Find amount of winning, draw and losing weeks for portfolio
         win_weeks, draw_weeks, loss_weeks = get_winning_weeks_for_portfolio(
             self.trading_module.capital_per_timestamp,
@@ -162,7 +165,8 @@ class StatsModule:
                            stoploss_type=self.config.stoploss_type,
                            fee=self.config.fee,
                            total_fee_amount=self.trading_module.total_fee_paid,
-                           rejected_buy_signal=self.trading_module.rejected_buy_signal)
+                           rejected_buy_signal=self.trading_module.rejected_buy_signal,
+                           sharpe_ratio=sharpe_ratio)
 
     def generate_coin_results(self, closed_trades: [Trade], market_change: dict, market_drawdown: dict) -> [list, dict]:
         stats, market_change_weekly = self.calculate_statistics_per_coin(closed_trades)
@@ -316,4 +320,3 @@ class StatsModule:
 
             left_open_trade_stats.append(left_open_trade_results)
         return left_open_trade_stats
-
