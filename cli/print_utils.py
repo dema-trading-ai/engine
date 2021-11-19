@@ -1,6 +1,16 @@
+import os
+
+from typing import Literal
 from rich.console import Console
 
-from utils.utils import is_verbosity
+
+def get_verbosity():
+    return os.getenv("VERBOSITY") or "none"
+
+
+def is_verbosity(verbosity: Literal["debug", "none"]):
+    return get_verbosity() == verbosity
+
 
 console_standard = Console(color_system=None, width=200)
 console_color = Console(color_system="truecolor", width=200)
