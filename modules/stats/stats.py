@@ -131,14 +131,14 @@ class StatsModule:
         # save_dict_to_file(BASE_DIR + '/data/realised_profits_algo2.json', self.trading_module.realised_profits_per_timestamp)
         # save_dict_to_file(BASE_DIR + '/data/capital_per_timestamp_algo2.json', self.trading_module.capital_per_timestamp)
 
-        # Multi bot Implementation
-        realised_profits_per_timestamp = open_dict_from_file(BASE_DIR + '/data/combined_realised_profits.json')
-        capital_per_timestamp = open_dict_from_file(BASE_DIR + '/data/combined_capital.json')
-        # realised_profits_per_timestamp = open_dict_from_file(BASE_DIR + '/data/realised_profits_algo2.json')
-        # capital_per_timestamp = open_dict_from_file(BASE_DIR + '/data/capital_per_timestamp_algo2.json')
-
-        self.trading_module.realised_profits_per_timestamp = realised_profits_per_timestamp
-        self.trading_module.capital_per_timestamp = capital_per_timestamp
+        # # Multi bot Implementation
+        # realised_profits_per_timestamp = open_dict_from_file(BASE_DIR + '/data/combined_realised_profits.json')
+        # capital_per_timestamp = open_dict_from_file(BASE_DIR + '/data/combined_capital.json')
+        # # realised_profits_per_timestamp = open_dict_from_file(BASE_DIR + '/data/realised_profits_algo2.json')
+        # # capital_per_timestamp = open_dict_from_file(BASE_DIR + '/data/capital_per_timestamp_algo2.json')
+        #
+        # self.trading_module.realised_profits_per_timestamp = realised_profits_per_timestamp
+        # self.trading_module.capital_per_timestamp = capital_per_timestamp
 
         # Find max seen and realised drawdown
         max_realised_drawdown = get_max_realised_drawdown_for_portfolio(
@@ -149,13 +149,13 @@ class StatsModule:
             self.trading_module.capital_per_timestamp
         )
 
-        # Calculate profits based on realised_profits
-        profit_pct = self.calculate_pct_from_profits(self.trading_module.realised_profits_per_timestamp)
-
-        intermediate_results = {'profit': round(profit_pct, 2),
-                                'max_realised_drawdown': round((1-max_realised_drawdown) * 100, 2),
-                                'max_seen_drawdown': round((1-max_seen_drawdown['drawdown']) * 100, 2)
-                                }
+        # # Calculate profits based on realised_profits
+        # profit_pct = self.calculate_pct_from_profits(self.trading_module.realised_profits_per_timestamp)
+        #
+        # intermediate_results = {'profit': round(profit_pct, 2),
+        #                         'max_realised_drawdown': round((1-max_realised_drawdown) * 100, 2),
+        #                         'max_seen_drawdown': round((1-max_seen_drawdown['drawdown']) * 100, 2)
+        #                         }
 
 
         # Find amount of winning, draw and losing weeks for portfolio
