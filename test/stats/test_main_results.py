@@ -1,3 +1,4 @@
+import datetime
 import math
 from datetime import timedelta
 
@@ -475,3 +476,16 @@ def test_rejected_buy_signal_reject_exposure():
     stats = fixture.create().analyze()
 
     assert stats.main_results.rejected_buy_signal == 1
+
+
+def test_sharpe_ratio():
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert math.isclose(stats.main_results.sharpe_ratio, -0.1655, abs_tol=0.0001)

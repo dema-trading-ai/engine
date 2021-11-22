@@ -1,5 +1,5 @@
+import numpy as np
 import pandas as pd
-import empyrical as ep
 
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
 
@@ -35,23 +35,19 @@ def get_max_realised_drawdown_for_portfolio(realised_profits_per_timestamp: dict
     return max_realised_drawdown
 
 
+def convert_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.drop(labels=0)
+    df.index = pd.to_datetime(df.index, unit='ms')
+    convert_df = df.resample('D').sum()
+    return convert_df
+
+
 def get_sharpe_ratio(capital_per_timestamp: dict) -> float:
-    # capital = pd.Series(capital_per_timestamp.values())
     df = pd.DataFrame.from_dict(capital_per_timestamp, columns=['value'], orient='index')
-    df.drop(labels=0, inplace=True)
-    df['index_1'] = df.index
-    df['index_1'] = pd.to_datetime(df['index_1'], unit='ms')
-    df.set_index('index_1', drop=True, inplace=True)
-    df1 = df.resample('D').sum()
-    print(df1)
-    returns = []
-    capital_list = list(capital_per_timestamp.values())
-    for capital in capital_list:
-        if capital_list.index(capital) == 0:
-            diff = 0
-        else:
-            diff = (capital / capital_list[capital_list.index(capital) - 1]) - 1
-        returns.append(diff)
-    df = pd.Series(returns)
-    sharpe_ratio = ep.sharpe_ratio(df)
+    convert_df = convert_dataframe(df) if df['value'].iloc[0] != 100.0 else df.drop(labels=0)
+    convert_df['returns'] = (convert_df['value'] - convert_df['value'].shift()) / 100
+    mean_rx = convert_df['returns'].sum() / (len(convert_df['returns']) - 1)
+    rf = 0
+    std_dev = np.std(convert_df['returns'])
+    sharpe_ratio = (mean_rx - rf) / std_dev
     return sharpe_ratio
