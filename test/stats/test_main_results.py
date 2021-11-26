@@ -487,7 +487,7 @@ def test_sharpe_ratio_three_trades():
     # Act
     stats = fixture.create().analyze()
 
-    assert math.isclose(stats.main_results.sharpe_ratio, -0.15353, abs_tol=0.00001)
+    assert stats.main_results.sharpe_ratio == '-0.1535'
 
 
 def test_sharpe_ratio_one_trade_down():
@@ -500,7 +500,7 @@ def test_sharpe_ratio_one_trade_down():
     # Act
     stats = fixture.create().analyze()
 
-    assert math.isclose(stats.main_results.sharpe_ratio, 0.6962, abs_tol=0.00001)
+    assert stats.main_results.sharpe_ratio == '0.6962'
 
 
 def test_sharpe_ratio_three_trades_no_sell():

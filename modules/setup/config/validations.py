@@ -122,4 +122,4 @@ def validate_sharpe_ratio(sharpe_ratio: str) -> str:
         print_warning('Sharpe ratio unavailable as a period of at least two days is required')
         return '-'
 
-    return str(round(float(sharpe_ratio), 2))
+    return str(round(float(sharpe_ratio), 4))  # Four decimals for testing
