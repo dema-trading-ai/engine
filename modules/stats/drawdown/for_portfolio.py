@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
+from modules.public.trading_stats import MainResults
 
 
 def get_max_seen_drawdown_for_portfolio(capital_per_timestamp: dict):
@@ -35,19 +36,21 @@ def get_max_realised_drawdown_for_portfolio(realised_profits_per_timestamp: dict
     return max_realised_drawdown
 
 
-def convert_dataframe(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.drop(labels=0)
-    df.index = pd.to_datetime(df.index, unit='ms')
-    convert_df = df.resample('D').sum()
-    return convert_df
-
-
-def get_sharpe_ratio(capital_per_timestamp: dict) -> float:
+def convert_dataframe(capital_per_timestamp: dict) -> pd.DataFrame:
     df = pd.DataFrame.from_dict(capital_per_timestamp, columns=['value'], orient='index')
-    convert_df = convert_dataframe(df) if df['value'].iloc[0] != 100.0 else df.drop(labels=0)
-    convert_df['returns'] = (convert_df['value'] - convert_df['value'].shift()) / 100
-    mean_rx = convert_df['returns'].sum() / (len(convert_df['returns']) - 1)
-    rf = 0
-    std_dev = np.std(convert_df['returns'])
-    sharpe_ratio = (mean_rx - rf) / std_dev
-    return sharpe_ratio
+    if str(type(df.index.dtype)) == "<class 'numpy.dtype[float64]'>":  # Check if a test is happening
+        df = df.iloc[1:, :]
+        df.index = pd.to_datetime(df.index, unit='ms')
+        df = df.resample('D').apply(lambda x: x.iloc[-1])
+    return df
+
+
+def get_sharpe_ratio(capital_per_timestamp: dict, risk_free: int = 0) -> float:
+    df = convert_dataframe(capital_per_timestamp)
+    df['returns'] = (df['value'] - df['value'].shift()) / 100
+    df = df.iloc[1:, :]
+    df['rf'] = risk_free
+    expected_excess_asset_return = np.subtract(df['returns'], df['rf'])
+    sharpe_ratio_per_timestamp = np.divide(expected_excess_asset_return, np.std(expected_excess_asset_return))
+    avg_sharpe_ratio = np.mean(sharpe_ratio_per_timestamp)
+    return avg_sharpe_ratio

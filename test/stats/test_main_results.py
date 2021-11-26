@@ -1,4 +1,5 @@
-import datetime
+import numpy as np
+
 import math
 from datetime import timedelta
 
@@ -478,14 +479,41 @@ def test_rejected_buy_signal_reject_exposure():
     assert stats.main_results.rejected_buy_signal == 1
 
 
-def test_sharpe_ratio():
+def test_sharpe_ratio_three_trades():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
+    # Win/Loss/Open
     fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
 
     # Act
     stats = fixture.create().analyze()
 
-    # Assert
-    assert math.isclose(stats.main_results.sharpe_ratio, -0.1655, abs_tol=0.0001)
+    assert math.isclose(stats.main_results.sharpe_ratio, -0.15353, abs_tol=0.00001)
+
+
+def test_sharpe_ratio_one_trade_down():
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade_down_20()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    assert math.isclose(stats.main_results.sharpe_ratio, 0.6962, abs_tol=0.00001)
+
+
+def test_sharpe_ratio_three_trades_no_sell():
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_no_trades()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    assert str(stats.main_results.sharpe_ratio) == 'nan'
+

@@ -157,7 +157,7 @@ def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown
     performance_table.add_row('Market drawdown BTC/USDT',
                               colorize(round(self.market_drawdown_btc,
                                              2), 0, '%'))
-    performance_table.add_row('Sharpe ratio', str(round(self.sharpe_ratio, 2)))
+    performance_table.add_row('Sharpe ratio', str(round(self.sharpe_ratio, 2)) if str(self.sharpe_ratio) != 'nan' else 'Not applicable')
     performance_table.add_row('Total fee paid',
                               f"{round(self.total_fee_amount)} {currency_symbol}")
     return performance_table
