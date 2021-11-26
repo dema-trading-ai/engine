@@ -513,5 +513,6 @@ def test_sharpe_ratio_three_trades_no_sell():
     # Act
     stats = fixture.create().analyze()
 
-    assert str(stats.main_results.sharpe_ratio) == 'nan'
+    assert str(stats.main_results.sharpe_ratio) == '-'
+
 
