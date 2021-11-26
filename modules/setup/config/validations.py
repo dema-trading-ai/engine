@@ -111,3 +111,15 @@ def check_for_float(param_value: int, t: type) -> Tuple[float, type]:
     if isinstance(param_value, int) and not isinstance(param_value, bool):
         return float(param_value), float
     return param_value, t
+
+
+def validate_sharpe_ratio(sharpe_ratio: str) -> str:
+    if sharpe_ratio == 'nan':
+        print_warning('Sharpe ratio unavailable as no trades were made')
+        return '-'
+
+    if sharpe_ratio == '-inf':
+        print_warning('Sharpe ratio unavailable as a period of at least two days is required')
+        return '-'
+
+    return str(round(float(sharpe_ratio), 2))
