@@ -1,8 +1,9 @@
+import math
+
 import numpy as np
 import pandas as pd
 
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
-from modules.setup.config.validations import validate_sharpe_ratio
 
 
 def get_max_seen_drawdown_for_portfolio(capital_per_timestamp: dict):
@@ -47,7 +48,7 @@ def convert_dataframe(capital_per_timestamp: dict) -> pd.DataFrame:
     return df
 
 
-def get_sharpe_ratio(capital_per_timestamp: dict, risk_free: int = 0) -> str:
+def get_sharpe_ratio(capital_per_timestamp: dict, risk_free: int = 0) -> float:
     df = convert_dataframe(capital_per_timestamp)
     df['returns'] = (df['value'] - df['value'].shift()) / 100
     df = df.iloc[1:, :]
@@ -55,8 +56,14 @@ def get_sharpe_ratio(capital_per_timestamp: dict, risk_free: int = 0) -> str:
 
     expected_excess_asset_return = np.subtract(df['returns'], df['rf'])
     sharpe_ratio_per_timestamp = np.divide(expected_excess_asset_return, np.std(expected_excess_asset_return))
-    avg_sharpe_ratio = np.mean(sharpe_ratio_per_timestamp)
 
-    final_ratio = validate_sharpe_ratio(str(avg_sharpe_ratio))
+    avg_sharpe_ratio = 0.0
 
-    return final_ratio
+    try:
+        if math.isinf(sharpe_ratio_per_timestamp):  # Check in case only one row
+            sharpe_ratio_per_timestamp = expected_excess_asset_return.iloc[0]
+
+    except TypeError:
+        avg_sharpe_ratio = np.mean(sharpe_ratio_per_timestamp)
+
+    return avg_sharpe_ratio
