@@ -48,4 +48,4 @@ def equity_plot(capital_dict, strategy_name):
         title_x=0.5
     )
     fig.update_layout(yaxis_type="log", yaxis_range=[log10(min_value), log10(max_value)])
-    fig.write_html("data/backtesting-data/plots/equity/equityplot.html", auto_open=False)
+    fig.write_html(f"data/backtesting-data/plots/equity/{strategy_name}.html", auto_open=False)
