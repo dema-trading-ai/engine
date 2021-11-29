@@ -55,4 +55,4 @@ def equity_plot(capital_dict, strategy_name):
         }
     }
 
-    fig.write_html(f"data/backtesting-data/plots/equity/equityplot.html", auto_open=False, config=config)
+    fig.write_html("data/backtesting-data/plots/equity/equityplot.html", auto_open=False, config=config)
