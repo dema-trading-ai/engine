@@ -23,7 +23,7 @@ class TradingModule:
         self.realised_profit = self.budget
 
         self.max_open_trades = int(self.config.max_open_trades)
-        self.exposure_per_trade = float(self.config.exposure_per_trade or 1.)
+        self.exposure_per_trade = float(self.config.exposure_per_trade)
         self.amount_of_pairs = len(self.config.pairs)
         if self.amount_of_pairs < self.max_open_trades:
             print_warning("max_open_trades exceeds amount of pairs in whitelist. max_open_trades will be limited to the amount of pairs in whitelist.")
@@ -41,6 +41,7 @@ class TradingModule:
         self.lowest_total_capital_open_trades = {}
         self.highest_total_capital_open_trades = {}
         self.total_fee_paid = 0
+        self.rejected_buy_signal = 0
 
     def tick(self, ohlcv: dict, data_dict: dict) -> None:
         trade = self.find_open_trade(ohlcv['pair'])
@@ -100,9 +101,11 @@ class TradingModule:
         open_trades = len(self.open_trades)
         available_spaces = self.max_open_trades - open_trades
         if available_spaces == 0:
+            self.rejected_buy_signal += 1
             return
 
         if self.budget <= 0:
+            self.rejected_buy_signal += 1
             print_info("Budget is running low, cannot buy")
             return
 

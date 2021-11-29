@@ -6,6 +6,7 @@ from backtesting.strategy import Strategy
 from modules.public.pairs_data import PairsData
 from modules.setup.config import ConfigModule
 from cli.print_utils import print_info, print_warning, print_error
+from modules.setup.config.validations import validate_dynamic_stoploss
 
 
 # ======================================================================
@@ -49,8 +50,6 @@ class BackTesting:
         Populates sell signal
         """
         data_dict = {}
-        notify = False
-        notify_reason = ""
         stoploss_type = self.config.stoploss_type
 
         print_info("Populating Indicators")
@@ -69,14 +68,8 @@ class BackTesting:
             self.df[pair] = indicators.copy()
             if stoploss_type == "dynamic":
                 stoploss = self.strategy.stoploss(indicators)
-                if stoploss is None:  # stoploss not configured
-                    notify = True
-                    notify_reason = "not configured"
-                elif 'stoploss' in stoploss.columns:
-                    indicators['stoploss'] = stoploss['stoploss']
-                else:  # stoploss wrongly configured
-                    notify = True
-                    notify_reason = "configured incorrectly"
+                validate_dynamic_stoploss(stoploss)
+                indicators['stoploss'] = stoploss['stoploss']
             data_dict[pair] = indicators.to_dict('index')
             if not self.df[pair][['open', 'high', 'low', 'close', 'volume', 'pair']].equals(
                     df[['open', 'high', 'low', 'close', 'volume', 'pair']]
@@ -84,9 +77,7 @@ class BackTesting:
                 print_error(
                     "It is not allowed to edit OHLCV data in your strategy. In order to use edited OHLCV data, be sure to save it in a different variable.")
                 sys.exit()
-        if notify:
-            print_warning(f"Dynamic stoploss {notify_reason}. Using static stoploss of "
-                          f"{self.config.stoploss}%.")
+
         if stoploss_type == 'standard':
             self.config.stoploss_type = 'static'
             print_warning(f"The use of 'standard' is deprecated. Using static stoploss of {self.config.stoploss}%.")
