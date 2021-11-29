@@ -102,8 +102,7 @@ class StatsModule:
             self.trading_module.capital_per_timestamp
         )
 
-        sharpe_ratio = get_sharpe_ratio(self.trading_module.capital_per_timestamp
-                                        )
+        sharpe_ratio = get_sharpe_ratio(self.trading_module.capital_per_timestamp)
 
         # Find amount of winning, draw and losing weeks for portfolio
         win_weeks, draw_weeks, loss_weeks = get_winning_weeks_for_portfolio(
