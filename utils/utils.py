@@ -3,11 +3,11 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Literal
 
 from modules.stats.trade import Trade
+from cli.print_utils import print_config_error
 
-CURRENT_VERSION = "v0.7.9"
+CURRENT_VERSION = "v0.7.10"
 
 MILLISECONDS = 1000
 MINUTE = 60 * MILLISECONDS
@@ -67,23 +67,17 @@ def is_running_as_executable():
         return False
 
 
-def get_verbosity():
-    return os.getenv("VERBOSITY") or "none"
-
-
-def is_verbosity(verbosity: Literal["debug", "none"]):
-    return get_verbosity() == verbosity
-
-
 def parse_timeframe(timeframe_str: str):
     match = re.match(r"([0-9]+)([mdh])", timeframe_str, re.I)
     if not match:
-        raise Exception("[ERROR] Error whilst parsing timeframe")
+        print_config_error("Error while parsing the timeframe from config.json")
+        sys.exit()
     items = re.split(r'([0-9]+)', timeframe_str)
     if items[2] == 'm':
         timeframe_time = int(items[1]) * MINUTE
     elif items[2] == 'h':
         timeframe_time = int(items[1]) * HOUR
     else:
-        raise Exception("[ERROR] Error whilst parsing timeframe")  # TODO
+        print_config_error("Error while parsing the timeframe from config.json")
+        sys.exit()
     return timeframe_time
