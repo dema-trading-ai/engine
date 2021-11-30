@@ -481,8 +481,15 @@ def test_sharpe_ratio_three_trades():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
+    fixture.frame_with_signals['COIN/BASE'].set_starting_time(1577833200000)
+
     # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+    fixture.frame_with_signals['COIN/BASE'].add_entry(open=10, high=10, low=10, close=10, volume=1, buy=1, sell=0, timestep=18000000)
+    fixture.frame_with_signals['COIN/BASE'].add_entry(open=10, high=10, low=9, close=9, volume=1, buy=0, sell=1, timestep=18000000)
+    fixture.frame_with_signals['COIN/BASE'].add_entry(open=9, high=9, low=9, close=9, volume=1, buy=1, sell=0, timestep=18000000)
+    fixture.frame_with_signals['COIN/BASE'].add_entry(open=9, high=18, low=9, close=18, volume=1, buy=0, sell=1, timestep=18000000)
+    fixture.frame_with_signals['COIN/BASE'].add_entry(open=18, high=18, low=18, close=18, volume=1, buy=1, sell=0, timestep=18000000)
+    fixture.frame_with_signals['COIN/BASE'].add_entry(open=18, high=18, low=4.5, close=4.5, volume=1, buy=0, sell=1, timestep=18000000)
 
     # Act
     stats = fixture.create().analyze()

@@ -39,10 +39,9 @@ def get_max_realised_drawdown_for_portfolio(realised_profits_per_timestamp: dict
 def convert_dataframe(capital_per_timestamp: dict, risk_free: float) -> pd.DataFrame:
     df = pd.DataFrame.from_dict(capital_per_timestamp, columns=['value'], orient='index')
 
-    if str(type(df.index.dtype)) == "<class 'numpy.dtype[float64]'>":  # Check if a test is happening
-        df = df.iloc[1:, :]
-        df.index = pd.to_datetime(df.index, unit='ms')
-        df = df.resample('D').apply(lambda x: x.iloc[-1])
+    df = df.iloc[1:, :]
+    df.index = pd.to_datetime(df.index, unit='ms')
+    df = df.resample('D').apply(lambda x: x.iloc[-1])
 
     df['returns'] = (df['value'] - df['value'].shift()) / 100
     df = df.iloc[1:, :]

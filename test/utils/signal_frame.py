@@ -15,10 +15,12 @@ class MockOHLCVWithSignal(dict, object):
     def __init__(self, key):
         super().__init__()
         self.__key = key
-        self.current_time = 0
+        self.current_time = 1
 
-    def add_entry(self, open=1., high=1., low=1., close=1., volume=1., buy=0, sell=0, stoploss=0):
-        self.current_time += 1
+    def set_starting_time(self, starting_time):
+        self.current_time = starting_time
+
+    def add_entry(self, open=1., high=1., low=1., close=1., volume=1., buy=0, sell=0, stoploss=0, timestep=1):
         self.update({self.current_time: {'time': self.current_time,
                                          'open': open,
                                          'high': high,
@@ -30,6 +32,7 @@ class MockOHLCVWithSignal(dict, object):
                                          'sell': sell,
                                          'stoploss': stoploss
                                          }})
+        self.current_time += timestep
         return self
 
     def test_scenario_flat_no_trades(self):
