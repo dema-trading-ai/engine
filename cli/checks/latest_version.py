@@ -4,6 +4,8 @@ from typing import Optional
 from urllib.error import URLError
 from urllib.request import urlopen
 import re
+import certifi
+import ssl
 
 # Files
 from cli.print_utils import print_warning, print_error
@@ -62,7 +64,7 @@ TAG_URL = "https://api.github.com/repos/dema-trading-ai/engine/tags"
 
 def get_engine_repository_tags() -> Optional:
     try:
-        response = urlopen(TAG_URL)
+        response = urlopen(TAG_URL, context=ssl.create_default_context(cafile=certifi.where()))
         data_json = json.loads(response.read())
         tag_names = list(map(lambda x: x["name"], data_json))
         return tag_names
