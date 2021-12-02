@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import calendar
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -11,6 +12,16 @@ class Trade:
         self.close_timestamp = close_timestamp
         self.profit = profit
         self.starting_capital = 0
+
+
+def dt2ts(dt):
+    """Converts a datetime object to UTC timestamp
+
+    naive datetime will be considered UTC.
+
+    """
+
+    return calendar.timegm(dt.utctimetuple())
 
 
 def read_trade_log(filename):
@@ -32,8 +43,8 @@ def parse_trade_json(trades, filename):
             continue
 
         profit = round((v['close_price'] - v['open_price']) / v['open_price'], 3)
-        open_timestamp = datetime.datetime.strptime(v['opened_at'], "%Y-%m-%d %H:%M:%S").timestamp()
-        close_timestamp = datetime.datetime.strptime(v['closed_at'], "%Y-%m-%d %H:%M:%S").timestamp()
+        open_timestamp = dt2ts(datetime.datetime.strptime(v['opened_at'], "%Y-%m-%d %H:%M:%S"))
+        close_timestamp = dt2ts(datetime.datetime.strptime(v['closed_at'], "%Y-%m-%d %H:%M:%S"))
         trade = Trade(open_timestamp=open_timestamp, close_timestamp=close_timestamp, profit=profit)
         trades.append(trade)
 
