@@ -2,7 +2,7 @@
 import json
 from typing import Optional
 from urllib.error import URLError
-from urllib.request import urlopen
+import urllib.request as request
 import re
 import certifi
 import ssl
@@ -64,10 +64,11 @@ TAG_URL = "https://api.github.com/repos/dema-trading-ai/engine/tags"
 
 def get_engine_repository_tags() -> Optional:
     try:
-        response = urlopen(TAG_URL, context=ssl.create_default_context(cafile=certifi.where()))
-        data_json = json.loads(response.read())
-        tag_names = list(map(lambda x: x["name"], data_json))
-        return tag_names
+        req = request.Request(TAG_URL)
+        with request.urlopen(req, context=ssl.create_default_context(cafile=certifi.where())) as response:
+            data_json = json.loads(response.read())
+            tag_names = list(map(lambda x: x["name"], data_json))
+            return tag_names
     except URLError:
         print_error("Error while checking version.")
     return None
