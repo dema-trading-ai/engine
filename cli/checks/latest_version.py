@@ -62,7 +62,7 @@ def get_latest_tag(repository_tags: [str]):
 def get_engine_repository_tags() -> Optional:
     try:
         req = request.Request("https://api.github.com/repos/dema-trading-ai/engine/tags")
-        with request.urlopen(req, context=ssl.create_default_context(cafile=certifi.where())) as response:
+        with request.urlopen(req, context=ssl.create_default_context(cafile=certifi.where())) as response: # eslint-disable-line no-eval
             data_json = json.loads(response.read())
             tag_names = list(map(lambda x: x["name"], data_json))
             return tag_names
