@@ -55,12 +55,14 @@ def get_winning_weeks_for_portfolio(capital_per_timestamp, market_change_weekly)
         # Calculate average market change
         combined_market_change_df['avg_market_change'] = combined_market_change_df.mean(axis=1)
 
-        # add the starting capital to the timeframe in a sensible timestep, in order to take buy fee into account
-        capital_per_timestamp[list(capital_per_timestamp.keys())[1] - 1] = capital_per_timestamp[0]
         # Create dataframe for capital per timestamp
         capital_per_timestamp_df = DataFrame(capital_per_timestamp.values(),
                                              index=capital_per_timestamp.keys(),
                                              columns=['capital']).iloc[1:]
+
+        # add the starting capital to the timeframe in a sensible timestep, in order to take buy fee into account
+        new_timestep = DataFrame([capital_per_timestamp[0]], columns=["capital"], index=[list(capital_per_timestamp.keys())[1] - 1])
+        capital_per_timestamp_df = capital_per_timestamp_df.append(new_timestep).sort_index()
 
         profit_ratio = capital_per_timestamp_df['capital'].div(capital_per_timestamp_df['capital'].shift(1))
         profit_ratio.index = \

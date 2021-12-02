@@ -42,6 +42,7 @@ class ConfigModule(object):
         self.stoploss = None
         self.fee = None
         self.strategy_definition = None
+        self.strategy_name = None
         self.exchange = None
 
     @staticmethod
@@ -59,6 +60,7 @@ class ConfigModule(object):
         config_module.timeframe = config["timeframe"]
         config_module.timeframe_ms = parse_timeframe(config_module.timeframe)
         config_module.strategy_definition = StrategyDefinition(config['strategy-name'], config['strategies-folder'])
+        config_module.strategy_name = config_module.strategy_definition.strategy_name
         config_module.exchange_name = exchange_str
         config_module.exchange = create_cctx_exchange(config_module.exchange_name, config_module.timeframe)
         backtesting_till_now = config["backtesting-till-now"]
@@ -74,9 +76,13 @@ class ConfigModule(object):
         config_module.stoploss = config["stoploss"]
         config_module.stoploss_type = config["stoploss-type"]
         config_module.max_open_trades = config["max-open-trades"]
-        config_module.exposure_per_trade = config.get("exposure-per-trade", 100.) / 100.
+        config_module.exposure_per_trade = config["exposure-per-trade"]
+        if float(config_module.exposure_per_trade) != round(config_module.exposure_per_trade, 2):
+            print_warning("Exposure has been rounded to two decimal points.")
+            config_module.exposure_per_trade = round(config_module.exposure_per_trade, 2)
+        config_module.exposure_per_trade /= 100
         if config_module.exposure_per_trade > 1.0:
-            print_warning(f"Warning: Exposure is not 100% (default), this means that every trade will use {config_module.exposure_per_trade * 100}% funds per trade until either all funds are used or max open trades are open.")
+            print_warning(f"Exposure is not 100% (default), this means that every trade will use {round(config_module.exposure_per_trade * 100, 2)}% funds per trade until either all funds are used or max open trades are open.")
         config_module.plots = config["plots"]
         config_module.tearsheet = config.get("tearsheet", False)
         config_module.export_result = config.get("export-result", False)
@@ -136,7 +142,7 @@ def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtes
 
         print_info('Changed end date %s to %s.' % (backtesting_to_parsed, last_closed_candle_datetime))
 
-        backtesting_to_parsed = exchange.iso8601(last_closed_candle_ms)
+        backtesting_to_parsed = last_closed_candle_datetime
 
     # Check for incorrect configuration
     if backtesting_from_ms >= backtesting_to_ms:

@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import typing
 
 from rich.console import JustifyMethod
+from rich.padding import Padding
 from rich.table import Table
 from rich import box
 
@@ -77,9 +78,11 @@ def show_mainresults(self: MainResults, currency_symbol: str):
 
     # Create grid for all tables
     table_grid = Table(box=box.SIMPLE)
-    table_grid.add_column(":robot: BACKTESTING RESULTS :robot:")
-    table_grid.add_row(settings_table)
-    table_grid.add_row(performance_table, trade_info_table)
+    table_grid.add_column(f":robot: {self.strategy_name}'s Backtest brought to you by DemaTrading.ai's Engine :robot:")
+    tables = Table.grid()
+    tables.add_row(settings_table)
+    tables.add_row(performance_table, Padding(trade_info_table, (0, 2)))
+    table_grid.add_row(tables)
     console_color.print(table_grid)
 
 
@@ -99,6 +102,7 @@ def create_trade_info_table(self, justification) -> Table:
                              str(round(self.n_average_trades, 2)))
     trade_info_table.add_row('Left-open trades', str(self.n_left_open_trades))
     trade_info_table.add_row('Trades with loss', str(self.n_trades_with_loss))
+    trade_info_table.add_row('Rejected buy signals', str(self.rejected_buy_signal))
     trade_info_table.add_row('Most consecutive losses',
                              str(self.n_consecutive_losses))
     trade_info_table.add_row(f'Best trade',
@@ -112,7 +116,7 @@ def create_trade_info_table(self, justification) -> Table:
     trade_info_table.add_row('Shortest trade duration', str(shortest_trade_duration))
     trade_info_table.add_row('Avg. trade duration', str(avg_trade_duration))
     trade_info_table.add_row('Longest trade duration', str(longest_trade_duration))
-    trade_info_table.add_row('Winning weeks (W/D/L)', f'{self.win_weeks} / {self.draw_weeks}'
+    trade_info_table.add_row('Weekly perf. vs market (W/D/L)', f'{self.win_weeks} / {self.draw_weeks}'
                                                       f' / {self.loss_weeks}')
     return trade_info_table
 
@@ -144,13 +148,13 @@ def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown
     performance_table.add_row('Market change coins',
                               colorize(round(self.market_change_coins,
                                              2), 0, '%'))
-    performance_table.add_row('Market change BTC',
+    performance_table.add_row('Market change BTC/USDT',
                               colorize(round(self.market_change_btc,
                                              2), 0, '%'))
     performance_table.add_row('Market drawdown coins',
                               colorize(round(self.market_drawdown_coins,
                                              2), 0, '%'))
-    performance_table.add_row('Market drawdown BTC',
+    performance_table.add_row('Market drawdown BTC/USDT',
                               colorize(round(self.market_drawdown_btc,
                                              2), 0, '%'))
     performance_table.add_row('Total fee paid',
@@ -167,6 +171,7 @@ def create_settings_table(self: MainResults, currency_symbol, justification, tes
                               width=25)
     settings_table.add_column(justify=justification, width=20)
     settings_table.add_row("Engine version", CURRENT_VERSION)
+    settings_table.add_row("Strategy", self.strategy_name)
     settings_table.add_row("Backtesting from", tested_from_string)
     settings_table.add_row("Backtesting to", tested_to_string)
     settings_table.add_row("Timeframe", self.timeframe)
@@ -177,7 +182,7 @@ def create_settings_table(self: MainResults, currency_symbol, justification, tes
                            f"{round(self.starting_capital, 2)} {currency_symbol}")
     settings_table.add_row("Fee percentage", f"{self.fee} %")
     settings_table.add_row("Max. open trades", str(self.max_open_trades))
-    settings_table.add_row("Exposure per trade", str(self.exposure_per_trade * 100) + " %")
+    settings_table.add_row("Exposure per trade", str(round(self.exposure_per_trade * 100, 2)) + " %")
     return settings_table
 
 
@@ -274,7 +279,7 @@ class CoinInsights:
         coin_metrics_table.add_column("Max. seen drawdown (%)", justify=justification)
         coin_metrics_table.add_column("Max. realised drawdown (%)",
                                       justify=justification)
-        coin_metrics_table.add_column("Winning weeks (W/D/L)",
+        coin_metrics_table.add_column("Weekly perf. vs market (W/D/L)",
                                       justify=justification)
         return coin_metrics_table
 

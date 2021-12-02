@@ -11,6 +11,7 @@ class MainResults:
     tested_from: datetime
     tested_to: datetime
     timeframe: str
+    strategy_name: str
     max_open_trades: int
     exposure_per_trade: float
     market_change_coins: float
@@ -44,6 +45,7 @@ class MainResults:
     stoploss_type: str
     fee: float
     total_fee_amount: float
+    rejected_buy_signal: int
 
 
 @dataclass

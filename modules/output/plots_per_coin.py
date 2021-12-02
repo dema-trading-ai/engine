@@ -54,13 +54,18 @@ def plot_coin(config, stats, pair: str, pair_data):
         title='%s Chart' % pair,
         yaxis_title=pair,
         template='ggplot2',
-        dragmode='pan')
+        dragmode='pan',
+        updatemenus=[
+            dict(
+                buttons=[
+                     dict(label="Toggle Log / Linear Scale",
+                          method="relayout",
+                          args=[{"yaxis.type": "linear"}],
+                          args2=[{"yaxis.type": "log"}])
+                ],
+                type="buttons"
+            )
+        ]
+    )
 
-    # remove plots if they already existed in the binance folder.
-    # used to remove plots made by older version so users don't by accident open old plots.
-    # Can be removed in a future release, when we can be quite certain that the old plots are gone.
-    try:
-        os.remove("data/backtesting-data/binance/plot%s.html" % pair.replace("/", ""))
-    except OSError:
-        pass
     fig.write_html("data/backtesting-data/plots/plot%s.html" % pair.replace("/", ""), config={'scrollZoom': True})
