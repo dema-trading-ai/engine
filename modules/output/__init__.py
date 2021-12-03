@@ -40,7 +40,7 @@ class OutputModule(object):
             pass
 
         print_info("Logging trades to " + FONT_BOLD + "data/backtesting-data/trades_log.json" + FONT_RESET + "...")
-        log_trades(stats)
+        log_trades(stats, self.config)
 
         # write orders to a  tearsheet
         if self.config.tearsheet and len(stats.trades):
@@ -73,8 +73,8 @@ def show_trade_anomalies(stats: TradingStats):
         print_warning("Profit for affected trades will be set to 0%")
 
 
-def log_trades(stats: TradingStats):
-    trades_dict = {}
+def log_trades(stats: TradingStats, config: StatsConfig):
+    trades_dict = {"max-open_trades": config.max_open_trades, "timeframe": config.timeframe, "trades": {}}
     for i, trade in enumerate(stats.trades):
         trade_dict = {'status': trade.status,
                       'opened_at': trade.opened_at,
@@ -88,13 +88,11 @@ def log_trades(stats: TradingStats):
                       'currency_amount': trade.currency_amount,
                       'sell_reason': trade.sell_reason}
 
-        trades_dict[i] = trade_dict
-
-    trades_dict = dict(sorted(trades_dict.items()))
+        trades_dict["trades"][i] = trade_dict
 
     trades_json = json.dumps(trades_dict, indent=4, default=str)
 
-    with open('./data/backtesting-data/trades_log.json', 'w', encoding='utf-8') as f:
+    with open(f'./data/backtesting-data/{config.strategy_name}_trades_log.json', 'w', encoding='utf-8') as f:
         f.write(trades_json)
 
 
