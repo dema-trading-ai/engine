@@ -20,8 +20,6 @@ from modules.stats.metrics.winning_weeks import get_winning_weeks_per_coin, \
 from modules.stats.stats_config import StatsConfig
 from modules.stats.trade import Trade, SellReason
 from modules.stats.tradingmodule import TradingModule
-from read_trade_logs import parse_trade_json, BASE_DIR
-from read_csv_logs import open_dict_from_file, save_dict_to_file
 
 from utils.dict import group_by
 from utils.utils import calculate_worth_of_open_trades
@@ -54,38 +52,7 @@ class StatsModule:
         market_drawdown = get_market_drawdown(pairs, self.frame_with_signals)
         return self.generate_backtesting_result(market_change, market_drawdown)
 
-    def generate_multibot_trading_module(self):
-        budget, closed_trades = parse_trade_json()
-        open_trades = []
-        trading_module_config = self.trading_module.config
-        multi_trading_module = TradingModule(trading_module_config)
-        multi_trading_module.closed_trades = closed_trades
-        multi_trading_module.open_trades = open_trades
-        multi_trading_module.budget = budget
-
-        realised_profits_per_timestamp = {}
-        realised_profit = 0
-        for trade in closed_trades:
-            realised_profit += trade.profit_dollar
-            realised_profits_per_timestamp[int(datetime.timestamp(trade.closed_at)*1000)] = realised_profit
-
-        multi_trading_module.realised_profit = realised_profit
-        multi_trading_module.realised_profits_per_timestamp = realised_profits_per_timestamp
-
-        return multi_trading_module
-
-    def calculate_pct_from_profits(self, realised_profits: dict):
-        start = list(realised_profits)[0]
-        end = list(realised_profits)[-1]
-        end_capital = realised_profits[end]
-        start_capital = realised_profits[start]
-
-        return ((end_capital - start_capital) / start_capital) * 100
-
     def generate_backtesting_result(self, market_change: dict, market_drawdown: dict) -> TradingStats:
-
-        # This is for running the back test engine from a json trade log
-        # self.trading_module = self.generate_multibot_trading_module()
 
         coin_results, market_change_weekly = self.generate_coin_results(self.trading_module.closed_trades,
                                                                         market_change,
@@ -127,19 +94,6 @@ class StatsModule:
         budget += calculate_worth_of_open_trades(open_trades)
         overall_profit_percentage = ((budget - self.config.starting_capital) / self.config.starting_capital) * 100
 
-        # Saving the dicts to json
-        # save_dict_to_file(BASE_DIR + '/data/realised_profits_algo2.json', self.trading_module.realised_profits_per_timestamp)
-        # save_dict_to_file(BASE_DIR + '/data/capital_per_timestamp_algo2.json', self.trading_module.capital_per_timestamp)
-
-        # # Multi bot Implementation
-        # realised_profits_per_timestamp = open_dict_from_file(BASE_DIR + '/data/combined_realised_profits.json')
-        # capital_per_timestamp = open_dict_from_file(BASE_DIR + '/data/combined_capital.json')
-        # # realised_profits_per_timestamp = open_dict_from_file(BASE_DIR + '/data/realised_profits_algo2.json')
-        # # capital_per_timestamp = open_dict_from_file(BASE_DIR + '/data/capital_per_timestamp_algo2.json')
-        #
-        # self.trading_module.realised_profits_per_timestamp = realised_profits_per_timestamp
-        # self.trading_module.capital_per_timestamp = capital_per_timestamp
-
         # Find max seen and realised drawdown
         max_realised_drawdown = get_max_realised_drawdown_for_portfolio(
             self.trading_module.realised_profits_per_timestamp
@@ -149,23 +103,11 @@ class StatsModule:
             self.trading_module.capital_per_timestamp
         )
 
-        # # Calculate profits based on realised_profits
-        # profit_pct = self.calculate_pct_from_profits(self.trading_module.realised_profits_per_timestamp)
-        #
-        # intermediate_results = {'profit': round(profit_pct, 2),
-        #                         'max_realised_drawdown': round((1-max_realised_drawdown) * 100, 2),
-        #                         'max_seen_drawdown': round((1-max_seen_drawdown['drawdown']) * 100, 2)
-        #                         }
-
-
         # Find amount of winning, draw and losing weeks for portfolio
         win_weeks, draw_weeks, loss_weeks = get_winning_weeks_for_portfolio(
             self.trading_module.capital_per_timestamp,
             market_change_weekly
         )
-        # win_weeks = 0
-        # draw_weeks = 0
-        # loss_weeks = 0
 
         nr_losing_trades = get_number_of_losing_trades(closed_trades)
         nr_consecutive_losing_trades = get_number_of_consecutive_losing_trades(closed_trades)

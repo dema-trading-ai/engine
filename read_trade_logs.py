@@ -25,19 +25,19 @@ def dt2ts(dt):
 
 
 def read_trade_log(filename):
-    with open(BASE_DIR + '/data/backtesting-data/' + filename) as f:
+    with open(filename) as f:
         return json.load(f)
 
 
 def save_trade_log(data, filename):
-    with open(BASE_DIR + '/data/backtesting-data/' + filename, 'w+') as f:
+    with open(filename, 'w+') as f:
         json.dump(data, f)
 
 
 def parse_trade_json(trades, filename):
     data = read_trade_log(filename)
-
-    for k, v in data.items():
+    mot = data['mot']
+    for k, v in data['trades'].items():
         if v['status'] == 'open':
             # Skip open trades for now
             continue
@@ -48,7 +48,7 @@ def parse_trade_json(trades, filename):
         trade = Trade(open_timestamp=open_timestamp, close_timestamp=close_timestamp, profit=profit)
         trades.append(trade)
 
-    return trades
+    return mot, trades
 
 
 def parse_existing_trade_log(filename):
@@ -64,17 +64,13 @@ def parse_existing_trade_log(filename):
 
 def combine_trade_logs(files, export=False, path=None):
     trades = []
+    mot = 0
     for file in files:
-        trades = parse_trade_json(trades, file)
+        max_open_trades, trades = parse_trade_json(trades, file)
+        mot += max_open_trades
 
     if export:
         data = [trade.__dict__ for trade in trades]
         save_trade_log(data, path)
 
-    return trades
-
-
-export_filename = 'combined_trades_log.json'
-filenames = ['trades_log.json', 'trades_log_test.json']
-
-# combine_trade_logs(filenames, export=True, path=export_filename)
+    return mot, trades

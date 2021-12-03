@@ -1,20 +1,24 @@
 import datetime
 import calendar
+from glob import glob
+import itertools
 
 import pandas as pd
 import numpy as np
 
-from read_trade_logs import parse_existing_trade_log, parse_trade_json
+from read_trade_logs import BASE_DIR, combine_trade_logs, save_trade_log
 
 
 def dt2ts(dt):
-    """Converts a datetime object to UTC timestamp
-
-    naive datetime will be considered UTC.
-
     """
-
+    Converts a datetime object to UTC timestamp
+    naive datetime will be considered UTC.
+    """
     return calendar.timegm(dt.utctimetuple())
+
+
+def beautify_filename(path):
+    return path.split('/')[-1].split('.')[0]
 
 
 def get_initialized_df(trades):
@@ -43,80 +47,72 @@ def get_profit_pct(end_capital, start_capital):
     return ((end_capital - start_capital) / start_capital) * 100
 
 
-smallest_timeframe = '1H'
-starting_capital = 1000
-mot = 1
+def run_multibot(trades, mot):
+    df, timestamp_interval = get_initialized_df(trades)
+
+    starting_capital = 1000
+    available_funds = starting_capital
+    total_funds = starting_capital
+
+    open_trades = []
+    for i in timestamp_interval:
+        # Check if we need to close a trade
+        trade_to_close = next((trade for trade in open_trades if trade.close_timestamp == i), None)
+        if trade_to_close:
+            # Calculate profit and update total-, and available funds
+            abs_profit = trade_to_close.starting_capital * trade_to_close.profit
+            fee_paid = (abs_profit + trade_to_close.starting_capital) * fee
+            abs_profit -= fee_paid
+            available_funds += abs_profit + trade_to_close.starting_capital
+            total_funds += abs_profit - trade_to_close.open_fee
+
+            # Remove trade from the open trades list
+            open_trades.remove(trade_to_close)
+
+        # Check if we need to open new trades
+        trade_to_open = next((trade for trade in trades if trade.open_timestamp == i), None)
+        if trade_to_open:
+            # Calculate the amount to open the trades with and update the funds accordingly
+            trade_open_amount = total_funds / mot
+            open_fee = trade_open_amount * fee
+            trade_to_open.starting_capital = trade_open_amount - open_fee
+            trade_to_open.open_fee = open_fee
+            available_funds -= trade_open_amount
+
+            # Add the newly opened trade to the open trade list
+            open_trades.append(trade_to_open)
+
+            # Remove the newly opened trades from the still-to-open trades list
+            trades.remove(trade_to_open)
+
+        # Update the dataframe to 'save' the funds per timestamp
+        df.loc[i, 'AF'] = available_funds
+        df.loc[i, 'TF'] = total_funds
+
+    ending_capital = df['TF'].iloc[-1]
+    profit_pct = get_profit_pct(ending_capital, starting_capital)
+    drawdown_ratio = get_max_drawdown_ratio(df)
+    drawdown_pct = (drawdown_ratio - 1) * 100
+
+    return profit_pct, drawdown_pct
+
+
+smallest_timeframe = '15min'
 fee = 0.0025
-available_funds = starting_capital
-total_funds = starting_capital
-combined_trades_filename = 'trades_log.json'
-
-trades = parse_trade_json([], combined_trades_filename)
-
-df, timestamp_interval = get_initialized_df(trades)
-
-open_trades = []
-for i in timestamp_interval:
-    # Check if we need to close a trade
-    trade_to_close = next((trade for trade in open_trades if trade.close_timestamp == i), None)
-    if trade_to_close:
-        # Calculate profit and update total-, and available funds
-        abs_profit = trade_to_close.starting_capital * trade_to_close.profit
-        fee_paid = (abs_profit + trade_to_close.starting_capital) * fee
-        abs_profit -= fee_paid
-        available_funds += abs_profit + trade_to_close.starting_capital
-        total_funds += abs_profit - trade_to_close.open_fee
-
-        # Remove trade from the open trades list
-        open_trades.remove(trade_to_close)
-
-    # Check if we need to open new trades
-    trade_to_open = next((trade for trade in trades if trade.open_timestamp == i), None)
-    if trade_to_open:
-        # Calculate the amount to open the trades with and update the funds accordingly
-        trade_open_amount = total_funds / mot
-        open_fee = trade_open_amount * fee
-        trade_to_open.starting_capital = trade_open_amount - open_fee
-        trade_to_open.open_fee = open_fee
-        available_funds -= trade_open_amount
-
-        # Add the newly opened trade to the open trade list
-        open_trades.append(trade_to_open)
-
-        # Remove the newly opened trades from the still-to-open trades list
-        trades.remove(trade_to_open)
-
-    # Update the dataframe to 'save' the funds per timestamp
-    df.loc[i, 'AF'] = available_funds
-    df.loc[i, 'TF'] = total_funds
 
 
-ending_capital = df['TF'].iloc[-1]
-profit_pct = get_profit_pct(ending_capital, starting_capital)
-drawdown_ratio = get_max_drawdown_ratio(df)
-drawdown_pct = (drawdown_ratio - 1) * 100
-x = 1
+def combine_and_run_multibot():
+    results = {}
+    files = glob(BASE_DIR + r"/data/backtesting-data/trade_logs/*.json")
+    all_combinations = list(itertools.combinations(files, 2))
+    for i, combination in enumerate(all_combinations):
+        mot, trades = combine_trade_logs(list(combination), export=True, path=BASE_DIR + f'/data/backtesting-data/trade_comb_{i}.json')
+        profit, drawdown = run_multibot(trades, mot)
+        cleaned_filenames = [beautify_filename(filename) for filename in list(combination)]
+        combination_title = '-'.join(cleaned_filenames)
+        results[combination_title] = {"profit": profit, "drawdown": drawdown}
+
+    save_trade_log(results, BASE_DIR+'/data/backtesting-data/combined_results1.json')
 
 
-
-
-"""
-trades_log.json :
-4h timeframe
-from 2021-01-01 01:00                                                      
-to 2021-09-01 02:00
-1 max open trades 
--26.88% profit
--35.67% Realised drawdown
-25 trades
-
-trades_log.json :
-4h timeframe
-from 2021-01-01 01:00
-to 2021-09-01 02:00
-3 max open trades
--21.32 % profit
--36.81 % realised drawdown
-94 trades
-
-"""
+combine_and_run_multibot()
