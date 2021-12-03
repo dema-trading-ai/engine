@@ -36,7 +36,8 @@ def save_trade_log(data, filename):
 
 def parse_trade_json(trades, filename):
     data = read_trade_log(filename)
-    mot = data['mot']
+    mot = data['max-open-trades']
+    timeframe = data['timeframe']
     for k, v in data['trades'].items():
         if v['status'] == 'open':
             # Skip open trades for now
@@ -48,7 +49,7 @@ def parse_trade_json(trades, filename):
         trade = Trade(open_timestamp=open_timestamp, close_timestamp=close_timestamp, profit=profit)
         trades.append(trade)
 
-    return mot, trades
+    return mot, timeframe, trades
 
 
 def parse_existing_trade_log(filename):
@@ -64,13 +65,15 @@ def parse_existing_trade_log(filename):
 
 def combine_trade_logs(files, export=False, path=None):
     trades = []
+    timeframes = []
     mot = 0
     for file in files:
-        max_open_trades, trades = parse_trade_json(trades, file)
+        max_open_trades, timeframe, trades = parse_trade_json(trades, file)
         mot += max_open_trades
+        timeframes.append(timeframe)
 
     if export:
         data = [trade.__dict__ for trade in trades]
         save_trade_log(data, path)
 
-    return mot, trades
+    return mot, trades, timeframes

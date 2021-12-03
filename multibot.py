@@ -8,6 +8,16 @@ import numpy as np
 
 from read_trade_logs import BASE_DIR, combine_trade_logs, save_trade_log
 
+SMALLEST_TIMEFRAME_DEFINITIONS = {
+    "5m": "5min",
+    "15m": "5min",
+    "30m": "15min",
+    "1h": "30min",
+    "4h": "1H"
+}
+
+FEE = 0.0025
+
 
 def dt2ts(dt):
     """
@@ -17,11 +27,25 @@ def dt2ts(dt):
     return calendar.timegm(dt.utctimetuple())
 
 
+def get_smallest_timeframe(timeframes):
+    smallest_ones = [timeframe for timeframe in timeframes if timeframe.endswith('m')]
+    if not smallest_ones:
+        smallest_ones = [timeframe for timeframe in timeframes if timeframe.endswith('h')]
+
+    smallest_timeframe_number = 100
+    smallest_timeframe = 0
+    for timeframe in smallest_ones:
+        if int(timeframe[:-1]) < smallest_timeframe_number:
+            smallest_timeframe = timeframe
+
+    return SMALLEST_TIMEFRAME_DEFINITIONS[smallest_timeframe]
+
+
 def beautify_filename(path):
     return path.split('/')[-1].split('.')[0]
 
 
-def get_initialized_df(trades):
+def get_initialized_df(trades, smallest_timeframe):
     first_open_timestamp = sorted(trades, key=lambda trade: trade.open_timestamp)[0].open_timestamp
     last_close_timestamp = sorted(trades, key=lambda trade: trade.close_timestamp, reverse=True)[0].close_timestamp
     start = datetime.datetime.fromtimestamp(first_open_timestamp, tz=datetime.timezone.utc)
@@ -47,8 +71,8 @@ def get_profit_pct(end_capital, start_capital):
     return ((end_capital - start_capital) / start_capital) * 100
 
 
-def run_multibot(trades, mot):
-    df, timestamp_interval = get_initialized_df(trades)
+def run_multibot(trades, mot, smallest_timeframe):
+    df, timestamp_interval = get_initialized_df(trades, smallest_timeframe)
 
     starting_capital = 1000
     available_funds = starting_capital
@@ -61,7 +85,7 @@ def run_multibot(trades, mot):
         if trade_to_close:
             # Calculate profit and update total-, and available funds
             abs_profit = trade_to_close.starting_capital * trade_to_close.profit
-            fee_paid = (abs_profit + trade_to_close.starting_capital) * fee
+            fee_paid = (abs_profit + trade_to_close.starting_capital) * FEE
             abs_profit -= fee_paid
             available_funds += abs_profit + trade_to_close.starting_capital
             total_funds += abs_profit - trade_to_close.open_fee
@@ -74,7 +98,7 @@ def run_multibot(trades, mot):
         if trade_to_open:
             # Calculate the amount to open the trades with and update the funds accordingly
             trade_open_amount = total_funds / mot
-            open_fee = trade_open_amount * fee
+            open_fee = trade_open_amount * FEE
             trade_to_open.starting_capital = trade_open_amount - open_fee
             trade_to_open.open_fee = open_fee
             available_funds -= trade_open_amount
@@ -97,22 +121,28 @@ def run_multibot(trades, mot):
     return profit_pct, drawdown_pct
 
 
-smallest_timeframe = '15min'
-fee = 0.0025
-
-
 def combine_and_run_multibot():
-    results = {}
-    files = glob(BASE_DIR + r"/data/backtesting-data/trade_logs/*.json")
-    all_combinations = list(itertools.combinations(files, 2))
-    for i, combination in enumerate(all_combinations):
-        mot, trades = combine_trade_logs(list(combination), export=True, path=BASE_DIR + f'/data/backtesting-data/trade_comb_{i}.json')
-        profit, drawdown = run_multibot(trades, mot)
-        cleaned_filenames = [beautify_filename(filename) for filename in list(combination)]
-        combination_title = '-'.join(cleaned_filenames)
-        results[combination_title] = {"profit": profit, "drawdown": drawdown}
+    print('[INFO] Starting multibot run')
+    for i in range(3, 7):
+        results = {}
+        files = glob(BASE_DIR + r"/data/backtesting-data/trade_logs/*.json")
+        all_combinations = list(itertools.combinations(files, i))
+        for j, combination in enumerate(all_combinations):
+            print(f'[INFO] Currently running combination {j} out of {len(all_combinations)} options for {i} combinations')
+            mot, trades, timeframes = combine_trade_logs(list(combination))
+            smallest_timeframe = get_smallest_timeframe(timeframes)
 
-    save_trade_log(results, BASE_DIR+'/data/backtesting-data/combined_results1.json')
+            try:
+                profit, drawdown = run_multibot(trades, mot, smallest_timeframe)
+            except Exception as e:
+                print(f'[ERROR] Something went wrong: {e}')
+                profit = drawdown = 0
+
+            cleaned_filenames = [beautify_filename(filename) for filename in list(combination)]
+            combination_title = '-'.join(cleaned_filenames)
+            results[combination_title] = {"profit": profit, "drawdown": drawdown}
+
+        save_trade_log(results, BASE_DIR+f'/data/backtesting-data/combined_{i}_results.json')
 
 
 combine_and_run_multibot()
