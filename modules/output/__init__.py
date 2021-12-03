@@ -92,7 +92,7 @@ def log_trades(stats: TradingStats, config: StatsConfig):
 
     trades_json = json.dumps(trades_dict, indent=4, default=str)
 
-    with open(f'./data/backtesting-data/{config.strategy_name}_trades_log.json', 'w', encoding='utf-8') as f:
+    with open(f'./data/backtesting-data/trades_log_{config.strategy_name}.json', 'w', encoding='utf-8') as f:
         f.write(trades_json)
 
 
