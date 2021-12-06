@@ -37,14 +37,22 @@ def get_max_realised_drawdown_for_portfolio(realised_profits_per_timestamp: dict
 
 
 def convert_dataframe(capital_per_timestamp: dict, risk_free: float) -> pd.DataFrame:
+    """
+    Converts a dict of capital per timestamps to a dataframe with timestamps as index, and with a daily returns column
+    """
+
     df = pd.DataFrame.from_dict(capital_per_timestamp, columns=['value'], orient='index')
 
-    df['returns'] = (df['value'] - df['value'].shift()) / 100
-
+    first_value = df['value'][0]
     df = df.iloc[1:, :]
+
     df.index = pd.to_datetime(df.index, unit='ms')
     df = df.resample('D').apply(lambda x: x.iloc[-1])
 
+    df.loc[df.index[0]] = first_value  # Replace with previous first value to include price of first buy in returns
+    df = df.sort_index()
+
+    df['returns'] = (df['value'] - df['value'].shift()) / 100
     df['rf'] = risk_free
 
     return df
