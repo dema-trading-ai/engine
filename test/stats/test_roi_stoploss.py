@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import timedelta
 
 from test.stats.stats_test_utils import StatsFixture
 
@@ -64,7 +64,7 @@ def test_trailing_stoploss():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.trades[0].closed_at == datetime(2020, 1, 5, 0, 0)
+    assert stats.trades[0].closed_at - stats.trades[0].opened_at == timedelta(days=4)
     assert stats.main_results.end_capital == 147.015
 
 
