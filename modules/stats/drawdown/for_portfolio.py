@@ -62,6 +62,21 @@ def get_sharpe_ratio(capital_per_timestamp: dict, risk_free: float = 0.0) -> flo
     expected_excess_asset_return = np.subtract(df['returns'], df['rf'])
     sharpe_ratio_per_timestamp = np.divide(expected_excess_asset_return, np.std(expected_excess_asset_return))
 
-    avg_sharpe_ratio = np.mean(sharpe_ratio_per_timestamp)
+    avg_sharpe_ratio = float(np.mean(sharpe_ratio_per_timestamp))
 
     return avg_sharpe_ratio
+
+
+def get_sortino_ratio(capital_per_timestamp: dict, risk_free: float = 0.0) -> float:
+    df = convert_dataframe(capital_per_timestamp, risk_free)
+
+    average_realized_return = sum(df['returns']) / len(df['returns'])
+    additional_return = average_realized_return - risk_free
+
+    df['down_dev'] = np.where(df['returns'] < 0, abs(df['returns']) ** 2, 0)
+    average_squared_downside_deviation = sum(df['down_dev']) / len(df['down_dev'])
+    target_downside_deviation = np.sqrt(average_squared_downside_deviation)
+
+    sortino_ratio = additional_return / target_downside_deviation
+
+    return sortino_ratio

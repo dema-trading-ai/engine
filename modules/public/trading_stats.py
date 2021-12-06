@@ -47,6 +47,7 @@ class MainResults:
     total_fee_amount: float
     rejected_buy_signal: int
     sharpe_ratio: float
+    sortino_ratio: float
 
 
 @dataclass

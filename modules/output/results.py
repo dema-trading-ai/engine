@@ -159,6 +159,8 @@ def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown
                               colorize(round(self.market_drawdown_btc,
                                              2), 0, '%'))
     performance_table.add_row('Sharpe ratio', str(round(self.sharpe_ratio, 2)) if not (math.isnan(self.sharpe_ratio) or math.isinf(self.sharpe_ratio)) else '-')
+    performance_table.add_row('Sortino ratio', str(round(self.sortino_ratio, 2)) if not (
+                math.isnan(self.sortino_ratio) or math.isinf(self.sortino_ratio)) else '-')
     performance_table.add_row('Total fee paid',
                               f"{round(self.total_fee_amount)} {currency_symbol}")
     return performance_table
