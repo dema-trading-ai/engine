@@ -39,25 +39,25 @@ def get_max_realised_drawdown_for_portfolio(realised_profits_per_timestamp: dict
 def convert_dataframe(capital_per_timestamp: dict, risk_free: float) -> pd.DataFrame:
     df = pd.DataFrame.from_dict(capital_per_timestamp, columns=['value'], orient='index')
 
+    df['returns'] = (df['value'] - df['value'].shift()) / 100
+
     df = df.iloc[1:, :]
     df.index = pd.to_datetime(df.index, unit='ms')
     df = df.resample('D').apply(lambda x: x.iloc[-1])
 
-    df['returns'] = (df['value'] - df['value'].shift()) / 100
-    df = df.iloc[1:, :]
     df['rf'] = risk_free
-
-    if (df['returns'] == 0.0).all():
-        print_warning('Unable to compute sharpe ratio: No trades were made')
-
-    if len(df['value']) < 2:
-        print_warning('Unable to compute sharpe ratio: The backtesting period needs to be at least 24h')
 
     return df
 
 
 def get_sharpe_ratio(capital_per_timestamp: dict, risk_free: float = 0.0) -> float:
     df = convert_dataframe(capital_per_timestamp, risk_free)
+
+    if (df['returns'] == 0.0).all():
+        print_warning('Unable to compute sharpe ratio: No trades were made')
+
+    if len(df['value']) < 2:
+        print_warning('Unable to compute sharpe ratio: The backtesting period needs to be at least 24h')
 
     expected_excess_asset_return = np.subtract(df['returns'], df['rf'])
     sharpe_ratio_per_timestamp = np.divide(expected_excess_asset_return, np.std(expected_excess_asset_return))
