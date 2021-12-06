@@ -3,6 +3,11 @@ from datetime import timedelta
 
 from test.stats.stats_test_utils import StatsFixture
 
+# Define different timestep values
+DAILY = 86400000  # 24 hours in milliseconds
+THIRTY_MIN = 1800000  # 30 minutes in milliseconds
+ONE_MIL = 1  # 1 millisecond
+
 
 def test_capital():
     """Given 'value of coin rises', 'capital' should 'rise same minus fee'"""
@@ -348,7 +353,7 @@ def test_trade_length_one_trade():
     fixture = StatsFixture(['COIN/BASE'])
 
     # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_flat_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_flat_one_trade(timestep=ONE_MIL)
 
     # Act
     stats = fixture.create().analyze()
@@ -365,7 +370,7 @@ def test_trade_length_three_trades():
     fixture = StatsFixture(['COIN/BASE'])
 
     # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades(timestep=ONE_MIL)
 
     # Act
     stats = fixture.create().analyze()
@@ -382,7 +387,7 @@ def test_trade_length_one_trade_longer():
     fixture = StatsFixture(['COIN/BASE'])
 
     # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_one_trade(timestep=ONE_MIL)
 
     # Act
     stats = fixture.create().analyze()
@@ -399,8 +404,8 @@ def test_trade_length_four_trades():
     fixture = StatsFixture(['COIN/BASE'])
 
     # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_one_trade()
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_three_trades()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_one_trade(timestep=ONE_MIL)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_three_trades(timestep=ONE_MIL)
 
     # Act
     stats = fixture.create().analyze()
@@ -477,40 +482,36 @@ def test_rejected_buy_signal_reject_exposure():
     assert stats.main_results.rejected_buy_signal == 1
 
 
-def test_sharpe_ratio_three_trades():
-    # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
-
-    fixture.frame_with_signals['COIN/BASE'].set_starting_time(1577833200000)
-
-    # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].add_entry(open=10, high=10, low=10, close=10, volume=1, buy=1, sell=0, timestep=18000000)
-    fixture.frame_with_signals['COIN/BASE'].add_entry(open=10, high=10, low=9, close=9, volume=1, buy=0, sell=1, timestep=18000000)
-    fixture.frame_with_signals['COIN/BASE'].add_entry(open=9, high=9, low=9, close=9, volume=1, buy=1, sell=0, timestep=18000000)
-    fixture.frame_with_signals['COIN/BASE'].add_entry(open=9, high=18, low=9, close=18, volume=1, buy=0, sell=1, timestep=18000000)
-    fixture.frame_with_signals['COIN/BASE'].add_entry(open=18, high=18, low=18, close=18, volume=1, buy=1, sell=0, timestep=18000000)
-    fixture.frame_with_signals['COIN/BASE'].add_entry(open=18, high=18, low=4.5, close=4.5, volume=1, buy=0, sell=1, timestep=18000000)
-
-    # Act
-    stats = fixture.create().analyze()
-
-    assert math.isclose(stats.main_results.sharpe_ratio, -0.15353, abs_tol=0.00001)
-
-
-def test_sharpe_ratio_one_trade_down():
+def test_sharpe_ratio_three_trades_daily_timestep():
+    # Three trades, one per day; should return an actual value
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
     # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade_down_20()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
 
-    assert math.isclose(stats.main_results.sharpe_ratio, 0.69620, abs_tol=0.00001)
+    assert math.isclose(stats.main_results.sharpe_ratio, -0.16851, abs_tol=0.00001)
+
+
+def test_sharpe_ratio_three_trades_thirty_min_timestep():
+    # Three trades, one every 30 minutes; should return inf
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades(timestep=THIRTY_MIN)
+
+    # Act
+    stats = fixture.create().analyze()
+
+    assert math.isinf(stats.main_results.sharpe_ratio)
 
 
 def test_sharpe_ratio_three_trades_no_sell():
+    # Three trades with no selling, should return nan
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
@@ -521,5 +522,3 @@ def test_sharpe_ratio_three_trades_no_sell():
     stats = fixture.create().analyze()
 
     assert math.isnan(stats.main_results.sharpe_ratio)
-
-
