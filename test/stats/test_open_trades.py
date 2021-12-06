@@ -116,7 +116,7 @@ def test_open_trades_opened_at():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.open_trade_results[0].opened_at.timestamp() == 1 / 1000
+    assert stats.open_trade_results[0].opened_at.timestamp() == 1577833200
 
 
 def test_open_trades_opened_at_timestep_three():
@@ -131,4 +131,4 @@ def test_open_trades_opened_at_timestep_three():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.open_trade_results[0].opened_at.timestamp() == 3 / 1000
+    assert stats.open_trade_results[0].opened_at.timestamp() == 1578006000

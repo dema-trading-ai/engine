@@ -64,7 +64,7 @@ def test_trailing_stoploss():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.trades[0].closed_at == datetime.fromtimestamp(5/1000)
+    assert stats.trades[0].closed_at == datetime(2020, 1, 5, 0, 0)
     assert stats.main_results.end_capital == 147.015
 
 
