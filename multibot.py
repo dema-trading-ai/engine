@@ -123,7 +123,7 @@ def run_multibot(trades, mot, smallest_timeframe):
 
 def combine_and_run_multibot():
     print('[INFO] Starting multibot run')
-    for i in range(3, 7):
+    for i in range(3, 6):
         results = {}
         files = glob(BASE_DIR + r"/data/backtesting-data/trade_logs/*.json")
         all_combinations = list(itertools.combinations(files, i))
