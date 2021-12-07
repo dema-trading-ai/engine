@@ -19,6 +19,13 @@ SMALLEST_TIMEFRAME_DEFINITIONS = {
 FEE = 0.0025
 
 
+def write_log_to_file(text):
+    with open('multibot_logs.txt', 'a') as f:
+        f.write(f"[{datetime.datetime.now()}] - ")
+        f.write(text)
+        f.write("\n")
+
+
 def dt2ts(dt):
     """
     Converts a datetime object to UTC timestamp
@@ -122,12 +129,13 @@ def run_multibot(trades, mot, smallest_timeframe):
 
 
 def combine_and_run_multibot():
-    print('[INFO] Starting multibot run')
+    write_log_to_file('[INFO] Starting multibot run')
     for i in range(3, 6):
         results = {}
         files = glob(BASE_DIR + r"/data/backtesting-data/trade_logs/*.json")
         all_combinations = list(itertools.combinations(files, i))
         for j, combination in enumerate(all_combinations):
+            write_log_to_file(f'[INFO] Currently running combination {j} out of {len(all_combinations)} options for {i} combinations')
             print(f'[INFO] Currently running combination {j} out of {len(all_combinations)} options for {i} combinations')
             mot, trades, timeframes = combine_trade_logs(list(combination))
             smallest_timeframe = get_smallest_timeframe(timeframes)
@@ -135,7 +143,7 @@ def combine_and_run_multibot():
             try:
                 profit, drawdown = run_multibot(trades, mot, smallest_timeframe)
             except Exception as e:
-                print(f'[ERROR] Something went wrong: {e}')
+                write_log_to_file(f'[ERROR] Something went wrong: {str(e)}')
                 profit = drawdown = 0
 
             cleaned_filenames = [beautify_filename(filename) for filename in list(combination)]
