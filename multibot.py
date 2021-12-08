@@ -49,7 +49,7 @@ def get_smallest_timeframe(timeframes):
 
 
 def beautify_filename(path):
-    return path.split('/')[-1].split('.')[0]
+    return path.split('/')[-1].split('.')[0].split('_', 2)[-1]
 
 
 def get_initialized_df(trades, smallest_timeframe):
@@ -130,17 +130,17 @@ def run_multibot(trades, mot, smallest_timeframe):
 
 def combine_and_run_multibot():
     write_log_to_file('[INFO] Starting multibot run')
+    files = glob(BASE_DIR + r"/data/backtesting-data/trade_logs/*.json")
     for i in range(3, 6):
         results = {}
-        files = glob(BASE_DIR + r"/data/backtesting-data/trade_logs/*.json")
         all_combinations = list(itertools.combinations(files, i))
         for j, combination in enumerate(all_combinations):
             write_log_to_file(f'[INFO] Currently running combination {j} out of {len(all_combinations)} options for {i} combinations')
             print(f'[INFO] Currently running combination {j} out of {len(all_combinations)} options for {i} combinations')
-            mot, trades, timeframes = combine_trade_logs(list(combination))
-            smallest_timeframe = get_smallest_timeframe(timeframes)
-
             try:
+                mot, trades, timeframes = combine_trade_logs(list(combination))
+                smallest_timeframe = get_smallest_timeframe(timeframes)
+
                 profit, drawdown = run_multibot(trades, mot, smallest_timeframe)
             except Exception as e:
                 write_log_to_file(f'[ERROR] Something went wrong: {str(e)}')
@@ -153,4 +153,7 @@ def combine_and_run_multibot():
         save_trade_log(results, BASE_DIR+f'/data/backtesting-data/combined_{i}_results.json')
 
 
-combine_and_run_multibot()
+try:
+    combine_and_run_multibot()
+except Exception as e:
+    write_log_to_file(f'[ERROR] Fatal error, unable to continue: {str(e)}')
