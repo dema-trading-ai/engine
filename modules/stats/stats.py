@@ -169,7 +169,8 @@ class StatsModule:
                            stoploss=self.config.stoploss,
                            stoploss_type=self.config.stoploss_type,
                            fee=self.config.fee,
-                           total_fee_amount=self.trading_module.total_fee_paid)
+                           total_fee_amount=self.trading_module.total_fee_paid,
+                           rejected_buy_signal=self.trading_module.rejected_buy_signal)
 
     def generate_coin_results(self, closed_trades: [Trade], market_change: dict, market_drawdown: dict) -> [list, dict]:
         stats, market_change_weekly = self.calculate_statistics_per_coin(closed_trades)

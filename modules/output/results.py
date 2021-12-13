@@ -102,6 +102,7 @@ def create_trade_info_table(self, justification) -> Table:
                              str(round(self.n_average_trades, 2)))
     trade_info_table.add_row('Left-open trades', str(self.n_left_open_trades))
     trade_info_table.add_row('Trades with loss', str(self.n_trades_with_loss))
+    trade_info_table.add_row('Rejected buy signals', str(self.rejected_buy_signal))
     trade_info_table.add_row('Most consecutive losses',
                              str(self.n_consecutive_losses))
     trade_info_table.add_row(f'Best trade',
@@ -183,7 +184,7 @@ def create_settings_table(self: MainResults, currency_symbol, justification, tes
                            f"{round(self.starting_capital, 2)} {currency_symbol}")
     settings_table.add_row("Fee percentage", f"{self.fee} %")
     settings_table.add_row("Max. open trades", str(self.max_open_trades))
-    settings_table.add_row("Exposure per trade", str(self.exposure_per_trade * 100) + " %")
+    settings_table.add_row("Exposure per trade", str(round(self.exposure_per_trade * 100, 2)) + " %")
     return settings_table
 
 

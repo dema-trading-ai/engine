@@ -48,6 +48,7 @@ class MainResults:
     stoploss_type: str
     fee: float
     total_fee_amount: float
+    rejected_buy_signal: int
 
 
 @dataclass

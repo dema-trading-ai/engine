@@ -76,9 +76,13 @@ class ConfigModule(object):
         config_module.stoploss = config["stoploss"]
         config_module.stoploss_type = config["stoploss-type"]
         config_module.max_open_trades = config["max-open-trades"]
-        config_module.exposure_per_trade = config.get("exposure-per-trade", 100.) / 100.
+        config_module.exposure_per_trade = config["exposure-per-trade"]
+        if float(config_module.exposure_per_trade) != round(config_module.exposure_per_trade, 2):
+            print_warning("Exposure has been rounded to two decimal points.")
+            config_module.exposure_per_trade = round(config_module.exposure_per_trade, 2)
+        config_module.exposure_per_trade /= 100
         if config_module.exposure_per_trade > 1.0:
-            print_warning(f"Warning: Exposure is not 100% (default), this means that every trade will use {config_module.exposure_per_trade * 100}% funds per trade until either all funds are used or max open trades are open.")
+            print_warning(f"Exposure is not 100% (default), this means that every trade will use {round(config_module.exposure_per_trade * 100, 2)}% funds per trade until either all funds are used or max open trades are open.")
         config_module.plots = config["plots"]
         config_module.tearsheet = config.get("tearsheet", False)
         config_module.export_result = config.get("export-result", False)
@@ -99,7 +103,10 @@ def read_config(config_path: str) -> dict:
         with open(config_path or "config.json", 'r', encoding='utf-8') as configfile:
             data = configfile.read()
     except FileNotFoundError:
-        raise FileNotFoundError(f"[ERROR] No config file found at {config_path}.")
+        print_error(f"No config file found at {config_path}. You might be trying to run the engine from the wrong"
+                    f" directory. See our documentation (https://docs.dematrading.ai) for detailed instructions on"
+                    f" how to run the engine.")
+        sys.exit()
     except Exception:
         raise Exception("[ERROR] Something went wrong parsing config file.",
                         sys.exc_info()[0])
