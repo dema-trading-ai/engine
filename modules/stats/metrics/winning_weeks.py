@@ -5,6 +5,12 @@ from pandas import DataFrame
 from modules.stats.metrics.profit_ratio import with_copied_initial_row
 
 
+outperforming_weeks_coin = None
+profitable_weeks_coin = None
+outperforming_weeks_portfolio = None
+profitable_weeks_portfolio = None
+
+
 def get_market_ratio(signal_dict):
     df = DataFrame(signal_dict.values()).set_index("time")
     df = with_copied_initial_row(df)
@@ -26,8 +32,12 @@ def get_winning_weeks_per_coin(signal_dict: dict, cum_profit_ratio):
     cum_profit_ratio.index = datetime_index
 
     # Resample dataframes to one week
-    market_change_weekly = round_down(ohlcv_df['market_ratio'], 6).resample('W', origin='start').prod()
-    cum_profit_ratio_weekly = round_down(cum_profit_ratio['profit_ratio'], 6).resample('W', origin='start').prod()
+    market_change_weekly = ohlcv_df['market_ratio'].resample('D', origin='start').prod()
+    cum_profit_ratio_weekly = cum_profit_ratio['profit_ratio'].resample('D', origin='start').prod()
+
+    global outperforming_weeks_coin
+    outperforming_weeks_coin = cum_profit_ratio_weekly
+    test_function()
 
     # Define the winning weeks
     wins = len(cum_profit_ratio_weekly[cum_profit_ratio_weekly > market_change_weekly + 0.001])
@@ -35,30 +45,11 @@ def get_winning_weeks_per_coin(signal_dict: dict, cum_profit_ratio):
     draws = len(cum_profit_ratio_weekly) - wins - losses
 
     # Calculate weekly change for portfolio overview
-    coin_close_price_weekly = ohlcv_df['close'].resample('W', origin='start').ohlc()
+    coin_close_price_weekly = ohlcv_df['close'].resample('D', origin='start').ohlc()
     market_change_weekly_portfolio = \
         coin_close_price_weekly['close'] / coin_close_price_weekly['open']
 
     return wins, draws, losses, market_change_weekly_portfolio
-
-
-def get_profitable_weeks_per_coin(cum_profit_ratio):
-    # Create dataframes
-    cum_profit_ratio = cum_profit_ratio.iloc[1:]
-
-    # Refactor index of dataframes
-    datetime_index = [datetime.fromtimestamp(ms / 1000.0) for ms in cum_profit_ratio.index]
-    cum_profit_ratio.index = datetime_index
-
-    # Resample dataframes to one week
-    cum_profit_ratio_weekly = round_down(cum_profit_ratio['profit_ratio'], 6).resample('W', origin='start').prod()
-
-    # Define the winning weeks
-    wins = len(cum_profit_ratio_weekly[cum_profit_ratio_weekly > 1.001])
-    losses = len(cum_profit_ratio_weekly[cum_profit_ratio_weekly < 0.999])
-    draws = len(cum_profit_ratio_weekly) - wins - losses
-
-    return wins, draws, losses
 
 
 def get_winning_weeks_for_portfolio(capital_per_timestamp, market_change_weekly):
@@ -90,11 +81,15 @@ def get_winning_weeks_for_portfolio(capital_per_timestamp, market_change_weekly)
         # Set index to datetime and resample to one week
         capital_per_timestamp_df.index = \
             [datetime.fromtimestamp(ms / 1000.0) for ms in capital_per_timestamp_df.index]
-        capital_per_timestamp_weekly = capital_per_timestamp_df['capital'].resample('W', origin='start').ohlc()
+        capital_per_timestamp_weekly = capital_per_timestamp_df['capital'].resample('D', origin='start').ohlc()
 
         # Calculate market change
         capital_per_timestamp_weekly['weekly_profit'] = \
             capital_per_timestamp_weekly['close'] / capital_per_timestamp_weekly['open']
+
+        global outperforming_weeks_portfolio
+        outperforming_weeks_portfolio = capital_per_timestamp_weekly
+        test_function()
 
         # Define the winning weeks
         wins = len(capital_per_timestamp_weekly[capital_per_timestamp_weekly['weekly_profit'] >
@@ -107,8 +102,30 @@ def get_winning_weeks_for_portfolio(capital_per_timestamp, market_change_weekly)
     return 0, 0, 0
 
 
-def get_profitable_weeks_for_portfolio(capital_per_timestamp):
+def get_profitable_weeks_per_coin(cum_profit_ratio):
+    # Create dataframes
+    cum_profit_ratio = cum_profit_ratio.iloc[1:]
 
+    # Refactor index of dataframes
+    datetime_index = [datetime.fromtimestamp(ms / 1000.0) for ms in cum_profit_ratio.index]
+    cum_profit_ratio.index = datetime_index
+
+    # Resample dataframes to one week
+    cum_profit_ratio_weekly = round_down(cum_profit_ratio['profit_ratio'], 6).resample('W', origin='start').prod()
+
+    global profitable_weeks_coin
+    profitable_weeks_coin = cum_profit_ratio_weekly
+    # test_function()
+
+    # Define the winning weeks
+    wins = len(cum_profit_ratio_weekly[cum_profit_ratio_weekly > 1.001])
+    losses = len(cum_profit_ratio_weekly[cum_profit_ratio_weekly < 0.999])
+    draws = len(cum_profit_ratio_weekly) - wins - losses
+
+    return wins, draws, losses
+
+
+def get_profitable_weeks_for_portfolio(capital_per_timestamp):
     # Create dataframe for capital per timestamp
     capital_per_timestamp_df = DataFrame(capital_per_timestamp.values(),
                                          index=capital_per_timestamp.keys(),
@@ -131,6 +148,10 @@ def get_profitable_weeks_for_portfolio(capital_per_timestamp):
     capital_per_timestamp_weekly['weekly_profit'] = \
         capital_per_timestamp_weekly['close'] / capital_per_timestamp_weekly['open']
 
+    global profitable_weeks_portfolio
+    profitable_weeks_portfolio = capital_per_timestamp_weekly
+    # test_function()
+
     # Define the winning weeks
     wins = len(capital_per_timestamp_weekly[capital_per_timestamp_weekly['weekly_profit'] >
                                             (1.001)])
@@ -143,3 +164,19 @@ def get_profitable_weeks_for_portfolio(capital_per_timestamp):
 
 def round_down(dataframe, decimals):
     return ((dataframe.fillna(1) * (10 ** decimals)).apply(math.floor)) / (10 ** decimals)
+
+
+def test_function():
+    global outperforming_weeks_coin, profitable_weeks_coin, outperforming_weeks_portfolio, profitable_weeks_portfolio
+
+    if outperforming_weeks_coin is not None:
+        outperf = DataFrame(outperforming_weeks_coin)
+    if outperforming_weeks_portfolio is not None:
+        a = outperforming_weeks_portfolio
+        outperf['portfolio'] = outperforming_weeks_portfolio['weekly_profit']
+    if profitable_weeks_coin is not None:
+        profit = DataFrame(profitable_weeks_coin)
+    if profitable_weeks_portfolio is not None:
+        profit['portfolio'] = profitable_weeks_portfolio['weekly_profit']
+
+    print("yooo")
