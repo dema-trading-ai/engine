@@ -15,9 +15,9 @@ profitable_profit_ratio = None
 def get_market_ratio(signal_dict):
     df = DataFrame(signal_dict.values()).set_index("time")
     df = with_copied_initial_row(df)
-    df["close"] = df["close"].fillna(None, 'ffill')
+    df["close"] = df["close"].fillna(value=None, method='ffill')
     df["market_ratio"] = (df["close"] / df["close"].shift(1))
-    df["market_ratio"] = df["market_ratio"].fillna(1)
+    df["market_ratio"] = df["market_ratio"].fillna(value=1)
     return df
 
 
