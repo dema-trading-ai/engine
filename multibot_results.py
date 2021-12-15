@@ -23,4 +23,4 @@ df1 = df1.sort_values(by='drawdown', ascending=False)
 df2 = df2.sort_values(by='drawdown', ascending=False)
 df3 = df3.sort_values(by='drawdown', ascending=False)
 
-print(df1)
+print(df1.head(15))
