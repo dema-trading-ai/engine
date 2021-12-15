@@ -237,6 +237,8 @@ class StatsModule:
         }
         market_change_weekly = {pair: None for pair in self.frame_with_signals.keys()}
         trades_per_coin = group_by(closed_trades, "pair")
+        if len(trades_per_coin) == 0:
+            trades_per_coin = {pair: None for pair in self.frame_with_signals.keys()}
 
         print_info("Calculating statistics")
         for key, closed_pair_trades in trades_per_coin.items():

@@ -1,6 +1,6 @@
 {
   "exchange": "binance",
-  "timeframe": "30m",
+  "timeframe": "12h",
   "max-open-trades": 1,
   "exposure-per-trade": 100,
   "starting-capital": 1000,
@@ -16,7 +16,7 @@
   },
   "pairs": ["BTC/USDT"],
   "currency": "USDT",
-  "fee": 0.25,
+  "fee": 0,
   "strategy-name": "MyStrategy",
   "strategies-folder": "resources/setup/strategies",
   "plots": false,
