@@ -254,6 +254,13 @@ class StatsModule:
                     self.frame_with_signals[key],
                     seen_cum_profit_ratio_df
                 )
+
+                # Find profitable weeks for current coin
+                per_coin_stats[key]["prof_weeks_win"], \
+                per_coin_stats[key]["prof_weeks_draw"], \
+                per_coin_stats[key]["prof_weeks_loss"] = get_profitable_weeks_per_coin(
+                    seen_cum_profit_ratio_df
+                )
         else:
             for key, closed_pair_trades in trades_per_coin.items():
                 # Calculate max seen drawdown ratio

@@ -75,15 +75,6 @@ def get_winning_weeks_for_portfolio(capital_per_timestamp, market_change_weekly)
     test_function()
 
     # Define the winning weeks
-
-    wins_when = capital_per_timestamp_weekly[capital_per_timestamp_weekly['weekly_profit'] >
-                                            (combined_market_change_df['avg_market_change'] + 0.001)]
-    loss_when = capital_per_timestamp_weekly[capital_per_timestamp_weekly['weekly_profit'] <
-                                              (combined_market_change_df['avg_market_change'] - 0.001)]
-
-    draw_when = capital_per_timestamp_weekly
-    draw_when = draw_when[~draw_when.isin(wins_when)].dropna()
-    draw_when = draw_when[~draw_when.isin(loss_when)].dropna()
     wins = len(capital_per_timestamp_weekly[capital_per_timestamp_weekly['weekly_profit'] >
                                             (combined_market_change_df['avg_market_change'] + 0.001)])
     losses = len(capital_per_timestamp_weekly[capital_per_timestamp_weekly['weekly_profit'] <
