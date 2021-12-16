@@ -103,7 +103,10 @@ def read_config(config_path: str) -> dict:
         with open(config_path or "config.json", 'r', encoding='utf-8') as configfile:
             data = configfile.read()
     except FileNotFoundError:
-        raise FileNotFoundError(f"[ERROR] No config file found at {config_path}.")
+        print_error(f"No config file found at {config_path}. You might be trying to run the Engine from the wrong"
+                    f" directory. See our documentation (https://docs.dematrading.ai) for detailed instructions on"
+                    f" how to run the Engine.")
+        sys.exit()
     except Exception:
         raise Exception("[ERROR] Something went wrong parsing config file.",
                         sys.exc_info()[0])

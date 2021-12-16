@@ -269,6 +269,9 @@ class DataModule:
         nandf["time"] = daterange
         nandf["pair"] = pair
 
+        # Removes identically-labeled rows such that comparison is possible
+        df = df.loc[~df.index.duplicated(), :]
+
         nandf.update(df)
         return nandf
 
