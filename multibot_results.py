@@ -6,9 +6,18 @@ import json
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 files = glob(BASE_DIR + r"/data/backtesting-data/combined_*.json")
 
+to_ignore = ['Eagle_heikin', 'Osprey_heikin', 'Osprey']
+
 with open(files[0], 'r') as f:
     data = json.load(f)
-    df1 = pd.DataFrame(data).T
+    df1 = pd.DataFrame()
+    for bot in data:
+        for ignore in to_ignore:
+            if ignore in bot:
+                continue
+            df1.append({bot:data[bot]}, ignore_index=True)
+
+    df1 = df1.T
 
 with open(files[1], 'r') as f:
     data = json.load(f)
