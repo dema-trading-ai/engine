@@ -11,7 +11,7 @@ function IsElevated {
 if (-not(IsElevated)) {
     throw "Please run this script as administrator"
 }
-echo "Installing DemaTrading.ai Engine... (this takes +/- 10 seconds")
+echo "Installing DemaTrading.ai Engine... (this takes +/- 10 seconds)"
 $executableUri = "https://engine-store.ams3.digitaloceanspaces.com/engine-windows-development.zip"
 $tempDir = $env:TEMP + "\engine"
 $tempLocation = $tempDir + "\executable.zip"
