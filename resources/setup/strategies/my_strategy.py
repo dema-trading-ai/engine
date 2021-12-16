@@ -42,7 +42,7 @@ class MyStrategy(Strategy):
                 (dataframe['ema5'] < dataframe['ema21']) &
                 (dataframe['volume'] > 0)
             ),
-            'buy'] = 0
+            'buy'] = 1
 
         # END STRATEGY
 
@@ -61,6 +61,12 @@ class MyStrategy(Strategy):
             (
                 (dataframe['rsi'] > 70) &
                 (dataframe['volume'] > 0)
+            ),
+            'sell'] = 1
+
+        dataframe.loc[
+            (
+                dataframe.tail(1).index
             ),
             'sell'] = 1
 
