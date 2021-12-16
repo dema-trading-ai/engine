@@ -64,12 +64,6 @@ class MyStrategy(Strategy):
             ),
             'sell'] = 1
 
-        dataframe.loc[
-            (
-                dataframe.tail(1).index
-            ),
-            'sell'] = 1
-
         # END STRATEGY
 
         return dataframe
