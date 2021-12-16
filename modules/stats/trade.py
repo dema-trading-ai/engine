@@ -60,8 +60,11 @@ class Trade:
         self.sl_type = sl_type
         self.sl_perc = sl_perc
         self.sl_static_price = None
+        self.sl_trailing_ratio = None
+        self.sl_trailing_high_capital = None
         self.sl_sell_price = None
         self.sl_ratio = None
+
         self.update_profits()
 
     def close_trade(self, reason: SellReason, date: datetime) -> None:
@@ -94,23 +97,25 @@ class Trade:
         if self.sl_type == 'static':
             self.sl_static_price = self.starting_amount * (1 - (abs(self.sl_perc) / 100))
         if self.sl_type == 'trailing':
-            self.sl_ratio = 1 - (abs(self.sl_perc) / 100)
+            self.sl_trailing_ratio = 1 - (abs(self.sl_perc) / 100)
+            self.sl_trailing_high_capital = self.starting_amount
         if self.sl_type == 'dynamic':
             self.sl_sell_price = ohlcv['stoploss']
 
     def check_for_sl(self, ohlcv: dict) -> bool:
+        lowest_capital = self.currency_amount * ohlcv['low']
         if self.sl_type == 'static':
-            lowest_capital = self.currency_amount * ohlcv['low']
             if lowest_capital <= self.sl_static_price:
                 self.capital = min(self.currency_amount * ohlcv['open'], self.sl_static_price)
                 self.update_profits(False)
                 return True
         elif self.sl_type == 'trailing':
-            lowest_ratio = ohlcv['low'] / self.high
-            if lowest_ratio <= self.sl_ratio:
-                self.current = (self.sl_ratio * self.starting_amount) / self.currency_amount
-                self.update_profits()
+            current_trailing_price = self.sl_trailing_high_capital * self.sl_trailing_ratio
+            if lowest_capital <= current_trailing_price:
+                self.capital = min(self.currency_amount * ohlcv['open'], current_trailing_price)
+                self.update_profits(False)
                 return True
+            self.sl_trailing_high_capital = self.currency_amount * ohlcv['high']
         elif self.sl_type == 'dynamic':
             if self.sl_sell_price == ohlcv['time']:
                 self.current = (self.sl_ratio * self.starting_amount) / self.currency_amount
