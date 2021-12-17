@@ -46,7 +46,7 @@ class StatsModule:
             for pair in pairs:
                 pair_dict = self.frame_with_signals[pair]
                 tick_dict = pair_dict[tick]
-                self.trading_module.tick(tick_dict, pair_dict)
+                self.trading_module.tick(tick_dict)
 
         market_change = get_market_change(self.df, pairs, self.frame_with_signals)
         market_drawdown = get_market_drawdown(pairs, self.frame_with_signals)
