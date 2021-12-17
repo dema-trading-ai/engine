@@ -53,7 +53,6 @@ class Trade:
         self.max_seen_drawdown = 1.0  # ratio
         self.starting_amount = spend_amount
         self.capital = spend_amount - self.open_fee_paid  # apply fee
-        self.capital_per_timestamp = {}
         self.currency_amount = (self.capital / ohlcv['close'])
 
         # Stoploss configurations
@@ -83,7 +82,6 @@ class Trade:
         if not first:
             self.candle_low = ohlcv['low']
             self.candle_open = ohlcv['open']
-            self.high = ohlcv['high']
 
     def update_profits(self, update_capital: bool = True):
         if update_capital:  # always triggers except when a trade is closed
@@ -117,8 +115,9 @@ class Trade:
                 return True
             self.sl_trailing_high_capital = self.currency_amount * ohlcv['high']
         elif self.sl_type == 'dynamic':
-            if self.sl_sell_price == ohlcv['time']:
-                self.current = (self.sl_ratio * self.starting_amount) / self.currency_amount
-                self.update_profits()
+            current_dynamic_price = ohlcv['stoploss'] * self.starting_amount
+            if lowest_capital <= current_dynamic_price:
+                self.capital = min(self.currency_amount * ohlcv['open'], self.currency_amount * ohlcv['stoploss'])
+                self.update_profits(False)
                 return True
         return False
