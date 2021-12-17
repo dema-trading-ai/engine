@@ -61,8 +61,6 @@ class Trade:
         self.sl_static_price = None
         self.sl_trailing_ratio = None
         self.sl_trailing_high_capital = None
-        self.sl_sell_price = None
-        self.sl_ratio = None
 
         self.update_profits()
 
@@ -89,7 +87,7 @@ class Trade:
         self.profit_ratio = self.capital / self.starting_amount
         self.profit_dollar = self.capital - self.starting_amount
 
-    def configure_stoploss(self, ohlcv: dict) -> None:
+    def configure_stoploss(self) -> None:
         if self.sl_type == 'standard':  # for backwards compatability - can be removed in the future
             self.sl_type = 'static'
         if self.sl_type == 'static':
@@ -97,8 +95,6 @@ class Trade:
         if self.sl_type == 'trailing':
             self.sl_trailing_ratio = 1 - (abs(self.sl_perc) / 100)
             self.sl_trailing_high_capital = self.starting_amount
-        if self.sl_type == 'dynamic':
-            self.sl_sell_price = ohlcv['stoploss']
 
     def check_for_sl(self, ohlcv: dict) -> bool:
         lowest_capital = self.currency_amount * ohlcv['low']

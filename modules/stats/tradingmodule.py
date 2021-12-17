@@ -118,7 +118,7 @@ class TradingModule:
         date = datetime.fromtimestamp(ohlcv['time'] / 1000)
         new_trade = \
             Trade(ohlcv, spend_amount, self.fee, date, self.sl_type, self.sl_perc)
-        new_trade.configure_stoploss(ohlcv)
+        new_trade.configure_stoploss()
         new_trade.update_stats(ohlcv, first=True)
 
         # Update total budget with configured spend amount and fee
