@@ -1,5 +1,5 @@
 # Libraries
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 # Files
@@ -26,7 +26,8 @@ class TradingModule:
         self.exposure_per_trade = float(self.config.exposure_per_trade)
         self.amount_of_pairs = len(self.config.pairs)
         if self.amount_of_pairs < self.max_open_trades:
-            print_warning("max_open_trades exceeds amount of pairs in whitelist. max_open_trades will be limited to the amount of pairs in whitelist.")
+            print_warning("max_open_trades exceeds amount of pairs in whitelist. max_open_trades will be limited to "
+                          "the amount of pairs in whitelist.")
 
         self.fee = config.fee / 100
         self.sl_type = config.stoploss_type
@@ -138,7 +139,7 @@ class TradingModule:
             return True
         return False
 
-    def get_roi_over_time(self, time_passed: datetime) -> float:
+    def get_roi_over_time(self, time_passed: timedelta) -> float:
         passed_minutes = time_passed.seconds / 60
         roi = self.config.roi['0']
 
