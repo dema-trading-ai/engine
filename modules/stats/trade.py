@@ -105,12 +105,14 @@ class Trade:
         if self.sl_type == 'static':
             if lowest_capital <= self.sl_static_price:
                 self.capital = min(self.currency_amount * ohlcv['open'], self.sl_static_price)
+                self.current = self.capital / self.currency_amount
                 self.update_profits(False)
                 return True
         elif self.sl_type == 'trailing':
             current_trailing_price = self.sl_trailing_high_capital * self.sl_trailing_ratio
             if lowest_capital <= current_trailing_price:
                 self.capital = min(self.currency_amount * ohlcv['open'], current_trailing_price)
+                self.current = self.capital / self.currency_amount
                 self.update_profits(False)
                 return True
             self.sl_trailing_high_capital = self.currency_amount * ohlcv['high']
@@ -118,6 +120,7 @@ class Trade:
             current_dynamic_price = ohlcv['stoploss'] * self.starting_amount
             if lowest_capital <= current_dynamic_price:
                 self.capital = min(self.currency_amount * ohlcv['open'], self.currency_amount * ohlcv['stoploss'])
+                self.current = self.capital / self.currency_amount
                 self.update_profits(False)
                 return True
         return False
