@@ -1,8 +1,12 @@
 import numpy as np
 import pandas as pd
 
-from cli.print_utils import print_warning
+from pandas import DataFrame
+
+from typing import Tuple
+from datetime import timedelta
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
+from modules.setup.config.validations import validate_ratios
 
 
 def get_max_seen_drawdown_for_portfolio(capital_per_timestamp: dict):
@@ -53,33 +57,25 @@ def convert_dataframe(capital_per_timestamp: dict, risk_free: float) -> pd.DataF
     df = df.sort_index()
 
     df['returns'] = (df['value'] - df['value'].shift()) / 100
-    df['rf'] = risk_free
+    df['risk_free'] = risk_free
 
     return df
 
 
-def get_sharpe_ratio(capital_per_timestamp: dict, risk_free: float = 0.0) -> float:
-    df = convert_dataframe(capital_per_timestamp, risk_free)
+def compute_sharpe_ratio(df: DataFrame) -> float:
 
-    if (df['returns'] == 0.0).all():
-        print_warning('Unable to compute ratios: No trades were made')
-
-    if len(df['value']) < 2:
-        print_warning('Unable to compute ratios: The backtesting period needs to be at least 24h')
-
-    expected_excess_asset_return = np.subtract(df['returns'], df['rf'])
+    expected_excess_asset_return = np.subtract(df['returns'], df['risk_free'])
     sharpe_ratio_per_timestamp = np.divide(expected_excess_asset_return, np.std(expected_excess_asset_return))
 
-    avg_sharpe_ratio = float(np.mean(sharpe_ratio_per_timestamp))
+    sharpe_ratio = float(np.mean(sharpe_ratio_per_timestamp))
 
-    return avg_sharpe_ratio
+    return sharpe_ratio
 
 
-def get_sortino_ratio(capital_per_timestamp: dict, risk_free: float = 0.0) -> float:
-    df = convert_dataframe(capital_per_timestamp, risk_free)
+def compute_sortino_ratio(df: DataFrame) -> float:
 
     average_realized_return = np.mean(df['returns'])
-    additional_return = average_realized_return - risk_free
+    additional_return = average_realized_return - df['risk_free'][0]
 
     df['down_dev'] = np.where(df['returns'] < 0, abs(df['returns']) ** 2, 0)
     average_squared_downside_deviation = np.mean(df['down_dev'])
@@ -88,3 +84,30 @@ def get_sortino_ratio(capital_per_timestamp: dict, risk_free: float = 0.0) -> fl
     sortino_ratio = additional_return / target_downside_deviation
 
     return sortino_ratio
+
+
+def get_ratios(capital_per_timestamp: dict, risk_free: float = 0.0) -> Tuple[float, float, float, float]:
+    df = convert_dataframe(capital_per_timestamp, risk_free)
+
+    ninety_d, three_y = validate_ratios(df)
+
+    if ninety_d:
+        df_ninety_d = df.truncate(after=df.index[0] + timedelta(days=90))
+        sharpe_ninety_d = compute_sharpe_ratio(df_ninety_d)
+        sortino_ninety_d = compute_sortino_ratio(df_ninety_d)
+
+    else:
+        sharpe_ninety_d = compute_sharpe_ratio(df)
+        sortino_ninety_d = compute_sortino_ratio(df)
+
+    if three_y:
+        df_three_y = df.truncate(after=df.index[0] + timedelta(days=3 * 365))  # Does not take leap years into account
+        sharpe_three_y = compute_sharpe_ratio(df_three_y)
+        sortino_three_y = compute_sortino_ratio(df_three_y)
+
+    else:
+        sharpe_three_y = compute_sharpe_ratio(df)
+        sortino_three_y = compute_sortino_ratio(df)
+
+    return sharpe_ninety_d, sortino_ninety_d, sharpe_three_y, sortino_three_y
+

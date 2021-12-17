@@ -112,3 +112,31 @@ def check_for_float(param_value: int, t: type) -> Tuple[float, type]:
         return float(param_value), float
     return param_value, t
 
+
+def validate_ratios(df: DataFrame) -> Tuple[bool, bool]:
+    """
+    Checks the given dataframe, prints out appropriate warning messages and returns bools to determine which time periods should be computed.
+    """
+
+    if (df['returns'] == 0.0).all():
+        print_warning('Unable to compute ratios: No trades were made')
+
+    count_days = len(df['value'])
+
+    if count_days < 2:
+        print_warning('Unable to compute ratios: The backtesting period needs to be at least 24h')
+
+    df_year = df.resample('Y').apply(lambda x: x.iloc[-1])
+    count_year = len(df_year['value'])
+    ninety_d = True
+    three_y = True
+
+    if count_year < 3 and count_days >= 2:
+        three_y = False
+        if 90 > count_days:
+            ninety_d = False
+            print_warning(f'The time period selected is not long enough to display 3-years and 90-days ratios')
+        else:
+            print_warning(f'The time period selected is not long enough to display a 3-years ratios')
+
+    return ninety_d, three_y
