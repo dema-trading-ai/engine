@@ -23,7 +23,7 @@ however with some effort this project should be runnable for everyone, no matter
 
 # Discord
 
-For any questions not covered by the documentation, or for further questions regarding the engine, 
+For any questions not covered by the documentation, or for further questions regarding the Engine, 
 trading, your own strategies, your algorithms, or just a chit chat with like-minded individuals, 
 you are more than welcome join our Discord server, where we will facilitate whatever need you 
 may have.
@@ -53,7 +53,7 @@ If your operating system is Windows, please execute the following command from a
 Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://ams3.digitaloceanspaces.com/engine-store/install-windows.ps1'))
 ```
 
-# Running the engine
+# Running the Engine
 
 Once you have successfully installed the Engine, it is time to run it. Open a terminal (MacOS) or Powershell (with administrator rights) (Windows), and execute the following commands.
 
@@ -80,7 +80,7 @@ for more information.
 /resources/setup/strategies/my_strategy.py
 
 If you want to create your own strategy just simply copy the sample strategy and change the name 
-of the class to for example 'MyNewStrategy'. Then just change the config.json file in the engine 
+of the class to for example 'MyNewStrategy'. Then just change the config.json file in the Engine 
 directory accordingly to test this strategy:
 ```
 "strategy-name": "MyNewStrategy"

@@ -34,6 +34,9 @@ class MainResults:
     avg_trade_duration: timedelta
     longest_trade_duration: timedelta
     shortest_trade_duration: timedelta
+    prof_weeks_win: int
+    prof_weeks_draw: int
+    prof_weeks_loss: int
     win_weeks: int
     draw_weeks: int
     loss_weeks: int
