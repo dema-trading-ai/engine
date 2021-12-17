@@ -1,11 +1,7 @@
 # Libraries
-import math
 from datetime import datetime
 from enum import Enum
 from typing import Any
-
-import numpy as np
-
 
 # Files
 
