@@ -31,7 +31,7 @@ with open(files[1], 'r') as f:
     data = json.load(f)
     df2 = return_cleaned_dict(data)
 
-with open(files[2], 'r') as f:
+with open(files[-1], 'r') as f:
     data = json.load(f)
     df3 = return_cleaned_dict(data)
 
@@ -40,4 +40,4 @@ df1 = df1.sort_values(by='drawdown', ascending=False)
 df2 = df2.sort_values(by='drawdown', ascending=False)
 df3 = df3.sort_values(by='drawdown', ascending=False)
 
-print(df1.head(15))
+print(df3.head(15))
