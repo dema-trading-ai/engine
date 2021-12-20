@@ -37,8 +37,9 @@ class Trade:
         self.closed_at = None
         self.close = None
         self.fee = fee
-        self.open_fee_paid = spend_amount * fee
-        self.close_fee_paid = None
+        self.fee_paid_open = spend_amount * fee
+        self.fee_paid_close = None
+        self.fee_paid_total = self.fee_paid_open
         self.sell_reason = SellReason.NONE
         self.candle_low = None
         self.candle_open = None
@@ -48,7 +49,8 @@ class Trade:
         # Calculations for trade worth
         self.max_seen_drawdown = 1.0  # ratio
         self.starting_amount = spend_amount
-        self.capital = spend_amount - self.open_fee_paid  # apply fee
+        self.capital = spend_amount - self.fee_paid_open  # apply fee
+        self.capital_per_timestamp = {}
         self.currency_amount = (self.capital / ohlcv['close'])
 
         # Stoploss configurations
@@ -65,9 +67,10 @@ class Trade:
         self.sell_reason = reason
         self.close = self.current
         self.closed_at = date
-        self.close_fee_paid = self.capital * self.fee  # final issued fee
+        self.fee_paid_close = self.capital * self.fee   # final issued fee
+        self.fee_paid_total += self.fee_paid_close
 
-        self.capital -= self.close_fee_paid
+        self.capital -= self.fee_paid_close
         self.update_profits(update_capital=False)
 
     def update_stats(self, ohlcv: dict, first: bool = False) -> None:

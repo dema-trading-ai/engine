@@ -74,7 +74,12 @@ def show_trade_anomalies(stats: TradingStats):
 
 
 def log_trades(stats: TradingStats, config: StatsConfig):
-    trades_dict = {"max-open_trades": config.max_open_trades, "timeframe": config.timeframe, "trades": {}}
+    trades_dict = {
+        "max-open-trades": config.max_open_trades,
+        "timeframe": config.timeframe,
+        "fee-percentage": config.fee,
+        "trades": {}
+    }
     for i, trade in enumerate(stats.trades):
         trade_dict = {'status': trade.status,
                       'opened_at': trade.opened_at,
@@ -82,7 +87,9 @@ def log_trades(stats: TradingStats, config: StatsConfig):
                       'pair': trade.pair,
                       'open_price': trade.open,
                       'close_price': trade.close,
-                      'fee_paid': trade.fee,
+                      'fee_paid_open': trade.fee_paid_open,
+                      'fee_paid_close': trade.fee_paid_close,
+                      'fee_paid_total': trade.fee_paid_total,
                       'starting_amount': trade.starting_amount,
                       'capital': trade.capital,
                       'currency_amount': trade.currency_amount,
