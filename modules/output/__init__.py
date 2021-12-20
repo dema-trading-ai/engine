@@ -39,7 +39,7 @@ class OutputModule(object):
         except OSError:
             pass
 
-        print_info("Logging trades to " + FONT_BOLD + "data/backtesting-data/trades_log.json" + FONT_RESET + "...")
+        print_info("Logging trades to " + FONT_BOLD + f"data/backtesting-data/trades_log_{self.config.strategy_name}.json" + FONT_RESET + "...")
         log_trades(stats, self.config)
 
         # write orders to a  tearsheet
