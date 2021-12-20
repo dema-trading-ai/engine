@@ -68,6 +68,28 @@ def test_trailing_stoploss():
     assert stats.main_results.end_capital == 147.015
 
 
+def test_trailing_stoploss_multiple_dips():
+    """Given 'trailing stoploss and value first rises and then
+    dips below stoploss', 'end capital' should 'represent sold
+    on stoploss price'"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.trading_module_config.stoploss_type = "trailing"
+
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_one_trade()
+
+    fixture.trading_module_config.stoploss = -25
+    fixture.stats_config.stoploss = -25
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    # assert stats.trades[0].closed_at == datetime.fromtimestamp(5/1000)
+    assert stats.main_results.end_capital == 147.015
+
+
 def test_dynamic_stoploss():
     """Given 'dynamic stoploss and value dips below stoploss',
     'end capital' should 'represent sold on stoploss price'"""
