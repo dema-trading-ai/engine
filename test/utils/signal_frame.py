@@ -1,3 +1,4 @@
+import inspect
 from enum import Enum
 from typing import TypeVar
 
@@ -250,7 +251,7 @@ class MockOHLCVWithSignal(dict, object):
         new_price = last_close_price * multiplier
         return self.add_entry(last_close_price, new_price, last_close_price, new_price, 1, buy, sell)
 
-    def generate_trades(self, days: int, scenario: str = 'up_100_down_75_one_trade') -> None:
+    def generate_trades(self, days: int) -> None:
         """
         Generates a high number of trades for tests where a few trades cannot represent what is being tested
         """
@@ -259,14 +260,8 @@ class MockOHLCVWithSignal(dict, object):
         if days not in valid_days:
             raise ValueError(f'Days must be one of {valid_days}, now is {days}')
 
-        valid_scenarios = ['up_100_down_75_one_trade']
-        if scenario not in valid_scenarios:
-            raise ValueError(f'Scenario must be one of {valid_scenarios}, now is {scenario}')
-
-        scenario_to_run = getattr(self, 'test_scenario_' + scenario)()
-
         for day in range(days):
-            scenario_to_run()
+            self.test_scenario_up_100_down_75_one_trade()
 
 
 KeyType = TypeVar("KeyType")
