@@ -50,6 +50,7 @@ def map_trades_to_opened_closed_timestamps(closed_pair_trades):
 
 def apply_profit_ratio(df, trades_open_closed):
     df["corrected_close"] = df["corrected_close"].fillna(value=None, method='ffill')
+    df["profit_ratio"] = None
     for open_timestamp, close in trades_open_closed:
         # skip the first row of each trade
         idx = np.searchsorted(df.index, open_timestamp)
