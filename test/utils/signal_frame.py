@@ -1,4 +1,3 @@
-import inspect
 from enum import Enum
 from typing import TypeVar
 
@@ -260,7 +259,7 @@ class MockOHLCVWithSignal(dict, object):
         if days not in valid_days:
             raise ValueError(f'Days must be one of {valid_days}, now is {days}')
 
-        for day in range(days):
+        for _ in range(days):
             self.test_scenario_up_100_down_75_one_trade()
 
 

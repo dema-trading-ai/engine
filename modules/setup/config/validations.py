@@ -135,8 +135,8 @@ def validate_ratios(df: DataFrame) -> Tuple[bool, bool]:
         three_y = False
         if 90 > count_days:
             ninety_d = False
-            print_warning(f'The time period selected is not long enough to display 3-years and 90-days ratios')
+            print_warning('The time period selected is not long enough to display 3-years and 90-days ratios')
         else:
-            print_warning(f'The time period selected is not long enough to display a 3-years ratios')
+            print_warning('The time period selected is not long enough to display a 3-years ratios')
 
     return ninety_d, three_y
