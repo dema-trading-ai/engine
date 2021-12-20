@@ -92,6 +92,12 @@ def log_trades(stats: TradingStats, config: StatsConfig):
 
     trades_json = json.dumps(trades_dict, indent=4, default=str)
 
+    # remove the old trade log file. Can be removed in the future.
+    try:
+        os.remove('./data/backtesting-data/trades_log.json')
+    except FileNotFoundError:
+        pass
+
     with open(f'./data/backtesting-data/trades_log_{config.strategy_name}.json', 'w', encoding='utf-8') as f:
         f.write(trades_json)
 
