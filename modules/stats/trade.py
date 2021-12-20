@@ -107,8 +107,7 @@ class Trade:
                 self.current = self.capital / self.currency_amount
                 self.update_profits(False)
                 return True
-            # self.sl_trailing_high_capital = max(self.currency_amount * ohlcv['high'], self.sl_trailing_high_capital)
-            self.sl_trailing_high_capital = self.currency_amount * ohlcv['high']
+            self.sl_trailing_high_capital = max(self.currency_amount * ohlcv['high'], self.sl_trailing_high_capital)
         elif self.sl_type == 'dynamic':
             current_dynamic_price = ohlcv['stoploss'] * self.starting_amount
             if lowest_capital <= current_dynamic_price:

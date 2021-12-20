@@ -77,7 +77,7 @@ def test_trailing_stoploss_multiple_dips():
 
     fixture.trading_module_config.stoploss_type = "trailing"
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_one_trade_long_timesteps()
 
     fixture.trading_module_config.stoploss = -25
     fixture.stats_config.stoploss = -25
