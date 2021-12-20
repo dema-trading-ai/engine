@@ -3,9 +3,6 @@ from datetime import datetime
 from enum import Enum
 from typing import Any
 
-import numpy as np
-
-
 # Files
 
 
@@ -44,6 +41,10 @@ class Trade:
         self.fee_paid_close = None
         self.fee_paid_total = self.fee_paid_open
         self.sell_reason = SellReason.NONE
+        self.candle_low = None
+        self.candle_open = None
+        self.profit_ratio = None
+        self.profit_dollar = None
 
         # Calculations for trade worth
         self.max_seen_drawdown = 1.0  # ratio
@@ -55,8 +56,10 @@ class Trade:
         # Stoploss configurations
         self.sl_type = sl_type
         self.sl_perc = sl_perc
-        self.sl_sell_time = None
-        self.sl_ratio = None
+        self.sl_static_price = None
+        self.sl_trailing_ratio = None
+        self.sl_trailing_high_capital = None
+
         self.update_profits()
 
     def close_trade(self, reason: SellReason, date: datetime) -> None:
@@ -83,74 +86,36 @@ class Trade:
         self.profit_ratio = self.capital / self.starting_amount
         self.profit_dollar = self.capital - self.starting_amount
 
-    def configure_stoploss(self, ohlcv: dict, data_dict: dict) -> None:
-        if self.sl_type == 'dynamic':
-            if 'stoploss' in ohlcv:
-                self.sl_sell_time, self.sl_ratio = self.dynamic_stoploss(data_dict, ohlcv['time'])
-            else:
-                self.sl_type = 'static'   # when dynamic not configured use static stoploss
-        if self.sl_type == 'standard':   # for backwards compatability - can be removed in the future
+    def configure_stoploss(self) -> None:
+        if self.sl_type == 'standard':  # for backwards compatability - can be removed in the future
             self.sl_type = 'static'
         if self.sl_type == 'static':
-            self.sl_ratio = 1 - (abs(self.sl_perc) / 100)
-        elif self.sl_type == 'trailing':
-            self.sl_sell_time, self.sl_ratio = self.trailing_stoploss(data_dict, ohlcv['time'])
+            self.sl_static_price = self.starting_amount * (1 - (abs(self.sl_perc) / 100))
+        if self.sl_type == 'trailing':
+            self.sl_trailing_ratio = 1 - (abs(self.sl_perc) / 100)
+            self.sl_trailing_high_capital = self.starting_amount
 
     def check_for_sl(self, ohlcv: dict) -> bool:
+        lowest_capital = self.currency_amount * ohlcv['low']
         if self.sl_type == 'static':
-            lowest_ratio = (ohlcv['low'] * self.currency_amount) / self.starting_amount
-            if lowest_ratio <= self.sl_ratio:
-                self.current = (self.sl_ratio * self.starting_amount) / self.currency_amount
-                self.update_profits()
+            if lowest_capital <= self.sl_static_price:
+                self.capital = min(self.currency_amount * ohlcv['open'], self.sl_static_price)
+                self.current = self.capital / self.currency_amount
+                self.update_profits(False)
                 return True
-        elif self.sl_type == 'trailing' or self.sl_type == 'dynamic':
-            if self.sl_sell_time == ohlcv['time']:
-                self.current = (self.sl_ratio * self.starting_amount) / self.currency_amount
-                self.update_profits()
+        elif self.sl_type == 'trailing':
+            current_trailing_price = self.sl_trailing_high_capital * self.sl_trailing_ratio
+            if lowest_capital <= current_trailing_price:
+                self.capital = min(self.currency_amount * ohlcv['open'], current_trailing_price)
+                self.current = self.capital / self.currency_amount
+                self.update_profits(False)
+                return True
+            self.sl_trailing_high_capital = max(self.currency_amount * ohlcv['high'], self.sl_trailing_high_capital)
+        elif self.sl_type == 'dynamic':
+            current_dynamic_price = ohlcv['stoploss'] * self.starting_amount
+            if lowest_capital <= current_dynamic_price:
+                self.capital = min(self.currency_amount * ohlcv['open'], self.currency_amount * ohlcv['stoploss'])
+                self.current = self.capital / self.currency_amount
+                self.update_profits(False)
                 return True
         return False
-
-    def trailing_stoploss(self, data_dict: dict, time: int) -> tuple:
-        """
-        Calculates the trailing stoploss (TSL) for each tick, applying the standard definition:
-        - stoploss (SL) for a tick is calculated using: candle_high * (1 - trailing_percentage)
-        - TSL algorithm:
-            1. TSL is defined as the SL of first candle
-            2. Get SL of next candle
-            3. If SL for current candle is HIGHER than TSL:
-                -> TSL = current candle SL
-                -> back to Step 2.
-            4. If SL for current candle is LOWER than TSL:
-                -> back to Step 2.
-        """
-        # Calculates correct TSL% and adds TSL value for each tick
-        stoploss_perc = (abs(self.sl_perc) / 100)
-        trail_ratio = 1 - stoploss_perc
-        for timestamp in data_dict.keys():
-            if int(timestamp) > time:
-                ohlcv = data_dict[timestamp]
-
-                # Check if lowest ratio crossed trail ratio
-                lowest_ratio = (ohlcv['low'] * self.currency_amount) / self.starting_amount
-                if lowest_ratio <= trail_ratio:
-                    return ohlcv['time'], trail_ratio
-
-                # Update trail ratio
-                stoploss_ratio = (ohlcv['high'] * self.currency_amount) * (1-stoploss_perc) / self.starting_amount
-                if stoploss_ratio > trail_ratio:
-                    trail_ratio = stoploss_ratio
-        return np.NaN, np.NaN
-
-    def dynamic_stoploss(self, data_dict: dict, time: int) -> tuple:
-        """
-        Finds the first occurrence where the dynamic stoploss (defined in strategy)
-        is triggered.
-        """
-        for timestamp in data_dict.keys():
-            if int(timestamp) > time:
-                ohlcv = data_dict[timestamp]
-                if ohlcv['low'] <= ohlcv['stoploss']:
-                    low_value = min(ohlcv["stoploss"], ohlcv["open"])
-                    sl_ratio = (low_value * self.currency_amount) / self.starting_amount
-                    return ohlcv['time'], sl_ratio
-        return np.NaN, np.NaN
