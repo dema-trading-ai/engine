@@ -481,21 +481,43 @@ def test_rejected_buy_signal_reject_exposure():
     assert stats.main_results.rejected_buy_signal == 1
 
 
-def test_sharpe_ratio_three_trades_daily_timestep():
+def test_ratios_90_days():
     # Three trades, one per day; should return an actual value
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
     # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades(timestep=DAILY)
+    fixture.frame_with_signals['COIN/BASE'].generate_trades(days=90)
 
     # Act
     stats = fixture.create().analyze()
 
-    assert math.isclose(stats.main_results.sharpe_ratio, -0.16851, abs_tol=0.00001)
+    # Sharpe ratio at 90 days
+    assert math.isclose(stats.main_results.ratios[0], 0.1015, abs_tol=0.0001)
+
+    # Sortino ratio at 90 days
+    assert math.isclose(stats.main_results.ratios[1], 0.2217, abs_tol=0.0001)
 
 
-def test_sharpe_ratio_three_trades_thirty_min_timestep():
+def test_ratios_3_years():
+    # Three trades, one per day; should return an actual value
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].generate_trades(days=1095)
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Sharpe ratio at 3 years
+    assert math.isclose(stats.main_results.ratios[2], 0.02896, abs_tol=0.00001)
+
+    # Sortino ratio at 3 years
+    assert math.isclose(stats.main_results.ratios[3], 0.06324, abs_tol=0.00001)
+
+
+def test_ratios_1_day():
     # Three trades, one every 30 minutes; should return inf
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
@@ -506,10 +528,10 @@ def test_sharpe_ratio_three_trades_thirty_min_timestep():
     # Act
     stats = fixture.create().analyze()
 
-    assert math.isinf(stats.main_results.sharpe_ratio)
+    assert math.isinf(stats.main_results.ratios[0])
 
 
-def test_sharpe_ratio_three_trades_no_sell():
+def test_ratios_no_sell():
     # Three trades with no selling, should return nan
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
@@ -520,46 +542,4 @@ def test_sharpe_ratio_three_trades_no_sell():
     # Act
     stats = fixture.create().analyze()
 
-    assert math.isnan(stats.main_results.sharpe_ratio)
-
-
-def test_sortino_ratio_three_trades_daily_timestep():
-    # Three trades, one per day; should return an actual value
-    # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
-
-    # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades(timestep=DAILY)
-
-    # Act
-    stats = fixture.create().analyze()
-
-    assert math.isclose(stats.main_results.sortino_ratio, -0.21825, abs_tol=0.00001)
-
-
-def test_sortino_ratio_three_trades_thirty_min_timestep():
-    # Three trades, one every millisecond; should return nan
-    # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
-
-    # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades(timestep=ONE_MIL)
-
-    # Act
-    stats = fixture.create().analyze()
-
-    assert math.isnan(stats.main_results.sortino_ratio)
-
-
-def test_sortino_ratio_three_trades_no_sell():
-    # Three trades with no selling, should return nan
-    # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
-
-    # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_no_trades()
-
-    # Act
-    stats = fixture.create().analyze()
-
-    assert math.isnan(stats.main_results.sortino_ratio)
+    assert math.isnan(stats.main_results.ratios[0])

@@ -122,15 +122,15 @@ class MockOHLCVWithSignal(dict, object):
         self.add_entry(open=2, high=4, low=2, close=4, volume=1, buy=0, sell=0)
         self.add_entry(open=4, high=4, low=2, close=2, volume=1, buy=0, sell=1)
 
-    def test_scenario_up_100_down_75_one_trade(self):
+    def test_scenario_up_100_down_75_one_trade(self, timestep=DAILY):
         """
         Chart flow:
         1. Trend goes up 100%
         2. Trend goes down 75%
         """
-        self.add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0)
-        self.add_entry(open=2, high=4, low=2, close=4, volume=1, buy=0, sell=0)
-        self.add_entry(open=4, high=4, low=3, close=3, volume=1, buy=0, sell=1)
+        self.add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0, timestep=timestep)
+        self.add_entry(open=2, high=4, low=2, close=4, volume=1, buy=0, sell=0, timestep=timestep)
+        self.add_entry(open=4, high=4, low=3, close=3, volume=1, buy=0, sell=1, timestep=timestep)
 
     def test_scenario_up_100_down_75_two_trades(self):
         """
@@ -249,6 +249,24 @@ class MockOHLCVWithSignal(dict, object):
         last_close_price = self.get(self.current_time, {"close": 1})["close"]
         new_price = last_close_price * multiplier
         return self.add_entry(last_close_price, new_price, last_close_price, new_price, 1, buy, sell)
+
+    def generate_trades(self, days: int, scenario: str = 'up_100_down_75_one_trade') -> None:
+        """
+        Generates a high number of trades for tests where a few trades cannot represent what is being tested
+        """
+
+        valid_days = [90, 1095]
+        if days not in valid_days:
+            raise ValueError(f'Days must be one of {valid_days}, now is {days}')
+
+        valid_scenarios = ['up_100_down_75_one_trade']
+        if scenario not in valid_scenarios:
+            raise ValueError(f'Scenario must be one of {valid_scenarios}, now is {scenario}')
+
+        scenario_to_run = getattr(self, 'test_scenario_' + scenario)()
+
+        for day in range(days):
+            scenario_to_run()
 
 
 KeyType = TypeVar("KeyType")
