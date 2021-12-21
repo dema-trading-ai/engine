@@ -36,7 +36,7 @@ def save_trade_log(data, filename):
 
 def parse_trade_json(trades, filename):
     data = read_trade_log(filename)
-    mot = data['max-open-trades']
+    mot = data['max-open_trades']
     timeframe = data['timeframe']
     for k, v in data['trades'].items():
         if v['status'] == 'open':
