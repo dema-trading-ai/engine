@@ -80,15 +80,14 @@ class TradingModule:
         if trade.sell_reason == SellReason.STOPLOSS_AND_ROI:
             # Because trade had no impact on results, remove first issued fee from
             # total amount of fee and reset trade stats.
-            first_fee = trade.starting_amount * trade.fee
-            self.total_fee_paid -= first_fee
+            self.total_fee_paid -= trade.fee_paid_open
 
             # Reset trade stats
             trade.capital = trade.starting_amount
             trade.update_profits(update_capital=False)
             trade.max_seen_drawdown = 1.0
         else:
-            self.total_fee_paid += trade.close_fee_paid
+            self.total_fee_paid += trade.fee_paid_close
         self.budget += trade.capital
 
         self.open_trades.remove(trade)
@@ -118,7 +117,7 @@ class TradingModule:
         date = datetime.fromtimestamp(ohlcv['time'] / 1000)
         new_trade = \
             Trade(ohlcv, spend_amount, self.fee, date, self.sl_type, self.sl_perc)
-        new_trade.configure_stoploss(ohlcv, data_dict)
+        new_trade.configure_stoploss()
         new_trade.update_stats(ohlcv, first=True)
 
         # Update total budget with configured spend amount and fee

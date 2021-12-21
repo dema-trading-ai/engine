@@ -30,7 +30,7 @@ def with_copied_initial_row(df) -> pd.DataFrame:
 
 def apply_profit_ratio(df, open_timestamp):
     df.loc[open_timestamp:, "profit_ratio"] = (df["close"] / df["close"].shift(1))
-    df["profit_ratio"] = df["profit_ratio"].fillna(1)
+    df["profit_ratio"] = df["profit_ratio"].fillna(value=1)
 
 
 def add_trade_fee(df, fee_percentage, open):

@@ -16,7 +16,7 @@ from modules.stats.metrics.market_change import get_market_change, get_market_dr
 from modules.stats.metrics.trades import calculate_best_worst_trade, get_number_of_losing_trades, \
     get_number_of_consecutive_losing_trades, calculate_trade_durations
 from modules.stats.metrics.winning_weeks import get_winning_weeks_per_coin, \
-    get_winning_weeks_for_portfolio
+    get_winning_weeks_for_portfolio, get_profitable_weeks_for_portfolio, get_profitable_weeks_per_coin
 from modules.stats.stats_config import StatsConfig
 from modules.stats.trade import Trade, SellReason
 from modules.stats.tradingmodule import TradingModule
@@ -104,6 +104,11 @@ class StatsModule:
         )
 
         # Find amount of winning, draw and losing weeks for portfolio
+        prof_weeks_win, prof_weeks_draw, prof_weeks_loss = get_profitable_weeks_for_portfolio(
+            self.trading_module.capital_per_timestamp
+        )
+
+        # Find amount of winning, draw and losing weeks for portfolio
         win_weeks, draw_weeks, loss_weeks = get_winning_weeks_for_portfolio(
             self.trading_module.capital_per_timestamp,
             market_change_weekly
@@ -152,6 +157,9 @@ class StatsModule:
                            avg_trade_duration=avg_trade_duration,
                            longest_trade_duration=longest_trade_duration,
                            shortest_trade_duration=shortest_trade_duration,
+                           prof_weeks_win=prof_weeks_win,
+                           prof_weeks_draw=prof_weeks_draw,
+                           prof_weeks_loss=prof_weeks_loss,
                            win_weeks=win_weeks,
                            draw_weeks=draw_weeks,
                            loss_weeks=loss_weeks,
@@ -185,6 +193,9 @@ class StatsModule:
                                         profit=stats[coin]['total_profit_amount'],
                                         max_seen_drawdown=(stats[coin]['max_seen_ratio'] - 1) * 100,
                                         max_realised_drawdown=(stats[coin]['max_realised_ratio'] - 1) * 100,
+                                        prof_weeks_win=stats[coin]['prof_weeks_win'],
+                                        prof_weeks_draw=stats[coin]['prof_weeks_draw'],
+                                        prof_weeks_loss=stats[coin]['prof_weeks_loss'],
                                         win_weeks=stats[coin]['win_weeks'],
                                         draw_weeks=stats[coin]['draw_weeks'],
                                         loss_weeks=stats[coin]['loss_weeks'],
@@ -217,6 +228,9 @@ class StatsModule:
                 "avg_trade_duration": timedelta(0),
                 "longest_trade_duration": timedelta(0),
                 "shortest_trade_duration": timedelta(0),
+                "prof_weeks_win": 0,
+                "prof_weeks_draw": 0,
+                "prof_weeks_loss": 0,
                 "win_weeks": 0,
                 "draw_weeks": 0,
                 "loss_weeks": 0
@@ -226,6 +240,8 @@ class StatsModule:
         trades_per_coin = group_by(closed_trades, "pair")
 
         print_info("Calculating statistics")
+        if len(trades_per_coin) == 0:
+            trades_per_coin = {pair: [] for pair in self.frame_with_signals.keys()}
         for key, closed_pair_trades in trades_per_coin.items():
             # Calculate max seen drawdown ratio
             seen_cum_profit_ratio_df = get_seen_cum_profit_ratio_per_coin(
@@ -246,18 +262,25 @@ class StatsModule:
 
             # Find avg, longest and shortest trade durations
             per_coin_stats[key]["avg_trade_duration"], \
-            per_coin_stats[key]["longest_trade_duration"], \
-            per_coin_stats[key]["shortest_trade_duration"] = \
+                per_coin_stats[key]["longest_trade_duration"], \
+                per_coin_stats[key]["shortest_trade_duration"] = \
                 calculate_trade_durations(closed_pair_trades)
 
             # Find winning, draw and losing weeks for current coin
             per_coin_stats[key]["win_weeks"], \
-            per_coin_stats[key]["draw_weeks"], \
-            per_coin_stats[key]["loss_weeks"], \
-            market_change_weekly[key] = get_winning_weeks_per_coin(
-                self.frame_with_signals[key],
-                seen_cum_profit_ratio_df
-            )
+                per_coin_stats[key]["draw_weeks"], \
+                per_coin_stats[key]["loss_weeks"], \
+                market_change_weekly[key] = get_winning_weeks_per_coin(
+                    self.frame_with_signals[key],
+                    seen_cum_profit_ratio_df
+                )
+
+            # Find profitable weeks for current coin
+            per_coin_stats[key]["prof_weeks_win"], \
+                per_coin_stats[key]["prof_weeks_draw"], \
+                per_coin_stats[key]["prof_weeks_loss"] = get_profitable_weeks_per_coin(
+                    seen_cum_profit_ratio_df
+                )
 
             for trade in closed_pair_trades:
                 # Update average profit
@@ -317,4 +340,3 @@ class StatsModule:
 
             left_open_trade_stats.append(left_open_trade_results)
         return left_open_trade_stats
-
