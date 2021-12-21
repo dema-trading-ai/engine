@@ -2,7 +2,6 @@ import datetime
 import calendar
 from glob import glob
 import itertools
-import time
 
 import pandas as pd
 import numpy as np
@@ -152,7 +151,7 @@ class MultiBotBacktester:
 
 def combine_and_run_multibot(util):
     util.write_log_to_file('[INFO] Starting multibot run')
-    files = glob(BASE_DIR + r"/data/backtesting-data/trades_log*.json")
+    files = glob(BASE_DIR + r"/data/backtesting-data/trade_logs/*.json")
     for i in range(3, 7):
         results = {}
         all_combinations = list(itertools.combinations(files, 1))
@@ -186,9 +185,6 @@ def combine_and_run_multibot(util):
 utility = Utilities()
 
 try:
-    tic = time.perf_counter()
     combine_and_run_multibot(utility)
-    toc = time.perf_counter()
-    print(f'Execution time: {toc-tic:0.4f}')
 except Exception as e:
     utility.write_log_to_file(f'[ERROR] Fatal error, unable to continue: {str(e)}')
