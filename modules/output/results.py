@@ -1,5 +1,4 @@
 # Libraries
-import math
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 import typing
@@ -160,8 +159,8 @@ def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown
     performance_table.add_row('Market drawdown BTC/USDT',
                               colorize(round(self.market_drawdown_btc,
                                              2), 0, '%'))
-    performance_table.add_row('Sharpe ratio (90d / 3y)', str(round(self.ratios[0], 2)) + ' / ' + str(round(self.ratios[1], 2)) if not (math.isnan(self.ratios[0]) or math.isinf(self.ratios[0])) else '- / -')
-    performance_table.add_row('Sortino ratio (90d / 3y)', str(round(self.ratios[2], 2)) + ' / ' + str(round(self.ratios[3], 2)) if not (math.isnan(self.ratios[2]) or math.isinf(self.ratios[2])) else '- / -')
+    performance_table.add_row('Sharpe ratio (90d / 3y)', f'{round(self.sharpe_90d, 2) if self.sharpe_90d is not None else "-"} / {round(self.sharpe_3y, 2) if self.sharpe_3y is not None else "-"}')
+    performance_table.add_row('Sortino ratio (90d / 3y)', f'{round(self.sortino_90d, 2) if self.sortino_90d is not None else "-"} / {round(self.sortino_3y, 2) if self.sortino_3y is not None else "-"}')
     performance_table.add_row('Total fee paid',
                               f"{round(self.total_fee_amount)} {currency_symbol}")
     return performance_table

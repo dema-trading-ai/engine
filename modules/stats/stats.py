@@ -10,7 +10,8 @@ from modules.public.trading_stats import TradingStats
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio, get_max_drawdown_ratio_without_buy_rows
 from modules.stats.metrics.profit_ratio import get_seen_cum_profit_ratio_per_coin, get_realised_profit_ratio
 from modules.stats.drawdown.for_portfolio import get_max_seen_drawdown_for_portfolio, \
-    get_max_realised_drawdown_for_portfolio, get_ratios
+    get_max_realised_drawdown_for_portfolio
+from modules.stats.ratios.for_portfolio import get_sharpe_sortino_ratios
 from modules.stats.drawdown.per_trade import get_max_seen_drawdown_per_trade
 from modules.stats.metrics.market_change import get_market_change, get_market_drawdown
 from modules.stats.metrics.trades import calculate_best_worst_trade, get_number_of_losing_trades, \
@@ -102,7 +103,7 @@ class StatsModule:
             self.trading_module.capital_per_timestamp
         )
 
-        sharpe_90d, sharpe_3y, sortino_90d, sortino_3y = get_ratios(self.trading_module.capital_per_timestamp)
+        sharpe_90d, sortino_90d, sharpe_3y, sortino_3y = get_sharpe_sortino_ratios(self.trading_module.capital_per_timestamp)
 
         # Find amount of winning, draw and losing weeks for portfolio
         prof_weeks_win, prof_weeks_draw, prof_weeks_loss = get_profitable_weeks_for_portfolio(
@@ -173,7 +174,10 @@ class StatsModule:
                            fee=self.config.fee,
                            total_fee_amount=self.trading_module.total_fee_paid,
                            rejected_buy_signal=self.trading_module.rejected_buy_signal,
-                           ratios=(sharpe_90d, sharpe_3y, sortino_90d, sortino_3y)
+                           sharpe_90d=sharpe_90d,
+                           sharpe_3y=sharpe_3y,
+                           sortino_90d=sortino_90d,
+                           sortino_3y=sortino_3y
                            )
 
     def generate_coin_results(self, closed_trades: [Trade], market_change: dict, market_drawdown: dict) -> [list, dict]:
