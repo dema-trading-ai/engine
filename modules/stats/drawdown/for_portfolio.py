@@ -1,12 +1,6 @@
-import numpy as np
 import pandas as pd
 
-from pandas import DataFrame
-
-from typing import Tuple
-from datetime import timedelta
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
-from modules.setup.config.validations import validate_ratios
 
 
 def get_max_seen_drawdown_for_portfolio(capital_per_timestamp: dict):
