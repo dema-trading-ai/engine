@@ -2,11 +2,7 @@ import math
 from datetime import timedelta
 
 from test.stats.stats_test_utils import StatsFixture
-
-# Define different timestep values
-DAILY = 86400000  # 24 hours in milliseconds
-THIRTY_MIN = 1800000  # 30 minutes in milliseconds
-ONE_MIL = 1  # 1 millisecond
+from test.utils.signal_frame import ONE_MIL
 
 
 def test_fee_equals_stoploss():

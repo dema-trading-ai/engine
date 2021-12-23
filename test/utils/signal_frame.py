@@ -48,7 +48,7 @@ class MockOHLCVWithSignal(dict, object):
         self.add_entry(open=2, high=2, low=2, close=2, volume=1, buy=0, sell=0)
         self.add_entry(open=2, high=2, low=2, close=2, volume=1, buy=0, sell=0)
 
-    def test_scenario_flat_one_trade(self, timestep=ONE_MIL):
+    def test_scenario_flat_one_trade(self, timestep=DAILY):
         """
         Chart flow:
         1. Trend stays the same
@@ -268,10 +268,6 @@ class MockOHLCVWithSignal(dict, object):
         """
         Generates a high number of trades for tests where a few trades cannot represent what is being tested
         """
-
-        valid_days = [90, 1095]
-        if days not in valid_days:
-            raise ValueError(f'Days must be one of {valid_days}, now is {days}')
 
         for _ in range(days):
             self.test_scenario_up_100_down_75_one_trade()
