@@ -6,6 +6,12 @@ jobs:
   pytest-test:
     runs-on: ubuntu-latest
     steps:
+      - name: Set Timezone
+        uses: szenius/set-timezone@v1.0
+        with:
+          timezoneLinux: "Europe/Amsterdam"
+          timezoneMacos: "Europe/Amsterdam"
+          timezoneWindows: "Central European Time"
       - uses: actions/checkout@v2
       - name: Run Pytest and create a coverage report
         uses: actions/setup-python@v2
