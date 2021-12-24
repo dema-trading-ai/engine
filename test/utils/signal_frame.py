@@ -20,7 +20,7 @@ class MockOHLCVWithSignal(dict, object):
     def __init__(self, key):
         super().__init__()
         self.__key = key
-        self.current_time = 1577833200000
+        self.current_time = 1577833200000 # 2020-01-01
 
     def set_starting_time(self, starting_time):
         self.current_time = starting_time
