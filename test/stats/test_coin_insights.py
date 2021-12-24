@@ -301,7 +301,7 @@ def test_trade_length_one_trade():
     fixture = StatsFixture(['COIN/BASE'])
 
     # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_flat_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_flat_one_trade(timestep=ONE_MIL)
 
     # Act
     stats = fixture.create().analyze()
