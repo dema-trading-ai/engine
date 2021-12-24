@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import timedelta, datetime
+from typing import Optional
 
 from pandas import DataFrame
 
@@ -49,7 +50,10 @@ class MainResults:
     fee: float
     total_fee_amount: float
     rejected_buy_signal: int
-
+    sharpe_90d: Optional[float]
+    sharpe_3y: Optional[float]
+    sortino_90d: Optional[float]
+    sortino_3y: Optional[float]
 
 @dataclass
 class TradingStats:

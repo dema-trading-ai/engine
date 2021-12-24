@@ -1,5 +1,7 @@
 import math
 
+from datetime import datetime
+
 from test.stats.stats_test_utils import StatsFixture
 from test.utils.signal_frame import TradeAction
 
@@ -97,9 +99,9 @@ def test_simple_seen_drawdown():
 
     # Assert
     assert math.isclose(stats.main_results.max_seen_drawdown, -50.995)
-    assert stats.main_results.drawdown_from == 1  # not zero, because the first row is copied for fee calc purposes
+    assert datetime.fromtimestamp(stats.main_results.drawdown_from / 1000) == datetime(year=2020, month=1, day=1)  # First timestamp, because the first row is copied for fee calc purposes
     assert stats.main_results.drawdown_to == 0  # zero, because the drawdown hasn't ended yet
-    assert stats.main_results.drawdown_at == 2
+    assert datetime.fromtimestamp(stats.main_results.drawdown_at / 1000) == datetime(year=2020, month=1, day=2)  # Last timestamp
 
 
 def test_simple_no_seen_drawdown():
@@ -114,9 +116,9 @@ def test_simple_no_seen_drawdown():
 
     # Assert
     assert math.isclose(stats.main_results.max_seen_drawdown, -1)
-    assert stats.main_results.drawdown_from == 1
-    assert stats.main_results.drawdown_to == 2
-    assert stats.main_results.drawdown_at == 1
+    assert datetime.fromtimestamp(stats.main_results.drawdown_from / 1000) == datetime(year=2020, month=1, day=1)
+    assert datetime.fromtimestamp(stats.main_results.drawdown_to / 1000) == datetime(year=2020, month=1, day=2)
+    assert datetime.fromtimestamp(stats.main_results.drawdown_at / 1000) == datetime(year=2020, month=1, day=1)
     
 
 def test_multiple_periods_seen_drawdown_two_drawdown_periods():
@@ -133,9 +135,9 @@ def test_multiple_periods_seen_drawdown_two_drawdown_periods():
 
     # Assert
     assert math.isclose(stats.main_results.max_seen_drawdown, -75.4975)
-    assert stats.main_results.drawdown_from == 4
+    assert datetime.fromtimestamp(stats.main_results.drawdown_from / 1000) == datetime(year=2020, month=1, day=4)
     assert stats.main_results.drawdown_to == 0
-    assert stats.main_results.drawdown_at == 6
+    assert datetime.fromtimestamp(stats.main_results.drawdown_at / 1000) == datetime(year=2020, month=1, day=6)
 
 
 def test_multiple_periods_seen_drawdown_one_drawdown_period():
@@ -152,9 +154,9 @@ def test_multiple_periods_seen_drawdown_one_drawdown_period():
 
     # Assert
     assert math.isclose(stats.main_results.max_realised_drawdown, -80.7880798)
-    assert stats.main_results.drawdown_from == 2
+    assert datetime.fromtimestamp(stats.main_results.drawdown_from / 1000) == datetime(year=2020, month=1, day=2)
     assert stats.main_results.drawdown_to == 0
-    assert stats.main_results.drawdown_at == 6
+    assert datetime.fromtimestamp(stats.main_results.drawdown_at / 1000) == datetime(year=2020, month=1, day=6)
 
 
 def test_multiple_periods_seen_drawdown_easy():
@@ -176,9 +178,9 @@ def test_multiple_periods_seen_drawdown_easy():
 
     # Assert
     assert math.isclose(stats.main_results.max_seen_drawdown, -59.1625)
-    assert stats.main_results.drawdown_from == 1
+    assert datetime.fromtimestamp(stats.main_results.drawdown_from / 1000) == datetime(year=2020, month=1, day=1)
     assert stats.main_results.drawdown_to == 0
-    assert stats.main_results.drawdown_at == 2
+    assert datetime.fromtimestamp(stats.main_results.drawdown_at / 1000) == datetime(year=2020, month=1, day=2)
 
 
 def test_multiple_periods_seen_drawdown():
@@ -198,9 +200,9 @@ def test_multiple_periods_seen_drawdown():
 
     # Assert
     assert math.isclose(stats.main_results.max_seen_drawdown, -75.4975)
-    assert stats.main_results.drawdown_from == 4
+    assert datetime.fromtimestamp(stats.main_results.drawdown_from / 1000) == datetime(year=2020, month=1, day=4)
     assert stats.main_results.drawdown_to == 0
-    assert stats.main_results.drawdown_at == 6
+    assert datetime.fromtimestamp(stats.main_results.drawdown_at / 1000) == datetime(year=2020, month=1, day=6)
 
 
 def test_drawdown_equality():
@@ -252,9 +254,9 @@ def test_drawdown_simple():
     assert math.isclose(stats.coin_results[0].max_seen_drawdown, -80.2)
     assert math.isclose(stats.coin_results[0].max_realised_drawdown, -60.796)
     assert math.isclose(stats.coin_results[0].max_seen_drawdown, -80.2)
-    assert stats.main_results.drawdown_from == 2
+    assert datetime.fromtimestamp(stats.main_results.drawdown_from / 1000) == datetime(year=2020, month=1, day=2)
     assert stats.main_results.drawdown_to == 0
-    assert stats.main_results.drawdown_at == 4
+    assert datetime.fromtimestamp(stats.main_results.drawdown_at / 1000) == datetime(year=2020, month=1, day=4)
 
 
 def test_drawdown_multiple_peaks():
@@ -271,9 +273,9 @@ def test_drawdown_multiple_peaks():
     # Assert
     assert math.isclose(stats.coin_results[0].max_seen_drawdown, -75.25)
     assert math.isclose(stats.coin_results[0].max_realised_drawdown, -55.8955)
-    assert stats.main_results.drawdown_from == 3
+    assert datetime.fromtimestamp(stats.main_results.drawdown_from / 1000) == datetime(year=2020, month=1, day=3)
     assert stats.main_results.drawdown_to == 0
-    assert stats.main_results.drawdown_at == 4
+    assert datetime.fromtimestamp(stats.main_results.drawdown_at / 1000) == datetime(year=2020, month=1, day=4)
 
 
 def test_drawdown_multiple_pairs():
@@ -301,9 +303,9 @@ def test_drawdown_multiple_pairs():
 
     assert math.isclose(stats.main_results.max_seen_drawdown, -85.76400119125371)
     assert math.isclose(stats.main_results.max_realised_drawdown, -85.76400119125371)
-    assert stats.main_results.drawdown_from == 4
+    assert datetime.fromtimestamp(stats.main_results.drawdown_from / 1000) == datetime(year=2020, month=1, day=4)
     assert stats.main_results.drawdown_to == 0
-    assert stats.main_results.drawdown_at == 12
+    assert datetime.fromtimestamp(stats.main_results.drawdown_at / 1000) == datetime(year=2020, month=1, day=12)
 
     assert stats.main_results.n_trades_with_loss == 7
     assert stats.main_results.n_consecutive_losses == 4
@@ -358,7 +360,7 @@ def test_seen_drawdown_up_down():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.coin_results[0].max_seen_drawdown, -90.1)
+    assert math.isclose(stats.coin_results[0].max_seen_drawdown, -97.5245, abs_tol=0.001)
 
 
 def test_seen_drawdown_down():
