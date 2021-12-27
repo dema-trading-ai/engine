@@ -51,7 +51,7 @@ class OutputModule(object):
         if self.config.plots:
             print_info("Creating plots in " + FONT_BOLD + "data/backtesting-data/plots" + FONT_RESET + "...")
             plot_per_coin(stats, config=self.config)
-            equity_plot(stats.capital_per_timestamp, self.config.strategy_definition.strategy_name)
+            equity_plot(stats, self.config.strategy_definition.strategy_name)
         print_info("Backtest finished!")
 
         # Export backtest result as JSON

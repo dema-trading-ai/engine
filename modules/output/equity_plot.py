@@ -1,29 +1,39 @@
-from datetime import datetime
-from math import log10
 from pathlib import Path
+
 import pandas as pd
+from plotly.graph_objs import Figure
 
-from plotly import graph_objects as go
+from modules.public.trading_stats import TradingStats
+from modules.output.plots import convert_df_for_plotting, compute_average_market_change
 
 
-def equity_plot(capital_dict, strategy_name):
+def equity_plot(stats: TradingStats, strategy_name):
     Path("data/backtesting-data/plots/equity").mkdir(parents=True, exist_ok=True)
-    df = pd.DataFrame(list(capital_dict.items()))
 
-    # remove first value since its 0
-    df.drop(index=df.index[0],
-            axis=0,
-            inplace=True)
+    df_capital = pd.DataFrame(list(stats.capital_per_timestamp.items()), columns=['timestamp', 'capital'])
 
-    # get dates and y range
-    dates = [datetime.fromtimestamp(time / 1000) for time in df[0]]
-    min_value = max(int(df[1].min() - 10), 1)
-    max_value = int(df[1].max() + 10)
+    df_capital, dates = convert_df_for_plotting(df_capital)
 
-    # create figure
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=dates, y=df[1], fill='tozeroy'))  # fill down to xaxis
-    # fig.update_yaxes(range=[min_value, max_value])
+    df_coins = compute_average_market_change(stats.df, stats.capital_per_timestamp[0])
+
+    # Define various traces to be plotted
+    data = [
+        {
+            "name": "Capital",
+            "mode": "lines",
+            "x": dates,
+            "y": df_capital['capital'],
+            "fill": 'tozeroy'
+        },
+        {
+            "name": "Average market change",
+            "mode": "lines",
+            "x": dates,
+            "y": df_coins['avg_market_change']
+        }
+    ]
+
+    fig = Figure(data=data)
 
     fig.update_layout(
         updatemenus=[
@@ -33,13 +43,12 @@ def equity_plot(capital_dict, strategy_name):
                          method="relayout",
                          args=[
                              {"yaxis.type": "log",
-                              "yaxis.autorange": False,
-                              "yaxis.range": [log10(min_value), log10(max_value)]}],
+                              "yaxis.autorange": True}],
                          args2=[
                              {"yaxis.type": "linear",
-                              "yaxis.autorange": False,
-                              "yaxis.range": [min_value, max_value]}],
+                              "yaxis.autorange": True}]
                          ),
+
                 ],
                 type="buttons"
             )
@@ -47,7 +56,6 @@ def equity_plot(capital_dict, strategy_name):
         title_text=f"Equity Plot ({strategy_name}) by DemaTrading.ai",
         title_x=0.5
     )
-    fig.update_layout(yaxis_type="log", yaxis_range=[log10(min_value), log10(max_value)])
 
     config = {
         'toImageButtonOptions': {
