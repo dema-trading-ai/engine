@@ -1,5 +1,7 @@
 import math
 
+from datetime import datetime
+
 from test.stats.stats_test_utils import StatsFixture
 
 
@@ -116,7 +118,7 @@ def test_open_trades_opened_at():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.open_trade_results[0].opened_at.timestamp() == 1 / 1000
+    assert stats.open_trade_results[0].opened_at == datetime(year=2020, month=1, day=1)
 
 
 def test_open_trades_opened_at_timestep_three():
@@ -131,4 +133,4 @@ def test_open_trades_opened_at_timestep_three():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.open_trade_results[0].opened_at.timestamp() == 3 / 1000
+    assert stats.open_trade_results[0].opened_at == datetime(year=2020, month=1, day=3)

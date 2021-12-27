@@ -111,3 +111,29 @@ def check_for_float(param_value: int, t: type) -> Tuple[float, type]:
     if isinstance(param_value, int) and not isinstance(param_value, bool):
         return float(param_value), float
     return param_value, t
+
+
+def validate_ratios(df: DataFrame) -> Tuple[bool, bool]:
+    """
+    Checks the given dataframe, prints out appropriate warning messages and returns bools to determine which time periods should be computed.
+    """
+
+    check_returns = (df['returns'].iloc[1:] == 0).all()
+
+    if check_returns:
+        print_warning('Unable to compute Sharpe and Sortino ratios: Perhaps the time period is too short?')
+
+    df_year = df.resample('Y').apply(lambda x: x.iloc[-1])
+    count_year = len(df_year['capital'])
+    ninety_d = True
+    three_y = True
+
+    if count_year < 3 and not check_returns:
+        three_y = False
+        if 90 > len(df['capital']):
+            ninety_d = False
+            print_warning('The time period is less than 90 days. The 90 day and 3 year Sharpe and Sortino ratios are only calculated on the available data.')
+        else:
+            print_warning('The time period is less than 3 years. The 3 year Sharpe and Sortino ratios are only calculated on the available data.')
+
+    return ninety_d, three_y

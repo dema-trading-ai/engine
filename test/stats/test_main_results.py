@@ -2,6 +2,7 @@ import math
 from datetime import timedelta
 
 from test.stats.stats_test_utils import StatsFixture
+from test.utils.signal_frame import ONE_MIL, THIRTY_MIN
 
 
 def test_capital():
@@ -233,7 +234,6 @@ def test_n_trades():
 
 
 def test_n_average_trades():
-
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
@@ -343,7 +343,7 @@ def test_trade_length_one_trade_no_close():
 
 
 def test_trade_length_one_trade():
-    # One trade, sold immediately; lengths should be 1 ms
+    # One trade, sold immediately; lengths should be 1 day
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
@@ -354,13 +354,13 @@ def test_trade_length_one_trade():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.main_results.avg_trade_duration == timedelta(microseconds=1000)
-    assert stats.main_results.longest_trade_duration == timedelta(microseconds=1000)
-    assert stats.main_results.shortest_trade_duration == timedelta(microseconds=1000)
+    assert stats.main_results.avg_trade_duration == timedelta(days=1)
+    assert stats.main_results.longest_trade_duration == timedelta(days=1)
+    assert stats.main_results.shortest_trade_duration == timedelta(days=1)
 
 
 def test_trade_length_three_trades():
-    # Three trades, sold immediately; lengths should be 1 ms
+    # Three trades, sold immediately; lengths should be 1 day
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
@@ -371,9 +371,9 @@ def test_trade_length_three_trades():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.main_results.avg_trade_duration == timedelta(microseconds=1000)
-    assert stats.main_results.longest_trade_duration == timedelta(microseconds=1000)
-    assert stats.main_results.shortest_trade_duration == timedelta(microseconds=1000)
+    assert stats.main_results.avg_trade_duration == timedelta(days=1)
+    assert stats.main_results.longest_trade_duration == timedelta(days=1)
+    assert stats.main_results.shortest_trade_duration == timedelta(days=1)
 
 
 def test_trade_length_one_trade_longer():
@@ -382,7 +382,7 @@ def test_trade_length_one_trade_longer():
     fixture = StatsFixture(['COIN/BASE'])
 
     # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_one_trade(timestep=ONE_MIL)
 
     # Act
     stats = fixture.create().analyze()
@@ -399,8 +399,8 @@ def test_trade_length_four_trades():
     fixture = StatsFixture(['COIN/BASE'])
 
     # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_one_trade()
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_three_trades()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_one_trade(timestep=ONE_MIL)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_three_trades(timestep=ONE_MIL)
 
     # Act
     stats = fixture.create().analyze()
@@ -475,3 +475,63 @@ def test_rejected_buy_signal_reject_exposure():
     stats = fixture.create().analyze()
 
     assert stats.main_results.rejected_buy_signal == 1
+
+
+def test_ratios_90_days():
+    # Three trades, one per day; both ratios should return an actual value
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].generate_trades(days=90)  # Runs test_scenario_up_100_down_75_one_trade one per day for 90 days
+
+    # Act
+    stats = fixture.create().analyze()
+
+    assert math.isclose(stats.main_results.sharpe_90d, 0.1015, abs_tol=0.0001)
+    assert math.isclose(stats.main_results.sortino_90d, 0.2217, abs_tol=0.0001)
+
+
+def test_ratios_3_years():
+    # Three trades, one per day; both ratios should return an actual value
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].generate_trades(days=1095)  # Runs test_scenario_up_100_down_75_one_trade one per day for 1095 days
+
+    # Act
+    stats = fixture.create().analyze()
+
+    assert math.isclose(stats.main_results.sharpe_3y, 0.02896, abs_tol=0.00001)
+    assert math.isclose(stats.main_results.sortino_3y, 0.06324, abs_tol=0.00001)
+
+
+def test_ratios_1_day():
+    # Three trades, one every 30 minutes; rare instance where Sharpe is None but Sortino is a float
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades(timestep=THIRTY_MIN)
+
+    # Act
+    stats = fixture.create().analyze()
+
+    assert stats.main_results.sharpe_90d is None
+    assert math.isclose(stats.main_results.sortino_90d, -1.4142, abs_tol=0.0001)
+
+
+def test_ratios_no_sell():
+    # Three trades with no selling, both rations both ratios should return None
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_no_trades()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    assert stats.main_results.sharpe_90d is None
+    assert stats.main_results.sortino_90d is None
