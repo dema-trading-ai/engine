@@ -113,6 +113,7 @@ def create_trade_info_table(self, justification) -> Table:
                              colorize(round(
                                  self.worst_trade_profit_percentage, 2),
                                  0, f'% ({self.worst_trade_pair})'))
+    trade_info_table.add_row('Median trade profit', str(round(self.median_trade_profit, 2)))
     trade_info_table.add_row('Shortest trade duration', str(shortest_trade_duration))
     trade_info_table.add_row('Avg. trade duration', str(avg_trade_duration))
     trade_info_table.add_row('Longest trade duration', str(longest_trade_duration))

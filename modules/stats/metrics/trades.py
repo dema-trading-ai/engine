@@ -1,4 +1,5 @@
 from datetime import timedelta
+from statistics import median
 import numpy as np
 
 from modules.stats.trade import Trade
@@ -50,3 +51,14 @@ def calculate_trade_durations(closed_trades: [Trade]):
     else:
         avg_trade_duration = longest_trade_duration = shortest_trade_duration = timedelta(0)
     return avg_trade_duration, longest_trade_duration, shortest_trade_duration
+
+
+def compute_median_trade_profit(closed_trades: [Trade]) -> float:
+    all_trade_profit = [trade.profit_dollar for trade in closed_trades]
+
+    if len(all_trade_profit) == 0:
+        return 0.0
+
+    else:
+        median_trade_profit = median(all_trade_profit)
+        return median_trade_profit
