@@ -2,7 +2,7 @@ import math
 from datetime import timedelta
 
 from test.stats.stats_test_utils import StatsFixture
-from test.utils.signal_frame import ONE_MIL, THIRTY_MIN
+from test.utils.signal_frame import ONE_MIL, THIRTY_MIN, EIGHT_HOURS, SIX_HOURS, TWELVE_HOURS
 
 
 def test_capital():
@@ -343,7 +343,7 @@ def test_trade_length_one_trade_no_close():
 
 
 def test_trade_length_one_trade():
-    # One trade, sold immediately; lengths should be 1 day
+    # One trade, sold immediately; lengths should be one timestep - in this case, 30 minutes
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
@@ -354,13 +354,13 @@ def test_trade_length_one_trade():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.main_results.avg_trade_duration == timedelta(days=1)
-    assert stats.main_results.longest_trade_duration == timedelta(days=1)
-    assert stats.main_results.shortest_trade_duration == timedelta(days=1)
+    assert stats.main_results.avg_trade_duration == timedelta(minutes=30)
+    assert stats.main_results.longest_trade_duration == timedelta(minutes=30)
+    assert stats.main_results.shortest_trade_duration == timedelta(minutes=30)
 
 
 def test_trade_length_three_trades():
-    # Three trades, sold immediately; lengths should be 1 day
+    # Three trades, sold immediately; lengths should be one timestep - in this case, 30 minutes
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
@@ -371,9 +371,9 @@ def test_trade_length_three_trades():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.main_results.avg_trade_duration == timedelta(days=1)
-    assert stats.main_results.longest_trade_duration == timedelta(days=1)
-    assert stats.main_results.shortest_trade_duration == timedelta(days=1)
+    assert stats.main_results.avg_trade_duration == timedelta(minutes=30)
+    assert stats.main_results.longest_trade_duration == timedelta(minutes=30)
+    assert stats.main_results.shortest_trade_duration == timedelta(minutes=30)
 
 
 def test_trade_length_one_trade_longer():
@@ -477,13 +477,14 @@ def test_rejected_buy_signal_reject_exposure():
     assert stats.main_results.rejected_buy_signal == 1
 
 
-def test_ratios_90_days():
-    # Three trades, one per day; both ratios should return an actual value
+def test_sharpe_sortino_ratios_90_days():
+    # Three trades per day; both ratios should return an actual value
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
     # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].generate_trades(days=90)  # Runs test_scenario_up_100_down_75_one_trade one per day for 90 days
+    # Runs test_scenario_up_100_down_75_one_trade one per day for 90 days
+    fixture.frame_with_signals['COIN/BASE'].generate_trades(days=90)
 
     # Act
     stats = fixture.create().analyze()
@@ -492,13 +493,14 @@ def test_ratios_90_days():
     assert math.isclose(stats.main_results.sortino_90d, 0.2217, abs_tol=0.0001)
 
 
-def test_ratios_3_years():
-    # Three trades, one per day; both ratios should return an actual value
+def test_sharpe_sortino_ratios_3_years():
+    # Three trades per day; both ratios should return an actual value
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
     # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].generate_trades(days=1095)  # Runs test_scenario_up_100_down_75_one_trade one per day for 1095 days
+    # Runs test_scenario_up_100_down_75_one_trade one per day for 1095 days
+    fixture.frame_with_signals['COIN/BASE'].generate_trades(days=1096)
 
     # Act
     stats = fixture.create().analyze()
@@ -507,7 +509,7 @@ def test_ratios_3_years():
     assert math.isclose(stats.main_results.sortino_3y, 0.06324, abs_tol=0.00001)
 
 
-def test_ratios_1_day():
+def test_sharpe_sortino_ratios_1_day():
     # Three trades, one every 30 minutes; rare instance where Sharpe is None but Sortino is a float
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
@@ -522,8 +524,8 @@ def test_ratios_1_day():
     assert math.isclose(stats.main_results.sortino_90d, -1.4142, abs_tol=0.0001)
 
 
-def test_ratios_no_sell():
-    # Three trades with no selling, both rations both ratios should return None
+def test_sharpe_sortino_ratios_no_sell():
+    # Three trades with no selling, both ratios should return None
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
@@ -535,3 +537,116 @@ def test_ratios_no_sell():
 
     assert stats.main_results.sharpe_90d is None
     assert stats.main_results.sortino_90d is None
+
+
+def test_profitable_weeks_one_win():
+    # One week, all days are positive - outcome should be one profitable week.
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+
+    for _ in range(4):  # Start date is on a wednesday, four days makes it Sunday - one week!
+        fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_75_one_trade(timestep=EIGHT_HOURS)
+
+    # Act
+    stats = fixture.create().analyze()
+
+    assert stats.main_results.prof_weeks_win is 1
+    assert stats.main_results.prof_weeks_draw is 0
+    assert stats.main_results.prof_weeks_loss is 0
+
+    assert stats.main_results.win_weeks is 1
+    assert stats.main_results.draw_weeks is 0
+    assert stats.main_results.loss_weeks is 0
+
+
+def test_profitable_weeks_one_loss():
+    # One week, all days are negative - outcome should be one losing week.
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+
+    for _ in range(4):  # Start date is on a wednesday, four days makes it Sunday - one week!
+        fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade(timestep=TWELVE_HOURS)
+
+    # Act
+    stats = fixture.create().analyze()
+
+    assert stats.main_results.prof_weeks_win is 0
+    assert stats.main_results.prof_weeks_draw is 0
+    assert stats.main_results.prof_weeks_loss is 1
+
+    assert stats.main_results.win_weeks is 0
+    assert stats.main_results.draw_weeks is 0
+    assert stats.main_results.loss_weeks is 1
+
+
+def test_profitable_weeks_no_trades_market_down():
+    # One week, all days are positive - outcome should be draw for profitable week, win for outperform
+    # market week, since the market is going down.
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+
+    for _ in range(4):  # Start date is on a wednesday, four days makes it Sunday - one week!
+        fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_no_trades(timestep=SIX_HOURS)
+
+    # Act
+    stats = fixture.create().analyze()
+
+    assert stats.main_results.prof_weeks_win is 0
+    assert stats.main_results.prof_weeks_draw is 1
+    assert stats.main_results.prof_weeks_loss is 0
+
+    assert stats.main_results.win_weeks is 1
+    assert stats.main_results.draw_weeks is 0
+    assert stats.main_results.loss_weeks is 0
+
+
+def test_profitable_weeks_no_trades_market_up():
+    # One week, all days are negative - outcome should be draw for profitable week, loss for outperform
+    # market week, since the market is going up.
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+
+    for _ in range(4):  # Start date is on a wednesday, four days makes it Sunday - one week!
+        fixture.frame_with_signals['COIN/BASE'].test_scenario_up_no_trades(timestep=TWELVE_HOURS)
+
+    # Act
+    stats = fixture.create().analyze()
+
+    assert stats.main_results.prof_weeks_win is 0
+    assert stats.main_results.prof_weeks_draw is 1
+    assert stats.main_results.prof_weeks_loss is 0
+
+    assert stats.main_results.win_weeks is 0
+    assert stats.main_results.draw_weeks is 0
+    assert stats.main_results.loss_weeks is 1
+
+
+def test_profitable_weeks_no_trades_market_flat():
+    # One week, all days are flat - outcome should be draw for profitable week, draw for outperform
+    # market week, since the market is flat.
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+
+    for _ in range(4):  # Start date is on a wednesday, four days makes it Sunday - one week!
+        fixture.frame_with_signals['COIN/BASE'].test_scenario_flat_no_trades(timestep=TWELVE_HOURS)
+
+    # Act
+    stats = fixture.create().analyze()
+
+    assert stats.main_results.prof_weeks_win is 0
+    assert stats.main_results.prof_weeks_draw is 1
+    assert stats.main_results.prof_weeks_loss is 0
+
+    assert stats.main_results.win_weeks is 0
+    assert stats.main_results.draw_weeks is 1
+    assert stats.main_results.loss_weeks is 0
