@@ -552,13 +552,13 @@ def test_profitable_weeks_one_win():
     # Act
     stats = fixture.create().analyze()
 
-    assert stats.main_results.prof_weeks_win is 1
-    assert stats.main_results.prof_weeks_draw is 0
-    assert stats.main_results.prof_weeks_loss is 0
+    assert stats.main_results.prof_weeks_win == 1
+    assert stats.main_results.prof_weeks_draw == 0
+    assert stats.main_results.prof_weeks_loss == 0
 
-    assert stats.main_results.win_weeks is 1
-    assert stats.main_results.draw_weeks is 0
-    assert stats.main_results.loss_weeks is 0
+    assert stats.main_results.win_weeks == 1
+    assert stats.main_results.draw_weeks == 0
+    assert stats.main_results.loss_weeks == 0
 
 
 def test_profitable_weeks_one_loss():
@@ -574,13 +574,13 @@ def test_profitable_weeks_one_loss():
     # Act
     stats = fixture.create().analyze()
 
-    assert stats.main_results.prof_weeks_win is 0
-    assert stats.main_results.prof_weeks_draw is 0
-    assert stats.main_results.prof_weeks_loss is 1
+    assert stats.main_results.prof_weeks_win == 0
+    assert stats.main_results.prof_weeks_draw == 0
+    assert stats.main_results.prof_weeks_loss == 1
 
-    assert stats.main_results.win_weeks is 0
-    assert stats.main_results.draw_weeks is 0
-    assert stats.main_results.loss_weeks is 1
+    assert stats.main_results.win_weeks == 0
+    assert stats.main_results.draw_weeks == 0
+    assert stats.main_results.loss_weeks == 1
 
 
 def test_profitable_weeks_no_trades_market_down():
@@ -597,13 +597,13 @@ def test_profitable_weeks_no_trades_market_down():
     # Act
     stats = fixture.create().analyze()
 
-    assert stats.main_results.prof_weeks_win is 0
-    assert stats.main_results.prof_weeks_draw is 1
-    assert stats.main_results.prof_weeks_loss is 0
+    assert stats.main_results.prof_weeks_win == 0
+    assert stats.main_results.prof_weeks_draw == 1
+    assert stats.main_results.prof_weeks_loss == 0
 
-    assert stats.main_results.win_weeks is 1
-    assert stats.main_results.draw_weeks is 0
-    assert stats.main_results.loss_weeks is 0
+    assert stats.main_results.win_weeks == 1
+    assert stats.main_results.draw_weeks == 0
+    assert stats.main_results.loss_weeks == 0
 
 
 def test_profitable_weeks_no_trades_market_up():
@@ -620,13 +620,13 @@ def test_profitable_weeks_no_trades_market_up():
     # Act
     stats = fixture.create().analyze()
 
-    assert stats.main_results.prof_weeks_win is 0
-    assert stats.main_results.prof_weeks_draw is 1
-    assert stats.main_results.prof_weeks_loss is 0
+    assert stats.main_results.prof_weeks_win == 0
+    assert stats.main_results.prof_weeks_draw == 1
+    assert stats.main_results.prof_weeks_loss == 0
 
-    assert stats.main_results.win_weeks is 0
-    assert stats.main_results.draw_weeks is 0
-    assert stats.main_results.loss_weeks is 1
+    assert stats.main_results.win_weeks == 0
+    assert stats.main_results.draw_weeks == 0
+    assert stats.main_results.loss_weeks == 1
 
 
 def test_profitable_weeks_no_trades_market_flat():
@@ -643,10 +643,10 @@ def test_profitable_weeks_no_trades_market_flat():
     # Act
     stats = fixture.create().analyze()
 
-    assert stats.main_results.prof_weeks_win is 0
-    assert stats.main_results.prof_weeks_draw is 1
-    assert stats.main_results.prof_weeks_loss is 0
+    assert stats.main_results.prof_weeks_win == 0
+    assert stats.main_results.prof_weeks_draw == 1
+    assert stats.main_results.prof_weeks_loss == 0
 
-    assert stats.main_results.win_weeks is 0
-    assert stats.main_results.draw_weeks is 1
-    assert stats.main_results.loss_weeks is 0
+    assert stats.main_results.win_weeks == 0
+    assert stats.main_results.draw_weeks == 1
+    assert stats.main_results.loss_weeks == 0
