@@ -14,7 +14,7 @@ def equity_plot(stats: TradingStats, strategy_name):
 
     df_capital, dates = convert_df_for_plotting(df_capital)
 
-    df_coins = compute_average_market_change(stats.df, stats.capital_per_timestamp[0])
+    df_average_market_change = compute_average_market_change(stats.df, stats.capital_per_timestamp[0])
 
     # Define various traces to be plotted
     data = [
@@ -26,10 +26,10 @@ def equity_plot(stats: TradingStats, strategy_name):
             "fill": 'tozeroy'
         },
         {
-            "name": "Average market change",
+            "name": "Average Market Change",
             "mode": "lines",
             "x": dates,
-            "y": df_coins['avg_market_change']
+            "y": df_average_market_change['avg_market_change']
         }
     ]
 
