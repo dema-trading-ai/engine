@@ -10,7 +10,7 @@ from modules.public.trading_stats import TradingStats
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio, get_max_drawdown_ratio_without_buy_rows
 from modules.stats.metrics.profit_ratio import get_seen_cum_profit_ratio_per_coin, get_realised_profit_ratio
 from modules.stats.drawdown.for_portfolio import get_max_seen_drawdown_for_portfolio, \
-    get_max_realised_drawdown_for_portfolio
+    get_max_realised_drawdown_for_portfolio, get_longest_realised_drawdown, get_longest_seen_drawdown
 from modules.stats.ratios.for_portfolio import get_sharpe_sortino_ratios
 from modules.stats.drawdown.per_trade import get_max_seen_drawdown_per_trade
 from modules.stats.metrics.market_change import get_market_change, get_market_drawdown
@@ -103,6 +103,10 @@ class StatsModule:
             self.trading_module.capital_per_timestamp
         )
 
+        longest_realised_drawdown = get_longest_realised_drawdown(self.trading_module.realised_profits_per_timestamp)
+
+        longest_seen_drawdown = get_longest_seen_drawdown(self.trading_module.capital_per_timestamp)
+
         sharpe_90d, sortino_90d, sharpe_3y, sortino_3y = get_sharpe_sortino_ratios(self.trading_module.capital_per_timestamp)
 
         # Find amount of winning, draw and losing weeks for portfolio
@@ -169,6 +173,8 @@ class StatsModule:
                            drawdown_from=max_seen_drawdown['from'],
                            drawdown_to=max_seen_drawdown['to'],
                            drawdown_at=max_seen_drawdown['at'],
+                           longest_realised_drawdown=longest_realised_drawdown,
+                           longest_seen_drawdown=longest_seen_drawdown,
                            stoploss=self.config.stoploss,
                            stoploss_type=self.config.stoploss_type,
                            fee=self.config.fee,

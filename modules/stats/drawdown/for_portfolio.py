@@ -1,4 +1,5 @@
 import pandas as pd
+from datetime import timedelta, datetime
 
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
 
@@ -32,3 +33,49 @@ def get_max_realised_drawdown_for_portfolio(realised_profits_per_timestamp: dict
     max_realised_drawdown = get_max_drawdown_ratio(df)
 
     return max_realised_drawdown
+
+
+def get_longest_realised_drawdown(realised_profits_per_timestamp: dict) -> timedelta:
+    df = pd.DataFrame.from_dict(realised_profits_per_timestamp, columns=['capital'], orient='index')
+
+    df = df.iloc[1:, :]  # Removing first row for the index to be transformed to Datetime correctly
+
+    df['timestamps'] = [datetime.fromtimestamp(date / 1000) for date in df.index]
+
+    df['returns'] = df['capital'] - df['capital'].shift()
+    df['timesteps'] = df['timestamps'] - df['timestamps'].shift()
+
+    df['negative_returns_timesteps'] = df.loc[df['returns'] < 0, ['timesteps']]  # Keep only the timesteps with negative returns
+
+    longest_realised_drawdown = df['negative_returns_timesteps'].max()
+
+    return longest_realised_drawdown
+
+
+def get_longest_seen_drawdown(capital_per_timestamp: dict) -> timedelta:
+
+    # TODO: Check if first (from highest to lowest cap) or second (longest consecutive negative returns) is the correct solution
+
+    df = pd.DataFrame.from_dict(capital_per_timestamp, columns=['capital'], orient='index')
+
+    df = df.iloc[1:, :]  # Removing first row for the index to be transformed to Datetime correctly
+
+    df['timestamps'] = [datetime.fromtimestamp(date / 1000) for date in df.index]
+
+    start_drawdown = datetime.fromtimestamp(int(df['capital'].idxmax() / 1000))
+
+    end_drawdown = datetime.fromtimestamp(int(df['capital'].idxmin() / 1000))
+
+    longest_seen_drawdown = end_drawdown - start_drawdown
+
+    # df['negative_returns_timesteps'] = df.loc[
+    #     df['returns'] < 0, ['timesteps']]  # Keep only the timesteps with negative returns
+    #
+    # df['consecutive_negative_returns_timesteps'] = df['negative_returns_timesteps'].groupby(
+    #     (df['negative_returns_timesteps'] != df['negative_returns_timesteps'].shift()).cumsum()).transform(
+    #     'size')  # Count consecutive timesteps with negative returns
+    #
+    # longest_seen_drawdown = df['consecutive_negative_returns_timesteps'].max() * df['timesteps'].iloc[
+    #     1]  # Use second row as first is NaT
+
+    return longest_seen_drawdown

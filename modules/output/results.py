@@ -125,6 +125,9 @@ def create_trade_info_table(self, justification) -> Table:
 
 def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown_from_string, drawdown_to_string,
                              justification) -> Table:
+    longest_realised_drawdown = format_time_difference(self.longest_realised_drawdown)
+    longest_seen_drawdown = format_time_difference(self.longest_seen_drawdown)
+
     performance_table = Table(box=box.ROUNDED)
     performance_table.add_column("Performance "
                                  ":chart_with_upwards_trend:", justify=justification,
@@ -147,6 +150,8 @@ def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown
                               drawdown_from_string)
     performance_table.add_row('Max. seen drawdown to', drawdown_to_string)
     performance_table.add_row('Max. seen drawdown at', drawdown_at_string)
+    performance_table.add_row('Longest realised drawdown', str(longest_realised_drawdown))
+    performance_table.add_row('Longest seen drawdown', str(longest_seen_drawdown))
     performance_table.add_row('Market change coins',
                               colorize(round(self.market_change_coins,
                                              2), 0, '%'))
