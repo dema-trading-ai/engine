@@ -508,7 +508,7 @@ def test_ratios_3_years():
 
 
 def test_ratios_1_day():
-    # Three trades, one every 30 minutes; rare instance where Sharpe is None but Sortino is a float
+    # Three trades, one every 30 minutes; both ratios should return None
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
@@ -519,7 +519,7 @@ def test_ratios_1_day():
     stats = fixture.create().analyze()
 
     assert stats.main_results.sharpe_90d is None
-    assert math.isclose(stats.main_results.sortino_90d, -1.4142, abs_tol=0.0001)
+    assert stats.main_results.sharpe_3y is None
 
 
 def test_ratios_no_sell():

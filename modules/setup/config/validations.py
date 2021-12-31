@@ -118,7 +118,10 @@ def validate_ratios(df: DataFrame) -> Tuple[bool, bool]:
     Checks the given dataframe, prints out appropriate warning messages and returns bools to determine which time periods should be computed.
     """
 
-    check_returns = (df['returns'].iloc[1:] == 0).all()
+    if len(df['capital']) > 1:
+        check_returns = (df['returns'].iloc[1:] == 0).all()
+    else:
+        check_returns = False
 
     if check_returns:
         print_warning('Unable to compute Sharpe and Sortino ratios: Perhaps the time period is too short?')
