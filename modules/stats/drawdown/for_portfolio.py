@@ -1,7 +1,8 @@
 import pandas as pd
-from datetime import timedelta, datetime
+from datetime import timedelta
 
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
+from modules.stats import utils
 
 
 def get_max_seen_drawdown_for_portfolio(capital_per_timestamp: dict):
@@ -36,11 +37,9 @@ def get_max_realised_drawdown_for_portfolio(realised_profits_per_timestamp: dict
 
 
 def get_longest_realised_drawdown(realised_profits_per_timestamp: dict) -> timedelta:
-    df = pd.DataFrame.from_dict(realised_profits_per_timestamp, columns=['capital'], orient='index')
+    df = utils.convert_dict_to_dataframe(realised_profits_per_timestamp)
 
-    df = df.iloc[1:, :]  # Removing first row for the index to be transformed to Datetime correctly
-
-    df['timestamps'] = [datetime.fromtimestamp(date / 1000) for date in df.index]
+    df['timestamps'] = df.index
 
     df['returns'] = df['capital'] - df['capital'].shift()
     df['timesteps'] = df['timestamps'] - df['timestamps'].shift()
@@ -56,15 +55,11 @@ def get_longest_seen_drawdown(capital_per_timestamp: dict) -> timedelta:
 
     # TODO: Check if first (from highest to lowest cap) or second (longest consecutive negative returns) is the correct solution
 
-    df = pd.DataFrame.from_dict(capital_per_timestamp, columns=['capital'], orient='index')
+    df = utils.convert_dict_to_dataframe(capital_per_timestamp)
 
-    df = df.iloc[1:, :]  # Removing first row for the index to be transformed to Datetime correctly
+    start_drawdown = df['capital'].idxmax()
 
-    df['timestamps'] = [datetime.fromtimestamp(date / 1000) for date in df.index]
-
-    start_drawdown = datetime.fromtimestamp(int(df['capital'].idxmax() / 1000))
-
-    end_drawdown = datetime.fromtimestamp(int(df['capital'].idxmin() / 1000))
+    end_drawdown = df['capital'].idxmin()
 
     longest_seen_drawdown = end_drawdown - start_drawdown
 

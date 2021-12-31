@@ -2,11 +2,15 @@ from datetime import timedelta
 from typing import Tuple, Optional
 
 from modules.setup.config.validations import validate_ratios
-from modules.stats.ratios import utils, ratios
+from modules.stats import utils
+from modules.stats.ratios import ratios
 
 
 def get_sharpe_sortino_ratios(capital_per_timestamp: dict, risk_free: float = 0.0) -> Tuple[Optional[float], Optional[float], Optional[float], Optional[float]]:
-    df = utils.change_capital_dict_to_dataframe(capital_per_timestamp, risk_free)
+    df = utils.convert_dict_to_dataframe(capital_per_timestamp, resample=True)
+
+    df['returns'] = (df['capital'] - df['capital'].shift()) / 100
+    df['risk_free'] = risk_free
 
     ninety_d, three_y = validate_ratios(df)
 
