@@ -113,6 +113,7 @@ def create_trade_info_table(self, justification) -> Table:
                              colorize(round(
                                  self.worst_trade_profit_percentage, 2),
                                  0, f'% ({self.worst_trade_pair})'))
+    trade_info_table.add_row('Median trade profit', str(round(self.median_trade_profit, 2)) + ' $')
     trade_info_table.add_row('Shortest trade duration', str(shortest_trade_duration))
     trade_info_table.add_row('Avg. trade duration', str(avg_trade_duration))
     trade_info_table.add_row('Longest trade duration', str(longest_trade_duration))
@@ -150,8 +151,6 @@ def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown
                               drawdown_from_string)
     performance_table.add_row('Max. seen drawdown to', drawdown_to_string)
     performance_table.add_row('Max. seen drawdown at', drawdown_at_string)
-    performance_table.add_row('Longest realised drawdown', str(longest_realised_drawdown))
-    performance_table.add_row('Longest seen drawdown', str(longest_seen_drawdown))
     performance_table.add_row('Market change coins',
                               colorize(round(self.market_change_coins,
                                              2), 0, '%'))

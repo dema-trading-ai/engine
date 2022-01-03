@@ -32,6 +32,7 @@ class MainResults:
     worst_trade_pair: str
     best_trade_profit_percentage: float
     best_trade_pair: str
+    median_trade_profit: float
     avg_trade_duration: timedelta
     longest_trade_duration: timedelta
     shortest_trade_duration: timedelta

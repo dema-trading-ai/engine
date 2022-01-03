@@ -535,3 +535,31 @@ def test_ratios_no_sell():
 
     assert stats.main_results.sharpe_90d is None
     assert stats.main_results.sortino_90d is None
+
+
+def test_median_trade_profit():
+    # Checks the median trade profit, should return a float
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    assert math.isclose(stats.main_results.median_trade_profit, -11.791, abs_tol=0.001)
+
+
+def test_median_trade_profit_no_trades():
+    # No trades, should return 0.0
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_no_trades()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    assert stats.main_results.median_trade_profit == 0.0
