@@ -154,7 +154,7 @@ def combine_and_run_multibot(util):
     files = glob(BASE_DIR + r"/data/backtesting-data/trade_logs/*.json")
     for i in range(3, 7):
         results = {}
-        all_combinations = list(itertools.combinations(files, 1))
+        all_combinations = list(itertools.combinations(files, i))
         for j, combination in enumerate(all_combinations):
             util.write_log_to_file(f'[INFO] Currently running combination {j} '
                                    f'out of {len(all_combinations)} options for {i} combinations')
