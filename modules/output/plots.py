@@ -1,7 +1,11 @@
 # Libraries
 
 import numpy as np
+import pandas as pd
 import plotly.graph_objects as go
+
+from datetime import datetime
+from typing import List, Tuple
 
 # Files
 from cli.print_utils import print_warning
@@ -84,3 +88,40 @@ def add_indicators(fig, dates, df, mainplot_indicators, subplot_indicators):
                 print_warning(f"Unable to plot {ind}. No {ind} found in strategy.")
 
     return fig
+
+
+def convert_df_for_plotting(df: pd.DataFrame) -> Tuple[pd.DataFrame, List[datetime]]:
+    """
+    Takes a raw dataframe and adapts it for simpler plotting work
+    """
+    # Remove first value since its 0
+    df.drop(index=df.index[0], axis=0, inplace=True)
+
+    dates = [datetime.fromtimestamp(date / 1000) for date in df['timestamp']]
+
+    # Transform the index to dates
+    df.index = dates
+    df.drop(columns='timestamp', inplace=True)
+
+    return df, dates
+
+
+def compute_average_market_change(df_stats: pd.DataFrame, starting_capital: float) -> pd.DataFrame:
+    """
+    Simulates a buy at the first candle and no selling to be plotted on the equity plot
+    """
+
+    coins = [coin for coin in df_stats]
+    df_coins = pd.DataFrame(columns=coins)
+
+    # Compute average starting capital per coin assuming it's equally divided among all coins
+    avg_starting_capital = starting_capital / len(coins)
+
+    for coin, ohlcv in df_stats.items():
+        # Calculate the capital to coin ratio by dividing the coin's capital by the closing price of the first candle
+        capital_to_coin = avg_starting_capital / ohlcv['close'].iloc[0]
+        df_coins[str(coin)] = ohlcv['close'] * capital_to_coin
+
+    df_coins['avg_market_change'] = df_coins.sum(axis=1, skipna=False)
+
+    return df_coins

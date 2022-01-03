@@ -148,7 +148,7 @@ def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown
                               drawdown_from_string)
     performance_table.add_row('Max. seen drawdown to', drawdown_to_string)
     performance_table.add_row('Max. seen drawdown at', drawdown_at_string)
-    performance_table.add_row('Market change coins',
+    performance_table.add_row('Average market change',
                               colorize(round(self.market_change_coins,
                                              2), 0, '%'))
     performance_table.add_row('Market change BTC/USDT',
