@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 
 from modules.stats.stats import StatsModule
@@ -6,6 +8,8 @@ from modules.stats.tradingmodule import TradingModule
 from modules.stats.tradingmodule_config import TradingModuleConfig
 from test.utils.signal_frame import MockPairFrame
 from utils.utils import get_ohlcv_indicators
+
+os.environ["VERBOSITY"] = "quiet"  # disables printing of info and warning messages
 
 StatsModuleFactory = [[], StatsModule]
 
