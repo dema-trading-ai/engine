@@ -1,6 +1,7 @@
+import numpy as np
 import pandas as pd
 from datetime import timedelta
-import numpy as np
+from typing import Tuple
 
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
 from modules.stats import utils
@@ -45,28 +46,51 @@ def get_longest_realised_drawdown(realised_profits_per_timestamp: dict) -> timed
     df['returns'] = df['capital'] - df['capital'].shift()
     df['timesteps'] = df['timestamps'] - df['timestamps'].shift()
 
-    df['negative_returns_timesteps'] = df.loc[df['returns'] < 0, ['timesteps']]  # Keep only the timesteps with negative returns
+    df['negative_returns_timesteps'] = df.loc[
+        df['returns'] < 0, ['timesteps']]  # Keep only the timesteps with negative returns
 
     longest_realised_drawdown = df['negative_returns_timesteps'].max()
 
     return longest_realised_drawdown
 
 
-def get_longest_seen_drawdown(capital_per_timestamp: dict) -> timedelta:
-
-    # Drawdown: starts at highest point and ends when a new highest point emerges
-
+def get_longest_seen_drawdown(capital_per_timestamp: dict) -> Tuple[timedelta, bool]:
     df = utils.convert_timestamp_dict_to_dataframe(capital_per_timestamp)
 
-    # Find every point where the next point is less
-    df['start_drawdown'] = np.where(df['capital'].shift() > df['capital'], True, False)
-    df['start_drawdown'] = df['start_drawdown'].shift(-1)
+    # Track highest capital, downward, and upward trends
+    df['max_capital'] = df['capital'].cummax()  # Tracks the highest capital chronologically
 
-    # For each of these points, find when capital is above it again
-    df['end_drawdown'] = np.where((df['start_drawdown'] and df['capital']))
+    df['down_trend'] = np.where(df['capital'] < df['capital'].shift(), 1, 0)
+    df['down_trend'] = df['down_trend'].shift(-1)  # Shift the downward trend as we look at when the trend is about to go down
 
-    # Compute timedelta for each drawndown
+    df['up_trend'] = np.where(df['capital'] > df['capital'].shift(), 1, 0)
 
-    # Find highest timedelta and return
+    # Track start and end of drawdowns
+    df['start_drawdown'] = np.where((df['max_capital'] == df['capital']) & (df['down_trend'] == 1), 1, 0)
+    df['end_drawdown'] = np.where((df['max_capital'] == df['capital']) & (df['up_trend'] == 1), 1, 0)
 
-    return timedelta()
+    last_row = df.iloc[-1]  # Save the last row to compute whether the longest drawdown is ongoing
+
+    df = df.drop(
+        df[  # Remove rows that do not indicate the start or the end of a drawdown
+            (df['start_drawdown'] == 0) & (df['end_drawdown'] == 0) |
+            (  # Remove superfluous drawdown start and end indicators
+                    (df['end_drawdown'] == 1) &
+                    (df['start_drawdown'] == 0) &
+                    (df['end_drawdown'].shift() == 1) &
+                    (df['start_drawdown'].shift() == 0)
+            )
+            ].index
+    )
+
+    df = df.append(last_row)
+
+    # Compute every drawdown length
+    df['timestamps'] = df.index
+    df['length_drawdown'] = df['timestamps'] - df['timestamps'].shift()
+
+    longest_seen_drawdown = df['length_drawdown'].max()
+
+    is_ongoing = longest_seen_drawdown == df['length_drawdown'].iloc[-1]
+
+    return longest_seen_drawdown, is_ongoing
