@@ -119,8 +119,10 @@ def compute_average_market_change(df_stats: pd.DataFrame, starting_capital: floa
 
     for coin, ohlcv in df_stats.items():
         # Calculate the capital to coin ratio by dividing the coin's capital by the closing price of the first candle
-        capital_to_coin = avg_starting_capital / ohlcv['close'].iloc[0]
-        df_coins[str(coin)] = ohlcv['close'] * capital_to_coin
+        # Fill nan values with previous price - bfill is used for when the first values are nan-values.
+        close_price = ohlcv['close'].fillna(method='ffill').fillna(method='bfill')
+        capital_to_coin = avg_starting_capital / close_price.iloc[0]
+        df_coins[str(coin)] = close_price * capital_to_coin
 
     df_coins['avg_market_change'] = df_coins.sum(axis=1, skipna=False)
 
