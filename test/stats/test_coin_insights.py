@@ -2,6 +2,7 @@ import math
 from datetime import timedelta
 
 from test.stats.stats_test_utils import StatsFixture
+from test.utils.signal_frame import ONE_MIL
 
 
 def test_fee_equals_stoploss():
@@ -300,7 +301,7 @@ def test_trade_length_one_trade():
     fixture = StatsFixture(['COIN/BASE'])
 
     # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_flat_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_flat_one_trade(timestep=ONE_MIL)
 
     # Act
     stats = fixture.create().analyze()
@@ -317,7 +318,7 @@ def test_trade_length_three_trades():
     fixture = StatsFixture(['COIN/BASE'])
 
     # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades(timestep=ONE_MIL)
 
     # Act
     stats = fixture.create().analyze()
@@ -334,7 +335,7 @@ def test_trade_length_one_trade_longer():
     fixture = StatsFixture(['COIN/BASE'])
 
     # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_one_trade(timestep=ONE_MIL)
 
     # Act
     stats = fixture.create().analyze()
@@ -351,8 +352,8 @@ def test_trade_length_four_trades():
     fixture = StatsFixture(['COIN/BASE'])
 
     # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_one_trade()
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_three_trades()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_one_trade(timestep=ONE_MIL)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_three_trades(timestep=ONE_MIL)
 
     # Act
     stats = fixture.create().analyze()

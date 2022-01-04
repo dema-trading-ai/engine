@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import timedelta, datetime
+from typing import Optional
 
 from pandas import DataFrame
 
@@ -31,6 +32,7 @@ class MainResults:
     worst_trade_pair: str
     best_trade_profit_percentage: float
     best_trade_pair: str
+    median_trade_profit: float
     avg_trade_duration: timedelta
     longest_trade_duration: timedelta
     shortest_trade_duration: timedelta
@@ -49,6 +51,10 @@ class MainResults:
     fee: float
     total_fee_amount: float
     rejected_buy_signal: int
+    sharpe_90d: Optional[float]
+    sharpe_3y: Optional[float]
+    sortino_90d: Optional[float]
+    sortino_3y: Optional[float]
 
 
 @dataclass
