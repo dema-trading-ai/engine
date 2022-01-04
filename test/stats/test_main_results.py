@@ -539,15 +539,45 @@ def test_sharpe_sortino_ratios_no_sell():
     assert stats.main_results.sortino_90d is None
 
 
-def test_profitable_weeks_one_win():
-    # One week, all days are positive - outcome should be one profitable week.
+def test_median_trade_profit():
+    # Checks the median trade profit, should return a float
+
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
     # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
 
-    for _ in range(4):  # Start date is on a wednesday, four days makes it Sunday - one week!
-        fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_75_one_trade(timestep=EIGHT_HOURS)
+    # Act
+    stats = fixture.create().analyze()
+
+    assert math.isclose(stats.main_results.median_trade_profit, -11.791, abs_tol=0.001)
+
+
+def test_median_trade_profit_no_trades():
+    # No trades, should return 0.0
+
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_no_trades()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    assert stats.main_results.median_trade_profit == 0.0
+
+
+def test_profitable_weeks_one_win():
+    # One week, all days are positive - outcome should be one profitable week.
+
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+    # Start date is on a wednesday, four days makes it Sunday - one week!
+    fixture.frame_with_signals['COIN/BASE'].generate_trades(days=4, timestep=EIGHT_HOURS)
 
     # Act
     stats = fixture.create().analyze()
@@ -632,11 +662,11 @@ def test_profitable_weeks_no_trades_market_up():
 def test_profitable_weeks_no_trades_market_flat():
     # One week, all days are flat - outcome should be draw for profitable week, draw for outperform
     # market week, since the market is flat.
+
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
     # Win/Loss/Open
-
     for _ in range(4):  # Start date is on a wednesday, four days makes it Sunday - one week!
         fixture.frame_with_signals['COIN/BASE'].test_scenario_flat_no_trades(timestep=TWELVE_HOURS)
 

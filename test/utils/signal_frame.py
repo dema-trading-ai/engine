@@ -276,13 +276,13 @@ class MockOHLCVWithSignal(dict, object):
         new_price = last_close_price * multiplier
         return self.add_entry(last_close_price, new_price, last_close_price, new_price, 1, buy, sell)
 
-    def generate_trades(self, days: int) -> None:
+    def generate_trades(self, days: int, timestep=DAILY) -> None:
         """
         Generates a high number of trades for tests where a few trades cannot represent what is being tested
         """
 
         for _ in range(days):
-            self.test_scenario_up_100_down_75_one_trade(timestep=DAILY)
+            self.test_scenario_up_100_down_75_one_trade(timestep=timestep)
 
 
 KeyType = TypeVar("KeyType")
