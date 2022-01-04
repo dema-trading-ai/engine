@@ -7,7 +7,7 @@ from pathlib import Path
 from modules.stats.trade import Trade
 from cli.print_utils import print_config_error
 
-CURRENT_VERSION = "v0.7.13"
+CURRENT_VERSION = "v0.7.15"
 
 MILLISECONDS = 1000
 MINUTE = 60 * MILLISECONDS
