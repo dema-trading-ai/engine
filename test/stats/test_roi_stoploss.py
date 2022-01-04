@@ -99,8 +99,8 @@ def test_dynamic_stoploss():
     fixture.trading_module_config.stoploss_type = "dynamic"
 
     fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0, stoploss=1) \
-        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=0, stoploss=1.5)
+        .add_entry(open=2, high=2, low=2, close=2, buy=1, sell=0, stoploss=1) \
+        .add_entry(open=2, high=2, low=1, close=1, buy=0, sell=0, stoploss=1.5)
     # Act
     stats = fixture.create().analyze()
 
@@ -117,8 +117,8 @@ def test_dynamic_stoploss_high():
     fixture.trading_module_config.stoploss_type = "dynamic"
 
     fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0, stoploss=1) \
-        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=0, stoploss=3)
+        .add_entry(open=2, high=2, low=2, close=2, buy=1, sell=0, stoploss=1) \
+        .add_entry(open=2, high=2, low=1, close=1, buy=0, sell=0, stoploss=3)
     # Act
     stats = fixture.create().analyze()
 
@@ -133,8 +133,8 @@ def test_both_roi_stoploss():
     fixture = StatsFixture(['COIN/BASE'])
 
     fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=2, low=0.1, close=2, volume=1, buy=0, sell=0)
+        .add_entry(open=1, high=1, low=1, close=1, buy=1, sell=0) \
+        .add_entry(open=1, high=2, low=0.1, close=2, buy=0, sell=0)
 
     fixture.trading_module_config.roi = {
         "0": 50

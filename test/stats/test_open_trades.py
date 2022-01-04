@@ -3,6 +3,7 @@ import math
 from datetime import datetime
 
 from test.stats.stats_test_utils import StatsFixture
+from test.utils.signal_frame import DAILY
 
 
 def test_open_trades_pair():
@@ -96,8 +97,8 @@ def test_open_trades_drawdown_negative():
     fixture = StatsFixture(['COIN/BASE'])
 
     fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0) \
-        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=0)
+        .add_entry(open=2, high=2, low=2, close=2, buy=1, sell=0) \
+        .add_entry(open=2, high=2, low=1, close=1, buy=0, sell=0)
 
     # Act
     stats = fixture.create().analyze()
@@ -126,8 +127,8 @@ def test_open_trades_opened_at_timestep_three():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade()
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade_no_sell()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade(timestep=DAILY)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_one_trade_no_sell(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()

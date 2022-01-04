@@ -2,7 +2,7 @@ import math
 from datetime import timedelta
 
 from test.stats.stats_test_utils import StatsFixture
-from test.utils.signal_frame import ONE_MIL, THIRTY_MIN
+from test.utils.signal_frame import ONE_MIL, THIRTY_MIN, EIGHT_HOURS, SIX_HOURS, TWELVE_HOURS
 
 
 def test_capital():
@@ -508,7 +508,7 @@ def test_ratios_3_years():
 
 
 def test_ratios_1_day():
-    # Three trades, one every 30 minutes; both ratios should return None
+    # Three trades, one every 30 minutes; rare instance where Sharpe is None but Sortino is a float
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
@@ -519,7 +519,7 @@ def test_ratios_1_day():
     stats = fixture.create().analyze()
 
     assert stats.main_results.sharpe_90d is None
-    assert stats.main_results.sharpe_3y is None
+    assert math.isclose(stats.main_results.sortino_90d, -1.4142, abs_tol=0.0001)
 
 
 def test_ratios_no_sell():
