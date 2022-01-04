@@ -3,7 +3,7 @@ import math
 from datetime import datetime
 
 from test.stats.stats_test_utils import StatsFixture
-from test.utils.signal_frame import TradeAction
+from test.utils.signal_frame import TradeAction, DAILY
 
 
 def test_multiple_periods_realized_drawdown_two_drawdown_periods():
@@ -92,16 +92,16 @@ def test_simple_seen_drawdown():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
 
     # Assert
     assert math.isclose(stats.main_results.max_seen_drawdown, -50.995)
-    assert datetime.fromtimestamp(stats.main_results.drawdown_from / 1000) == datetime(year=2020, month=1, day=1)  # First timestamp, because the first row is copied for fee calc purposes
+    assert datetime.fromtimestamp(stats.main_results.drawdown_from / 1000) == datetime(year=2020, month=1, day=1)
     assert stats.main_results.drawdown_to == 0  # zero, because the drawdown hasn't ended yet
-    assert datetime.fromtimestamp(stats.main_results.drawdown_at / 1000) == datetime(year=2020, month=1, day=2)  # Last timestamp
+    assert datetime.fromtimestamp(stats.main_results.drawdown_at / 1000) == datetime(year=2020, month=1, day=2)
 
 
 def test_simple_no_seen_drawdown():
@@ -109,7 +109,7 @@ def test_simple_no_seen_drawdown():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
@@ -128,7 +128,7 @@ def test_multiple_periods_seen_drawdown_two_drawdown_periods():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
@@ -147,7 +147,7 @@ def test_multiple_periods_seen_drawdown_one_drawdown_period():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_three_trades()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_three_trades(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
@@ -167,11 +167,11 @@ def test_multiple_periods_seen_drawdown_easy():
     # Arrange
     fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE', 'COIN3/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade(timestep=DAILY)
 
-    fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_50_one_trade()
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_50_one_trade(timestep=DAILY)
 
-    fixture.frame_with_signals['COIN3/BASE'].test_scenario_down_75_one_trade()
+    fixture.frame_with_signals['COIN3/BASE'].test_scenario_down_75_one_trade(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
@@ -189,11 +189,11 @@ def test_multiple_periods_seen_drawdown():
     # Arrange
     fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE', 'COIN3/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades(timestep=DAILY)
 
-    fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_10_up_100_down_75_three_trades(timestep=DAILY)
 
-    fixture.frame_with_signals['COIN3/BASE'].test_scenario_up_100_down_20_down_75_three_trades()
+    fixture.frame_with_signals['COIN3/BASE'].test_scenario_up_100_down_20_down_75_three_trades(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
@@ -245,7 +245,7 @@ def test_drawdown_simple():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_one_trade(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
@@ -265,7 +265,7 @@ def test_drawdown_multiple_peaks():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_one_trade(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
@@ -284,12 +284,12 @@ def test_drawdown_multiple_pairs():
     # Arrange
     fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_flat_no_trades()
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades(timestep=DAILY)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_flat_no_trades(timestep=DAILY)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_one_trade(timestep=DAILY)
 
-    fixture.frame_with_signals['COIN2/BASE'].test_scenario_up_100_down_20_down_75_three_trades()
-    fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_up_100_down_20_down_75_three_trades(timestep=DAILY)
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_10_up_100_down_75_three_trades(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
