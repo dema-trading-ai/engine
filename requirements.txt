@@ -11,6 +11,6 @@ rich==10.16.2
 ta-lib==0.4.23
 pyinstaller~=4.3
 pyarrow==6.0.1
-optuna==2.10.0
+optuna==2.8.0
 openpyxl==3.0.9
 certifi==2021.10.8
