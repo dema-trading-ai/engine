@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from typing import Generator
 
-from optuna import Trial
+# from optuna import Trial
 
 from modules.output import OutputModule
 from modules.setup import ConfigModule, DataModule, SetupModule
@@ -26,10 +26,10 @@ class BacktestRunner:
         stats_module = StatsModule(self.stats_config, dict_with_signals, trading_module, pair_dicts)
         return stats_module.analyze()
 
-    def run_hyperopt_iteration(self, trial: Trial) -> float:
-        self.strategy.trial = trial
-        stats = self.run_backtest()
-        return self.strategy.loss_function(stats)
+    # def run_hyperopt_iteration(self, trial: Trial) -> float:
+    #     self.strategy.trial = trial
+    #     stats = self.run_backtest()
+    #     return self.strategy.loss_function(stats)
 
     def run_outputted_backtest(self):
         stats = self.run_backtest()
