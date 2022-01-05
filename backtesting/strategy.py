@@ -1,7 +1,7 @@
 # Libraries
 import abc
 
-from optuna import Trial
+# from optuna import Trial
 from pandas import DataFrame
 import pandas as pd
 
@@ -25,7 +25,7 @@ class Strategy(abc.ABC):
     This module defines the abstract base class (abc) that every strategy must inherit from.
     Methods defined in strategies/*.py will overwrite these methods.
     """
-    trial: Trial = None
+    # trial: Trial = None
     timeframe: str
 
     @abc.abstractmethod
