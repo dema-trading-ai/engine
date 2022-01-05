@@ -4,7 +4,7 @@ import os
 import sys
 from time import perf_counter
 
-import optuna
+# import optuna
 
 from cli.arg_parse import execute_for_args
 from cli.checks.latest_version import print_warning_if_version_outdated
@@ -41,8 +41,8 @@ def run_init(args):
 
 if __name__ == "__main__":
     multiprocessing.freeze_support()
-    if not is_verbosity(verbosity="debug"):
-        optuna.logging.set_verbosity(optuna.logging.WARNING)
+    # if not is_verbosity(verbosity="debug"):
+    #     optuna.logging.set_verbosity(optuna.logging.WARNING)
     start_time = perf_counter()
     main()
     end_time = perf_counter()
