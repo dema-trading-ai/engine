@@ -4,7 +4,7 @@ import sys
 
 # Files
 from backtesting.strategy import Strategy
-from modules.algo.hyperopt.hyperopt_strategy import inject_hyperopt_parameters
+# from modules.algo.hyperopt.hyperopt_strategy import inject_hyperopt_parameters
 from modules.setup.config import StrategyDefinition
 from cli.print_utils import print_error
 
@@ -25,7 +25,7 @@ def load_strategy_from_config(strategy_definition: StrategyDefinition) -> Strate
 
             try:
                 strategy = CustomStrategy()
-                inject_hyperopt_parameters(strategy)
+                # inject_hyperopt_parameters(strategy)
                 return strategy
             except TypeError:
                 print_error("Your custom strategy has inherited from the base class Strategy,")
