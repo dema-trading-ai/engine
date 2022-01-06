@@ -111,7 +111,10 @@ def read_config(config_path: str) -> dict:
     except Exception:
         raise Exception("[ERROR] Something went wrong parsing config file.",
                         sys.exc_info()[0])
-    return json.loads(data)
+    config = json.loads(data)
+    config['path'] = config_path or "config.json"
+
+    return config
 
 
 def print_pairs(config_json):
