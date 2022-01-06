@@ -8,7 +8,7 @@ from cli.arg_parse import read_spec, spec_type_to_python_type
 from modules.setup.config.cli import get_cli_config
 from cli.print_utils import print_config_error, print_warning, print_error
 
-CONFIG_DEFAULTS_FILE = sys.argv[0] + "/resources/config-defaults.json"
+CONFIG_DEFAULTS_FILE = os.path.dirname(os.path.realpath(sys.argv[0])) + "/resources/config-defaults.json"
 
 
 def validate_and_read_cli(config: dict, args):
@@ -27,7 +27,7 @@ def validate_by_spec(config, config_spec):
 
 
 def check_for_missing_config_items(config: dict):
-    print(sys.argv[0])
+    print(os.path.dirname(os.path.realpath(sys.argv[0])))
     print(CONFIG_DEFAULTS_FILE)
     try:
         with open(CONFIG_DEFAULTS_FILE) as defaults_file:
