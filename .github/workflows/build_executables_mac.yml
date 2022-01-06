@@ -6,7 +6,6 @@ on:
     branches:
       - release/stable
       - development
-      - feat/config_forward_compatibility
 jobs:
   build:
     runs-on: macos-latest
@@ -73,7 +72,7 @@ jobs:
       - test
     runs-on: ubuntu-18.04
     environment: "executable_release"
-#    if: github.ref == 'refs/heads/release/stable' || github.ref == 'refs/heads/development'
+    if: github.ref == 'refs/heads/release/stable' || github.ref == 'refs/heads/development'
     steps:
       - uses: actions/checkout@v2
       - name: exe
@@ -82,7 +81,7 @@ jobs:
           name: engine-macos
       - run: ls -la
       - run: |
-          aws s3 --endpoint=https://ams3.digitaloceanspaces.com cp ./engine.zip s3://engine-store/engine-macos-development.zip --acl "public-read"
+          aws s3 --endpoint=https://ams3.digitaloceanspaces.com cp ./engine.zip s3://engine-store/engine-macos-${GITHUB_REF##*/}.zip --acl "public-read"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.DO_SPACES_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SPACES_SECRET }}
