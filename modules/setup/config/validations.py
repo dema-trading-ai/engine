@@ -1,3 +1,4 @@
+import json
 import sys
 from pandas import DataFrame
 from typing import Tuple
@@ -5,6 +6,8 @@ from typing import Tuple
 from cli.arg_parse import read_spec, spec_type_to_python_type
 from modules.setup.config.cli import get_cli_config
 from cli.print_utils import print_config_error, print_warning, print_error
+
+CONFIG_DEFAULTS_FILE = "./resources/config-defaults.json"
 
 
 def validate_and_read_cli(config: dict, args):
@@ -20,6 +23,23 @@ def validate_by_spec(config, config_spec):
         assert_type(config, param_spec)
         assert_in_options(config, param_spec)
         assert_min_max(config, param_spec)
+
+
+def check_for_missing_config_items(config: dict):
+    try:
+        with open(CONFIG_DEFAULTS_FILE) as defaultsfile:
+            data = defaultsfile.read()
+    except Exception:
+        raise Exception("[ERROR] Something went wrong while checking the config file.",
+                        sys.exc_info()[0])
+    defaults = json.loads(data)
+
+    config_complete = True
+    for setting in defaults:
+        if setting not in config:
+            config_complete = False
+            config
+
 
 
 def validate_dynamic_stoploss(stoploss: DataFrame) -> None:
