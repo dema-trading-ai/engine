@@ -27,15 +27,16 @@ def validate_by_spec(config, config_spec):
 
 
 def check_for_missing_config_items(config: dict):
-    print(os.path.dirname(os.path.realpath(sys.argv[0])))
-    print(CONFIG_DEFAULTS_FILE)
     try:
         with open(CONFIG_DEFAULTS_FILE) as defaults_file:
             data = defaults_file.read()
+    except FileNotFoundError:
+        print_warning("Cannot find the default values for config file")
+        return config
     except Exception:
-        # todo: raise warning instead of exception if it goes wrong
-        raise Exception("[ERROR] Something went wrong while checking the config file.",
+        raise Exception("Something went wrong while checking the config file.",
                         sys.exc_info()[0])
+
     defaults = json.loads(data)
 
     config_complete = True
@@ -44,10 +45,17 @@ def check_for_missing_config_items(config: dict):
             config_complete = False
             config[setting] = defaults[setting]
 
-    # todo: change stoploss standard value into static if not set correctly
+    if config['stoploss-type'] == "standard":
+        config['stoploss-type'] = "static"
+        config_complete = False
+        print_warning("Stoploss type of Standard has changed to Static. This is changed in your config file.")
+
+    config_path = config['path']
+    config.pop("path")
+
     if not config_complete:
-        with open(config['path'], 'w', encoding='utf-8') as configfile:
-            json.dump(config, configfile, indent=4, sort_keys=True)
+        with open(config_path, 'w', encoding='utf-8') as configfile:
+            json.dump(config, configfile, indent=4)
 
     return config
 
