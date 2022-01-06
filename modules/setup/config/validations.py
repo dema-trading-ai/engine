@@ -38,7 +38,6 @@ def check_for_missing_config_items(config: dict):
     for setting in defaults:
         if setting not in config:
             config_complete = False
-            config
 
 
 
