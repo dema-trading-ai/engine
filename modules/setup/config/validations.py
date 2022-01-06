@@ -29,9 +29,15 @@ def validate_by_spec(config, config_spec):
 
 def check_for_missing_config_items(config: dict):
     try:
-        with open(CONFIG_DEFAULTS_DEVELOPMENT_FILE or CONFIG_DEFAULTS_EXECUTABLE_FILE) as defaultsfile:
-            data = defaultsfile.read()
+        if os.path.exists(CONFIG_DEFAULTS_DEVELOPMENT_FILE):
+            config_file = CONFIG_DEFAULTS_DEVELOPMENT_FILE
+        else:
+            config_file = CONFIG_DEFAULTS_EXECUTABLE_FILE
+
+        with open(config_file) as defaults_file:
+            data = defaults_file.read()
     except Exception:
+        # todo: raise warning instead of exception if it goes wrong
         raise Exception("[ERROR] Something went wrong while checking the config file.",
                         sys.exc_info()[0])
     defaults = json.loads(data)
@@ -42,6 +48,7 @@ def check_for_missing_config_items(config: dict):
             config_complete = False
             config[setting] = defaults[setting]
 
+    # todo: change stoploss standard value into static if not set correctly
     if not config_complete:
         with open(config['path'], 'w', encoding='utf-8') as configfile:
             json.dump(config, configfile, indent=4, sort_keys=True)
