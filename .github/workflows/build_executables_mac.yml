@@ -6,6 +6,7 @@ on:
     branches:
       - release/stable
       - development
+      - feat/config_forward_compatibility
 jobs:
   build:
     runs-on: macos-latest
