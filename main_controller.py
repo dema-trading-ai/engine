@@ -1,5 +1,5 @@
 # Files
-
+import os
 import optuna
 from optuna import Trial
 
@@ -14,6 +14,7 @@ class MainController:
         async with create_backtest_runner(args) as runner:
 
             if args.alpha_hyperopt:
+                os.environ["VERBOSITY"] = "no_warnings"
                 study = optuna.create_study()
 
                 def objective(trial: Trial):
