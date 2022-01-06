@@ -38,7 +38,13 @@ def check_for_missing_config_items(config: dict):
     for setting in defaults:
         if setting not in config:
             config_complete = False
+            config[setting] = defaults[setting]
 
+    # if not config_complete:
+    #     with open("name_of_file.json", "w") as f:
+    #         f.write(my_formatted_json_var)
+
+    return config
 
 
 def validate_dynamic_stoploss(stoploss: DataFrame) -> None:
