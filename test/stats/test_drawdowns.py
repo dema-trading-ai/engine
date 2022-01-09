@@ -1,9 +1,10 @@
 import math
 
 from datetime import datetime
+from datetime import timedelta
 
 from test.stats.stats_test_utils import StatsFixture
-from test.utils.signal_frame import TradeAction, DAILY
+from test.utils.signal_frame import TradeAction, DAILY, ONE_MIL
 
 
 def test_multiple_periods_realized_drawdown_two_drawdown_periods():
@@ -119,7 +120,7 @@ def test_simple_no_seen_drawdown():
     assert datetime.fromtimestamp(stats.main_results.drawdown_from / 1000) == datetime(year=2020, month=1, day=1)
     assert datetime.fromtimestamp(stats.main_results.drawdown_to / 1000) == datetime(year=2020, month=1, day=2)
     assert datetime.fromtimestamp(stats.main_results.drawdown_at / 1000) == datetime(year=2020, month=1, day=1)
-    
+
 
 def test_multiple_periods_seen_drawdown_two_drawdown_periods():
     """ Given one trade, creating two separate drawdown
@@ -377,3 +378,85 @@ def test_seen_drawdown_down():
 
     # Assert
     assert stats.coin_results[0].max_seen_drawdown == -90.199
+
+
+def test_longest_drawdowns():
+    """Check both drawdowns on the same daily scenario, seen drawdown should be 3 days long and not ongoing,
+    realised drawdown should be 2 days long and ongoing"""
+
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades(timestep=DAILY)
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.main_results.longest_seen_drawdown['longest_drawdown'] == timedelta(days=3)
+    assert stats.main_results.longest_seen_drawdown['is_ongoing'] is False
+    assert stats.main_results.longest_realised_drawdown['longest_drawdown'] == timedelta(days=2)
+    assert stats.main_results.longest_realised_drawdown['is_ongoing'] is True
+
+
+def test_longest_drawdowns_short_period():
+    """Check both drawdowns for a very short scenario (one millisecond per trade), should return a time difference of
+    3 and 2 milliseconds for seen and realised drawdown respectively"""
+
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades(timestep=ONE_MIL)
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.main_results.longest_seen_drawdown['longest_drawdown'] == timedelta(milliseconds=3)
+    assert stats.main_results.longest_realised_drawdown['longest_drawdown'] == timedelta(milliseconds=2)
+
+
+def test_longest_drawdown_no_trade():
+    """Checks that drawdowns are handled when no trades are made, both drawdowns should return a timedelta of 0"""
+
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_flat_no_trades()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.main_results.longest_seen_drawdown['longest_drawdown'] == timedelta(0)
+    assert stats.main_results.longest_realised_drawdown['longest_drawdown'] == timedelta(0)
+
+
+def test_longest_drawdown_trend_down():
+    """Checks that the ongoing detection works as intended, seen drawdown should be ongoing"""
+
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.main_results.longest_seen_drawdown['is_ongoing'] is True
+
+
+def test_longest_drawdown_trend_up():
+    """Checks that the ongoing detection works as intended, seen drawdown should not be ongoing"""
+
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.main_results.longest_seen_drawdown['is_ongoing'] is False

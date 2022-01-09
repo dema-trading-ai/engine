@@ -48,11 +48,16 @@ def get_longest_drawdown(per_timestamp_dict: dict) -> dict[str, timedelta | bool
 
     longest_drawdown, last_drawdown = compute_drawdown_lengths(df)
 
-    is_ongoing = longest_drawdown == last_drawdown
+    # Checks if the longest drawdown was actually computed
+    if longest_drawdown == timedelta(0) and last_drawdown == timedelta(0):
+        is_ongoing = False
 
-    realised_drawdown_info = {
+    else:
+        is_ongoing = longest_drawdown == last_drawdown
+
+    drawdown_info = {
         'longest_drawdown': longest_drawdown,
         'is_ongoing': is_ongoing
     }
 
-    return realised_drawdown_info
+    return drawdown_info

@@ -34,6 +34,9 @@ def compute_drawdown_lengths(df: pd.DataFrame) -> Tuple[timedelta, timedelta]:
     whether the longest drawdown is ongoing.
     """
 
+    if len(df) <= 1 or np.all(df['capital'] == df['capital'].iloc[0]):  # Checks if there are drawdowns to be computed
+        return timedelta(0), timedelta(0)
+
     # Track the highest capital, downward, and upward trends
     df['max_capital'] = df['capital'].cummax()
 
