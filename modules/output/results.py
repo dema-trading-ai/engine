@@ -118,16 +118,16 @@ def create_trade_info_table(self, justification) -> Table:
     trade_info_table.add_row('Avg. trade duration', str(avg_trade_duration))
     trade_info_table.add_row('Longest trade duration', str(longest_trade_duration))
     trade_info_table.add_row('Profitable weeks (W/D/L)', f'{self.prof_weeks_win} / {self.prof_weeks_draw}'
-                                                      f' / {self.prof_weeks_loss}')
+                                                         f' / {self.prof_weeks_loss}')
     trade_info_table.add_row('Weekly perf. vs market (W/D/L)', f'{self.win_weeks} / {self.draw_weeks}'
-                                                      f' / {self.loss_weeks}')
+                                                               f' / {self.loss_weeks}')
     return trade_info_table
 
 
 def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown_from_string, drawdown_to_string,
                              justification) -> Table:
-    longest_realised_drawdown = format_time_difference(self.longest_realised_drawdown)
-    longest_seen_drawdown = format_time_difference(self.longest_seen_drawdown)
+    longest_realised_drawdown = format_time_difference(self.longest_realised_drawdown['longest_drawdown'])
+    longest_seen_drawdown = format_time_difference(self.longest_seen_drawdown['longest_drawdown'])
 
     performance_table = Table(box=box.ROUNDED)
     performance_table.add_column("Performance "
@@ -151,6 +151,10 @@ def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown
                               drawdown_from_string)
     performance_table.add_row('Max. seen drawdown to', drawdown_to_string)
     performance_table.add_row('Max. seen drawdown at', drawdown_at_string)
+    performance_table.add_row('Longest realised drawdown', longest_realised_drawdown if not self.
+                              longest_realised_drawdown['is_ongoing'] else longest_realised_drawdown + ', (Ongoing)')
+    performance_table.add_row('Longest seen drawdown', longest_seen_drawdown if not self.longest_seen_drawdown[
+        'is_ongoing'] else longest_seen_drawdown + ', (Ongoing)')
     performance_table.add_row('Market change coins',
                               colorize(round(self.market_change_coins,
                                              2), 0, '%'))
@@ -163,8 +167,10 @@ def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown
     performance_table.add_row('Market drawdown BTC/USDT',
                               colorize(round(self.market_drawdown_btc,
                                              2), 0, '%'))
-    performance_table.add_row('Sharpe ratio (90d / 3y)', f'{round(self.sharpe_90d, 2) if self.sharpe_90d is not None else "-"} / {round(self.sharpe_3y, 2) if self.sharpe_3y is not None else "-"}')
-    performance_table.add_row('Sortino ratio (90d / 3y)', f'{round(self.sortino_90d, 2) if self.sortino_90d is not None else "-"} / {round(self.sortino_3y, 2) if self.sortino_3y is not None else "-"}')
+    performance_table.add_row('Sharpe ratio (90d / 3y)',
+                              f'{round(self.sharpe_90d, 2) if self.sharpe_90d is not None else "-"} / {round(self.sharpe_3y, 2) if self.sharpe_3y is not None else "-"}')
+    performance_table.add_row('Sortino ratio (90d / 3y)',
+                              f'{round(self.sortino_90d, 2) if self.sortino_90d is not None else "-"} / {round(self.sortino_3y, 2) if self.sortino_3y is not None else "-"}')
     performance_table.add_row('Total fee paid',
                               f"{round(self.total_fee_amount)} {currency_symbol}")
     return performance_table

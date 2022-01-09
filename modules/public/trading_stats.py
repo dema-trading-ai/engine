@@ -46,8 +46,8 @@ class MainResults:
     drawdown_from: int
     drawdown_to: int
     drawdown_at: int
-    longest_realised_drawdown: timedelta
-    longest_seen_drawdown: timedelta
+    longest_realised_drawdown: dict[str, timedelta | bool]
+    longest_seen_drawdown: dict[str, timedelta | bool]
     stoploss: float
     stoploss_type: str
     fee: float
