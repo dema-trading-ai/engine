@@ -77,8 +77,4 @@ class BackTesting:
                 print_error(
                     "It is not allowed to edit OHLCV data in your strategy. In order to use edited OHLCV data, be sure to save it in a different variable.")
                 sys.exit()
-
-        if stoploss_type == 'standard':
-            self.config.stoploss_type = 'static'
-            print_warning(f"The use of 'standard' is deprecated. Using static stoploss of {self.config.stoploss}%.")
         return data_dict
