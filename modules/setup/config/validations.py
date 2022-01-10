@@ -1,3 +1,5 @@
+import json
+import os
 import sys
 from pandas import DataFrame
 from typing import Tuple
@@ -5,6 +7,8 @@ from typing import Tuple
 from cli.arg_parse import read_spec, spec_type_to_python_type
 from modules.setup.config.cli import get_cli_config
 from cli.print_utils import print_config_error, print_warning, print_error
+
+CONFIG_DEFAULTS_FILE = os.path.dirname(os.path.realpath(sys.argv[0])) + "/resources/config-defaults.json"
 
 
 def validate_and_read_cli(config: dict, args):
@@ -20,6 +24,40 @@ def validate_by_spec(config, config_spec):
         assert_type(config, param_spec)
         assert_in_options(config, param_spec)
         assert_min_max(config, param_spec)
+
+
+def check_for_missing_config_items(config: dict):
+    try:
+        with open(CONFIG_DEFAULTS_FILE) as defaults_file:
+            data = defaults_file.read()
+    except FileNotFoundError:
+        print_warning("Cannot find the default values for config file")
+        return config
+    except Exception:
+        raise Exception("Something went wrong while checking the config file.",
+                        sys.exc_info()[0])
+
+    defaults = json.loads(data)
+
+    config_complete = True
+    for setting in defaults:
+        if setting not in config:
+            config_complete = False
+            config[setting] = defaults[setting]
+
+    if config['stoploss-type'] == "standard":
+        config['stoploss-type'] = "static"
+        config_complete = False
+        print_warning("Stoploss type of Standard has changed to Static. This is changed in your config file.")
+
+    config_path = config['path']
+    config.pop("path")
+
+    if not config_complete:
+        with open(config_path, 'w', encoding='utf-8') as configfile:
+            json.dump(config, configfile, indent=4)
+
+    return config
 
 
 def validate_dynamic_stoploss(stoploss: DataFrame) -> None:
