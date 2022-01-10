@@ -107,9 +107,12 @@ def calculate_capital_per_week(capital_per_timestamp):
                                          columns=['capital']).iloc[1:]
 
     # add the starting capital to the timeframe in a sensible timestep, in order to take buy fee into account
-    new_timestep = DataFrame([capital_per_timestamp[0]], columns=["capital"],
-                             index=[list(capital_per_timestamp.keys())[1] - 1])
-    capital_per_timestamp_df = capital_per_timestamp_df.append(new_timestep).sort_index()
+    starting_time = list(capital_per_timestamp.keys())[1]
+    base_capital = DataFrame([capital_per_timestamp[0]], columns=["capital"],
+                             index=[starting_time])
+    first_timestep = DataFrame([capital_per_timestamp[starting_time]], columns=["capital"],
+                             index=[starting_time + 1])
+    capital_per_timestamp_df = capital_per_timestamp_df.append(base_capital).append(first_timestep).sort_index()
 
     # Set index to datetime and resample to one week
     capital_per_timestamp_df.index = [datetime.fromtimestamp(ms / 1000.0) for ms in capital_per_timestamp_df.index]
