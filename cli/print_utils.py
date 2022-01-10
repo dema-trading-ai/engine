@@ -8,7 +8,7 @@ def get_verbosity():
     return os.getenv("VERBOSITY") or "none"
 
 
-def is_verbosity(verbosity: Literal["quiet", "debug", "none"]):
+def is_verbosity(verbosity: Literal["no_warnings", "quiet", "debug", "none"]):
     return get_verbosity() == verbosity
 
 
@@ -22,7 +22,7 @@ class ConsoleColors:
 
 
 def print_warning(text):
-    if is_verbosity("quiet"):
+    if is_verbosity("quiet") or is_verbosity("no_warnings"):
         return
     console_standard.print("[WARNING] ", end='')
     console_color.print(f"{ConsoleColors.WARNING}{text}[/]")
