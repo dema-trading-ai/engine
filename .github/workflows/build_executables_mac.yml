@@ -73,7 +73,6 @@ jobs:
       - test
     runs-on: ubuntu-18.04
     environment: "executable_release"
-    if: github.ref == 'refs/heads/release/stable' || github.ref == 'refs/heads/development'
     steps:
       - uses: actions/checkout@v2
       - name: exe
