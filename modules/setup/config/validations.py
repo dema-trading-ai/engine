@@ -8,7 +8,7 @@ from cli.arg_parse import read_spec, spec_type_to_python_type
 from modules.setup.config.cli import get_cli_config
 from cli.print_utils import print_config_error, print_warning, print_error
 
-CONFIG_DEFAULTS_FILE = os.path.dirname(os.path.realpath(sys.argv[0])) + "/resources/config-defaults.json"
+CONFIG_DEFAULTS_FILE = os.path.dirname(os.path.realpath(__file__)) + "/../../../resources/config-defaults.json"
 print("config defaults:")
 print(CONFIG_DEFAULTS_FILE)
 
