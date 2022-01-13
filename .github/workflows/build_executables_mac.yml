@@ -49,6 +49,24 @@ jobs:
           if-no-files-found: error
           name: engine-macos
           path: ./dist/engine/engine.zip
+  test:
+    needs:
+      - build
+    runs-on: macos-latest
+    steps:
+      - name: exe
+        uses: actions/download-artifact@v2
+        with:
+          name: engine-macos
+      - name: unzip
+        run: unzip ./engine.zip
+      - name: set executable bit
+        run: chmod +x ./engine
+      - name: init
+        run: ./engine init new-dir
+      - name: run
+        run: ../engine
+        working-directory: ./new-dir
   deploy:
     needs:
       - build
