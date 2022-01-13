@@ -23,21 +23,28 @@ def return_cleaned_dict(data_dict):
     return pd.DataFrame(data).T
 
 
-with open(files[0], 'r') as f:
-    data = json.load(f)
-    df1 = return_cleaned_dict(data)
-
-with open(files[1], 'r') as f:
-    data = json.load(f)
-    df2 = return_cleaned_dict(data)
-
-with open(files[-1], 'r') as f:
-    data = json.load(f)
-    df3 = return_cleaned_dict(data)
+# for i in range(3, 7):
+for i in range(4, 5):
+    # with open(BASE_DIR + f"/data/test_combined_{i}_results.json", 'r') as f:
+    with open(BASE_DIR + f"/data/backtesting-data/test_combined_{i}_results.json") as f:
+        data = json.load(f)
+        df = return_cleaned_dict(data)
+        df = df.sort_values(by='profit', ascending=False)
+        print(df.head(15))
 
 
-df1 = df1.sort_values(by='drawdown', ascending=False)
-df2 = df2.sort_values(by='drawdown', ascending=False)
-df3 = df3.sort_values(by='drawdown', ascending=False)
+#
+# with open(files[1], 'r') as f:
+#     data = json.load(f)
+#     df2 = return_cleaned_dict(data)
+#
+# with open(files[-1], 'r') as f:
+#     data = json.load(f)
+#     df3 = return_cleaned_dict(data)
 
-print(df3.head(15))
+
+# df1 = df1.sort_values(by='drawdown', ascending=False)
+# df2 = df2.sort_values(by='drawdown', ascending=False)
+# df3 = df3.sort_values(by='drawdown', ascending=False)
+
+# print(df3.head(15))

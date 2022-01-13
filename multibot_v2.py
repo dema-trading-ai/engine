@@ -57,11 +57,12 @@ class MultiBotBacktester:
         self.starting_capital = 1000
         self.available_funds = self.starting_capital
         self.total_funds = self.starting_capital
-        self.trades = trades
+        self.trades = sorted(trades, key=lambda trade: trade.open_timestamp)
         self.smallest_timeframe = smallest_timeframe
         self.mot = mot
         self.df = pd.DataFrame()
         self.FEE = 0.0025
+        self.open_trades = []
 
     def get_initialized_df(self):
         first_open_timestamp = sorted(self.trades, key=lambda trade: trade.open_timestamp)[0].open_timestamp
@@ -93,7 +94,7 @@ class MultiBotBacktester:
     def get_profit_pct(end_capital, start_capital):
         return ((end_capital - start_capital) / start_capital) * 100
 
-    def close_trade(self, trade):
+    def update_metrics_on_close(self, trade):
         # Calculate profit and update total-, and available funds
         abs_profit = trade.starting_capital * trade.profit
         fee_paid = (abs_profit + trade.starting_capital) * self.FEE
@@ -108,33 +109,44 @@ class MultiBotBacktester:
         trade.starting_capital = trade_open_amount - open_fee
         trade.open_fee = open_fee
         self.available_funds -= trade_open_amount
+        self.open_trades.append(trade)
 
     def update_timestep_df(self, timestamp):
         # # Update the dataframe to 'save' the funds per timestamp
         self.df.loc[timestamp, 'AF'] = self.available_funds
         self.df.loc[timestamp, 'TF'] = self.total_funds
 
+    def close_remaining_open_trades(self):
+        trades_to_close = sorted(self.open_trades, key=lambda open_order: open_order.close_timestamp)
+
+        for open_trade in trades_to_close:
+            self.close_trade(open_trade)
+
+    def close_trade(self, trade):
+        self.update_metrics_on_close(trade)
+        self.update_timestep_df(trade.close_timestamp)
+        self.open_trades.remove(trade)
+
     def run_multibot(self):
         self.get_initialized_df()
 
-        open_trades = []
         for trade in self.trades:
             # Check if we need to close previous trades
-            # TODO: check if we can remove this sorting
-            trades_to_close = [open_order for open_order in open_trades
+            trades_to_close = [open_order for open_order in self.open_trades
                                if open_order.close_timestamp <= trade.open_timestamp]
+            # TODO: check if we can remove this sorting
             trades_to_close = sorted(trades_to_close, key=lambda open_order: open_order.close_timestamp)
 
             for trade_to_close in trades_to_close:
                 self.close_trade(trade_to_close)
-                self.update_timestep_df(trade_to_close.close_timestamp)
-                open_trades.remove(trade_to_close)
 
             # Open the new trade
             self.open_trade(trade)
-            open_trades.append(trade)
 
+            # Update
             self.update_timestep_df(trade.open_timestamp)
+
+        self.close_remaining_open_trades()
 
     def get_results(self):
         # Forward fill the empty timestamps
@@ -178,6 +190,43 @@ def combine_and_run_multibot(util):
             results[combination_title] = {"profit": profit, "drawdown": drawdown}
 
         save_trade_log(results, BASE_DIR + f'/data/backtesting-data/combined_{i}_results.json')
+
+
+# def combine_and_run_multibot(util):
+#     # util.write_log_to_file('[INFO] Starting multibot run')
+#     # files = glob(BASE_DIR + r"/data/backtesting-data/trade_logs/*.json")
+#     BASE_DIR_EXT = BASE_DIR + "/data/backtesting-data/trade_logs/trades_log_"
+#     # files = [BASE_DIR_EXT + "JustABotti.json", BASE_DIR_EXT + "KaguTsuchi.json", BASE_DIR_EXT + "ObiOneKenobi.json", BASE_DIR_EXT + "Omoikane.json"]
+#     files = [BASE_DIR_EXT + "Bot1.json", BASE_DIR_EXT + "MyStrategy.json"]
+#     # for i in range(3, 7):
+#     i = 2
+#     results = {}
+#     all_combinations = list(itertools.combinations(files, i))
+#     for j, combination in enumerate(all_combinations):
+#         combination = ['/Users/marijnpc/Trading/engine/data/backtesting-data/trade_logs/trades_log_Bot1.json', '/Users/marijnpc/Trading/engine/data/backtesting-data/trade_logs/trades_log_MyStrategy.json']
+#         # combination = ['/Users/marijnpc/Trading/engine/data/backtesting-data/trade_logs/trades_log_JustABotti.json', '/Users/marijnpc/Trading/engine/data/backtesting-data/trade_logs/trades_log_KaguTsuchi.json', '/Users/marijnpc/Trading/engine/data/backtesting-data/trade_logs/trades_log_ObiOneKenobi.json', '/Users/marijnpc/Trading/engine/data/backtesting-data/trade_logs/trades_log_Omoikane.json']
+#         util.write_log_to_file(f'[INFO] Currently running combination {j} '
+#                                f'out of {len(all_combinations)} options for {i} combinations')
+#         print(f'[INFO] Currently running combination {j} out of {len(all_combinations)} options for {i} combinations')
+#         try:
+#             mot, trades, timeframes = combine_trade_logs(list(combination), export=True, path=BASE_DIR_EXT+'test_trade_log.json')
+#             smallest_timeframe = util.get_smallest_timeframe(timeframes)
+#
+#             multibot_backtester = MultiBotBacktester(trades, smallest_timeframe, mot)
+#
+#             multibot_backtester.run_multibot()
+#             profit, drawdown = multibot_backtester.get_results()
+#
+#         except Exception as ex:
+#             util.write_log_to_file(f'[ERROR] Something went wrong: {str(ex)}')
+#             print(f'[ERROR] Something went wrong: {str(ex)}')
+#             profit = drawdown = 0
+#
+#         cleaned_filenames = [util.beautify_filename(filename) for filename in list(combination)]
+#         combination_title = '-'.join(cleaned_filenames)
+#         results[combination_title] = {"profit": profit, "drawdown": drawdown}
+#
+#     save_trade_log(results, BASE_DIR + f'/data/backtesting-data/test1_combined_{i}_results.json')
 
 
 # Start the program

@@ -152,6 +152,38 @@ def combine_and_run_multibot():
 
         save_trade_log(results, BASE_DIR+f'/data/backtesting-data/combined_{i}_results.json')
 
+# def combine_and_run_multibot():
+#     BASE_DIR_EXT = BASE_DIR + "/data/backtesting-data/trade_logs/trades_log_"
+#     # files = glob(BASE_DIR + r"/data/backtesting-data/trade_logs/*.json")
+#
+#     # files = [BASE_DIR_EXT + "JustABotti.json", BASE_DIR_EXT + "KaguTsuchi.json", BASE_DIR_EXT + "ObiOneKenobi.json", BASE_DIR_EXT + "Omoikane.json"]
+#     files = [BASE_DIR_EXT + "Bot1.json", BASE_DIR_EXT + "MyStrategy.json"]
+#     i = 2
+#
+#     # for i in range(3, 7):
+#     results = {}
+#     all_combinations = list(itertools.combinations(files, i))
+#     for j, combination in enumerate(all_combinations):
+#         combination = ['/Users/marijnpc/Trading/engine/data/backtesting-data/trade_logs/trades_log_Bot1.json', '/Users/marijnpc/Trading/engine/data/backtesting-data/trade_logs/trades_log_MyStrategy.json']
+#
+#         # combination = ['/Users/marijnpc/Trading/engine/data/backtesting-data/trade_logs/trades_log_JustABotti.json', '/Users/marijnpc/Trading/engine/data/backtesting-data/trade_logs/trades_log_KaguTsuchi.json', '/Users/marijnpc/Trading/engine/data/backtesting-data/trade_logs/trades_log_ObiOneKenobi.json', '/Users/marijnpc/Trading/engine/data/backtesting-data/trade_logs/trades_log_Omoikane.json']
+#         write_log_to_file(f'[INFO] Currently running combination {j} out of {len(all_combinations)} options for {i} combinations')
+#         print(f'[INFO] Currently running combination {j} out of {len(all_combinations)} options for {i} combinations')
+#         try:
+#             mot, trades, timeframes = combine_trade_logs(list(combination), export=True, path=BASE_DIR_EXT+'testv1_trade_log.json')
+#             smallest_timeframe = get_smallest_timeframe(timeframes)
+#
+#             profit, drawdown = run_multibot(trades, mot, smallest_timeframe)
+#         except Exception as e:
+#             write_log_to_file(f'[ERROR] Something went wrong: {str(e)}')
+#             profit = drawdown = 0
+#
+#         cleaned_filenames = [beautify_filename(filename) for filename in list(combination)]
+#         combination_title = '-'.join(cleaned_filenames)
+#         results[combination_title] = {"profit": profit, "drawdown": drawdown}
+#
+#     save_trade_log(results, BASE_DIR+f'/data/backtesting-data/testv1_combined_{i}_results.json')
+
 
 try:
     combine_and_run_multibot()
