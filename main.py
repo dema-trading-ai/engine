@@ -22,12 +22,14 @@ if sys.stdout.isatty() is False and PYTHONIOENCODING is not False and sys.stdout
 
 
 def main():
+    print("TESTING PURPOSES")
     print_warning_if_version_outdated()
     execute_for_args({
         'init': run_init,
         'default': run_engine
     })
     print_warning_if_version_outdated()
+    print("TESTING PURPOSES")
 
 
 def run_engine(args):
