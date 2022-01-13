@@ -5,6 +5,7 @@ from backtesting.strategy import Strategy
 
 # Optional Imports
 import numpy as np
+from modules.setup.config import qtpylib_methods as qtpylib
 
 
 class MyStrategyAdvanced(Strategy):

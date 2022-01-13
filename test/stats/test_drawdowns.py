@@ -1,7 +1,9 @@
 import math
 
+from datetime import datetime
+
 from test.stats.stats_test_utils import StatsFixture
-from test.utils.signal_frame import TradeAction
+from test.utils.signal_frame import TradeAction, DAILY
 
 
 def test_multiple_periods_realized_drawdown_two_drawdown_periods():
@@ -90,16 +92,16 @@ def test_simple_seen_drawdown():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
 
     # Assert
     assert math.isclose(stats.main_results.max_seen_drawdown, -50.995)
-    assert stats.main_results.drawdown_from == 1  # not zero, because the first row is copied for fee calc purposes
+    assert datetime.fromtimestamp(stats.main_results.drawdown_from / 1000) == datetime(year=2020, month=1, day=1)
     assert stats.main_results.drawdown_to == 0  # zero, because the drawdown hasn't ended yet
-    assert stats.main_results.drawdown_at == 2
+    assert datetime.fromtimestamp(stats.main_results.drawdown_at / 1000) == datetime(year=2020, month=1, day=2)
 
 
 def test_simple_no_seen_drawdown():
@@ -107,16 +109,16 @@ def test_simple_no_seen_drawdown():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
 
     # Assert
     assert math.isclose(stats.main_results.max_seen_drawdown, -1)
-    assert stats.main_results.drawdown_from == 1
-    assert stats.main_results.drawdown_to == 2
-    assert stats.main_results.drawdown_at == 1
+    assert datetime.fromtimestamp(stats.main_results.drawdown_from / 1000) == datetime(year=2020, month=1, day=1)
+    assert datetime.fromtimestamp(stats.main_results.drawdown_to / 1000) == datetime(year=2020, month=1, day=2)
+    assert datetime.fromtimestamp(stats.main_results.drawdown_at / 1000) == datetime(year=2020, month=1, day=1)
     
 
 def test_multiple_periods_seen_drawdown_two_drawdown_periods():
@@ -126,16 +128,16 @@ def test_multiple_periods_seen_drawdown_two_drawdown_periods():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
 
     # Assert
     assert math.isclose(stats.main_results.max_seen_drawdown, -75.4975)
-    assert stats.main_results.drawdown_from == 4
+    assert datetime.fromtimestamp(stats.main_results.drawdown_from / 1000) == datetime(year=2020, month=1, day=4)
     assert stats.main_results.drawdown_to == 0
-    assert stats.main_results.drawdown_at == 6
+    assert datetime.fromtimestamp(stats.main_results.drawdown_at / 1000) == datetime(year=2020, month=1, day=6)
 
 
 def test_multiple_periods_seen_drawdown_one_drawdown_period():
@@ -145,16 +147,16 @@ def test_multiple_periods_seen_drawdown_one_drawdown_period():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_three_trades()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_three_trades(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
 
     # Assert
     assert math.isclose(stats.main_results.max_realised_drawdown, -80.7880798)
-    assert stats.main_results.drawdown_from == 2
+    assert datetime.fromtimestamp(stats.main_results.drawdown_from / 1000) == datetime(year=2020, month=1, day=2)
     assert stats.main_results.drawdown_to == 0
-    assert stats.main_results.drawdown_at == 6
+    assert datetime.fromtimestamp(stats.main_results.drawdown_at / 1000) == datetime(year=2020, month=1, day=6)
 
 
 def test_multiple_periods_seen_drawdown_easy():
@@ -165,20 +167,20 @@ def test_multiple_periods_seen_drawdown_easy():
     # Arrange
     fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE', 'COIN3/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade(timestep=DAILY)
 
-    fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_50_one_trade()
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_50_one_trade(timestep=DAILY)
 
-    fixture.frame_with_signals['COIN3/BASE'].test_scenario_down_75_one_trade()
+    fixture.frame_with_signals['COIN3/BASE'].test_scenario_down_75_one_trade(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
 
     # Assert
     assert math.isclose(stats.main_results.max_seen_drawdown, -59.1625)
-    assert stats.main_results.drawdown_from == 1
+    assert datetime.fromtimestamp(stats.main_results.drawdown_from / 1000) == datetime(year=2020, month=1, day=1)
     assert stats.main_results.drawdown_to == 0
-    assert stats.main_results.drawdown_at == 2
+    assert datetime.fromtimestamp(stats.main_results.drawdown_at / 1000) == datetime(year=2020, month=1, day=2)
 
 
 def test_multiple_periods_seen_drawdown():
@@ -187,20 +189,20 @@ def test_multiple_periods_seen_drawdown():
     # Arrange
     fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE', 'COIN3/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades(timestep=DAILY)
 
-    fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_10_up_100_down_75_three_trades(timestep=DAILY)
 
-    fixture.frame_with_signals['COIN3/BASE'].test_scenario_up_100_down_20_down_75_three_trades()
+    fixture.frame_with_signals['COIN3/BASE'].test_scenario_up_100_down_20_down_75_three_trades(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
 
     # Assert
     assert math.isclose(stats.main_results.max_seen_drawdown, -75.4975)
-    assert stats.main_results.drawdown_from == 4
+    assert datetime.fromtimestamp(stats.main_results.drawdown_from / 1000) == datetime(year=2020, month=1, day=4)
     assert stats.main_results.drawdown_to == 0
-    assert stats.main_results.drawdown_at == 6
+    assert datetime.fromtimestamp(stats.main_results.drawdown_at / 1000) == datetime(year=2020, month=1, day=6)
 
 
 def test_drawdown_equality():
@@ -243,7 +245,7 @@ def test_drawdown_simple():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_one_trade(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
@@ -252,9 +254,9 @@ def test_drawdown_simple():
     assert math.isclose(stats.coin_results[0].max_seen_drawdown, -80.2)
     assert math.isclose(stats.coin_results[0].max_realised_drawdown, -60.796)
     assert math.isclose(stats.coin_results[0].max_seen_drawdown, -80.2)
-    assert stats.main_results.drawdown_from == 2
+    assert datetime.fromtimestamp(stats.main_results.drawdown_from / 1000) == datetime(year=2020, month=1, day=2)
     assert stats.main_results.drawdown_to == 0
-    assert stats.main_results.drawdown_at == 4
+    assert datetime.fromtimestamp(stats.main_results.drawdown_at / 1000) == datetime(year=2020, month=1, day=4)
 
 
 def test_drawdown_multiple_peaks():
@@ -263,7 +265,7 @@ def test_drawdown_multiple_peaks():
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_one_trade(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
@@ -271,9 +273,9 @@ def test_drawdown_multiple_peaks():
     # Assert
     assert math.isclose(stats.coin_results[0].max_seen_drawdown, -75.25)
     assert math.isclose(stats.coin_results[0].max_realised_drawdown, -55.8955)
-    assert stats.main_results.drawdown_from == 3
+    assert datetime.fromtimestamp(stats.main_results.drawdown_from / 1000) == datetime(year=2020, month=1, day=3)
     assert stats.main_results.drawdown_to == 0
-    assert stats.main_results.drawdown_at == 4
+    assert datetime.fromtimestamp(stats.main_results.drawdown_at / 1000) == datetime(year=2020, month=1, day=4)
 
 
 def test_drawdown_multiple_pairs():
@@ -282,12 +284,12 @@ def test_drawdown_multiple_pairs():
     # Arrange
     fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_flat_no_trades()
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades(timestep=DAILY)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_flat_no_trades(timestep=DAILY)
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_one_trade(timestep=DAILY)
 
-    fixture.frame_with_signals['COIN2/BASE'].test_scenario_up_100_down_20_down_75_three_trades()
-    fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_up_100_down_20_down_75_three_trades(timestep=DAILY)
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_10_up_100_down_75_three_trades(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
@@ -301,9 +303,9 @@ def test_drawdown_multiple_pairs():
 
     assert math.isclose(stats.main_results.max_seen_drawdown, -85.76400119125371)
     assert math.isclose(stats.main_results.max_realised_drawdown, -85.76400119125371)
-    assert stats.main_results.drawdown_from == 4
+    assert datetime.fromtimestamp(stats.main_results.drawdown_from / 1000) == datetime(year=2020, month=1, day=4)
     assert stats.main_results.drawdown_to == 0
-    assert stats.main_results.drawdown_at == 12
+    assert datetime.fromtimestamp(stats.main_results.drawdown_at / 1000) == datetime(year=2020, month=1, day=12)
 
     assert stats.main_results.n_trades_with_loss == 7
     assert stats.main_results.n_consecutive_losses == 4
@@ -358,7 +360,7 @@ def test_seen_drawdown_up_down():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.coin_results[0].max_seen_drawdown, -90.1)
+    assert math.isclose(stats.coin_results[0].max_seen_drawdown, -97.5245, abs_tol=0.001)
 
 
 def test_seen_drawdown_down():

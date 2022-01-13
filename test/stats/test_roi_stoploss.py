@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import timedelta
 
 from test.stats.stats_test_utils import StatsFixture
 
@@ -64,7 +64,7 @@ def test_trailing_stoploss():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.trades[0].closed_at == datetime.fromtimestamp(5/1000)
+    assert stats.trades[0].closed_at - stats.trades[0].opened_at == timedelta(days=4)
     assert stats.main_results.end_capital == 147.015
 
 
@@ -99,8 +99,8 @@ def test_dynamic_stoploss():
     fixture.trading_module_config.stoploss_type = "dynamic"
 
     fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0, stoploss=1) \
-        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=0, stoploss=1.5)
+        .add_entry(open=2, high=2, low=2, close=2, buy=1, sell=0, stoploss=1) \
+        .add_entry(open=2, high=2, low=1, close=1, buy=0, sell=0, stoploss=1.5)
     # Act
     stats = fixture.create().analyze()
 
@@ -117,8 +117,8 @@ def test_dynamic_stoploss_high():
     fixture.trading_module_config.stoploss_type = "dynamic"
 
     fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0, stoploss=1) \
-        .add_entry(open=2, high=2, low=1, close=1, volume=1, buy=0, sell=0, stoploss=3)
+        .add_entry(open=2, high=2, low=2, close=2, buy=1, sell=0, stoploss=1) \
+        .add_entry(open=2, high=2, low=1, close=1, buy=0, sell=0, stoploss=3)
     # Act
     stats = fixture.create().analyze()
 
@@ -133,8 +133,8 @@ def test_both_roi_stoploss():
     fixture = StatsFixture(['COIN/BASE'])
 
     fixture.frame_with_signals['COIN/BASE'] \
-        .add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0) \
-        .add_entry(open=1, high=2, low=0.1, close=2, volume=1, buy=0, sell=0)
+        .add_entry(open=1, high=1, low=1, close=1, buy=1, sell=0) \
+        .add_entry(open=1, high=2, low=0.1, close=2, buy=0, sell=0)
 
     fixture.trading_module_config.roi = {
         "0": 50

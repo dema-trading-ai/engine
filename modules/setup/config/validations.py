@@ -1,3 +1,5 @@
+import json
+import os
 import sys
 from pandas import DataFrame
 from typing import Tuple
@@ -5,6 +7,8 @@ from typing import Tuple
 from cli.arg_parse import read_spec, spec_type_to_python_type
 from modules.setup.config.cli import get_cli_config
 from cli.print_utils import print_config_error, print_warning, print_error
+
+CONFIG_DEFAULTS_FILE = os.path.dirname(os.path.realpath(sys.argv[0])) + "/resources/config-defaults.json"
 
 
 def validate_and_read_cli(config: dict, args):
@@ -20,6 +24,40 @@ def validate_by_spec(config, config_spec):
         assert_type(config, param_spec)
         assert_in_options(config, param_spec)
         assert_min_max(config, param_spec)
+
+
+def check_for_missing_config_items(config: dict):
+    try:
+        with open(CONFIG_DEFAULTS_FILE) as defaults_file:
+            data = defaults_file.read()
+    except FileNotFoundError:
+        print_warning("Cannot find the default values for config file")
+        return config
+    except Exception:
+        raise Exception("Something went wrong while checking the config file.",
+                        sys.exc_info()[0])
+
+    defaults = json.loads(data)
+
+    config_complete = True
+    for setting in defaults:
+        if setting not in config:
+            config_complete = False
+            config[setting] = defaults[setting]
+
+    if config['stoploss-type'] == "standard":
+        config['stoploss-type'] = "static"
+        config_complete = False
+        print_warning("Stoploss type of Standard has changed to Static. This is changed in your config file.")
+
+    config_path = config['path']
+    config.pop("path")
+
+    if not config_complete:
+        with open(config_path, 'w', encoding='utf-8') as configfile:
+            json.dump(config, configfile, indent=4)
+
+    return config
 
 
 def validate_dynamic_stoploss(stoploss: DataFrame) -> None:
@@ -111,3 +149,29 @@ def check_for_float(param_value: int, t: type) -> Tuple[float, type]:
     if isinstance(param_value, int) and not isinstance(param_value, bool):
         return float(param_value), float
     return param_value, t
+
+
+def validate_ratios(df: DataFrame) -> Tuple[bool, bool]:
+    """
+    Checks the given dataframe, prints out appropriate warning messages and returns bools to determine which time periods should be computed.
+    """
+
+    check_returns = (df['returns'].iloc[1:] == 0).all()
+
+    if check_returns:
+        print_warning('Unable to compute Sharpe and Sortino ratios: Perhaps the time period is too short?')
+
+    df_year = df.resample('Y').apply(lambda x: x.iloc[-1])
+    count_year = len(df_year['capital'])
+    ninety_d = True
+    three_y = True
+
+    if count_year < 3 and not check_returns:
+        three_y = False
+        if 90 > len(df['capital']):
+            ninety_d = False
+            print_warning('The time period is less than 90 days. The 90 day and 3 year Sharpe and Sortino ratios are only calculated on the available data.')
+        else:
+            print_warning('The time period is less than 3 years. The 3 year Sharpe and Sortino ratios are only calculated on the available data.')
+
+    return ninety_d, three_y
