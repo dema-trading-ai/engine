@@ -11,7 +11,6 @@ from cli.print_utils import print_config_error, print_warning, print_error
 CONFIG_DEFAULTS_FILE = os.path.dirname(os.path.realpath(sys.argv[0])) + "/resources/config-defaults.json"
 print("config defaults:")
 print(CONFIG_DEFAULTS_FILE)
-sys.exit()
 
 
 def validate_and_read_cli(config: dict, args):
