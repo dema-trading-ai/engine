@@ -20,6 +20,8 @@ PYTHONIOENCODING = os.environ.get("PYTHONIOENCODING", False)
 if sys.stdout.isatty() is False and PYTHONIOENCODING is not False and sys.stdout.encoding != PYTHONIOENCODING:
     sys.stdout = open(sys.stdout.fileno(), 'w', encoding='utf-8', closefd=False)
 
+RUNFOLDER = os.path.dirname(os.path.realpath(__file__))
+
 
 def main():
     print("TESTING PURPOSES")
