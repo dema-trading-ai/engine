@@ -17,10 +17,15 @@ class MainController:
                 os.environ["VERBOSITY"] = "no_warnings"
                 study = optuna.create_study()
 
+                if args.n_trials:
+                    n_trials = args.n_trials
+                else:
+                    n_trials = 100
+
                 def objective(trial: Trial):
                     return runner.run_hyperopt_iteration(trial)
 
-                study.optimize(objective, n_trials=100)
+                study.optimize(objective, n_trials=n_trials)
                 print_info(f"Best results {study.best_params}")
             else:
                 runner.run_outputted_backtest()
