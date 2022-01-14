@@ -47,7 +47,8 @@ class StatsFixture:
             mainplot_indicators=[],
             subplot_indicators=[],
             strategy_definition=object(),
-            strategy_name='MyStrategy'
+            strategy_name='MyStrategy',
+            randomize_pair_order=False
         )
 
         self.trading_module_config = TradingModuleConfig(
