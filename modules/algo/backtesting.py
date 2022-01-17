@@ -75,6 +75,7 @@ class BackTesting:
                     df[['open', 'high', 'low', 'close', 'volume', 'pair']]
             ):
                 print_error(
-                    "It is not allowed to edit OHLCV data in your strategy. In order to use edited OHLCV data, be sure to save it in a different variable.")
+                    "It is not allowed to edit OHLCV data in your strategy. In order to use edited OHLCV data, be sure"
+                    " to save it in a different variable.")
                 sys.exit()
         return data_dict
