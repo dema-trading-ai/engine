@@ -114,4 +114,4 @@ class Strategy(abc.ABC):
         return dataframe
 
     def loss_function(self, stats: TradingStats) -> float:
-        raise Exception("loss_function not implemented")
+        raise NotImplementedError("loss_function not implemented")
