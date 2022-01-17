@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import random
 
 import numpy as np
 from collections import defaultdict
@@ -43,7 +44,10 @@ class StatsModule:
         pairs = list(self.frame_with_signals.keys())
         ticks = list(self.frame_with_signals[pairs[0]].keys()) if pairs else []
         print_info("Backtesting")
+        shuffle = self.config.randomize_pair_order
         for tick in ticks:
+            if shuffle:
+                random.shuffle(pairs)
             for pair in pairs:
                 pair_dict = self.frame_with_signals[pair]
                 tick_dict = pair_dict[tick]
