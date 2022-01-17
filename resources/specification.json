@@ -143,5 +143,14 @@
     "cli": {
       "short": "ex"
     }
+  },
+  {
+    "name": "n-trials",
+    "type": "int",
+    "default": 100,
+    "min": 1,
+    "cli": {
+      "short": "nt"
+    }
   }
 ]

@@ -539,8 +539,8 @@ def test_sharpe_sortino_ratios_no_sell():
     assert stats.main_results.sortino_90d is None
 
 
-def test_median_trade_profit():
-    # Checks the median trade profit, should return a float
+def test_trade_profit():
+    # Checks the best, median, and worst trade profits, should return a float
 
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
@@ -552,6 +552,10 @@ def test_median_trade_profit():
     stats = fixture.create().analyze()
 
     assert math.isclose(stats.main_results.median_trade_profit, -11.791, abs_tol=0.001)
+    assert math.isclose(stats.main_results.best_trade_profit_percentage, 96.02, abs_tol=0.001)
+    assert math.isclose(stats.main_results.best_trade_currency_amount, 84.698, abs_tol=0.001)
+    assert math.isclose(stats.main_results.worst_trade_profit_percentage, -75.498, abs_tol=0.001)
+    assert math.isclose(stats.main_results.worst_trade_currency_amount, -130.541, abs_tol=0.001)
 
 
 def test_median_trade_profit_no_trades():
@@ -567,6 +571,10 @@ def test_median_trade_profit_no_trades():
     stats = fixture.create().analyze()
 
     assert stats.main_results.median_trade_profit == 0.0
+    assert stats.main_results.best_trade_profit_percentage == 0.0
+    assert stats.main_results.best_trade_currency_amount == 0.0
+    assert stats.main_results.worst_trade_profit_percentage == 0.0
+    assert stats.main_results.worst_trade_currency_amount == 0.0
 
 
 def test_profitable_weeks_one_win():

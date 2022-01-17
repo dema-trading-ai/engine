@@ -6,23 +6,13 @@ from modules.stats.trade import Trade
 
 
 def calculate_best_worst_trade(closed_trades: [Trade]):
-    best_trade_ratio = -np.inf
-    best_trade_pair = ""
-    worst_trade_ratio = np.inf
-    worst_trade_pair = ""
-
     if len(closed_trades) > 0:
         best_trade = max(closed_trades,
                          key=lambda trade: trade.profit_ratio, default=-np.inf)
-        best_trade_ratio = best_trade.profit_ratio
-        best_trade_pair = best_trade.pair
-
         worst_trade = min(closed_trades,
                           key=lambda trade: trade.profit_ratio, default=np.inf)
-        worst_trade_ratio = worst_trade.profit_ratio
-        worst_trade_pair = worst_trade.pair
-
-    return best_trade_ratio, best_trade_pair, worst_trade_ratio, worst_trade_pair
+        return best_trade, worst_trade
+    return None, None
 
 
 def get_number_of_losing_trades(closed_trades: [Trade]) -> int:
