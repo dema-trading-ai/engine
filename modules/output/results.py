@@ -74,7 +74,10 @@ def show_mainresults(self: MainResults, currency_symbol: str):
                                                  )
 
     # Trade info table
-    trade_info_table = create_trade_info_table(self, justification)
+    trade_info_table = create_trade_info_table(self,
+                                               currency_symbol,
+                                               justification
+                                               )
 
     # Create grid for all tables
     table_grid = Table(box=box.SIMPLE)
@@ -86,7 +89,7 @@ def show_mainresults(self: MainResults, currency_symbol: str):
     console_color.print(table_grid)
 
 
-def create_trade_info_table(self, justification) -> Table:
+def create_trade_info_table(self, currency_symbol, justification) -> Table:
     avg_trade_duration = format_time_difference(self.avg_trade_duration)
     longest_trade_duration = format_time_difference(self.longest_trade_duration)
     shortest_trade_duration = format_time_difference(self.shortest_trade_duration)
@@ -113,7 +116,7 @@ def create_trade_info_table(self, justification) -> Table:
                              colorize(round(
                                  self.worst_trade_profit_percentage, 2),
                                  0, f'% ({self.worst_trade_pair})'))
-    trade_info_table.add_row('Median trade profit', str(round(self.median_trade_profit, 2)) + ' $')
+    trade_info_table.add_row('Median trade profit', f'{round(self.median_trade_profit, 2)} {currency_symbol}')
     trade_info_table.add_row('Shortest trade duration', str(shortest_trade_duration))
     trade_info_table.add_row('Avg. trade duration', str(avg_trade_duration))
     trade_info_table.add_row('Longest trade duration', str(longest_trade_duration))
