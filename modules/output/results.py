@@ -74,7 +74,10 @@ def show_mainresults(self: MainResults, currency_symbol: str):
                                                  )
 
     # Trade info table
-    trade_info_table = create_trade_info_table(self, currency_symbol, justification)
+    trade_info_table = create_trade_info_table(self,
+                                               currency_symbol,
+                                               justification
+                                               )
 
     # Create grid for all tables
     table_grid = Table(box=box.SIMPLE)
@@ -121,7 +124,7 @@ def create_trade_info_table(self: MainResults, currency_symbol, justification) -
                              colorize(round(
                                  self.worst_trade_currency_amount, 2),
                                  0, str(currency_symbol)))
-    trade_info_table.add_row('Median trade profit', str(round(self.median_trade_profit, 2)) + ' $')
+    trade_info_table.add_row('Median trade profit', f'{round(self.median_trade_profit, 2)} {currency_symbol}')
     trade_info_table.add_row('Shortest trade duration', str(shortest_trade_duration))
     trade_info_table.add_row('Avg. trade duration', str(avg_trade_duration))
     trade_info_table.add_row('Longest trade duration', str(longest_trade_duration))
