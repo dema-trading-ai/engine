@@ -45,6 +45,8 @@ def check_for_missing_config_items(config: dict):
         if setting not in config:
             config_complete = False
             config[setting] = defaults[setting]
+            print_warning(f"The setting '{setting}' was not in your config file. It has been added to your config file,"
+                          f" with the default value of {defaults[setting]}.")
 
     if config['stoploss-type'] == "standard":
         config['stoploss-type'] = "static"
