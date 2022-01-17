@@ -17,7 +17,7 @@ class MainController:
                 os.environ["VERBOSITY"] = "no_warnings"
                 study = optuna.create_study()
 
-                if args.n_trials:
+                if args.n_trials and args.n_trials > 0:
                     n_trials = args.n_trials
                 else:
                     n_trials = 100
