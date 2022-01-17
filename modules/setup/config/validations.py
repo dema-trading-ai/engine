@@ -136,7 +136,10 @@ def validate_single_currency_in_pairs(config: dict):
     currency = config["currency"]
     for pair in pairs:
         pair = pair.split("/")
-        assert len(pair) == 2
+        if not len(pair) == 2:
+            print_config_error("One or more of your pairs is not configured right. Check that the currencies in your"
+                               " pair are separated by a / symbol, and that each pair is enclosed in quotes.")
+            sys.exit()
         if not pair[1] == currency:
             print_config_error("You can only use pairs that have the base currency you specified.")
             print_config_error("e.g., if you specified 'USDT' as your currency, you cannot add 'BTC/EUR' as a pair")
