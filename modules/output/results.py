@@ -89,7 +89,7 @@ def show_mainresults(self: MainResults, currency_symbol: str):
     console_color.print(table_grid)
 
 
-def create_trade_info_table(self, currency_symbol, justification) -> Table:
+def create_trade_info_table(self: MainResults, currency_symbol, justification) -> Table:
     avg_trade_duration = format_time_difference(self.avg_trade_duration)
     longest_trade_duration = format_time_difference(self.longest_trade_duration)
     shortest_trade_duration = format_time_difference(self.shortest_trade_duration)
@@ -108,14 +108,22 @@ def create_trade_info_table(self, currency_symbol, justification) -> Table:
     trade_info_table.add_row('Rejected buy signals', str(self.rejected_buy_signal))
     trade_info_table.add_row('Most consecutive losses',
                              str(self.n_consecutive_losses))
-    trade_info_table.add_row(f'Best trade',
+    trade_info_table.add_row('Best trade',
                              colorize(round(
                                  self.best_trade_profit_percentage, 2),
                                  0, f'% ({self.best_trade_pair})'))
-    trade_info_table.add_row(f'Worst trade',
+    trade_info_table.add_row('Best trade profit',
+                             colorize(round(
+                                 self.best_trade_currency_amount, 2),
+                                 0, str(currency_symbol)))
+    trade_info_table.add_row('Worst trade',
                              colorize(round(
                                  self.worst_trade_profit_percentage, 2),
                                  0, f'% ({self.worst_trade_pair})'))
+    trade_info_table.add_row('Worst trade profit',
+                             colorize(round(
+                                 self.worst_trade_currency_amount, 2),
+                                 0, str(currency_symbol)))
     trade_info_table.add_row('Median trade profit', f'{round(self.median_trade_profit, 2)} {currency_symbol}')
     trade_info_table.add_row('Shortest trade duration', str(shortest_trade_duration))
     trade_info_table.add_row('Avg. trade duration', str(avg_trade_duration))
