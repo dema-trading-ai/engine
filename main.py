@@ -3,7 +3,6 @@ import multiprocessing
 import os
 import sys
 from time import perf_counter
-from requests_futures.sessions import FuturesSession
 
 import optuna
 
@@ -23,8 +22,6 @@ if sys.stdout.isatty() is False and PYTHONIOENCODING is not False and sys.stdout
 
 
 def main():
-    session = FuturesSession()
-    session.get('https://enginemetricspdbom7kn-logengineruns.functions.fnc.fr-par.scw.cloud')
     print_warning_if_version_outdated()
     execute_for_args({
         'init': run_init,
