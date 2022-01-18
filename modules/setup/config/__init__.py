@@ -45,6 +45,7 @@ class ConfigModule(object):
         self.strategy_definition = None
         self.strategy_name = None
         self.exchange = None
+        self.randomize_pair_order = None
 
     @staticmethod
     async def create(args):
@@ -91,6 +92,7 @@ class ConfigModule(object):
         config_module.export_result = config.get("export-result", False)
         config_module.roi = config["roi"]
         config_module.currency_symbol = get_currency_symbol(config_module.raw_config)
+        config_module.randomize_pair_order = config["randomize-pair-order"]
         return config_module
 
     async def close(self):

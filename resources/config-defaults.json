@@ -15,6 +15,7 @@
     "120": 3
   },
   "pairs": ["BTC/USDT", "LTC/USDT", "ETH/USDT"],
+  "randomize-pair-order": false,
   "currency": "USDT",
   "fee": 0.25,
   "strategy-name": "MyStrategy",
