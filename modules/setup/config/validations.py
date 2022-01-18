@@ -5,7 +5,8 @@ from typing import Tuple
 
 from cli.arg_parse import read_spec, spec_type_to_python_type
 from modules.setup.config.cli import get_cli_config
-from cli.print_utils import print_config_error, print_warning, print_error
+from cli.print_utils import print_config_error, print_warning
+from utils.error_handling import GeneralError, UnexpectedError
 
 
 def validate_and_read_cli(config: dict, args):
@@ -35,8 +36,10 @@ def check_for_missing_config_items(config: dict):
         print_warning("Cannot find the default values for config file")
         return config
     except Exception:
-        raise Exception("Something went wrong while checking the config file.",
-                        sys.exc_info()[0])
+        error = UnexpectedError(sys.exc_info(),
+                                add_info="Something went wrong while checking the config file.",
+                                stop=True).format()
+        raise error
 
     defaults = json.loads(data)
 
@@ -62,22 +65,37 @@ def check_for_missing_config_items(config: dict):
 
 
 def validate_dynamic_stoploss(stoploss: DataFrame) -> None:
-    if stoploss is None or 'stoploss' not in stoploss.columns:
-        print_error('Dynamic stoploss not configured')
-        sys.exit()
+    add_info = ''
+    try:
+        if stoploss is None or 'stoploss' not in stoploss.columns:
+            add_info = "Dynamic stoploss not configured"
+            raise GeneralError()
 
-    if stoploss['stoploss'].dtypes != 'float64':
-        print_error(f"You passed an invalid type to the stoploss parameter. This parameter should be of type float, but it is {stoploss['stoploss'].dtypes}.")
-        sys.exit()
+        if stoploss['stoploss'].dtypes != 'float64':
+            add_info = f"You passed an invalid type to the stoploss parameter. This parameter should be of type float, " \
+                       f"but it is {stoploss['stoploss'].dtypes}."
+            raise GeneralError()
+    except GeneralError:
+        error = UnexpectedError(sys.exc_info(),
+                                add_info=add_info,
+                                stop=True).format()
+        raise error
 
 
 def assert_given_else_default(config, spec):
     param_value = config.get(spec["name"])
     default = spec.get("default")
-    if param_value is None and default is None:
-        print_config_error(f"You must specify the '{spec['name']}' parameter")
-    if param_value is None:
-        config[spec["name"]] = default
+
+    try:
+        if param_value is None:
+            config[spec["name"]] = default
+            if default is None:
+                raise GeneralError()
+    except GeneralError:
+        error = UnexpectedError(sys.exc_info(),
+                                add_info=f"You must specify the '{spec['name']}' parameter",
+                                stop=True).format()
+        raise error
 
 
 def assert_type(config, spec):
@@ -85,10 +103,17 @@ def assert_type(config, spec):
     t = spec_type_to_python_type(spec["type"])
 
     good = is_value_of_type(param_value, t)
+    try:
+        if not good:
+            raise GeneralError()
 
-    if not good:
-        print_error(f"You passed an invalid type to the '{spec['name']}' parameter. This parameter should be of type {str(t)[8:-2]}, but it is {str(type(param_value))[8:-2]}.")
-        sys.exit()
+    except GeneralError:
+        error = UnexpectedError(sys.exc_info(),
+                                add_info=f"You passed an invalid type to the '{spec['name']}' "
+                                         f"parameter. This parameter should be of type "
+                                f"{str(t)[8:-2]}, but it is {str(type(param_value))[8:-2]}.",
+                                stop=True).format()
+        raise error
 
 
 def is_value_of_type(param_value, t) -> bool:
@@ -174,8 +199,12 @@ def validate_ratios(df: DataFrame) -> Tuple[bool, bool]:
         three_y = False
         if 90 > len(df['capital']):
             ninety_d = False
-            print_warning('The time period is less than 90 days. The 90 day and 3 year Sharpe and Sortino ratios are only calculated on the available data.')
+            print_warning(
+                'The time period is less than 90 days. The 90 day and 3 year Sharpe and Sortino ratios are only '
+                'calculated on the available data.')
         else:
-            print_warning('The time period is less than 3 years. The 3 year Sharpe and Sortino ratios are only calculated on the available data.')
+            print_warning(
+                'The time period is less than 3 years. The 3 year Sharpe and Sortino ratios are only calculated on '
+                'the available data.')
 
     return ninety_d, three_y

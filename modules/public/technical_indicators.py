@@ -1,6 +1,9 @@
 import talib.abstract as ta
 import pandas as pd
 import numpy as np
+import sys
+
+from utils.error_handling import UnexpectedError
 
 
 def absolute_strength_histogram(dataframe, length=9, smooth=3, mode="RSI"):
@@ -12,24 +15,28 @@ def absolute_strength_histogram(dataframe, length=9, smooth=3, mode="RSI"):
     :param mode: Indicator method. Choose from: ["RSI", "STOCHASTIC", "ADX"]
     :return:
     """
-    df = dataframe.copy()
+    try:
+        df = dataframe.copy()
 
-    if mode == "RSI":
-        df['bulls'] = 0.5 * (abs(df['close'] - df['close'].shift(1)) + (df['close'] - df['close'].shift(1)))
-        df['bears'] = 0.5 * (abs(df['close'] - df['close'].shift(1)) - (df['close'] - df['close'].shift(1)))
+        if mode == "RSI":
+            df['bulls'] = 0.5 * (abs(df['close'] - df['close'].shift(1)) + (df['close'] - df['close'].shift(1)))
+            df['bears'] = 0.5 * (abs(df['close'] - df['close'].shift(1)) - (df['close'] - df['close'].shift(1)))
 
-    elif mode == "STOCHASTIC":
-        df['lowest_bars'] = df['close'].rolling(length).min()
-        df['highest_bars'] = df['close'].rolling(length).max()
+        elif mode == "STOCHASTIC":
+            df['lowest_bars'] = df['close'].rolling(length).min()
+            df['highest_bars'] = df['close'].rolling(length).max()
 
-        df['bulls'] = df['close'] - df['lowest_bars']
-        df['bears'] = df['highest_bars'] - df['close']
+            df['bulls'] = df['close'] - df['lowest_bars']
+            df['bears'] = df['highest_bars'] - df['close']
 
-    elif mode == "ADX":
-        df['bulls'] = 0.5 * (abs(df['high'] - df['high'].shift(1)) + (df['high'] - df['high'].shift(1)))
-        df['bears'] = 0.5 * (abs(df['low'].shift(1) - df['low']) + (df['low'].shift(1) - df['low']))
-    else:
-        raise ValueError("Mode not implemented yet, use RSI, STOCHASTIC or ADX")
+        elif mode == "ADX":
+            df['bulls'] = 0.5 * (abs(df['high'] - df['high'].shift(1)) + (df['high'] - df['high'].shift(1)))
+            df['bears'] = 0.5 * (abs(df['low'].shift(1) - df['low']) + (df['low'].shift(1) - df['low']))
+    except ValueError:
+        error = UnexpectedError(sys.exc_info(),
+                                add_info="Mode not implemented yet, use RSI, STOCHASTIC or ADX.",
+                                stop=True).format()
+        raise error
 
     df['avg_bulls'] = ta.EMA(df['bulls'], timeperiod=length)
     df['avg_bears'] = ta.EMA(df['bears'], timeperiod=length)

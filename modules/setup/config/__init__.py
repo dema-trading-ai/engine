@@ -14,6 +14,7 @@ from .cctx_adapter import create_cctx_exchange
 from .currencies import get_currency_symbol
 from .validations import validate_and_read_cli, check_for_missing_config_items
 from cli.print_utils import print_info, print_standard, print_warning, print_error
+from utils.error_handling import GeneralError, UnexpectedError
 
 msec = 1000
 minute = 60 * msec
@@ -83,7 +84,8 @@ class ConfigModule(object):
             config_module.exposure_per_trade = round(config_module.exposure_per_trade, 2)
         config_module.exposure_per_trade /= 100
         if config_module.exposure_per_trade > 1.0:
-            print_warning(f"Exposure is not 100% (default), this means that every trade will use {round(config_module.exposure_per_trade * 100, 2)}% funds per trade until either all funds are used or max open trades are open.")
+            print_warning(
+                f"Exposure is not 100% (default), this means that every trade will use {round(config_module.exposure_per_trade * 100, 2)}% funds per trade until either all funds are used or max open trades are open.")
         config_module.plots = config["plots"]
         config_module.tearsheet = config.get("tearsheet", False)
         config_module.export_result = config.get("export-result", False)
@@ -107,10 +109,13 @@ def read_config(config_path: str) -> dict:
         print_error(f"No config file found at {config_path}. You might be trying to run the Engine from the wrong"
                     f" directory. See our documentation (https://docs.dematrading.ai) for detailed instructions on"
                     f" how to run the Engine.")
-        sys.exit()
+        sys.exit(1)
     except Exception:
-        raise Exception("[ERROR] Something went wrong parsing config file.",
-                        sys.exc_info()[0])
+        error = UnexpectedError(sys.exc_info(),
+                                add_info="Something went wrong while parsing the config file.",
+                                stop=True).format()
+        raise error
+
     config = json.loads(data)
     config['path'] = config_path or "config.json"
 
@@ -122,7 +127,8 @@ def print_pairs(config_json):
     print_info("Watching pairs: %s." % pairs_string[:-1])
 
 
-def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtesting_till_now: bool, timeframe_ms: int) -> tuple:
+def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtesting_till_now: bool,
+                   timeframe_ms: int) -> tuple:
     # Configure milliseconds
     today_ms = exchange.milliseconds()
     backtesting_from_ms = exchange.parse8601("%sT00:00:00Z" % backtesting_from)
@@ -152,11 +158,17 @@ def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtes
         backtesting_to_parsed = last_closed_candle_datetime
 
     # Check for incorrect configuration
-    if backtesting_from_ms >= backtesting_to_ms:
-        raise Exception("[ERROR] Backtesting periods are configured incorrectly.")
+    try:
+        timeframe = backtesting_from_ms - backtesting_to_ms
+        if timeframe > 0:
+            raise GeneralError()
+
+    except GeneralError:
+        error = UnexpectedError(sys.exc_info(), stop=True).format()
+        raise error
 
     print_info(f'Gathering data from {str(backtesting_from_parsed)} '
-                  f'until {str(backtesting_to_parsed)}.')
+               f'until {str(backtesting_to_parsed)}.')
     return backtesting_from_ms, backtesting_to_ms
 
 

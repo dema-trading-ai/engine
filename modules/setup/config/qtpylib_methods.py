@@ -27,11 +27,19 @@ import numpy as np
 import pandas as pd
 from pandas.core.base import PandasObject
 
+from utils.error_handling import GeneralError, UnexpectedError
+
 
 # =============================================
 # check min, python version
-if sys.version_info < (3, 4):
-    raise SystemError("QTPyLib requires Python version >= 3.4")
+try:
+    if sys.version_info < (3, 4):
+        raise GeneralError()
+except GeneralError:
+    error = UnexpectedError(sys.exc_info(),
+                            add_info="QTPyLib requires Python version >= 3.4",
+                            stop=True).format()
+    raise error
 
 # =============================================
 warnings.simplefilter(action="ignore", category=RuntimeWarning)
