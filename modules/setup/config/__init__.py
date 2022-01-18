@@ -166,7 +166,9 @@ def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtes
             raise GeneralError()
 
     except GeneralError:
-        error = UnexpectedError(sys.exc_info(), stop=True).format()
+        error = UnexpectedError(sys.exc_info(),
+                                add_info="Backtesting periods are configured incorrectly.",
+                                stop=True).format()
         raise error
 
     print_info(f'Gathering data from {str(backtesting_from_parsed)} '

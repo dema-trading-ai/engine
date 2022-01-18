@@ -6,12 +6,12 @@ from cli import print_utils
 
 
 class GeneralError(Exception):
-    """Base error class used to trigger graceful errors and parent to error below"""
+    """General error class used to trigger graceful errors and parent to error below"""
     pass
 
 
 class UnexpectedError(GeneralError):
-    """General error showing file, function and line number of its trigger"""
+    """Default error showing file, function and line number of its trigger"""
 
     def __init__(self, exc_info: Tuple, add_info: str = '', stop: bool = False):
         self.type = exc_info[0]
