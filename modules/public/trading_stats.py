@@ -29,8 +29,10 @@ class MainResults:
     n_consecutive_losses: int
     max_realised_drawdown: float
     worst_trade_profit_percentage: float
+    worst_trade_currency_amount: float
     worst_trade_pair: str
     best_trade_profit_percentage: float
+    best_trade_currency_amount: float
     best_trade_pair: str
     median_trade_profit: float
     avg_trade_duration: timedelta

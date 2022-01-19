@@ -1,5 +1,4 @@
 import json
-import os
 import sys
 from pandas import DataFrame
 from typing import Tuple
@@ -7,8 +6,6 @@ from typing import Tuple
 from cli.arg_parse import read_spec, spec_type_to_python_type
 from modules.setup.config.cli import get_cli_config
 from cli.print_utils import print_config_error, print_warning, print_error
-
-CONFIG_DEFAULTS_FILE = os.path.dirname(os.path.realpath(sys.argv[0])) + "/resources/config-defaults.json"
 
 
 def validate_and_read_cli(config: dict, args):
@@ -27,8 +24,12 @@ def validate_by_spec(config, config_spec):
 
 
 def check_for_missing_config_items(config: dict):
+    from main import RUNFOLDER
+
+    config_defaults_file = RUNFOLDER + "/resources/config-defaults.json"
+
     try:
-        with open(CONFIG_DEFAULTS_FILE) as defaults_file:
+        with open(config_defaults_file) as defaults_file:
             data = defaults_file.read()
     except FileNotFoundError:
         print_warning("Cannot find the default values for config file")
@@ -44,6 +45,8 @@ def check_for_missing_config_items(config: dict):
         if setting not in config:
             config_complete = False
             config[setting] = defaults[setting]
+            print_warning(f"The setting '{setting}' was not in your config file. It has been added to your config file,"
+                          f" with the default value of {defaults[setting]}.")
 
     if config['stoploss-type'] == "standard":
         config['stoploss-type'] = "static"
@@ -135,7 +138,10 @@ def validate_single_currency_in_pairs(config: dict):
     currency = config["currency"]
     for pair in pairs:
         pair = pair.split("/")
-        assert len(pair) == 2
+        if not len(pair) == 2:
+            print_config_error("One or more of your pairs is not configured right. Check that the currencies in your"
+                               " pair are separated by a / symbol, and that each pair is enclosed in quotes.")
+            sys.exit()
         if not pair[1] == currency:
             print_config_error("You can only use pairs that have the base currency you specified.")
             print_config_error("e.g., if you specified 'USDT' as your currency, you cannot add 'BTC/EUR' as a pair")
