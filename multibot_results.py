@@ -7,7 +7,11 @@ import copy
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 files = glob(BASE_DIR + r"/data/backtesting-data/combined_*.json")
 
-to_ignore = ['Eagle_heikin', 'Osprey_heikin', 'Osprey-', '-Osprey']
+pd.set_option('display.max_colwidth', None)
+
+
+# to_ignore = ['Eagle_heikin', 'Osprey_heikin', 'Osprey-', '-Osprey']
+to_ignore = []
 
 
 def return_cleaned_dict(data_dict):
@@ -23,13 +27,13 @@ def return_cleaned_dict(data_dict):
     return pd.DataFrame(data).T
 
 
-# for i in range(3, 7):
-for i in range(4, 5):
-    # with open(BASE_DIR + f"/data/test_combined_{i}_results.json", 'r') as f:
-    with open(BASE_DIR + f"/data/backtesting-data/test_combined_{i}_results.json") as f:
+for i in range(3, 7):
+# for i in range(4, 5):
+    # with open(BASE_DIR + f"/data/backtesting-data/test_combined_{i}_results.json") as f:
+    with open(BASE_DIR + f"/data/combined_{i}_results.json", 'r') as f:
         data = json.load(f)
         df = return_cleaned_dict(data)
-        df = df.sort_values(by='profit', ascending=False)
+        df = df.sort_values(by='drawdown', ascending=False)
         print(df.head(15))
 
 
