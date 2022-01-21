@@ -7,7 +7,6 @@ from cli import print_utils
 
 class GeneralError(Exception):
     """Parent class inheriting from Exception"""
-    pass
 
 
 class ConfigError(GeneralError):
