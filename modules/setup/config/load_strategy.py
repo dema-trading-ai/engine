@@ -7,7 +7,7 @@ from backtesting.strategy import Strategy
 from modules.algo.hyperopt.hyperopt_strategy import inject_hyperopt_parameters
 from modules.setup.config import StrategyDefinition
 from cli.print_utils import print_error
-from utils.error_handling import UnexpectedError
+from utils.error_handling import ErrorOutput
 
 
 def load_strategy_from_config(strategy_definition: StrategyDefinition) -> Strategy:
@@ -21,19 +21,19 @@ def load_strategy_from_config(strategy_definition: StrategyDefinition) -> Strate
             continue
         mod = __import__(pyfile[:-3])
         if hasattr(mod, strategy_definition.strategy_name):
-            CustomStrategy = getattr(mod, strategy_definition.strategy_name)
-            check_if_subclass_of_strategy(CustomStrategy)
+            custom_strategy = getattr(mod, strategy_definition.strategy_name)
+            check_if_subclass_of_strategy(custom_strategy)
 
             try:
-                strategy = CustomStrategy()
+                strategy = custom_strategy()
                 inject_hyperopt_parameters(strategy)
                 return strategy
+
             except TypeError:
-                error = UnexpectedError(sys.exc_info(),
-                                        add_info="Your custom strategy has inherited from the base class Strategy,\n\t"
-                                                 "but it does not implement all abstract methods.",
-                                        stop=True).format()
-                raise error
+                ErrorOutput(sys.exc_info(),
+                            add_info="Your custom strategy has inherited from the base class Strategy,\n\t"
+                                     "but it does not implement all abstract methods.",
+                            stop=True).print_error()
 
     # in case it is not found
     print_error(f"Could not find strategy '{strategy_definition.strategy_name}' "

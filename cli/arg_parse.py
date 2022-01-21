@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import TypedDict, Callable
 
 from utils.utils import get_project_root
-from utils.error_handling import GeneralError, UnexpectedError
+from utils.error_handling import WrongSpecTypeError, ErrorOutput
 
 CliActions = TypedDict("CliActions", {
     'init': Callable,
@@ -60,7 +60,6 @@ def spec_type_to_python_type(t: str):
         elif t == "datetime":
             return datetime
         else:
-            raise GeneralError()
-    except GeneralError:
-        error = UnexpectedError(sys.exc_info(), stop=True).format()
-        raise error
+            raise WrongSpecTypeError()
+    except WrongSpecTypeError:
+        ErrorOutput(sys.exc_info(), stop=True).print_error()

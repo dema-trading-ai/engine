@@ -15,7 +15,7 @@ from cli.print_utils import print_info, print_error, print_warning
 from modules.setup.config import ConfigModule
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
 from utils.utils import get_ohlcv_indicators, parse_timeframe
-from utils.error_handling import GeneralError, UnexpectedError
+from utils.error_handling import ErrorOutput, ConfigError
 
 # ======================================================================
 # DataModule is responsible for downloading OHLCV data, preparing it
@@ -73,11 +73,10 @@ class DataModule:
         self.warn_if_missing_ticks(history_data)
         try:
             if check_backtesting_period and not is_same_backtesting_period(history_data):
-                raise GeneralError()
+                raise ConfigError()
 
-        except GeneralError:
-            error = UnexpectedError(sys.exc_info(), stop=True).format()
-            raise error
+        except ConfigError:
+            ErrorOutput(sys.exc_info(), stop=True).print_error()
 
         return history_data
 

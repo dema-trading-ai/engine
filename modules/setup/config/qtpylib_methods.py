@@ -27,22 +27,22 @@ import numpy as np
 import pandas as pd
 from pandas.core.base import PandasObject
 
-from utils.error_handling import GeneralError, UnexpectedError
-
+from utils.error_handling import PythonVersionError, ErrorOutput
 
 # =============================================
 # check min, python version
 try:
     if sys.version_info < (3, 4):
-        raise GeneralError()
-except GeneralError:
-    error = UnexpectedError(sys.exc_info(),
-                            add_info="QTPyLib requires Python version >= 3.4",
-                            stop=True).format()
-    raise error
+        raise PythonVersionError()
+
+except PythonVersionError:
+    ErrorOutput(sys.exc_info(),
+                add_info="QTPyLib requires Python version >= 3.4",
+                stop=True).print_error()
 
 # =============================================
 warnings.simplefilter(action="ignore", category=RuntimeWarning)
+
 
 # =============================================
 
@@ -113,6 +113,7 @@ def session(df, start='17:00', end='16:00'):
 
     return df.copy()
 
+
 # ---------------------------------------------
 
 
@@ -135,17 +136,17 @@ def heikinashi(bars):
                               'low': bars['ha_low'],
                               'close': bars['ha_close']})
 
+
 # ---------------------------------------------
 
 
 def tdi(series, rsi_lookback=13, rsi_smooth_len=2,
         rsi_signal_len=7, bb_lookback=34, bb_std=1.6185):
-
     rsi_data = rsi(series, rsi_lookback)
     rsi_smooth = sma(rsi_data, rsi_smooth_len)
     rsi_signal = sma(rsi_data, rsi_signal_len)
 
-    bb_series = bollinger_bands(rsi_data, bb_lookback, bb_std)
+    bb_series = bollinger_bands(rsi_data, bb_lookback, int(bb_std))
 
     return pd.DataFrame(index=series.index, data={
         "rsi": rsi_data,
@@ -155,6 +156,7 @@ def tdi(series, rsi_lookback=13, rsi_smooth_len=2,
         "rsi_bb_lower": bb_series['lower'],
         "rsi_bb_mid": bb_series['mid']
     })
+
 
 # ---------------------------------------------
 
@@ -166,7 +168,7 @@ def awesome_oscillator(df, weighted=False, fast=5, slow=34):
         ao = (midprice.ewm(fast).mean() - midprice.ewm(slow).mean()).values
     else:
         ao = numpy_rolling_mean(midprice, fast) - \
-            numpy_rolling_mean(midprice, slow)
+             numpy_rolling_mean(midprice, slow)
 
     return pd.Series(index=df.index, data=ao)
 
@@ -236,11 +238,11 @@ def crossed(series1, series2, direction=None):
 
     if direction is None or direction == "above":
         above = pd.Series((series1 > series2) & (
-            series1.shift(1) <= series2.shift(1)))
+                series1.shift(1) <= series2.shift(1)))
 
     if direction is None or direction == "below":
         below = pd.Series((series1 < series2) & (
-            series1.shift(1) >= series2.shift(1)))
+                series1.shift(1) >= series2.shift(1)))
 
     if direction is None:
         return above or below
@@ -255,6 +257,7 @@ def crossed_above(series1, series2):
 def crossed_below(series1, series2):
     return crossed(series1, series2, "below")
 
+
 # ---------------------------------------------
 
 
@@ -268,6 +271,7 @@ def rolling_std(series, window=200, min_periods=None):
         except Exception as e:  # noqa: F841
             return pd.Series(series).rolling(window=window, min_periods=min_periods).std()
 
+
 # ---------------------------------------------
 
 
@@ -280,6 +284,7 @@ def rolling_mean(series, window=200, min_periods=None):
             return series.rolling(window=window, min_periods=min_periods).mean()
         except Exception as e:  # noqa: F841
             return pd.Series(series).rolling(window=window, min_periods=min_periods).mean()
+
 
 # ---------------------------------------------
 
@@ -317,7 +322,7 @@ def rolling_weighted_mean(series, window=200, min_periods=None):
 def hull_moving_average(series, window=200, min_periods=None):
     min_periods = window if min_periods is None else min_periods
     ma = (2 * rolling_weighted_mean(series, window / 2, min_periods)) - \
-        rolling_weighted_mean(series, window, min_periods)
+         rolling_weighted_mean(series, window, min_periods)
     return rolling_weighted_mean(ma, np.sqrt(window), min_periods)
 
 
@@ -419,7 +424,7 @@ def macd(series, fast=3, slow=10, smooth=16):
     return value is emaslow, emafast, macd which are len(x) arrays
     """
     macd_line = rolling_weighted_mean(series, window=fast) - \
-        rolling_weighted_mean(series, window=slow)
+                rolling_weighted_mean(series, window=slow)
     signal = rolling_weighted_mean(macd_line, window=smooth)
     histogram = macd_line - signal
     # return macd_line, signal, histogram
@@ -549,8 +554,8 @@ def stoch(df, window=14, d=3, k=3, fast=False):
     my_df['rolling_min'] = df['low'].rolling(window).min()
 
     my_df['fast_k'] = (
-        100 * (df['close'] - my_df['rolling_min']) /
-        (my_df['rolling_max'] - my_df['rolling_min'])
+            100 * (df['close'] - my_df['rolling_min']) /
+            (my_df['rolling_max'] - my_df['rolling_min'])
     )
     my_df['fast_d'] = my_df['fast_k'].rolling(d).mean()
 
@@ -561,6 +566,7 @@ def stoch(df, window=14, d=3, k=3, fast=False):
     my_df['slow_d'] = my_df['slow_k'].rolling(d).mean()
 
     return my_df.loc[:, ['slow_k', 'slow_d']]
+
 
 # ---------------------------------------------
 
@@ -592,6 +598,7 @@ def zlsma(series, window, min_periods=None):
 def zlhma(series, window, min_periods=None):
     return zlma(series, window, min_periods, kind="hma")
 
+
 # ---------------------------------------------
 
 
@@ -600,6 +607,7 @@ def zscore(bars, window=20, stds=1, col='close'):
     std = numpy_rolling_std(bars[col], window)
     mean = numpy_rolling_mean(bars[col], window)
     return (bars[col] - mean) / (std * stds)
+
 
 # ---------------------------------------------
 

@@ -14,7 +14,7 @@ from .cctx_adapter import create_cctx_exchange
 from .currencies import get_currency_symbol
 from .validations import validate_and_read_cli, check_for_missing_config_items
 from cli.print_utils import print_info, print_standard, print_warning, print_error
-from utils.error_handling import GeneralError, UnexpectedError
+from utils.error_handling import ConfigError, ErrorOutput
 
 msec = 1000
 minute = 60 * msec
@@ -86,7 +86,9 @@ class ConfigModule(object):
         config_module.exposure_per_trade /= 100
         if config_module.exposure_per_trade > 1.0:
             print_warning(
-                f"Exposure is not 100% (default), this means that every trade will use {round(config_module.exposure_per_trade * 100, 2)}% funds per trade until either all funds are used or max open trades are open.")
+                f"Exposure is not 100% (default), this means that every trade will use "
+                f"{round(config_module.exposure_per_trade * 100, 2)}% funds per trade until either all funds are "
+                f"used or max open trades are open.")
         config_module.plots = config["plots"]
         config_module.tearsheet = config.get("tearsheet", False)
         config_module.export_result = config.get("export-result", False)
@@ -107,16 +109,16 @@ def read_config(config_path: str) -> dict:
     try:
         with open(config_path or "config.json", 'r', encoding='utf-8') as configfile:
             data = configfile.read()
+
     except FileNotFoundError:
-        print_error(f"No config file found at {config_path}. You might be trying to run the Engine from the wrong"
-                    f" directory. See our documentation (https://docs.dematrading.ai) for detailed instructions on"
-                    f" how to run the Engine.")
-        sys.exit(1)
-    except Exception:
-        error = UnexpectedError(sys.exc_info(),
-                                add_info="Something went wrong while parsing the config file.",
-                                stop=True).format()
-        raise error
+        ErrorOutput(sys.exc_info(),
+                    add_info=f"No config file found at {config_path}. You might be trying to run the Engine from the "
+                             f"wrong directory. See our documentation\n\t(https://docs.dematrading.ai) for detailed "
+                             f"instructions on how to run the Engine.",
+                    stop=True).print_error()
+
+    except Exception as e:
+        raise e
 
     config = json.loads(data)
     config['path'] = config_path or "config.json"
@@ -163,13 +165,12 @@ def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtes
     try:
         timeframe = backtesting_from_ms - backtesting_to_ms
         if timeframe > 0:
-            raise GeneralError()
+            raise ConfigError()
 
-    except GeneralError:
-        error = UnexpectedError(sys.exc_info(),
-                                add_info="Backtesting periods are configured incorrectly.",
-                                stop=True).format()
-        raise error
+    except ConfigError:
+        ErrorOutput(sys.exc_info(),
+                    add_info="Backtesting periods are configured incorrectly.",
+                    stop=True).print_error()
 
     print_info(f'Gathering data from {str(backtesting_from_parsed)} '
                f'until {str(backtesting_to_parsed)}.')

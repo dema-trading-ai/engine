@@ -1,7 +1,7 @@
 import sys
 from enum import Enum
 from typing import TypeVar
-from utils.error_handling import UnexpectedError
+from utils.error_handling import ErrorOutput
 
 # Define different timestep values
 WEEKLY = 604800000  # 7 days in milliseconds
@@ -303,8 +303,7 @@ class MockPairFrame(dict):
             if k not in self:
                 raise LookupError()
         except LookupError:
-            error = UnexpectedError(sys.exc_info(),
-                                    add_info=f"no pair {k} defined on construction",
-                                    stop=True).format()
-            raise error
+            ErrorOutput(sys.exc_info(),
+                        add_info=f"No pair {k} defined on construction",
+                        stop=True).print_error()
         super().__setitem__(k, v)

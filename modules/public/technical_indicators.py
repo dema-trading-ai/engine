@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import sys
 
-from utils.error_handling import UnexpectedError
+from utils.error_handling import ErrorOutput
 
 
 def absolute_strength_histogram(dataframe, length=9, smooth=3, mode="RSI"):
@@ -33,10 +33,9 @@ def absolute_strength_histogram(dataframe, length=9, smooth=3, mode="RSI"):
             df['bulls'] = 0.5 * (abs(df['high'] - df['high'].shift(1)) + (df['high'] - df['high'].shift(1)))
             df['bears'] = 0.5 * (abs(df['low'].shift(1) - df['low']) + (df['low'].shift(1) - df['low']))
     except ValueError:
-        error = UnexpectedError(sys.exc_info(),
-                                add_info="Mode not implemented yet, use RSI, STOCHASTIC or ADX.",
-                                stop=True).format()
-        raise error
+        ErrorOutput(sys.exc_info(),
+                    add_info="Mode not implemented yet, use RSI, STOCHASTIC or ADX.",
+                    stop=True).print_error()
 
     df['avg_bulls'] = ta.EMA(df['bulls'], timeperiod=length)
     df['avg_bears'] = ta.EMA(df['bears'], timeperiod=length)
@@ -61,7 +60,8 @@ def stoch_rsi(dataframe, period=14, smooth_d=3, smooth_k=3, rsi_period=14):
     """
     df = dataframe.copy()
     df['rsi'] = ta.RSI(df, timeperiod=rsi_period)
-    stochrsi = (df['rsi'] - df['rsi'].rolling(period).min()) / (df['rsi'].rolling(period).max() - df['rsi'].rolling(period).min())
+    stochrsi = (df['rsi'] - df['rsi'].rolling(period).min()) / (
+                df['rsi'].rolling(period).max() - df['rsi'].rolling(period).min())
     df['srsi_k'] = stochrsi.rolling(smooth_k).mean() * 100
     df['srsi_d'] = df['srsi_k'].rolling(smooth_d).mean()
     return df['srsi_k'], df['srsi_d']
@@ -150,4 +150,5 @@ def HMA(dataframe, timeperiod):
     :param timeperiod: The timeperiod of the HMA
     :return: The Hull Moving Average
     """
-    return ta.WMA(2*ta.WMA(dataframe['close'], timeperiod // 2) - ta.WMA(dataframe['close'], timeperiod), int(np.floor(np.sqrt(timeperiod))))
+    return ta.WMA(2 * ta.WMA(dataframe['close'], timeperiod // 2) - ta.WMA(dataframe['close'], timeperiod),
+                  int(np.floor(np.sqrt(timeperiod))))

@@ -6,7 +6,7 @@ from typing import Tuple
 from cli.arg_parse import read_spec, spec_type_to_python_type
 from modules.setup.config.cli import get_cli_config
 from cli.print_utils import print_config_error, print_warning
-from utils.error_handling import GeneralError, UnexpectedError
+from utils.error_handling import StoplossConfigError, WrongSpecTypeError, WrongSpecNameError, ErrorOutput
 
 
 def validate_and_read_cli(config: dict, args):
@@ -32,14 +32,13 @@ def check_for_missing_config_items(config: dict):
     try:
         with open(config_defaults_file) as defaults_file:
             data = defaults_file.read()
+
     except FileNotFoundError:
         print_warning("Cannot find the default values for config file")
         return config
-    except Exception:
-        error = UnexpectedError(sys.exc_info(),
-                                add_info="Something went wrong while checking the config file.",
-                                stop=True).format()
-        raise error
+
+    except Exception as e:
+        raise e
 
     defaults = json.loads(data)
 
@@ -71,17 +70,17 @@ def validate_dynamic_stoploss(stoploss: DataFrame) -> None:
     try:
         if stoploss is None or 'stoploss' not in stoploss.columns:
             add_info = "Dynamic stoploss not configured"
-            raise GeneralError()
+            raise StoplossConfigError()
 
         if stoploss['stoploss'].dtypes != 'float64':
-            add_info = f"You passed an invalid type to the stoploss parameter. This parameter should be of type float, " \
-                       f"but it is {stoploss['stoploss'].dtypes}."
-            raise GeneralError()
-    except GeneralError:
-        error = UnexpectedError(sys.exc_info(),
-                                add_info=add_info,
-                                stop=True).format()
-        raise error
+            add_info = f"You passed an invalid type to the stoploss parameter. This parameter should be of type " \
+                       f"float, but it is {stoploss['stoploss'].dtypes}."
+            raise StoplossConfigError()
+
+    except StoplossConfigError:
+        ErrorOutput(sys.exc_info(),
+                    add_info=add_info,
+                    stop=True).print_error()
 
 
 def assert_given_else_default(config, spec):
@@ -92,12 +91,12 @@ def assert_given_else_default(config, spec):
         if param_value is None:
             config[spec["name"]] = default
             if default is None:
-                raise GeneralError()
-    except GeneralError:
-        error = UnexpectedError(sys.exc_info(),
-                                add_info=f"You must specify the '{spec['name']}' parameter",
-                                stop=True).format()
-        raise error
+                raise WrongSpecNameError()
+
+    except WrongSpecNameError:
+        ErrorOutput(sys.exc_info(),
+                    add_info=f"You must specify the '{spec['name']}' parameter",
+                    stop=True).print_error()
 
 
 def assert_type(config, spec):
@@ -107,15 +106,14 @@ def assert_type(config, spec):
     good = is_value_of_type(param_value, t)
     try:
         if not good:
-            raise GeneralError()
+            raise WrongSpecTypeError()
 
-    except GeneralError:
-        error = UnexpectedError(sys.exc_info(),
-                                add_info=f"You passed an invalid type to the '{spec['name']}' "
-                                         f"parameter. This parameter should be of type "
-                                f"{str(t)[8:-2]}, but it is {str(type(param_value))[8:-2]}.",
-                                stop=True).format()
-        raise error
+    except WrongSpecTypeError:
+        ErrorOutput(sys.exc_info(),
+                    add_info=f"You passed an invalid type to the '{spec['name']}' "
+                             f"parameter. This parameter should be of type "
+                             f"{str(t)[8:-2]}, but it is {str(type(param_value))[8:-2]}.",
+                    stop=True).print_error()
 
 
 def is_value_of_type(param_value, t) -> bool:
@@ -175,7 +173,8 @@ def validate_single_currency_in_pairs(config: dict):
 
 def check_for_float(param_value: int, t: type) -> Tuple[float, type]:
     """
-    Checks if the given param_value is an int. If so, coerces it to a float, and changes the expected type to float. Otherwise, returns what is input.
+    Checks if the given param_value is an int. If so, coerces it to a float, and changes the expected type to float.
+    Otherwise, returns what is input.
     """
     if isinstance(param_value, int) and not isinstance(param_value, bool):
         return float(param_value), float
@@ -184,7 +183,8 @@ def check_for_float(param_value: int, t: type) -> Tuple[float, type]:
 
 def validate_ratios(df: DataFrame) -> Tuple[bool, bool]:
     """
-    Checks the given dataframe, prints out appropriate warning messages and returns bools to determine which time periods should be computed.
+    Checks the given dataframe, prints out appropriate warning messages and returns bools to determine which time
+    periods should be computed.
     """
 
     check_returns = (df['returns'].iloc[1:] == 0).all()
