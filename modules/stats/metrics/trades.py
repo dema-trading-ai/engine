@@ -51,4 +51,28 @@ def compute_median_trade_profit(closed_trades: [Trade]) -> float:
     all_trade_profit = [trade.profit_dollar for trade in closed_trades]
 
     median_trade_profit = median(all_trade_profit)
+
     return median_trade_profit
+
+
+def compute_profit_ratio(closed_trades: [Trade]) -> float:
+
+    if len(closed_trades) == 0:
+        return 0.0
+
+    winning_trades = []
+    losing_trades = []
+
+    for trade in closed_trades:  # Ignore trades with a profit of 0
+        if trade.profit_dollar > 0:
+            winning_trades.append(trade.profit_dollar)
+
+        if trade.profit_dollar < 0:
+            losing_trades.append(trade.profit_dollar)
+
+    total_gain = sum(winning_trades)
+    total_loss = sum(losing_trades)
+
+    profit_ratio = (total_gain / len(winning_trades)) / (total_loss / len(losing_trades))
+
+    return profit_ratio
