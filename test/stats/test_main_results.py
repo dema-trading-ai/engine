@@ -668,7 +668,7 @@ def test_profitable_weeks_no_trades_market_up():
 
 
 def test_profitable_weeks_no_trades_market_flat():
-    # One week, all days are flat - outcome should be draw for profitable week, draw for outperform
+    # One week, all days are flat - outcome should be drawn for profitable week, draw for outperform
     # market week, since the market is flat.
 
     # Arrange
@@ -688,3 +688,19 @@ def test_profitable_weeks_no_trades_market_flat():
     assert stats.main_results.win_weeks == 0
     assert stats.main_results.draw_weeks == 1
     assert stats.main_results.loss_weeks == 0
+
+
+def test_profit_ratio():
+    # TBD
+
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.main_results.profit_ratio == 0
