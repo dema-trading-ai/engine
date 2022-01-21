@@ -2,7 +2,7 @@ import math
 from datetime import timedelta
 
 from test.stats.stats_test_utils import StatsFixture
-from test.utils.signal_frame import ONE_MIL, THIRTY_MIN, EIGHT_HOURS, SIX_HOURS, TWELVE_HOURS, DAILY
+from test.utils.signal_frame import ONE_MIL, THIRTY_MIN, EIGHT_HOURS, SIX_HOURS, TWELVE_HOURS
 
 
 def test_capital():
