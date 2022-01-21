@@ -64,8 +64,10 @@ def compute_profit_ratio(closed_trades: [Trade]) -> float:
     losing_trades = []
 
     for trade in closed_trades:  # Ignore trades with a profit of 0
+
         if trade.profit_dollar > 0:
             winning_trades.append(trade.profit_dollar)
+            continue
 
         if trade.profit_dollar < 0:
             losing_trades.append(trade.profit_dollar)
@@ -73,6 +75,15 @@ def compute_profit_ratio(closed_trades: [Trade]) -> float:
     total_gain = sum(winning_trades)
     total_loss = sum(losing_trades)
 
-    profit_ratio = (total_gain / len(winning_trades)) / (total_loss / len(losing_trades))
+    count_winning_trades = len(winning_trades)
+    count_losing_trades = len(losing_trades)
+
+    if count_winning_trades == 0 or count_losing_trades == 0 or total_gain == 0 or total_loss == 0:
+        return 0.0
+
+    avg_gain = total_gain / count_winning_trades
+    avg_loss = total_loss / count_losing_trades
+
+    profit_ratio = avg_gain / abs(avg_loss)
 
     return profit_ratio
