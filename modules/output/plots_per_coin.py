@@ -1,5 +1,4 @@
 import os
-import re
 from datetime import datetime
 from multiprocessing import Process
 from pathlib import Path
@@ -13,16 +12,6 @@ from modules.stats.stats_config import StatsConfig
 
 
 def plot_per_coin(stats: TradingStats, config: StatsConfig):
-
-    # Check for old plots and remove them
-    regex = re.compile("plot[A-Z]*.html")
-
-    if os.path.exists('./data/backtesting-data/plots/'):
-        for plot_name in os.listdir('./data/backtesting-data/plots/'):
-            plot = regex.search(plot_name)
-            if plot:
-                os.remove('./data/backtesting-data/plots/' + plot.string)
-
     Path("data/backtesting-data/plots/").mkdir(parents=True, exist_ok=True)
     processes = [Process(target=plot_coin, args=(config, stats, key, value)) for key, value in stats.df.items()]
     for p in processes:
@@ -33,6 +22,14 @@ def plot_per_coin(stats: TradingStats, config: StatsConfig):
 
 
 def plot_coin(config, stats, pair: str, pair_data):
+    # Check for old plot and remove it
+    if os.path.exists('./data/backtesting-data/plots/'):
+        try:
+            os.remove('./data/backtesting-data/plots/plot' + pair.replace('/', '') + '.html')
+
+        except FileNotFoundError:
+            pass
+
     # create figure
     rows, height = plot_sizes(config.subplot_indicators)
     fig = make_subplots(rows=rows, cols=1, row_heights=height, vertical_spacing=0.02, shared_xaxes=True)
