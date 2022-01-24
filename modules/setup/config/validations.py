@@ -59,7 +59,8 @@ def check_for_missing_config_items(config: dict):
             new_pairs.append(pair.replace("/" + config['currency'], ""))
             config_complete = False
             if to_print:
-                print_warning("Currencies are no longer included in the pairs. This is changed in your config file.")
+                print_warning("Currencies are no longer included in the pairs. This has been automatically changed in "
+                              "your config file.")
                 to_print = False
         else:
             new_pairs.append(pair)
