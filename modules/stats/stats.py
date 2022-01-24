@@ -16,7 +16,7 @@ from modules.stats.drawdown.per_trade import get_max_seen_drawdown_per_trade
 from modules.stats.metrics.market_change import get_market_change, get_market_drawdown
 from modules.stats.metrics.trades import calculate_best_worst_trade, get_number_of_losing_trades, \
     get_number_of_consecutive_losing_trades, calculate_trade_durations, compute_median_trade_profit, \
-    compute_profit_ratio
+    compute_risk_reward_ratio
 from modules.stats.metrics.winning_weeks import get_winning_weeks_per_coin, \
     get_winning_weeks_for_portfolio, get_profitable_weeks_for_portfolio, get_profitable_weeks_per_coin
 from modules.stats.stats_config import StatsConfig
@@ -126,7 +126,7 @@ class StatsModule:
         worst_trade_profit_percentage = 0
         worst_trade_currency_amount = 0
         worst_trade_pair = ""
-        profit_ratio = 0
+        risk_reward_ratio = 0
         if best_trade:
             best_trade_profit_percentage = (best_trade.profit_ratio - 1) * 100
             worst_trade_profit_percentage = (worst_trade.profit_ratio - 1) * 100
@@ -134,7 +134,7 @@ class StatsModule:
             worst_trade_currency_amount = worst_trade.profit_dollar
             best_trade_pair = best_trade.pair
             worst_trade_pair = worst_trade.pair
-            profit_ratio = compute_profit_ratio(closed_trades)
+            risk_reward_ratio = compute_risk_reward_ratio(closed_trades)
 
         median_trade_profit = compute_median_trade_profit(closed_trades)
 
@@ -195,7 +195,7 @@ class StatsModule:
                            sortino_90d=sortino_90d,
                            sortino_3y=sortino_3y,
                            median_trade_profit=median_trade_profit,
-                           profit_ratio=profit_ratio
+                           risk_reward_ratio=risk_reward_ratio
                            )
 
     def generate_coin_results(self, closed_trades: [Trade], market_change: dict, market_drawdown: dict) -> [list, dict]:

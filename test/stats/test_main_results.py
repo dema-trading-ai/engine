@@ -690,7 +690,7 @@ def test_profitable_weeks_no_trades_market_flat():
     assert stats.main_results.loss_weeks == 0
 
 
-def test_profit_ratio():
+def test_risk_reward_ratio():
     # Checks that two trades return a ratio, should return a float
 
     # Arrange
@@ -703,11 +703,11 @@ def test_profit_ratio():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.main_results.profit_ratio, 1.849, abs_tol=0.001)
+    assert math.isclose(stats.main_results.risk_reward_ratio, 1.849, abs_tol=0.001)
 
 
-def test_profit_ratio_no_trade():
-    # Checks that the profit ratio can't be computed as there are no trades, should return 0 as an int
+def test_risk_reward_ratio_no_trade():
+    # Checks that the risk/ reward ratio can't be computed as there are no trades, should return 0 as an int
 
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
@@ -719,12 +719,12 @@ def test_profit_ratio_no_trade():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.main_results.profit_ratio == 0
-    assert isinstance(stats.main_results.profit_ratio, int)
+    assert stats.main_results.risk_reward_ratio == 0
+    assert isinstance(stats.main_results.risk_reward_ratio, int)
 
 
-def test_profit_ratio_one_winning_trade():
-    # Checks that the profit ratio can't be computed as there are no losing trades, should return 0.0 as a float
+def test_risk_reward_ratio_one_winning_trade():
+    # Checks that the risk/ reward ratio can't be computed as there are no losing trades, should return 0.0 as a float
 
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
@@ -736,12 +736,12 @@ def test_profit_ratio_one_winning_trade():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.main_results.profit_ratio == 0
-    assert isinstance(stats.main_results.profit_ratio, float)
+    assert stats.main_results.risk_reward_ratio == 0
+    assert isinstance(stats.main_results.risk_reward_ratio, float)
 
 
-def test_profit_ratio_one_losing_trade():
-    # Checks that the profit ratio can't be computed as there are no winning trades, should return 0.0 as a float
+def test_risk_reward_ratio_one_losing_trade():
+    # Checks that the risk/ reward ratio can't be computed as there are no winning trades, should return 0.0 as a float
 
     # Arrange
     fixture = StatsFixture(['COIN/BASE'])
@@ -753,5 +753,5 @@ def test_profit_ratio_one_losing_trade():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.main_results.profit_ratio == 0
-    assert isinstance(stats.main_results.profit_ratio, float)
+    assert stats.main_results.risk_reward_ratio == 0
+    assert isinstance(stats.main_results.risk_reward_ratio, float)

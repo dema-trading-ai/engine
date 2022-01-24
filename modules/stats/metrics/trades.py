@@ -55,7 +55,7 @@ def compute_median_trade_profit(closed_trades: [Trade]) -> float:
     return median_trade_profit
 
 
-def compute_profit_ratio(closed_trades: [Trade]) -> float:
+def compute_risk_reward_ratio(closed_trades: [Trade]) -> float:
 
     if len(closed_trades) == 0:
         return 0.0
@@ -84,6 +84,6 @@ def compute_profit_ratio(closed_trades: [Trade]) -> float:
     avg_gain = total_gain / count_winning_trades
     avg_loss = total_loss / count_losing_trades
 
-    profit_ratio = avg_gain / abs(avg_loss)
+    risk_reward_ratio = avg_gain / abs(avg_loss)
 
-    return profit_ratio
+    return risk_reward_ratio

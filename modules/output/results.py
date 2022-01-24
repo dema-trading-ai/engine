@@ -124,7 +124,7 @@ def create_trade_info_table(self: MainResults, currency_symbol, justification) -
                              colorize(round(
                                  self.worst_trade_currency_amount, 2),
                                  0, str(currency_symbol)))
-    trade_info_table.add_row('Profit ratio', str(round(self.profit_ratio, 2)))
+    trade_info_table.add_row('Risk/ reward ratio', str(round(self.risk_reward_ratio, 2)))
     trade_info_table.add_row('Median trade profit', f'{round(self.median_trade_profit, 2)} {currency_symbol}')
     trade_info_table.add_row('Shortest trade duration', str(shortest_trade_duration))
     trade_info_table.add_row('Avg. trade duration', str(avg_trade_duration))
