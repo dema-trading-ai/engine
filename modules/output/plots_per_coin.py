@@ -16,10 +16,12 @@ def plot_per_coin(stats: TradingStats, config: StatsConfig):
 
     # Check for old plots and remove them
     regex = re.compile("plot[A-Z]*.html")
-    for plot_name in os.listdir('./data/backtesting-data/plots/'):
-        plot = regex.search(plot_name)
-        if plot:
-            os.remove('./data/backtesting-data/plots/' + plot.string)
+
+    if os.path.exists('./data/backtesting-data/plots/'):
+        for plot_name in os.listdir('./data/backtesting-data/plots/'):
+            plot = regex.search(plot_name)
+            if plot:
+                os.remove('./data/backtesting-data/plots/' + plot.string)
 
     Path("data/backtesting-data/plots/").mkdir(parents=True, exist_ok=True)
     processes = [Process(target=plot_coin, args=(config, stats, key, value)) for key, value in stats.df.items()]
