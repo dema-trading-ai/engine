@@ -63,4 +63,7 @@ def equity_plot(stats: TradingStats, strategy_name):
         }
     }
 
-    fig.write_html("data/backtesting-data/plots/equity/equityplot.html", auto_open=False, config=config)
+    fig.write_html(f"data/backtesting-data/plots/equity/equityplot_{strategy_name}.html",
+                   auto_open=False,
+                   config=config
+                   )

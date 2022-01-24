@@ -1,4 +1,3 @@
-import os
 from datetime import datetime
 from multiprocessing import Process
 from pathlib import Path
@@ -38,7 +37,8 @@ def plot_coin(config, stats, pair: str, pair_data):
         high=pair_data["high"],
         low=pair_data["low"],
         close=pair_data["close"],
-        name='OHLC')
+        name='OHLC'
+    )
 
     fig.add_trace(ohlc, row=1, col=1)
 
@@ -51,7 +51,7 @@ def plot_coin(config, stats, pair: str, pair_data):
 
     fig.update_xaxes(range=[dates[0], dates[-1]])
     fig.update_layout(
-        title='%s Chart' % pair,
+        title=f'{pair} Chart ({config.strategy_name})',
         yaxis_title=pair,
         template='ggplot2',
         dragmode='pan',
@@ -68,4 +68,5 @@ def plot_coin(config, stats, pair: str, pair_data):
         ]
     )
 
-    fig.write_html("data/backtesting-data/plots/plot%s.html" % pair.replace("/", ""), config={'scrollZoom': True})
+    fig.write_html(f"data/backtesting-data/plots/plot_{pair.replace('/', '')}_{config.strategy_name}.html",
+                   config={'scrollZoom': True})
