@@ -146,7 +146,7 @@ def tdi(series, rsi_lookback=13, rsi_smooth_len=2,
     rsi_smooth = sma(rsi_data, rsi_smooth_len)
     rsi_signal = sma(rsi_data, rsi_signal_len)
 
-    bb_series = bollinger_bands(rsi_data, bb_lookback, int(bb_std))
+    bb_series = bollinger_bands(rsi_data, bb_lookback, bb_std)
 
     return pd.DataFrame(index=series.index, data={
         "rsi": rsi_data,
@@ -437,7 +437,7 @@ def macd(series, fast=3, slow=10, smooth=16):
 
 # ---------------------------------------------
 
-def bollinger_bands(series, window=20, stds=2):
+def bollinger_bands(series, window=20, stds=2.0):
     ma = rolling_mean(series, window=window, min_periods=1)
     std = rolling_std(series, window=window, min_periods=1)
     upper = ma + std * stds

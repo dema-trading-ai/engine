@@ -37,9 +37,6 @@ def check_for_missing_config_items(config: dict):
         print_warning("Cannot find the default values for config file")
         return config
 
-    except Exception as e:
-        raise e
-
     defaults = json.loads(data)
 
     config_complete = True
@@ -102,17 +99,17 @@ def assert_given_else_default(config, spec):
 def assert_type(config, spec):
     param_value = config.get(spec["name"])
     t = spec_type_to_python_type(spec["type"])
+    correct_type = is_value_of_type(param_value, t)
 
-    good = is_value_of_type(param_value, t)
     try:
-        if not good:
+        if not correct_type:
             raise WrongSpecTypeError()
 
     except WrongSpecTypeError:
         ErrorOutput(sys.exc_info(),
                     add_info=f"You passed an invalid type to the '{spec['name']}' "
-                             f"parameter. This parameter should be of type "
-                             f"{str(t)[8:-2]}, but it is {str(type(param_value))[8:-2]}.",
+                             f"parameter.\n\tThis parameter should be of type "
+                             f"{t.__name__}, but it is {type(param_value).__name__}.",
                     stop=True).print_error()
 
 

@@ -33,6 +33,18 @@ class PythonVersionError(GeneralError):
     pass
 
 
+class ModeNotAvailableError(GeneralError):
+    pass
+
+
+class NotAStrategySubclassError(GeneralError):
+    pass
+
+
+class StrategyNotFoundError(GeneralError):
+    pass
+
+
 class ErrorOutput(GeneralError):
     """Error output module"""
 

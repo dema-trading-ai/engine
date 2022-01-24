@@ -12,7 +12,7 @@ from cli.prepare_workspace import prepare_workspace
 from cli.print_utils import print_debug, is_verbosity
 from main_controller import MainController
 
-# Hack, PyInstaller + rich on Windows in gitHub actions fails because it cannot find encoding of stdout, this sets
+# Hack, PyInstaller + rich on Windows in GitHub actions fails because it cannot find encoding of stdout, this sets
 # it on stdout if not set
 
 os.environ["PYTHONIOENCODING"] = "utf-8"

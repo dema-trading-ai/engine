@@ -299,11 +299,6 @@ class MockPairFrame(dict):
             self.setdefault(key, MockOHLCVWithSignal(key))
 
     def __setitem__(self, k: str, v: MockOHLCVWithSignal) -> None:
-        try:
-            if k not in self:
-                raise LookupError()
-        except LookupError:
-            ErrorOutput(sys.exc_info(),
-                        add_info=f"No pair {k} defined on construction",
-                        stop=True).print_error()
+        if k not in self:
+            raise LookupError(f"no pair {k} defined on construction")
         super().__setitem__(k, v)

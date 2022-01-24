@@ -10,7 +10,7 @@ from utils.error_handling import TimeframeNotSupportedByExchange, ErrorOutput
 def create_cctx_exchange(exchange_name: Exchange, timeframe: str):
     print_info('Connecting to exchange...')
 
-    exchange = ccxt.binance
+    exchange = None
 
     try:
         exchange = getattr(ccxt, exchange_name)()

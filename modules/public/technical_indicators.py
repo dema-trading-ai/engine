@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import sys
 
-from utils.error_handling import ErrorOutput
+from utils.error_handling import ErrorOutput, ModeNotAvailableError
 
 
 def absolute_strength_histogram(dataframe, length=9, smooth=3, mode="RSI"):
@@ -15,8 +15,10 @@ def absolute_strength_histogram(dataframe, length=9, smooth=3, mode="RSI"):
     :param mode: Indicator method. Choose from: ["RSI", "STOCHASTIC", "ADX"]
     :return:
     """
+
+    df = dataframe.copy()
+
     try:
-        df = dataframe.copy()
 
         if mode == "RSI":
             df['bulls'] = 0.5 * (abs(df['close'] - df['close'].shift(1)) + (df['close'] - df['close'].shift(1)))
@@ -32,7 +34,11 @@ def absolute_strength_histogram(dataframe, length=9, smooth=3, mode="RSI"):
         elif mode == "ADX":
             df['bulls'] = 0.5 * (abs(df['high'] - df['high'].shift(1)) + (df['high'] - df['high'].shift(1)))
             df['bears'] = 0.5 * (abs(df['low'].shift(1) - df['low']) + (df['low'].shift(1) - df['low']))
-    except ValueError:
+
+        else:
+            raise ModeNotAvailableError
+
+    except ModeNotAvailableError:
         ErrorOutput(sys.exc_info(),
                     add_info="Mode not implemented yet, use RSI, STOCHASTIC or ADX.",
                     stop=True).print_error()

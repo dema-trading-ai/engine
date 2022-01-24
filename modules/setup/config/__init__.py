@@ -138,13 +138,17 @@ def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtes
     backtesting_from_ms = exchange.parse8601("%sT00:00:00Z" % backtesting_from)
     backtesting_to_ms = exchange.parse8601("%sT00:00:00Z" % backtesting_to)
 
+    backtesting_from_parsed = None
+    backtesting_to_parsed = None
+
     # Get parsed dates
     try:
         backtesting_from_parsed = datetime.fromtimestamp(backtesting_from_ms / 1000.0).strftime("%Y-%m-%d")
         backtesting_to_parsed = datetime.fromtimestamp(backtesting_to_ms / 1000.0).strftime("%Y-%m-%d")
     except TypeError:
-        print_error("Backtesting periods are formatted incorrectly. The correct format is YYYY-MM-DD.")
-        sys.exit()
+        ErrorOutput(sys.exc_info(),
+                    add_info="Backtesting periods are formatted incorrectly. The correct format is YYYY-MM-DD.",
+                    stop=True).print_error()
 
     # Define correct end date
     if backtesting_till_now or today_ms < backtesting_to_ms:
@@ -164,12 +168,13 @@ def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtes
     # Check for incorrect configuration
     try:
         timeframe = backtesting_from_ms - backtesting_to_ms
-        if timeframe > 0:
-            raise ConfigError()
+        if timeframe >= 0:
+            raise ConfigError
 
     except ConfigError:
         ErrorOutput(sys.exc_info(),
-                    add_info="Backtesting periods are configured incorrectly.",
+                    add_info="Backtesting periods are configured incorrectly. "
+                             "Please make sure the 'backtesting-from' date is before the 'backtesting-to' date!",
                     stop=True).print_error()
 
     print_info(f'Gathering data from {str(backtesting_from_parsed)} '
