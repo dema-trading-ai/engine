@@ -274,7 +274,7 @@ def test_n_average_trades_no_trades():
 
 
 def test_n_average_trades_more_time_less_trades():
-    # Longer than a day with less trades following it.
+    # Longer than a day with fewer trades following it.
     # Arrange
     fixture = StatsFixture(['COIN'])
 
@@ -668,7 +668,7 @@ def test_profitable_weeks_no_trades_market_up():
 
 
 def test_profitable_weeks_no_trades_market_flat():
-    # One week, all days are flat - outcome should be draw for profitable week, draw for outperform
+    # One week, all days are flat - outcome should be drawn for profitable week, draw for outperform
     # market week, since the market is flat.
 
     # Arrange
@@ -688,3 +688,70 @@ def test_profitable_weeks_no_trades_market_flat():
     assert stats.main_results.win_weeks == 0
     assert stats.main_results.draw_weeks == 1
     assert stats.main_results.loss_weeks == 0
+
+
+def test_risk_reward_ratio():
+    # Checks that two trades return a ratio, should return a float
+
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_75_two_trades()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert math.isclose(stats.main_results.risk_reward_ratio, 1.849, abs_tol=0.001)
+
+
+def test_risk_reward_ratio_no_trade():
+    # Checks that the risk/ reward ratio can't be computed as there are no trades, should return 0 as an int
+
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_no_trades()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.main_results.risk_reward_ratio == 0
+    assert isinstance(stats.main_results.risk_reward_ratio, int)
+
+
+def test_risk_reward_ratio_one_winning_trade():
+    # Checks that the risk/ reward ratio can't be computed as there are no losing trades, should return 0.0 as a float
+
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.main_results.risk_reward_ratio == 0
+    assert isinstance(stats.main_results.risk_reward_ratio, float)
+
+
+def test_risk_reward_ratio_one_losing_trade():
+    # Checks that the risk/ reward ratio can't be computed as there are no winning trades, should return 0.0 as a float
+
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.main_results.risk_reward_ratio == 0
+    assert isinstance(stats.main_results.risk_reward_ratio, float)
