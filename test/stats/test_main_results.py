@@ -227,7 +227,7 @@ def test_n_trades():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.main_results.n_trades == 9
+    assert stats.main_results.n_trades == 8
     assert stats.main_results.n_left_open_trades == 1
     assert stats.main_results.n_trades_with_loss == 5
     assert stats.main_results.n_consecutive_losses == 2

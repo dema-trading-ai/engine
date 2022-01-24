@@ -100,8 +100,8 @@ def create_trade_info_table(self: MainResults, currency_symbol, justification) -
                                 justify=justification,
                                 style="white")
     trade_info_table.add_column(justify=justification)
-    trade_info_table.add_row('Amount of trades', str(self.n_trades))
-    trade_info_table.add_row('Avg. trades per day',
+    trade_info_table.add_row('Amount of closed trades', str(self.n_trades))
+    trade_info_table.add_row('Avg. closed trades per day',
                              str(round(self.n_average_trades, 2)))
     trade_info_table.add_row('Left-open trades', str(self.n_left_open_trades))
     trade_info_table.add_row('Trades with loss', str(self.n_trades_with_loss))
