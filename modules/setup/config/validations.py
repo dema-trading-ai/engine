@@ -13,7 +13,6 @@ def validate_and_read_cli(config: dict, args):
     config_spec = read_spec()
     config.update(get_cli_config(args))
     validate_by_spec(config, config_spec)
-    validate_single_currency_in_pairs(config)
 
 
 def validate_by_spec(config, config_spec):
@@ -51,6 +50,20 @@ def check_for_missing_config_items(config: dict):
         config['stoploss-type'] = "static"
         config_complete = False
         print_warning("Stoploss type of Standard has changed to Static. This is changed in your config file.")
+
+    new_pairs = []
+    to_print = True
+    for pair in config['pairs']:
+        if "/" + config['currency'] in pair:
+            new_pairs.append(pair.replace("/" + config['currency'], ""))
+            config_complete = False
+            if to_print:
+                print_warning("Currencies are no longer included in the pairs. This has been automatically changed in "
+                              "your config file.")
+                to_print = False
+        else:
+            new_pairs.append(pair)
+    config['pairs'] = new_pairs
 
     config_path = config['path']
     config.pop("path")
@@ -147,25 +160,6 @@ def assert_in_options(config, spec):
         print_config_error(f"{spec['name']} = {param_value} is not a valid option, choose one from: "
                            f"{options}.")
         sys.exit()
-
-
-def validate_single_currency_in_pairs(config: dict):
-    """Checks whether every pair (e.g., BTC/USDT) contains
-    the same currency as specified under the name 'currency'
-    in the configuration.
-    """
-    pairs = config["pairs"]
-    currency = config["currency"]
-    for pair in pairs:
-        pair = pair.split("/")
-        if not len(pair) == 2:
-            print_config_error("One or more of your pairs is not configured right. Check that the currencies in your"
-                               " pair are separated by a / symbol, and that each pair is enclosed in quotes.")
-            sys.exit()
-        if not pair[1] == currency:
-            print_config_error("You can only use pairs that have the base currency you specified.")
-            print_config_error("e.g., if you specified 'USDT' as your currency, you cannot add 'BTC/EUR' as a pair")
-            sys.exit()
 
 
 def check_for_float(param_value: int, t: type) -> Tuple[float, type]:

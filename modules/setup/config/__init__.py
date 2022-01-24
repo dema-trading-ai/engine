@@ -46,6 +46,7 @@ class ConfigModule(object):
         self.strategy_name = None
         self.exchange = None
         self.randomize_pair_order = None
+        self.pairs = []
 
     @staticmethod
     async def create(args):
@@ -74,7 +75,8 @@ class ConfigModule(object):
                                                                                       backtesting_till_now,
                                                                                       config_module.timeframe_ms)
 
-        config_module.pairs = config["pairs"]
+        for pair in config["pairs"]:
+            config_module.pairs.append(pair + "/" + config["currency"])
         config_module.fee = config["fee"]
         config_module.stoploss = config["stoploss"]
         config_module.stoploss_type = config["stoploss-type"]
@@ -126,8 +128,8 @@ def read_config(config_path: str) -> dict:
     return config
 
 
-def print_pairs(config_json):
-    pairs_string = ''.join([f'{pair} ' for pair in config_json['pairs']])
+def print_pairs(pairs):
+    pairs_string = ''.join([f'{pair} ' for pair in pairs])
     print_info("Watching pairs: %s." % pairs_string[:-1])
 
 
