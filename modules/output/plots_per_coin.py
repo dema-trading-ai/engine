@@ -22,6 +22,14 @@ def plot_per_coin(stats: TradingStats, config: StatsConfig):
 
 
 def plot_coin(config, stats, pair: str, pair_data):
+    # Check for old plot and remove it
+    if os.path.exists('./data/backtesting-data/plots/'):
+        try:
+            os.remove('./data/backtesting-data/plots/plot' + pair.replace('/', '') + '.html')
+
+        except FileNotFoundError:
+            pass
+
     # create figure
     rows, height = plot_sizes(config.subplot_indicators)
     fig = make_subplots(rows=rows, cols=1, row_heights=height, vertical_spacing=0.02, shared_xaxes=True)
@@ -38,7 +46,8 @@ def plot_coin(config, stats, pair: str, pair_data):
         high=pair_data["high"],
         low=pair_data["low"],
         close=pair_data["close"],
-        name='OHLC')
+        name='OHLC'
+    )
 
     fig.add_trace(ohlc, row=1, col=1)
 
@@ -51,7 +60,7 @@ def plot_coin(config, stats, pair: str, pair_data):
 
     fig.update_xaxes(range=[dates[0], dates[-1]])
     fig.update_layout(
-        title='%s Chart' % pair,
+        title=f'{pair} Chart ({config.strategy_name})',
         yaxis_title=pair,
         template='ggplot2',
         dragmode='pan',
@@ -68,4 +77,5 @@ def plot_coin(config, stats, pair: str, pair_data):
         ]
     )
 
-    fig.write_html("data/backtesting-data/plots/plot%s.html" % pair.replace("/", ""), config={'scrollZoom': True})
+    fig.write_html(f"data/backtesting-data/plots/plot_{pair.replace('/', '')}_{config.strategy_name}.html",
+                   config={'scrollZoom': True})
