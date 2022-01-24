@@ -17,7 +17,7 @@ class SetupModule(object):
         self.config = config_module
 
     async def setup(self) -> Tuple[AlgoModule, dict, Strategy, StatsConfig]:
-        print_pairs(self.config.raw_config)  # TODO fix mixed level of abstraction
+        print_pairs(self.config.pairs)
         ohlcv_pair_frames = await self.data_module.load_historical_data(self.config.pairs)
 
         strategy = load_strategy_from_config(self.config.strategy_definition)
@@ -36,6 +36,6 @@ class SetupModule(object):
 
         return AlgoModule(self.config, ohlcv_pair_frames, strategy,
                           additional_ohlcv_pair_frames), \
-               ohlcv_pair_frames, \
-               strategy, \
-               stats_config
+            ohlcv_pair_frames, \
+            strategy, \
+            stats_config
