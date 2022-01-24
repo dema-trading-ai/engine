@@ -1,5 +1,7 @@
+import sys
 from enum import Enum
 from typing import TypeVar
+from utils.error_handling import ErrorOutput
 
 # Define different timestep values
 WEEKLY = 604800000  # 7 days in milliseconds
