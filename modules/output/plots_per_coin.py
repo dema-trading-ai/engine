@@ -1,3 +1,5 @@
+import os
+import re
 from datetime import datetime
 from multiprocessing import Process
 from pathlib import Path
@@ -11,6 +13,14 @@ from modules.stats.stats_config import StatsConfig
 
 
 def plot_per_coin(stats: TradingStats, config: StatsConfig):
+
+    # Check for old plots and remove them
+    regex = re.compile("plot[A-Z]*.html")
+    for plot_name in os.listdir('./data/backtesting-data/plots/'):
+        plot = regex.search(plot_name)
+        if plot:
+            os.remove('./data/backtesting-data/plots/' + plot.string)
+
     Path("data/backtesting-data/plots/").mkdir(parents=True, exist_ok=True)
     processes = [Process(target=plot_coin, args=(config, stats, key, value)) for key, value in stats.df.items()]
     for p in processes:

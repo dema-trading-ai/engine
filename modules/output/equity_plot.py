@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -8,6 +9,14 @@ from modules.output.plots import convert_df_for_plotting, compute_average_market
 
 
 def equity_plot(stats: TradingStats, strategy_name):
+
+    # Remove old file
+    try:
+        os.remove("./data/backtesting-data/plots/equity/equityplot.html")
+
+    except FileNotFoundError:
+        pass
+
     Path("data/backtesting-data/plots/equity").mkdir(parents=True, exist_ok=True)
 
     df_capital = pd.DataFrame(list(stats.capital_per_timestamp.items()), columns=['timestamp', 'capital'])
