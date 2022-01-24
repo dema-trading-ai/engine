@@ -1,6 +1,9 @@
 import talib.abstract as ta
 import pandas as pd
 import numpy as np
+import sys
+
+from utils.error_handling import ErrorOutput, ModeNotAvailableError
 
 
 def absolute_strength_histogram(dataframe, length=9, smooth=3, mode="RSI"):
@@ -12,24 +15,33 @@ def absolute_strength_histogram(dataframe, length=9, smooth=3, mode="RSI"):
     :param mode: Indicator method. Choose from: ["RSI", "STOCHASTIC", "ADX"]
     :return:
     """
+
     df = dataframe.copy()
 
-    if mode == "RSI":
-        df['bulls'] = 0.5 * (abs(df['close'] - df['close'].shift(1)) + (df['close'] - df['close'].shift(1)))
-        df['bears'] = 0.5 * (abs(df['close'] - df['close'].shift(1)) - (df['close'] - df['close'].shift(1)))
+    try:
 
-    elif mode == "STOCHASTIC":
-        df['lowest_bars'] = df['close'].rolling(length).min()
-        df['highest_bars'] = df['close'].rolling(length).max()
+        if mode == "RSI":
+            df['bulls'] = 0.5 * (abs(df['close'] - df['close'].shift(1)) + (df['close'] - df['close'].shift(1)))
+            df['bears'] = 0.5 * (abs(df['close'] - df['close'].shift(1)) - (df['close'] - df['close'].shift(1)))
 
-        df['bulls'] = df['close'] - df['lowest_bars']
-        df['bears'] = df['highest_bars'] - df['close']
+        elif mode == "STOCHASTIC":
+            df['lowest_bars'] = df['close'].rolling(length).min()
+            df['highest_bars'] = df['close'].rolling(length).max()
 
-    elif mode == "ADX":
-        df['bulls'] = 0.5 * (abs(df['high'] - df['high'].shift(1)) + (df['high'] - df['high'].shift(1)))
-        df['bears'] = 0.5 * (abs(df['low'].shift(1) - df['low']) + (df['low'].shift(1) - df['low']))
-    else:
-        raise ValueError("Mode not implemented yet, use RSI, STOCHASTIC or ADX")
+            df['bulls'] = df['close'] - df['lowest_bars']
+            df['bears'] = df['highest_bars'] - df['close']
+
+        elif mode == "ADX":
+            df['bulls'] = 0.5 * (abs(df['high'] - df['high'].shift(1)) + (df['high'] - df['high'].shift(1)))
+            df['bears'] = 0.5 * (abs(df['low'].shift(1) - df['low']) + (df['low'].shift(1) - df['low']))
+
+        else:
+            raise ModeNotAvailableError
+
+    except ModeNotAvailableError:
+        ErrorOutput(sys.exc_info(),
+                    add_info="Mode not implemented yet, use RSI, STOCHASTIC or ADX.",
+                    stop=True).print_error()
 
     df['avg_bulls'] = ta.EMA(df['bulls'], timeperiod=length)
     df['avg_bears'] = ta.EMA(df['bears'], timeperiod=length)
@@ -54,7 +66,8 @@ def stoch_rsi(dataframe, period=14, smooth_d=3, smooth_k=3, rsi_period=14):
     """
     df = dataframe.copy()
     df['rsi'] = ta.RSI(df, timeperiod=rsi_period)
-    stochrsi = (df['rsi'] - df['rsi'].rolling(period).min()) / (df['rsi'].rolling(period).max() - df['rsi'].rolling(period).min())
+    stochrsi = (df['rsi'] - df['rsi'].rolling(period).min()) / (
+                df['rsi'].rolling(period).max() - df['rsi'].rolling(period).min())
     df['srsi_k'] = stochrsi.rolling(smooth_k).mean() * 100
     df['srsi_d'] = df['srsi_k'].rolling(smooth_d).mean()
     return df['srsi_k'], df['srsi_d']
@@ -143,4 +156,5 @@ def HMA(dataframe, timeperiod):
     :param timeperiod: The timeperiod of the HMA
     :return: The Hull Moving Average
     """
-    return ta.WMA(2*ta.WMA(dataframe['close'], timeperiod // 2) - ta.WMA(dataframe['close'], timeperiod), int(np.floor(np.sqrt(timeperiod))))
+    return ta.WMA(2 * ta.WMA(dataframe['close'], timeperiod // 2) - ta.WMA(dataframe['close'], timeperiod),
+                  int(np.floor(np.sqrt(timeperiod))))
