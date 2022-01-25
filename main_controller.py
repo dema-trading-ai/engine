@@ -35,7 +35,10 @@ class MainController:
                     study.optimize(objective, n_trials=n_trials)
                 except KeyboardInterrupt:
                     print_info(f"Quitting hyperoptimization.")
-                    print_info(f"Best results: {study.best_params}")
+                    try:
+                        print_info(f"Best results: {study.best_params}")
+                    except ValueError:
+                        print_info("No trials completed yet. Results not available.")
                     sys.exit()
                 print_info(f"Best results: {study.best_params}")
             else:
