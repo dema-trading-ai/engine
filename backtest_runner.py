@@ -1,8 +1,10 @@
+import sys
 from contextlib import asynccontextmanager
 from typing import Generator
 
 from optuna import Trial
 
+from cli.print_utils import print_error
 from modules.output import OutputModule
 from modules.setup import ConfigModule, DataModule, SetupModule
 from modules.stats.stats import StatsModule
@@ -29,7 +31,12 @@ class BacktestRunner:
     def run_hyperopt_iteration(self, trial: Trial) -> float:
         self.strategy.trial = trial
         stats = self.run_backtest()
-        return self.strategy.loss_function(stats)
+        try:
+            return self.strategy.loss_function(stats)
+        except NotImplementedError:
+            print_error("The Loss function isn't implemented in your strategy. For an example loss function, check out"
+                        " our documentation at docs.dematrading.ai.")
+            sys.exit()
 
     def run_outputted_backtest(self):
         stats = self.run_backtest()

@@ -29,7 +29,7 @@ class Strategy(abc.ABC):
     timeframe: str
 
     @abc.abstractmethod
-    def generate_indicators(self, dataframe: DataFrame) -> DataFrame:
+    def generate_indicators(self, dataframe: DataFrame, additional_pairs: dict = None) -> DataFrame:
         """
         :param dataframe: All passed candles (current candle included!) with OHLCV data
         :type dataframe: DataFrame
@@ -114,4 +114,4 @@ class Strategy(abc.ABC):
         return dataframe
 
     def loss_function(self, stats: TradingStats) -> float:
-        raise Exception("loss_function not implemented")
+        raise NotImplementedError("loss_function not implemented")

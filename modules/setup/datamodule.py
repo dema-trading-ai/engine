@@ -15,6 +15,7 @@ from cli.print_utils import print_info, print_error, print_warning
 from modules.setup.config import ConfigModule
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
 from utils.utils import get_ohlcv_indicators, parse_timeframe
+from utils.error_handling import ErrorOutput, ConfigError
 
 # ======================================================================
 # DataModule is responsible for downloading OHLCV data, preparing it
@@ -70,8 +71,13 @@ class DataModule:
         history_data = {key: value for [key, value] in dataframes}
 
         self.warn_if_missing_ticks(history_data)
-        if check_backtesting_period and not is_same_backtesting_period(history_data):
-            raise Exception("[ERROR] Dataframes don't have equal backtesting periods.")
+        try:
+            if check_backtesting_period and not is_same_backtesting_period(history_data):
+                raise ConfigError()
+
+        except ConfigError:
+            ErrorOutput(sys.exc_info(), stop=True).print_error()
+
         return history_data
 
     async def get_pair_data(self, pair, timeframe):

@@ -74,7 +74,10 @@ def show_mainresults(self: MainResults, currency_symbol: str):
                                                  )
 
     # Trade info table
-    trade_info_table = create_trade_info_table(self, justification)
+    trade_info_table = create_trade_info_table(self,
+                                               currency_symbol,
+                                               justification
+                                               )
 
     # Create grid for all tables
     table_grid = Table(box=box.SIMPLE)
@@ -86,7 +89,7 @@ def show_mainresults(self: MainResults, currency_symbol: str):
     console_color.print(table_grid)
 
 
-def create_trade_info_table(self, justification) -> Table:
+def create_trade_info_table(self: MainResults, currency_symbol, justification) -> Table:
     avg_trade_duration = format_time_difference(self.avg_trade_duration)
     longest_trade_duration = format_time_difference(self.longest_trade_duration)
     shortest_trade_duration = format_time_difference(self.shortest_trade_duration)
@@ -97,23 +100,32 @@ def create_trade_info_table(self, justification) -> Table:
                                 justify=justification,
                                 style="white")
     trade_info_table.add_column(justify=justification)
-    trade_info_table.add_row('Amount of trades', str(self.n_trades))
-    trade_info_table.add_row('Avg. trades per day',
+    trade_info_table.add_row('Amount of closed trades', str(self.n_trades))
+    trade_info_table.add_row('Avg. closed trades per day',
                              str(round(self.n_average_trades, 2)))
     trade_info_table.add_row('Left-open trades', str(self.n_left_open_trades))
     trade_info_table.add_row('Trades with loss', str(self.n_trades_with_loss))
     trade_info_table.add_row('Rejected buy signals', str(self.rejected_buy_signal))
     trade_info_table.add_row('Most consecutive losses',
                              str(self.n_consecutive_losses))
-    trade_info_table.add_row(f'Best trade',
+    trade_info_table.add_row('Best trade',
                              colorize(round(
                                  self.best_trade_profit_percentage, 2),
                                  0, f'% ({self.best_trade_pair})'))
-    trade_info_table.add_row(f'Worst trade',
+    trade_info_table.add_row('Best trade profit',
+                             colorize(round(
+                                 self.best_trade_currency_amount, 2),
+                                 0, str(currency_symbol)))
+    trade_info_table.add_row('Worst trade',
                              colorize(round(
                                  self.worst_trade_profit_percentage, 2),
                                  0, f'% ({self.worst_trade_pair})'))
-    trade_info_table.add_row('Median trade profit', str(round(self.median_trade_profit, 2)) + ' $')
+    trade_info_table.add_row('Worst trade profit',
+                             colorize(round(
+                                 self.worst_trade_currency_amount, 2),
+                                 0, str(currency_symbol)))
+    trade_info_table.add_row('Risk / reward ratio', str(round(self.risk_reward_ratio, 2)))
+    trade_info_table.add_row('Median trade profit', f'{round(self.median_trade_profit, 2)} {currency_symbol}')
     trade_info_table.add_row('Shortest trade duration', str(shortest_trade_duration))
     trade_info_table.add_row('Avg. trade duration', str(avg_trade_duration))
     trade_info_table.add_row('Longest trade duration', str(longest_trade_duration))

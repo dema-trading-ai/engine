@@ -9,10 +9,10 @@ import optuna
 from cli.arg_parse import execute_for_args
 from cli.checks.latest_version import print_warning_if_version_outdated
 from cli.prepare_workspace import prepare_workspace
-from cli.print_utils import print_debug,is_verbosity
+from cli.print_utils import print_debug, is_verbosity
 from main_controller import MainController
 
-# Hack, PyInstaller + rich on windows in github actions fails because it cannot find encoding of stdout, this sets
+# Hack, PyInstaller + rich on Windows in GitHub actions fails because it cannot find encoding of stdout, this sets
 # it on stdout if not set
 
 os.environ["PYTHONIOENCODING"] = "utf-8"

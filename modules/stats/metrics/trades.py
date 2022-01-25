@@ -6,23 +6,13 @@ from modules.stats.trade import Trade
 
 
 def calculate_best_worst_trade(closed_trades: [Trade]):
-    best_trade_ratio = -np.inf
-    best_trade_pair = ""
-    worst_trade_ratio = np.inf
-    worst_trade_pair = ""
-
     if len(closed_trades) > 0:
         best_trade = max(closed_trades,
                          key=lambda trade: trade.profit_ratio, default=-np.inf)
-        best_trade_ratio = best_trade.profit_ratio
-        best_trade_pair = best_trade.pair
-
         worst_trade = min(closed_trades,
                           key=lambda trade: trade.profit_ratio, default=np.inf)
-        worst_trade_ratio = worst_trade.profit_ratio
-        worst_trade_pair = worst_trade.pair
-
-    return best_trade_ratio, best_trade_pair, worst_trade_ratio, worst_trade_pair
+        return best_trade, worst_trade
+    return None, None
 
 
 def get_number_of_losing_trades(closed_trades: [Trade]) -> int:
@@ -61,4 +51,39 @@ def compute_median_trade_profit(closed_trades: [Trade]) -> float:
     all_trade_profit = [trade.profit_dollar for trade in closed_trades]
 
     median_trade_profit = median(all_trade_profit)
+
     return median_trade_profit
+
+
+def compute_risk_reward_ratio(closed_trades: [Trade]) -> float:
+
+    if len(closed_trades) == 0:
+        return 0.0
+
+    winning_trades = []
+    losing_trades = []
+
+    for trade in closed_trades:  # Ignore trades with a profit of 0
+
+        if trade.profit_dollar > 0:
+            winning_trades.append(trade.profit_dollar)
+            continue
+
+        if trade.profit_dollar < 0:
+            losing_trades.append(trade.profit_dollar)
+
+    total_gain = sum(winning_trades)
+    total_loss = sum(losing_trades)
+
+    count_winning_trades = len(winning_trades)
+    count_losing_trades = len(losing_trades)
+
+    if count_winning_trades == 0 or count_losing_trades == 0 or total_gain == 0 or total_loss == 0:
+        return 0.0
+
+    avg_gain = total_gain / count_winning_trades
+    avg_loss = total_loss / count_losing_trades
+
+    risk_reward_ratio = avg_gain / abs(avg_loss)
+
+    return risk_reward_ratio

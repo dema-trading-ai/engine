@@ -4,6 +4,7 @@ from typing import Literal
 
 @dataclass
 class StatsConfig:
+
     strategy_definition: object
     strategy_name: str
     mainplot_indicators: list
@@ -23,3 +24,4 @@ class StatsConfig:
     export_result: bool
     starting_capital: float
     currency_symbol: Literal["USDT"]
+    randomize_pair_order: bool

@@ -14,6 +14,7 @@ from .cctx_adapter import create_cctx_exchange
 from .currencies import get_currency_symbol
 from .validations import validate_and_read_cli, check_for_missing_config_items
 from cli.print_utils import print_info, print_standard, print_warning, print_error
+from utils.error_handling import ConfigError, ErrorOutput
 
 msec = 1000
 minute = 60 * msec
@@ -44,6 +45,8 @@ class ConfigModule(object):
         self.strategy_definition = None
         self.strategy_name = None
         self.exchange = None
+        self.randomize_pair_order = None
+        self.pairs = []
 
     @staticmethod
     async def create(args):
@@ -72,7 +75,8 @@ class ConfigModule(object):
                                                                                       backtesting_till_now,
                                                                                       config_module.timeframe_ms)
 
-        config_module.pairs = config["pairs"]
+        for pair in config["pairs"]:
+            config_module.pairs.append(pair + "/" + config["currency"])
         config_module.fee = config["fee"]
         config_module.stoploss = config["stoploss"]
         config_module.stoploss_type = config["stoploss-type"]
@@ -83,12 +87,16 @@ class ConfigModule(object):
             config_module.exposure_per_trade = round(config_module.exposure_per_trade, 2)
         config_module.exposure_per_trade /= 100
         if config_module.exposure_per_trade > 1.0:
-            print_warning(f"Exposure is not 100% (default), this means that every trade will use {round(config_module.exposure_per_trade * 100, 2)}% funds per trade until either all funds are used or max open trades are open.")
+            print_warning(
+                f"Exposure is not 100% (default), this means that every trade will use "
+                f"{round(config_module.exposure_per_trade * 100, 2)}% funds per trade until either all funds are "
+                f"used or max open trades are open.")
         config_module.plots = config["plots"]
         config_module.tearsheet = config.get("tearsheet", False)
         config_module.export_result = config.get("export-result", False)
         config_module.roi = config["roi"]
         config_module.currency_symbol = get_currency_symbol(config_module.raw_config)
+        config_module.randomize_pair_order = config["randomize-pair-order"]
         return config_module
 
     async def close(self):
@@ -103,38 +111,46 @@ def read_config(config_path: str) -> dict:
     try:
         with open(config_path or "config.json", 'r', encoding='utf-8') as configfile:
             data = configfile.read()
+
     except FileNotFoundError:
-        print_error(f"No config file found at {config_path}. You might be trying to run the Engine from the wrong"
-                    f" directory. See our documentation (https://docs.dematrading.ai) for detailed instructions on"
-                    f" how to run the Engine.")
-        sys.exit()
-    except Exception:
-        raise Exception("[ERROR] Something went wrong parsing config file.",
-                        sys.exc_info()[0])
+        ErrorOutput(sys.exc_info(),
+                    add_info=f"No config file found at {config_path}. You might be trying to run the Engine from the "
+                             f"wrong directory. See our documentation\n\t(https://docs.dematrading.ai) for detailed "
+                             f"instructions on how to run the Engine.",
+                    stop=True).print_error()
+
+    except Exception as e:
+        raise e
+
     config = json.loads(data)
     config['path'] = config_path or "config.json"
 
     return config
 
 
-def print_pairs(config_json):
-    pairs_string = ''.join([f'{pair} ' for pair in config_json['pairs']])
+def print_pairs(pairs):
+    pairs_string = ''.join([f'{pair} ' for pair in pairs])
     print_info("Watching pairs: %s." % pairs_string[:-1])
 
 
-def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtesting_till_now: bool, timeframe_ms: int) -> tuple:
+def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtesting_till_now: bool,
+                   timeframe_ms: int) -> tuple:
     # Configure milliseconds
     today_ms = exchange.milliseconds()
     backtesting_from_ms = exchange.parse8601("%sT00:00:00Z" % backtesting_from)
     backtesting_to_ms = exchange.parse8601("%sT00:00:00Z" % backtesting_to)
+
+    backtesting_from_parsed = None
+    backtesting_to_parsed = None
 
     # Get parsed dates
     try:
         backtesting_from_parsed = datetime.fromtimestamp(backtesting_from_ms / 1000.0).strftime("%Y-%m-%d")
         backtesting_to_parsed = datetime.fromtimestamp(backtesting_to_ms / 1000.0).strftime("%Y-%m-%d")
     except TypeError:
-        print_error("Backtesting periods are formatted incorrectly. The correct format is YYYY-MM-DD.")
-        sys.exit()
+        ErrorOutput(sys.exc_info(),
+                    add_info="Backtesting periods are formatted incorrectly. The correct format is YYYY-MM-DD.",
+                    stop=True).print_error()
 
     # Define correct end date
     if backtesting_till_now or today_ms < backtesting_to_ms:
@@ -152,11 +168,19 @@ def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtes
         backtesting_to_parsed = last_closed_candle_datetime
 
     # Check for incorrect configuration
-    if backtesting_from_ms >= backtesting_to_ms:
-        raise Exception("[ERROR] Backtesting periods are configured incorrectly.")
+    try:
+        timeframe = backtesting_from_ms - backtesting_to_ms
+        if timeframe >= 0:
+            raise ConfigError
+
+    except ConfigError:
+        ErrorOutput(sys.exc_info(),
+                    add_info="Backtesting periods are configured incorrectly. "
+                             "Please make sure the 'backtesting-from' date is before the 'backtesting-to' date!",
+                    stop=True).print_error()
 
     print_info(f'Gathering data from {str(backtesting_from_parsed)} '
-                  f'until {str(backtesting_to_parsed)}.')
+               f'until {str(backtesting_to_parsed)}.')
     return backtesting_from_ms, backtesting_to_ms
 
 
