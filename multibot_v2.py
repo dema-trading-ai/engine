@@ -193,48 +193,45 @@ def combine_and_run_multibot(util):
         save_trade_log(results, BASE_DIR + f'/data/backtesting-data/combined_{i}_results.json')
 
 
-# def combine_and_run_multibot(util):
-#     # util.write_log_to_file('[INFO] Starting multibot run')
-#     # files = glob(BASE_DIR + r"/data/backtesting-data/trade_logs/*.json")
-#     BASE_DIR_EXT = BASE_DIR + "/data/backtesting-data/trade_logs/trades_log_"
-#     # files = [BASE_DIR_EXT + "JustABotti.json", BASE_DIR_EXT + "KaguTsuchi.json", BASE_DIR_EXT + "ObiOneKenobi.json", BASE_DIR_EXT + "Omoikane.json"]
-#     files = [BASE_DIR_EXT + "FlowerPower.json"]
-#     # for i in range(3, 7):
-#     i = 1
-#     results = {}
-#     all_combinations = list(itertools.combinations(files, i))
-#     for j, combination in enumerate(all_combinations):
-#         # combination = ['/Users/marijnpc/Trading/engine/data/backtesting-data/trade_logs/trades_log_Bot1.json']
-#         combination = ['/Users/marijnpc/Trading/engine/data/backtesting-data/trade_logs/trades_log_FlowerPower.json']
-#         util.write_log_to_file(f'[INFO] Currently running combination {j} '
-#                                f'out of {len(all_combinations)} options for {i} combinations')
-#         print(f'[INFO] Currently running combination {j} out of {len(all_combinations)} options for {i} combinations')
-#         try:
-#             mot, trades, timeframes = combine_trade_logs(list(combination))
-#             smallest_timeframe = util.get_smallest_timeframe(timeframes)
-#
-#             multibot_backtester = MultiBotBacktester(trades, smallest_timeframe, mot)
-#
-#             multibot_backtester.run_multibot()
-#             profit, drawdown = multibot_backtester.get_results()
-#
-#         except Exception as ex:
-#             util.write_log_to_file(f'[ERROR] Something went wrong: {str(ex)}')
-#             print(f'[ERROR] Something went wrong: {str(ex)}')
-#             profit = drawdown = 0
-#
-#         cleaned_filenames = [util.beautify_filename(filename) for filename in list(combination)]
-#         combination_title = '-'.join(cleaned_filenames)
-#         results[combination_title] = {"profit": profit, "drawdown": drawdown}
-#
-#     save_trade_log(results, BASE_DIR + f'/data/backtesting-data/FlowerPower_results.json')
+def custom_run(util, combinations):
+    results = {}
+
+    try:
+        mot, trades, timeframes = combine_trade_logs(combinations)
+        smallest_timeframe = util.get_smallest_timeframe(timeframes)
+
+        multibot_backtester = MultiBotBacktester(trades, smallest_timeframe, mot)
+
+        multibot_backtester.run_multibot()
+        profit, drawdown = multibot_backtester.get_results()
+
+    except Exception as ex:
+        util.write_log_to_file(f'[ERROR] Something went wrong: {str(ex)}')
+        print(f'[ERROR] Something went wrong: {str(ex)}')
+        profit = drawdown = 0
+
+    cleaned_filenames = [util.beautify_filename(filename) for filename in list(combinations)]
+    combination_title = '-'.join(cleaned_filenames)
+    results[combination_title] = {"profit": profit, "drawdown": drawdown}
+
+    save_trade_log(results, BASE_DIR + f'/data/backtesting-data/gold_results_fluctus.json')
 
 
 # Start the program
 
 utility = Utilities()
 
+BASE_DIR_EXT = BASE_DIR + "/data/backtesting-data/trade_logs/trades_log_"
+
+logs_platinum = ["Bot1", "BuyHoldSmart", "Athena_VWAP", "DaanStrategy002", "KaguTsuchi", "Hawk_heikin", "fluctus"]
+logs_gold = ["Athena_VWAP", "DaanStrategy002", "KaguTsuchi", "Hawk_heikin", "fluctus"]
+
+files_platinum = [BASE_DIR_EXT + bot_name + ".json" for bot_name in logs_platinum]
+files_gold = [BASE_DIR_EXT + bot_name + ".json" for bot_name in logs_gold]
+
+
 try:
-    combine_and_run_multibot(utility)
+    # combine_and_run_multibot(utility)
+    custom_run(utility, files_gold)
 except Exception as e:
     utility.write_log_to_file(f'[ERROR] Fatal error, unable to continue: {str(e)}')
