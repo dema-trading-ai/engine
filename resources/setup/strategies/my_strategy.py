@@ -5,6 +5,7 @@ from backtesting.strategy import Strategy
 
 # Optional Imports
 from modules.setup.config import qtpylib_methods as qtpylib
+from modules.stats.trade import Trade
 
 
 class MyStrategy(Strategy):
@@ -70,3 +71,15 @@ class MyStrategy(Strategy):
         # END STRATEGY
 
         return dataframe
+
+    def buy_cooldown(self, last_trade: Trade) -> int:
+        """
+        Override this method if you want to add a buy cooldown when a trade is closed. This means that
+        for the pair of the closed trade, a new trade cannot be opened for x time-steps.
+
+        :param last_trade: The last trade that was closed
+        :type last_trade: Trade
+        :return: the amount of time-steps in which a new trade for the current pair may not be opened
+        :rtype: int
+        """
+        return 5
