@@ -14,18 +14,22 @@ class MainController:
         async with create_backtest_runner(args) as runner:
 
             if args.alpha_hyperopt:
-                os.environ["VERBOSITY"] = "no_warnings"
-                study = optuna.create_study()
-
-                if args.n_trials and args.n_trials > 0:
-                    n_trials = args.n_trials
-                else:
-                    n_trials = 100
-
-                def objective(trial: Trial):
-                    return runner.run_hyperopt_iteration(trial)
-
-                study.optimize(objective, n_trials=n_trials)
-                print_info(f"Best results {study.best_params}")
+                MainController.run_hyperopt(args, runner)
             else:
                 runner.run_outputted_backtest()
+
+    @staticmethod
+    def run_hyperopt(args, runner):
+        os.environ["VERBOSITY"] = "no_warnings"
+        study = optuna.create_study()
+
+        if args.n_trials and args.n_trials > 0:
+            n_trials = args.n_trials
+        else:
+            n_trials = 100
+
+        def objective(trial: Trial):
+            return runner.run_hyperopt_iteration(trial)
+
+        study.optimize(objective, n_trials=n_trials)
+        print_info(f"Best results {study.best_params}")
