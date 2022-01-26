@@ -82,11 +82,11 @@ class StatsFixture:
         return StatsModule(self.stats_config, self.frame_with_signals, trading_module, pair_df)
 
 
-class TestStrategy(MyStrategy):
+class TestStrategy(Strategy):
     pass
 
 
-class CooldownStrategy(MyStrategy):
+class CooldownStrategy(Strategy):
 
     def buy_cooldown(self, last_trade: Trade) -> int:
         cooldown = 0
