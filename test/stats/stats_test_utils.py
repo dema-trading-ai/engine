@@ -7,7 +7,6 @@ from modules.stats.stats import StatsModule
 from modules.stats.stats_config import StatsConfig
 from modules.stats.tradingmodule import TradingModule
 from modules.stats.tradingmodule_config import TradingModuleConfig
-from resources.setup.strategies.my_strategy import MyStrategy
 from test.utils.signal_frame import MockPairFrame
 from utils.utils import get_ohlcv_indicators
 from modules.stats.trade import Trade, SellReason
