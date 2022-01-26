@@ -114,11 +114,16 @@ class DataModule:
             slice_request_payloads.append([asked_ticks, start_date])
             start_date += np.around(asked_ticks * self.config.timeframe_ms)
 
-        results = await asyncio.gather(*[self.exchange.fetch_ohlcv(symbol=pair,
-                                                                   timeframe=self.config.timeframe,
-                                                                   since=int(start_date),
-                                                                   limit=int(asked_ticks)) for [asked_ticks, start_date]
-                                         in slice_request_payloads])
+        results = []
+        chunked_payload = chunks(slice_request_payloads, 200)
+        for chunk in chunked_payload:  # chunk so we don't overload throttle queue
+            results.extend(
+                await asyncio.gather(*[self.exchange.fetch_ohlcv(symbol=pair,
+                                                                 timeframe=self.config.timeframe,
+                                                                 since=int(start_date),
+                                                                 limit=int(asked_ticks)) for [asked_ticks, start_date]
+                                       in chunk])
+            )
 
         index = [candle[0] for results in results for candle in results]  # timestamps
         ohlcv_data = [candle for results in results for candle in results]
@@ -285,3 +290,8 @@ class DataModule:
 def is_same_backtesting_period(history_data) -> bool:
     df_lengths = [len(df.index.values) for df in history_data.values()]
     return all(length == df_lengths[0] for length in df_lengths)
+
+
+def chunks(lst, n):
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
