@@ -2,6 +2,7 @@ import os
 
 import pandas as pd
 
+from backtesting.strategy import Strategy
 from modules.stats.stats import StatsModule
 from modules.stats.stats_config import StatsConfig
 from modules.stats.tradingmodule import TradingModule
@@ -70,18 +71,22 @@ class StatsFixture:
         pair_df = {k: pd.DataFrame.from_dict(v, orient='index', columns=OHLCV_INDICATORS) for k, v in
                    self.frame_with_signals.items()}
 
-        trading_module = TradingModule(self.trading_module_config, MyStrategy())
+        trading_module = TradingModule(self.trading_module_config, TestStrategy())
         return StatsModule(self.stats_config, self.frame_with_signals, trading_module, pair_df)
 
-    def create_with_test_strategy(self):
+    def create_with_strategy(self, strategy: Strategy):
         pair_df = {k: pd.DataFrame.from_dict(v, orient='index', columns=OHLCV_INDICATORS) for k, v in
                    self.frame_with_signals.items()}
 
-        trading_module = TradingModule(self.trading_module_config, TestStrategy())
+        trading_module = TradingModule(self.trading_module_config, strategy)
         return StatsModule(self.stats_config, self.frame_with_signals, trading_module, pair_df)
 
 
 class TestStrategy(MyStrategy):
+    pass
+
+
+class CooldownStrategy(MyStrategy):
 
     def buy_cooldown(self, last_trade: Trade) -> int:
         cooldown = 0

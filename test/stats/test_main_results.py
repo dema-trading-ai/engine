@@ -1,7 +1,7 @@
 import math
 from datetime import timedelta
 
-from test.stats.stats_test_utils import StatsFixture
+from test.stats.stats_test_utils import StatsFixture, CooldownStrategy
 from test.utils.signal_frame import ONE_MIL, THIRTY_MIN, EIGHT_HOURS, SIX_HOURS, TWELVE_HOURS
 
 
@@ -768,7 +768,7 @@ def test_cooldown_sell_signal():
     fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
 
     # Act
-    stats = fixture.create_with_test_strategy().analyze()
+    stats = fixture.create_with_strategy(CooldownStrategy()).analyze()
 
     # Assert
     assert stats.main_results.n_trades == 1
@@ -789,7 +789,7 @@ def test_cooldown_stoploss():
     fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade()
 
     # Act
-    stats = fixture.create_with_test_strategy().analyze()
+    stats = fixture.create_with_strategy(CooldownStrategy()).analyze()
 
     # Assert
     assert stats.main_results.n_trades == 2
@@ -813,7 +813,7 @@ def test_cooldown_roi():
     fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade()
 
     # Act
-    stats = fixture.create_with_test_strategy().analyze()
+    stats = fixture.create_with_strategy(CooldownStrategy()).analyze()
 
     # Assert
     assert stats.main_results.n_trades == 3
