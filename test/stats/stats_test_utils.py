@@ -6,8 +6,10 @@ from modules.stats.stats import StatsModule
 from modules.stats.stats_config import StatsConfig
 from modules.stats.tradingmodule import TradingModule
 from modules.stats.tradingmodule_config import TradingModuleConfig
+from resources.setup.strategies.my_strategy import MyStrategy
 from test.utils.signal_frame import MockPairFrame
 from utils.utils import get_ohlcv_indicators
+from modules.stats.trade import Trade, SellReason
 
 os.environ["VERBOSITY"] = "quiet"  # disables printing of info and warning messages
 
@@ -68,5 +70,25 @@ class StatsFixture:
         pair_df = {k: pd.DataFrame.from_dict(v, orient='index', columns=OHLCV_INDICATORS) for k, v in
                    self.frame_with_signals.items()}
 
-        trading_module = TradingModule(self.trading_module_config)
+        trading_module = TradingModule(self.trading_module_config, MyStrategy())
         return StatsModule(self.stats_config, self.frame_with_signals, trading_module, pair_df)
+
+    def create_with_test_strategy(self):
+        pair_df = {k: pd.DataFrame.from_dict(v, orient='index', columns=OHLCV_INDICATORS) for k, v in
+                   self.frame_with_signals.items()}
+
+        trading_module = TradingModule(self.trading_module_config, TestStrategy())
+        return StatsModule(self.stats_config, self.frame_with_signals, trading_module, pair_df)
+
+
+class TestStrategy(MyStrategy):
+
+    def buy_cooldown(self, last_trade: Trade) -> int:
+        cooldown = 0
+        if last_trade.sell_reason == SellReason.STOPLOSS:
+            cooldown = 2
+        elif last_trade.sell_reason == SellReason.SELL_SIGNAL:
+            cooldown = 5
+        elif last_trade.sell_reason == SellReason.ROI:
+            cooldown = 1
+        return cooldown
