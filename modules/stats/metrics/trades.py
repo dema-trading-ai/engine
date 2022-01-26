@@ -1,37 +1,43 @@
-import pprint
 from datetime import timedelta
-from statistics import median
+from typing import Optional
 
 from modules.stats.trade import Trade
 
 
-def compute_trade_rankings(closed_trades: [Trade]) -> dict:
+def med(trades_return: list[float, ...], default=None) -> Optional[float]:
+    """Finds the median in a list of trade returns"""
 
-    pairs = {trade.pair for trade in closed_trades}  # Find all pairs that have closed trades
+    trades_return = sorted(trades_return)
+    n = len(trades_return)
+    if n == 0:
+        return default
+    if n % 2 == 1:
+        return trades_return[n // 2]
+    else:
+        i = n // 2
+        return (trades_return[i - 1] + trades_return[i]) / 2
 
+
+def compute_trade_rankings(closed_trades: [Trade], pairs: list) -> dict:
     # Sort trades by pairs
     sorted_trades = {pair: [trade for trade in closed_trades if trade.pair == pair] for pair in pairs}
 
-    rankings = {
+    rankings_per_pair = {pair: {
         'ratio': dict(best=None, worst=None, median=None),
         'currency': dict(best=None, worst=None, median=None)
-    }
-
-    rankings_per_pair = {pair: rankings for pair in pairs}
+    } for pair in pairs}
 
     if len(closed_trades) > 0:
         for pair, trades in sorted_trades.items():
-            for ranking_type in rankings.keys():
-                trade_lst = [trade.profit_ratio if ranking_type == 'ratio'
-                             else trade.profit_currency for trade in trades]
-                rankings_per_pair[pair][ranking_type]['best'] = max(trade_lst)
-                rankings_per_pair[pair][ranking_type]['worst'] = min(trade_lst)
-                rankings_per_pair[pair][ranking_type]['median'] = median(trade_lst)
-                pprint.pprint(rankings_per_pair)
-                print(pair)
-                print('-----------------------------------------')
+            trades_profit_ratio = [trade.profit_ratio for trade in trades]
+            trades_profit_currency = [trade.profit_currency for trade in trades]
 
-    pprint.pprint(rankings_per_pair)
+            rankings_per_pair[pair]['ratio']['best'] = max(trades_profit_ratio, default=None)
+            rankings_per_pair[pair]['ratio']['worst'] = min(trades_profit_ratio, default=None)
+            rankings_per_pair[pair]['ratio']['median'] = med(trades_profit_ratio, default=None)
+            rankings_per_pair[pair]['currency']['best'] = max(trades_profit_currency, default=None)
+            rankings_per_pair[pair]['currency']['worst'] = min(trades_profit_currency, default=None)
+            rankings_per_pair[pair]['currency']['median'] = med(trades_profit_currency, default=None)
 
     return rankings_per_pair
 

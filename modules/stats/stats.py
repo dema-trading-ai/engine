@@ -54,12 +54,13 @@ class StatsModule:
 
         market_change = get_market_change(self.df, pairs, self.frame_with_signals)
         market_drawdown = get_market_drawdown(pairs, self.frame_with_signals)
-        return self.generate_backtesting_result(market_change, market_drawdown)
+        return self.generate_backtesting_result(market_change, market_drawdown, pairs)
 
-    def generate_backtesting_result(self, market_change: dict, market_drawdown: dict) -> TradingStats:
+    def generate_backtesting_result(self, market_change: dict, market_drawdown: dict, pairs: list) -> TradingStats:
         coin_results, market_change_weekly = self.generate_coin_results(self.trading_module.closed_trades,
                                                                         market_change,
-                                                                        market_drawdown)
+                                                                        market_drawdown,
+                                                                        pairs)
         open_trade_results = self.get_left_open_trades_results(self.trading_module.open_trades)
 
         main_results = self.generate_main_results(
@@ -170,9 +171,10 @@ class StatsModule:
                            risk_reward_ratio=risk_reward_ratio
                            )
 
-    def generate_coin_results(self, closed_trades: [Trade], market_change: dict, market_drawdown: dict) -> [list, dict]:
+    def generate_coin_results(self, closed_trades: [Trade], market_change: dict, market_drawdown: dict, pairs: list) \
+            -> [list, dict]:
         stats, market_change_weekly = self.calculate_statistics_per_coin(closed_trades)
-        trade_rankings = compute_trade_rankings(closed_trades)
+        trade_rankings = compute_trade_rankings(closed_trades, pairs)
         new_stats = []
 
         for coin in stats:
@@ -203,7 +205,12 @@ class StatsModule:
                                         roi=stats[coin]['sell_reasons'][SellReason.ROI],
                                         stoploss=stats[coin]['sell_reasons'][SellReason.STOPLOSS],
                                         sell_signal=stats[coin]['sell_reasons'][SellReason.SELL_SIGNAL],
-                                        trade_rankings=trade_rankings)
+                                        best_trade_ratio=trade_rankings[coin]['ratio']['best'],
+                                        worst_trade_ratio=trade_rankings[coin]['ratio']['worst'],
+                                        median_trade_ratio=trade_rankings[coin]['ratio']['median'],
+                                        best_trade_currency=trade_rankings[coin]['currency']['best'],
+                                        worst_trade_currency=trade_rankings[coin]['currency']['worst'],
+                                        median_trade_currency=trade_rankings[coin]['currency']['median'])
             new_stats.append(coin_insight)
 
         return new_stats, market_change_weekly

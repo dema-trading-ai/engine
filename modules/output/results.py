@@ -76,7 +76,6 @@ def show_mainresults(self: MainResults, currency_symbol: str):
 
     # Trade info table
     trade_info_table = create_trade_info_table(self,
-                                               currency_symbol,
                                                justification
                                                )
 
@@ -90,7 +89,7 @@ def show_mainresults(self: MainResults, currency_symbol: str):
     console_color.print(table_grid)
 
 
-def create_trade_info_table(self: MainResults, currency_symbol, justification) -> Table:
+def create_trade_info_table(self: MainResults, justification) -> Table:
     avg_trade_duration = format_time_difference(self.avg_trade_duration)
     longest_trade_duration = format_time_difference(self.longest_trade_duration)
     shortest_trade_duration = format_time_difference(self.shortest_trade_duration)
@@ -217,7 +216,12 @@ class CoinInsights:
     roi: int
     stoploss: int
     sell_signal: int
-    trade_rankings: dict
+    best_trade_ratio: float
+    worst_trade_ratio: float
+    median_trade_ratio: float
+    best_trade_currency: float
+    worst_trade_currency: float
+    median_trade_currency: float
 
     @staticmethod
     def show(instances: typing.List['CoinInsights'], currency_symbol: str):
@@ -239,6 +243,12 @@ class CoinInsights:
                                            colorize(round(c.cum_profit_percentage, 2), 0),
                                            colorize(round(c.total_profit_percentage, 2), 0),
                                            colorize(round(c.profit, 2), 0),
+                                           f"{colorize(round((c.best_trade_ratio - 1) * 100, 2), 0)} / "
+                                           f"{colorize(round((c.worst_trade_ratio - 1) * 100, 2), 0)} / "
+                                           f"{colorize(round((c.median_trade_ratio - 1) * 100, 2), 0)}",
+                                           f"{colorize(round(c.best_trade_currency, 2), 0)} / "
+                                           f"{colorize(round(c.worst_trade_currency, 2), 0)} / "
+                                           f"{colorize(round(c.median_trade_currency, 2), 0)}"
                                            )
 
             coin_metrics_table.add_row(c.pair,
@@ -251,7 +261,9 @@ class CoinInsights:
                                        )
 
             coin_signal_table.add_row(c.pair,
-                                      f"{c.n_trades} ([bright_green]{c.n_wins}[/bright_green]/[bright_red]{c.n_losses}[/bright_red])",
+                                      f"{c.n_trades} ([bright_green]"
+                                      f"{c.n_wins}[/bright_green]/[bright_red]"
+                                      f"{c.n_losses}[/bright_red])",
                                       str(shortest_trade_duration),
                                       str(avg_trade_duration),
                                       str(longest_trade_duration),
