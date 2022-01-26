@@ -1,18 +1,39 @@
+import pprint
 from datetime import timedelta
 from statistics import median
-import numpy as np
 
 from modules.stats.trade import Trade
 
 
-def calculate_best_worst_trade(closed_trades: [Trade]):
+def compute_trade_rankings(closed_trades: [Trade]) -> dict:
+
+    pairs = {trade.pair for trade in closed_trades}  # Find all pairs that have closed trades
+
+    # Sort trades by pairs
+    sorted_trades = {pair: [trade for trade in closed_trades if trade.pair == pair] for pair in pairs}
+
+    rankings = {
+        'ratio': dict(best=None, worst=None, median=None),
+        'currency': dict(best=None, worst=None, median=None)
+    }
+
+    rankings_per_pair = {pair: rankings for pair in pairs}
+
     if len(closed_trades) > 0:
-        best_trade = max(closed_trades,
-                         key=lambda trade: trade.profit_ratio, default=-np.inf)
-        worst_trade = min(closed_trades,
-                          key=lambda trade: trade.profit_ratio, default=np.inf)
-        return best_trade, worst_trade
-    return None, None
+        for pair, trades in sorted_trades.items():
+            for ranking_type in rankings.keys():
+                trade_lst = [trade.profit_ratio if ranking_type == 'ratio'
+                             else trade.profit_currency for trade in trades]
+                rankings_per_pair[pair][ranking_type]['best'] = max(trade_lst)
+                rankings_per_pair[pair][ranking_type]['worst'] = min(trade_lst)
+                rankings_per_pair[pair][ranking_type]['median'] = median(trade_lst)
+                pprint.pprint(rankings_per_pair)
+                print(pair)
+                print('-----------------------------------------')
+
+    pprint.pprint(rankings_per_pair)
+
+    return rankings_per_pair
 
 
 def get_number_of_losing_trades(closed_trades: [Trade]) -> int:
@@ -43,20 +64,7 @@ def calculate_trade_durations(closed_trades: [Trade]):
     return avg_trade_duration, longest_trade_duration, shortest_trade_duration
 
 
-def compute_median_trade_profit(closed_trades: [Trade]) -> float:
-
-    if len(closed_trades) == 0:
-        return 0.0
-
-    all_trade_profit = [trade.profit_currency for trade in closed_trades]
-
-    median_trade_profit = median(all_trade_profit)
-
-    return median_trade_profit
-
-
 def compute_risk_reward_ratio(closed_trades: [Trade]) -> float:
-
     if len(closed_trades) == 0:
         return 0.0
 

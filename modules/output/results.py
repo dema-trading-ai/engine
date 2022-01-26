@@ -22,13 +22,14 @@ def show_signature():
         "================================================================================")
 
 
-def colorize(value, condition, symbol=""):
+def colorize(value: float, condition: float, symbol: str = "") -> str:
     if value > condition:
         return f"[bright_green]{value}[/bright_green] {symbol}"
-    elif value < condition:
+
+    if value < condition:
         return f"[bright_red]{value}[/bright_red] {symbol}"
-    else:
-        return f"[orange1]{value}[/orange1] {symbol}"
+
+    return f"[orange1]{value}[/orange1] {symbol}"
 
 
 def timestamp_to_string(time_stamp: int) -> str:
@@ -108,31 +109,14 @@ def create_trade_info_table(self: MainResults, currency_symbol, justification) -
     trade_info_table.add_row('Rejected buy signals', str(self.rejected_buy_signal))
     trade_info_table.add_row('Most consecutive losses',
                              str(self.n_consecutive_losses))
-    trade_info_table.add_row('Best trade',
-                             colorize(round(
-                                 self.best_trade_profit_percentage, 2),
-                                 0, f'% ({self.best_trade_pair})'))
-    trade_info_table.add_row('Best trade profit',
-                             colorize(round(
-                                 self.best_trade_currency_amount, 2),
-                                 0, str(currency_symbol)))
-    trade_info_table.add_row('Worst trade',
-                             colorize(round(
-                                 self.worst_trade_profit_percentage, 2),
-                                 0, f'% ({self.worst_trade_pair})'))
-    trade_info_table.add_row('Worst trade profit',
-                             colorize(round(
-                                 self.worst_trade_currency_amount, 2),
-                                 0, str(currency_symbol)))
     trade_info_table.add_row('Risk / reward ratio', str(round(self.risk_reward_ratio, 2)))
-    trade_info_table.add_row('Median trade profit', f'{round(self.median_trade_profit, 2)} {currency_symbol}')
     trade_info_table.add_row('Shortest trade duration', str(shortest_trade_duration))
     trade_info_table.add_row('Avg. trade duration', str(avg_trade_duration))
     trade_info_table.add_row('Longest trade duration', str(longest_trade_duration))
     trade_info_table.add_row('Profitable weeks (W/D/L)', f'{self.prof_weeks_win} / {self.prof_weeks_draw}'
-                                                      f' / {self.prof_weeks_loss}')
+                                                         f' / {self.prof_weeks_loss}')
     trade_info_table.add_row('Weekly perf. vs market (W/D/L)', f'{self.win_weeks} / {self.draw_weeks}'
-                                                      f' / {self.loss_weeks}')
+                                                               f' / {self.loss_weeks}')
     return trade_info_table
 
 
@@ -172,8 +156,12 @@ def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown
     performance_table.add_row('Market drawdown BTC/USDT',
                               colorize(round(self.market_drawdown_btc,
                                              2), 0, '%'))
-    performance_table.add_row('Sharpe ratio (90d / 3y)', f'{round(self.sharpe_90d, 2) if self.sharpe_90d is not None else "-"} / {round(self.sharpe_3y, 2) if self.sharpe_3y is not None else "-"}')
-    performance_table.add_row('Sortino ratio (90d / 3y)', f'{round(self.sortino_90d, 2) if self.sortino_90d is not None else "-"} / {round(self.sortino_3y, 2) if self.sortino_3y is not None else "-"}')
+    performance_table.add_row('Sharpe ratio (90d / 3y)',
+                              f'{round(self.sharpe_90d, 2) if self.sharpe_90d is not None else "-"} / '
+                              f'{round(self.sharpe_3y, 2) if self.sharpe_3y is not None else "-"}')
+    performance_table.add_row('Sortino ratio (90d / 3y)',
+                              f'{round(self.sortino_90d, 2) if self.sortino_90d is not None else "-"} / '
+                              f'{round(self.sortino_3y, 2) if self.sortino_3y is not None else "-"}')
     performance_table.add_row('Total fee paid',
                               f"{round(self.total_fee_amount)} {currency_symbol}")
     return performance_table
@@ -229,6 +217,7 @@ class CoinInsights:
     roi: int
     stoploss: int
     sell_signal: int
+    trade_rankings: dict
 
     @staticmethod
     def show(instances: typing.List['CoinInsights'], currency_symbol: str):
@@ -279,17 +268,17 @@ class CoinInsights:
         console_color.print(table_grid)
 
     @staticmethod
-    def create_coin_signals_table(justification) -> Table:
-        coin_signal_table = Table(title="Coin Signals", box=box.ROUNDED, width=100)
-        coin_signal_table.add_column("Pair", justify=justification)
-        coin_signal_table.add_column("Trades (W/L)", justify=justification)
-        coin_signal_table.add_column("Shortest trade duration", justify=justification)
-        coin_signal_table.add_column("Avg. trade duration", justify=justification)
-        coin_signal_table.add_column("Longest trade duration", justify=justification)
-        coin_signal_table.add_column("ROI", justify=justification)
-        coin_signal_table.add_column("SL", justify=justification)
-        coin_signal_table.add_column("Signal", justify=justification)
-        return coin_signal_table
+    def create_coin_performance_table(justification, currency_symbol: str) -> Table:
+        coin_performance_table = Table(title="Coin Performance\n(All columns indicate returns)",
+                                       box=box.ROUNDED)
+        coin_performance_table.add_column("Pair", justify=justification)
+        coin_performance_table.add_column("Average (%)", justify=justification)
+        coin_performance_table.add_column("Cumulative (%)", justify=justification)
+        coin_performance_table.add_column("Total (%)", justify=justification)
+        coin_performance_table.add_column(f"Actual ({currency_symbol})", justify=justification)
+        coin_performance_table.add_column("Percentage-based", justify=justification)
+        coin_performance_table.add_column("Currency-based", justify=justification)
+        return coin_performance_table
 
     @staticmethod
     def create_coin_metrics_table(justification) -> Table:
@@ -307,16 +296,17 @@ class CoinInsights:
         return coin_metrics_table
 
     @staticmethod
-    def create_coin_performance_table(justification, currency_symbol: str) -> Table:
-        coin_performance_table = Table(title="Coin Performance",
-                                       box=box.ROUNDED,
-                                       width=100)
-        coin_performance_table.add_column("Pair", justify=justification)
-        coin_performance_table.add_column("Avg. profit (%)", justify=justification)
-        coin_performance_table.add_column("Cum. profit (%)", justify=justification)
-        coin_performance_table.add_column("Total profit (%)", justify=justification)
-        coin_performance_table.add_column(f"Profit ({currency_symbol})", justify=justification)
-        return coin_performance_table
+    def create_coin_signals_table(justification) -> Table:
+        coin_signal_table = Table(title="Coin Signals", box=box.ROUNDED, width=100)
+        coin_signal_table.add_column("Pair", justify=justification)
+        coin_signal_table.add_column("Trades (W/L)", justify=justification)
+        coin_signal_table.add_column("Shortest trade duration", justify=justification)
+        coin_signal_table.add_column("Avg. trade duration", justify=justification)
+        coin_signal_table.add_column("Longest trade duration", justify=justification)
+        coin_signal_table.add_column("ROI", justify=justification)
+        coin_signal_table.add_column("SL", justify=justification)
+        coin_signal_table.add_column("Signal", justify=justification)
+        return coin_signal_table
 
 
 @dataclass
