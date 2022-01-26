@@ -46,7 +46,7 @@ class MyStrategy(Strategy):
                 (dataframe['ema5'] < dataframe['ema21']) &
                 (dataframe['volume'] > 0)
             ),
-            'buy'] = 1
+            'buy'] = 0
 
         # END STRATEGY
 

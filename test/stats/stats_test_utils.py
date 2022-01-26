@@ -1,6 +1,7 @@
 import os
 
 import pandas as pd
+from pandas import DataFrame
 
 from backtesting.strategy import Strategy
 from modules.stats.stats import StatsModule
@@ -82,11 +83,19 @@ class StatsFixture:
 
 
 class TestStrategy(Strategy):
-    pass
+    # Empty strategy used for testing purposes
+    def generate_indicators(self, dataframe: DataFrame, additional_pairs=None) -> DataFrame:
+        return dataframe
+
+    def buy_signal(self, dataframe: DataFrame) -> DataFrame:
+        return dataframe
+
+    def sell_signal(self, dataframe: DataFrame) -> DataFrame:
+        return dataframe
 
 
-class CooldownStrategy(Strategy):
-
+class CooldownStrategy(TestStrategy):
+    # Addition to the testing strategy to test cooldowns
     def buy_cooldown(self, last_trade: Trade) -> int:
         cooldown = 0
         if last_trade.sell_reason == SellReason.STOPLOSS:
