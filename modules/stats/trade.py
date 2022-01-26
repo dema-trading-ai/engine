@@ -44,7 +44,7 @@ class Trade:
         self.candle_low = None
         self.candle_open = None
         self.profit_ratio = None
-        self.profit_dollar = None
+        self.profit_currency = None
 
         # Calculations for trade worth
         self.max_seen_drawdown = 1.0  # ratio
@@ -84,7 +84,7 @@ class Trade:
         if update_capital:  # always triggers except when a trade is closed
             self.capital = self.currency_amount * self.current
         self.profit_ratio = self.capital / self.starting_amount
-        self.profit_dollar = self.capital - self.starting_amount
+        self.profit_currency = self.capital - self.starting_amount
 
     def configure_stoploss(self) -> None:
         if self.sl_type == 'standard':  # for backwards compatability - can be removed in the future

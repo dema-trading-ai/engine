@@ -7,6 +7,7 @@ from cli.print_utils import print_info, print_warning
 from modules.stats.trade import SellReason, Trade
 from modules.stats.tradingmodule_config import TradingModuleConfig
 
+
 # ======================================================================
 # TradingModule is responsible for tracking trades, calling strategy methods
 # and virtually opening / closing trades based on strategies' signal.
@@ -26,7 +27,8 @@ class TradingModule:
         self.exposure_per_trade = float(self.config.exposure_per_trade)
         self.amount_of_pairs = len(self.config.pairs)
         if self.amount_of_pairs < self.max_open_trades:
-            print_warning("max_open_trades exceeds amount of pairs in whitelist. max_open_trades will be limited to the amount of pairs in whitelist.")
+            print_warning(
+                "max_open_trades exceeds amount of pairs in whitelist. max_open_trades will be limited to the amount of pairs in whitelist.")
 
         self.fee = config.fee / 100
         self.sl_type = config.stoploss_type
@@ -109,7 +111,8 @@ class TradingModule:
             return
 
         # Define spend amount based on realised profit
-        spend_amount = ((1. / min(self.max_open_trades, self.amount_of_pairs)) * self.exposure_per_trade) * self.realised_profit
+        spend_amount = ((1. / min(self.max_open_trades, self.amount_of_pairs))
+                        * self.exposure_per_trade) * self.realised_profit
         if spend_amount > self.budget:
             spend_amount = self.budget
 
@@ -196,5 +199,5 @@ class TradingModule:
             self.budget_per_timestamp[ohlcv['time']] + self.total_capital_open_trades.get(ohlcv['time'], 0)
 
     def update_realised_profit(self, trade: Trade) -> None:
-        self.realised_profit += trade.profit_dollar
-        self.realised_profits_per_timestamp[int(datetime.timestamp(trade.closed_at)*1000)] = self.realised_profit
+        self.realised_profit += trade.profit_currency
+        self.realised_profits_per_timestamp[int(datetime.timestamp(trade.closed_at) * 1000)] = self.realised_profit

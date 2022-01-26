@@ -130,8 +130,8 @@ class StatsModule:
         if best_trade:
             best_trade_profit_percentage = (best_trade.profit_ratio - 1) * 100
             worst_trade_profit_percentage = (worst_trade.profit_ratio - 1) * 100
-            best_trade_currency_amount = best_trade.profit_dollar
-            worst_trade_currency_amount = worst_trade.profit_dollar
+            best_trade_currency_amount = best_trade.profit_currency
+            worst_trade_currency_amount = worst_trade.profit_currency
             best_trade_pair = best_trade.pair
             worst_trade_pair = worst_trade.pair
             risk_reward_ratio = compute_risk_reward_ratio(closed_trades)
@@ -316,7 +316,7 @@ class StatsModule:
                     per_coin_stats[key]['total_profit_ratio'] * trade.profit_ratio
 
                 # Update profit and amount of trades
-                per_coin_stats[key]['total_profit_amount'] += trade.profit_dollar
+                per_coin_stats[key]['total_profit_amount'] += trade.profit_currency
                 per_coin_stats[key]['amount_of_trades'] += 1
                 if trade.profit_ratio > 1:
                     per_coin_stats[key]['amount_of_winning_trades'] += 1
@@ -359,7 +359,7 @@ class StatsModule:
             )
             left_open_trade_results = LeftOpenTradeResult(pair=trade.pair,
                                                           curr_profit_percentage=(trade.profit_ratio - 1) * 100,
-                                                          curr_profit=trade.profit_dollar,
+                                                          curr_profit=trade.profit_currency,
                                                           max_seen_drawdown=(max_seen_drawdown - 1) * 100,
                                                           opened_at=trade.opened_at)
 
