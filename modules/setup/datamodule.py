@@ -17,6 +17,7 @@ from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
 from utils.utils import get_ohlcv_indicators, parse_timeframe
 from utils.error_handling import ErrorOutput, ConfigError
 
+
 # ======================================================================
 # DataModule is responsible for downloading OHLCV data, preparing it
 # and activating backtesting methods
@@ -44,8 +45,10 @@ class DataModule:
         print_info("Fetching market change of BTC/USDT...")
         begin_data = await self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe=self.config.timeframe,
                                                      since=self.config.backtesting_from, limit=1)
-        end_timestamp = int(np.floor(self.config.backtesting_to / self.config.timeframe_ms) * self.config.timeframe_ms) - self.config.timeframe_ms
-        end_data = await self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe=self.config.timeframe, since=end_timestamp,
+        end_timestamp = int(np.floor(self.config.backtesting_to / self.config.timeframe_ms)
+                            * self.config.timeframe_ms) - self.config.timeframe_ms
+        end_data = await self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe=self.config.timeframe,
+                                                   since=end_timestamp,
                                                    limit=1)
 
         begin_close_value = begin_data[0][4]
@@ -65,8 +68,10 @@ class DataModule:
         return bitcoin_drawdown
 
     async def load_historical_data(self, pairs, check_backtesting_period=True) -> dict:
-        dataframes = await asyncio.gather(*[self.get_pair_data(pair, self.config.timeframe) if not isinstance(pair, tuple)
-                                            else self.get_pair_data(pair[0], pair[1]) for pair in pairs])   # if tuple then additional pair and timeframe comes specified with it
+        dataframes = await asyncio.gather(
+            *[self.get_pair_data(pair, self.config.timeframe) if not isinstance(pair, tuple)
+              else self.get_pair_data(pair[0], pair[1]) for pair in
+              pairs])  # if tuple then additional pair and timeframe comes specified with it
 
         history_data = {key: value for [key, value] in dataframes}
 
@@ -185,7 +190,6 @@ class DataModule:
         final_timestamp = self.config.backtesting_from + (
                 timesteps_forward - self.config.timeframe_ms)  # last tick is excluded
 
-
         # Return correct backtesting period
         df = await self.check_backtesting_period(pair, df, final_timestamp)
 
@@ -255,8 +259,8 @@ class DataModule:
         filepath = os.path.join("data/backtesting-data/", self.config.exchange, filename)
         os.remove(filepath)
 
-    def warn_if_missing_ticks(self, history_data: dict) -> None:
-
+    @staticmethod
+    def warn_if_missing_ticks(history_data: dict) -> None:
         for pair, data in history_data.items():
             n_missing = data['close'].isnull().sum()
 
@@ -266,10 +270,6 @@ class DataModule:
     def fill_missing_ticks(self, df, pair, data_from, data_to):
         """
         Replace missing ticks by NaN
-        :param df: Downloaded data
-        :type df: DataFrame
-        :return: Complete df of the whole daterange
-        :rtype: DataFrame
         """
         daterange = np.arange(data_from,
                               data_to,

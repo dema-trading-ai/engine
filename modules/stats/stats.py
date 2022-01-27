@@ -51,7 +51,7 @@ class StatsModule:
             for pair in pairs:
                 pair_dict = self.frame_with_signals[pair]
                 tick_dict = pair_dict[tick]
-                self.trading_module.tick(tick_dict, pair_dict)
+                self.trading_module.tick(tick_dict)
 
         market_change = get_market_change(self.df, pairs, self.frame_with_signals)
         market_drawdown = get_market_drawdown(pairs, self.frame_with_signals)
@@ -155,8 +155,12 @@ class StatsModule:
                            exposure_per_trade=self.config.exposure_per_trade,
                            market_change_coins=(market_change['all'] - 1) * 100,
                            market_drawdown_coins=(market_drawdown['all'] - 1) * 100,
-                           market_change_btc=(self.config.btc_marketchange_ratio - 1) * 100 if self.config.btc_marketchange_ratio else '-',
-                           market_drawdown_btc=(self.config.btc_drawdown_ratio - 1) * 100 if self.config.btc_drawdown_ratio else '-',
+                           market_change_btc=(
+                                                     self.config.btc_marketchange_ratio - 1
+                                             ) * 100 if self.config.btc_marketchange_ratio else '-',
+                           market_drawdown_btc=(
+                                                       self.config.btc_drawdown_ratio - 1
+                                               ) * 100 if self.config.btc_drawdown_ratio else '-',
                            starting_capital=self.config.starting_capital,
                            end_capital=budget,
                            overall_profit_percentage=overall_profit_percentage,

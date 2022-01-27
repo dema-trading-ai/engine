@@ -130,9 +130,9 @@ def create_trade_info_table(self: MainResults, currency_symbol, justification) -
     trade_info_table.add_row('Avg. trade duration', str(avg_trade_duration))
     trade_info_table.add_row('Longest trade duration', str(longest_trade_duration))
     trade_info_table.add_row('Profitable weeks (W/D/L)', f'{self.prof_weeks_win} / {self.prof_weeks_draw}'
-                                                      f' / {self.prof_weeks_loss}')
+                             f' / {self.prof_weeks_loss}')
     trade_info_table.add_row('Weekly perf. vs market (W/D/L)', f'{self.win_weeks} / {self.draw_weeks}'
-                                                      f' / {self.loss_weeks}')
+                             f' / {self.loss_weeks}')
     return trade_info_table
 
 
@@ -172,8 +172,12 @@ def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown
     performance_table.add_row('Market drawdown BTC/USDT',
                               colorize(round(self.market_drawdown_btc,
                                              2), 0, '%'))
-    performance_table.add_row('Sharpe ratio (90d / 3y)', f'{round(self.sharpe_90d, 2) if self.sharpe_90d is not None else "-"} / {round(self.sharpe_3y, 2) if self.sharpe_3y is not None else "-"}')
-    performance_table.add_row('Sortino ratio (90d / 3y)', f'{round(self.sortino_90d, 2) if self.sortino_90d is not None else "-"} / {round(self.sortino_3y, 2) if self.sortino_3y is not None else "-"}')
+    performance_table.add_row(
+        'Sharpe ratio (90d / 3y)', f'{round(self.sharpe_90d, 2) if self.sharpe_90d is not None else "-"} / '
+                                   f'{round(self.sharpe_3y, 2) if self.sharpe_3y is not None else "-"}')
+    performance_table.add_row(
+        'Sortino ratio (90d / 3y)', f'{round(self.sortino_90d, 2) if self.sortino_90d is not None else "-"} /'
+                                    f' {round(self.sortino_3y, 2) if self.sortino_3y is not None else "-"}')
     performance_table.add_row('Total fee paid',
                               f"{round(self.total_fee_amount)} {currency_symbol}")
     return performance_table
@@ -262,7 +266,8 @@ class CoinInsights:
                                        )
 
             coin_signal_table.add_row(c.pair,
-                                      f"{c.n_trades} ([bright_green]{c.n_wins}[/bright_green]/[bright_red]{c.n_losses}[/bright_red])",
+                                      f"{c.n_trades} ([bright_green]{c.n_wins}[/bright_green]/[bright_red]{c.n_losses}"
+                                      f"[/bright_red])",
                                       str(shortest_trade_duration),
                                       str(avg_trade_duration),
                                       str(longest_trade_duration),

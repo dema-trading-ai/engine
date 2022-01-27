@@ -1,5 +1,5 @@
 # Libraries
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 # Files
@@ -44,19 +44,19 @@ class TradingModule:
         self.total_fee_paid = 0
         self.rejected_buy_signal = 0
 
-    def tick(self, ohlcv: dict, data_dict: dict) -> None:
+    def tick(self, ohlcv: dict) -> None:
         trade = self.find_open_trade(ohlcv['pair'])
         if trade:
             trade.update_stats(ohlcv)
             self.open_trade_tick(ohlcv, trade)
         else:
-            self.no_trade_tick(ohlcv, data_dict)
+            self.no_trade_tick(ohlcv)
         self.update_budget_per_timestamp(ohlcv)
         self.update_capital_per_timestamp(ohlcv)
 
-    def no_trade_tick(self, ohlcv: dict, data_dict: dict) -> None:
+    def no_trade_tick(self, ohlcv: dict) -> None:
         if ohlcv['buy'] == 1:
-            self.open_trade(ohlcv, data_dict)
+            self.open_trade(ohlcv)
 
     def open_trade_tick(self, ohlcv: dict, trade: Trade):
         stoploss_reached = self.check_stoploss_open_trade(trade, ohlcv)
@@ -95,7 +95,7 @@ class TradingModule:
         self.closed_trades.append(trade)
         self.update_realised_profit(trade)
 
-    def open_trade(self, ohlcv: dict, data_dict: dict) -> None:
+    def open_trade(self, ohlcv: dict) -> None:
 
         # Find available trade spaces
         open_trades = len(self.open_trades)
@@ -110,7 +110,9 @@ class TradingModule:
             return
 
         # Define spend amount based on realised profit
-        spend_amount = ((1. / min(self.max_open_trades, self.amount_of_pairs)) * self.exposure_per_trade) * self.realised_profit
+        spend_amount = (
+                               (1. / min(self.max_open_trades, self.amount_of_pairs)) * self.exposure_per_trade
+                       ) * self.realised_profit
         if spend_amount > self.budget:
             spend_amount = self.budget
 
@@ -138,7 +140,7 @@ class TradingModule:
             return True
         return False
 
-    def get_roi_over_time(self, time_passed: datetime) -> float:
+    def get_roi_over_time(self, time_passed: timedelta) -> float:
         passed_minutes = time_passed.seconds / 60
         roi = self.config.roi['0']
 
@@ -147,7 +149,8 @@ class TradingModule:
                 roi = value
         return roi
 
-    def check_stoploss_open_trade(self, trade: Trade, ohlcv: dict) -> bool:
+    @staticmethod
+    def check_stoploss_open_trade(trade: Trade, ohlcv: dict) -> bool:
         sl_signal = trade.check_for_sl(ohlcv)
         if sl_signal:
             return True

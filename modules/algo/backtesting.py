@@ -5,7 +5,7 @@ from typing import Tuple
 from backtesting.strategy import Strategy
 from modules.public.pairs_data import PairsData
 from modules.setup.config import ConfigModule
-from cli.print_utils import print_info, print_warning, print_error
+from cli.print_utils import print_info, print_error
 from modules.setup.config.validations import validate_dynamic_stoploss
 
 
@@ -15,9 +15,6 @@ from modules.setup.config.validations import validate_dynamic_stoploss
 #
 # © 2021 DemaTrading.ai
 # ======================================================================
-#
-# These constants are used for displaying and
-# emphasizing in commandline backtestresults
 
 
 class BackTesting:
