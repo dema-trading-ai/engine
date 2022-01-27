@@ -5,7 +5,6 @@ from backtesting.strategy import Strategy
 
 # Optional Imports
 from modules.setup.config import qtpylib_methods as qtpylib
-from modules.stats.trade import Trade, SellReason
 
 
 class MyStrategy(Strategy):
