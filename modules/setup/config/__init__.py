@@ -47,6 +47,7 @@ class ConfigModule(object):
         self.exchange = None
         self.randomize_pair_order = None
         self.pairs = []
+        self.btc_marketchange_ratio = None
 
     @staticmethod
     async def create(args):

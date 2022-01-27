@@ -7,6 +7,7 @@ from cli.print_utils import print_info
 from modules.output.results import CoinInsights, MainResults, LeftOpenTradeResult
 from modules.public.pairs_data import PairsData
 from modules.public.trading_stats import TradingStats
+from modules.setup import ConfigModule
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio, get_max_drawdown_ratio_without_buy_rows
 from modules.stats.metrics.profit_ratio import get_seen_cum_profit_ratio_per_coin, get_realised_profit_ratio
 from modules.stats.drawdown.for_portfolio import get_max_seen_drawdown_for_portfolio, \
@@ -19,7 +20,6 @@ from modules.stats.metrics.trades import calculate_best_worst_trade, get_number_
     compute_risk_reward_ratio
 from modules.stats.metrics.winning_weeks import get_winning_weeks_per_coin, \
     get_winning_weeks_for_portfolio, get_profitable_weeks_for_portfolio, get_profitable_weeks_per_coin
-from modules.stats.stats_config import StatsConfig
 from modules.stats.trade import Trade, SellReason
 from modules.stats.tradingmodule import TradingModule
 
@@ -29,7 +29,7 @@ from utils.utils import calculate_worth_of_open_trades
 
 class StatsModule:
 
-    def __init__(self, config: StatsConfig, frame_with_signals: PairsData, trading_module: TradingModule, df):
+    def __init__(self, config: ConfigModule, frame_with_signals: PairsData, trading_module: TradingModule, df):
         self.buy_points = None
         self.sell_points = None
         self.df = df
