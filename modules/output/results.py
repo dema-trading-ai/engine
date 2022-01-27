@@ -131,8 +131,8 @@ def create_trade_info_table(self: MainResults, currency_symbol, justification) -
     trade_info_table.add_row('Longest trade duration', str(longest_trade_duration))
     trade_info_table.add_row('Profitable weeks (W/D/L)', f'{self.prof_weeks_win} / {self.prof_weeks_draw}'
                                                       f' / {self.prof_weeks_loss}')
-    trade_info_table.add_row('Weekly perf. vs market (W/D/L)', f'{self.win_weeks} / {self.draw_weeks}'
-                                                      f' / {self.loss_weeks}')
+    trade_info_table.add_row('Weekly perf. vs market (W/D/L)', f'{self.perf_weeks_win} / {self.perf_weeks_draw}'
+                                                      f' / {self.perf_weeks_loss}')
     return trade_info_table
 
 
@@ -220,9 +220,9 @@ class CoinInsights:
     prof_weeks_win: int
     prof_weeks_draw: int
     prof_weeks_loss: int
-    win_weeks: int
-    draw_weeks: int
-    loss_weeks: int
+    perf_weeks_win: int
+    perf_weeks_draw: int
+    perf_weeks_loss: int
     avg_trade_duration: timedelta
     longest_trade_duration: timedelta
     shortest_trade_duration: timedelta
@@ -257,7 +257,7 @@ class CoinInsights:
                                        colorize(round(c.market_drawdown, 2), 0),
                                        colorize(round(c.max_seen_drawdown, 2), 0),
                                        colorize(round(c.max_realised_drawdown, 2), 0),
-                                       f"{c.win_weeks} / {c.draw_weeks} / {c.loss_weeks}",
+                                       f"{c.perf_weeks_win} / {c.perf_weeks_draw} / {c.perf_weeks_loss}",
                                        f"{c.prof_weeks_win} / {c.prof_weeks_draw} / {c.prof_weeks_loss}",
                                        )
 

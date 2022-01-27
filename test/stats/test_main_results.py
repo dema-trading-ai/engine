@@ -594,9 +594,9 @@ def test_profitable_weeks_one_win():
     assert stats.main_results.prof_weeks_draw == 0
     assert stats.main_results.prof_weeks_loss == 0
 
-    assert stats.main_results.win_weeks == 1
-    assert stats.main_results.draw_weeks == 0
-    assert stats.main_results.loss_weeks == 0
+    assert stats.main_results.perf_weeks_win == 1
+    assert stats.main_results.perf_weeks_draw == 0
+    assert stats.main_results.perf_weeks_loss == 0
 
 
 def test_profitable_weeks_one_loss():
@@ -616,9 +616,9 @@ def test_profitable_weeks_one_loss():
     assert stats.main_results.prof_weeks_draw == 0
     assert stats.main_results.prof_weeks_loss == 1
 
-    assert stats.main_results.win_weeks == 0
-    assert stats.main_results.draw_weeks == 0
-    assert stats.main_results.loss_weeks == 1
+    assert stats.main_results.perf_weeks_win == 0
+    assert stats.main_results.perf_weeks_draw == 0
+    assert stats.main_results.perf_weeks_loss == 1
 
 
 def test_profitable_weeks_no_trades_market_down():
@@ -639,9 +639,9 @@ def test_profitable_weeks_no_trades_market_down():
     assert stats.main_results.prof_weeks_draw == 1
     assert stats.main_results.prof_weeks_loss == 0
 
-    assert stats.main_results.win_weeks == 1
-    assert stats.main_results.draw_weeks == 0
-    assert stats.main_results.loss_weeks == 0
+    assert stats.main_results.perf_weeks_win == 1
+    assert stats.main_results.perf_weeks_draw == 0
+    assert stats.main_results.perf_weeks_loss== 0
 
 
 def test_profitable_weeks_no_trades_market_up():
@@ -662,9 +662,9 @@ def test_profitable_weeks_no_trades_market_up():
     assert stats.main_results.prof_weeks_draw == 1
     assert stats.main_results.prof_weeks_loss == 0
 
-    assert stats.main_results.win_weeks == 0
-    assert stats.main_results.draw_weeks == 0
-    assert stats.main_results.loss_weeks == 1
+    assert stats.main_results.perf_weeks_win == 0
+    assert stats.main_results.perf_weeks_draw == 0
+    assert stats.main_results.perf_weeks_loss == 1
 
 
 def test_profitable_weeks_no_trades_market_flat():
@@ -685,9 +685,9 @@ def test_profitable_weeks_no_trades_market_flat():
     assert stats.main_results.prof_weeks_draw == 1
     assert stats.main_results.prof_weeks_loss == 0
 
-    assert stats.main_results.win_weeks == 0
-    assert stats.main_results.draw_weeks == 1
-    assert stats.main_results.loss_weeks == 0
+    assert stats.main_results.perf_weeks_win == 0
+    assert stats.main_results.perf_weeks_draw == 1
+    assert stats.main_results.perf_weeks_loss == 0
 
 
 def test_risk_reward_ratio():

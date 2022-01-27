@@ -377,9 +377,9 @@ def test_winning_weeks():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.coin_results[0].win_weeks == 1
-    assert stats.coin_results[0].loss_weeks == stats.coin_results[0].draw_weeks == 0
-    assert stats.coin_results[1].loss_weeks == 1
-    assert stats.coin_results[1].win_weeks == stats.coin_results[0].draw_weeks == 0
-    assert stats.main_results.loss_weeks == 1
-    assert stats.main_results.win_weeks == stats.main_results.draw_weeks == 0
+    assert stats.coin_results[0].perf_weeks_win == 1
+    assert stats.coin_results[0].perf_weeks_draw == stats.coin_results[0].perf_weeks_draw == 0
+    assert stats.coin_results[1].perf_weeks_loss == 1
+    assert stats.coin_results[1].perf_weeks_win == stats.coin_results[0].perf_weeks_draw == 0
+    assert stats.main_results.perf_weeks_loss == 1
+    assert stats.main_results.perf_weeks_win == stats.main_results.perf_weeks_draw == 0

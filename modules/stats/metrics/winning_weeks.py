@@ -13,7 +13,7 @@ def get_market_ratio(signal_dict):
     return df
 
 
-def get_winning_weeks_per_coin(signal_dict: dict, cum_profit_ratio):
+def get_outperforming_weeks_per_coin(signal_dict: dict, cum_profit_ratio):
     # Create dataframes
     cum_profit_ratio = cum_profit_ratio.iloc[1:]
     ohlcv_df = get_market_ratio(signal_dict)
@@ -40,7 +40,7 @@ def get_winning_weeks_per_coin(signal_dict: dict, cum_profit_ratio):
     return wins, draws, losses, market_change_weekly
 
 
-def get_winning_weeks_for_portfolio(capital_per_timestamp, market_change_weekly):
+def get_outperforming_weeks_for_portfolio(capital_per_timestamp, market_change_weekly):
     coins = list(market_change_weekly.keys())
     market_change_weekly_first_coin = market_change_weekly[coins[0]]
 

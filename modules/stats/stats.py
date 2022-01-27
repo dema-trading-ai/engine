@@ -17,8 +17,8 @@ from modules.stats.metrics.market_change import get_market_change, get_market_dr
 from modules.stats.metrics.trades import calculate_best_worst_trade, get_number_of_losing_trades, \
     get_number_of_consecutive_losing_trades, calculate_trade_durations, compute_median_trade_profit, \
     compute_risk_reward_ratio
-from modules.stats.metrics.winning_weeks import get_winning_weeks_per_coin, \
-    get_winning_weeks_for_portfolio, get_profitable_weeks_for_portfolio, get_profitable_weeks_per_coin
+from modules.stats.metrics.winning_weeks import get_outperforming_weeks_per_coin, \
+    get_outperforming_weeks_for_portfolio, get_profitable_weeks_for_portfolio, get_profitable_weeks_per_coin
 from modules.stats.stats_config import StatsConfig
 from modules.stats.trade import Trade, SellReason
 from modules.stats.tradingmodule import TradingModule
@@ -112,7 +112,7 @@ class StatsModule:
         )
 
         # Find amount of winning, draw and losing weeks for portfolio
-        win_weeks, draw_weeks, loss_weeks = get_winning_weeks_for_portfolio(
+        perf_weeks_win, perf_weeks_draw, perf_weeks_loss = get_outperforming_weeks_for_portfolio(
             self.trading_module.capital_per_timestamp,
             market_change_weekly
         )
@@ -178,9 +178,9 @@ class StatsModule:
                            prof_weeks_win=prof_weeks_win,
                            prof_weeks_draw=prof_weeks_draw,
                            prof_weeks_loss=prof_weeks_loss,
-                           win_weeks=win_weeks,
-                           draw_weeks=draw_weeks,
-                           loss_weeks=loss_weeks,
+                           perf_weeks_win=perf_weeks_win,
+                           perf_weeks_draw=perf_weeks_draw,
+                           perf_weeks_loss=perf_weeks_loss,
                            max_seen_drawdown=(max_seen_drawdown['drawdown'] - 1) * 100,
                            drawdown_from=max_seen_drawdown['from'],
                            drawdown_to=max_seen_drawdown['to'],
@@ -221,9 +221,9 @@ class StatsModule:
                                         prof_weeks_win=stats[coin]['prof_weeks_win'],
                                         prof_weeks_draw=stats[coin]['prof_weeks_draw'],
                                         prof_weeks_loss=stats[coin]['prof_weeks_loss'],
-                                        win_weeks=stats[coin]['win_weeks'],
-                                        draw_weeks=stats[coin]['draw_weeks'],
-                                        loss_weeks=stats[coin]['loss_weeks'],
+                                        perf_weeks_win=stats[coin]['perf_weeks_win'],
+                                        perf_weeks_draw=stats[coin]['perf_weeks_draw'],
+                                        perf_weeks_loss=stats[coin]['perf_weeks_loss'],
                                         avg_trade_duration=stats[coin]['avg_trade_duration'],
                                         longest_trade_duration=stats[coin]['longest_trade_duration'],
                                         shortest_trade_duration=stats[coin]['shortest_trade_duration'],
@@ -256,9 +256,9 @@ class StatsModule:
                 "prof_weeks_win": 0,
                 "prof_weeks_draw": 0,
                 "prof_weeks_loss": 0,
-                "win_weeks": 0,
-                "draw_weeks": 0,
-                "loss_weeks": 0
+                "perf_weeks_win": 0,
+                "perf_weeks_draw": 0,
+                "perf_weeks_loss": 0
             } for pair in self.frame_with_signals.keys()
         }
         market_change_weekly = {pair: None for pair in self.frame_with_signals.keys()}
@@ -292,10 +292,10 @@ class StatsModule:
                 calculate_trade_durations(closed_pair_trades)
 
             # Find winning, draw and losing weeks for current coin
-            per_coin_stats[key]["win_weeks"], \
-                per_coin_stats[key]["draw_weeks"], \
-                per_coin_stats[key]["loss_weeks"], \
-                market_change_weekly[key] = get_winning_weeks_per_coin(
+            per_coin_stats[key]["perf_weeks_win"], \
+                per_coin_stats[key]["perf_weeks_draw"], \
+                per_coin_stats[key]["perf_weeks_loss"], \
+                market_change_weekly[key] = get_outperforming_weeks_per_coin(
                     self.frame_with_signals[key],
                     seen_cum_profit_ratio_df
                 )
