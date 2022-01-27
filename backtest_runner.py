@@ -9,7 +9,6 @@ from modules.output import OutputModule
 from modules.setup import ConfigModule, DataModule, SetupModule
 from modules.stats.stats import StatsModule
 from modules.stats.tradingmodule import TradingModule
-from modules.stats.tradingmodule_config import create_trading_module_config
 
 
 class BacktestRunner:

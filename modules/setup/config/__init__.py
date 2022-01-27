@@ -13,7 +13,7 @@ from .strategy_definition import StrategyDefinition
 from .cctx_adapter import create_cctx_exchange
 from .currencies import get_currency_symbol
 from .validations import validate_and_read_cli, check_for_missing_config_items
-from cli.print_utils import print_info, print_standard, print_warning, print_error
+from cli.print_utils import print_info, print_standard, print_warning
 from utils.error_handling import ConfigError, ErrorOutput
 
 msec = 1000
@@ -48,6 +48,8 @@ class ConfigModule(object):
         self.randomize_pair_order = None
         self.pairs = []
         self.btc_marketchange_ratio = None
+        self.btc_drawdown_ratio = None
+        self.roi = None
 
     @staticmethod
     async def create(args):

@@ -4,8 +4,8 @@ from typing import Optional
 
 # Files
 from cli.print_utils import print_info, print_warning
+from modules.setup import ConfigModule
 from modules.stats.trade import SellReason, Trade
-from modules.stats.tradingmodule_config import TradingModuleConfig
 
 # ======================================================================
 # TradingModule is responsible for tracking trades, calling strategy methods
@@ -17,7 +17,7 @@ from modules.stats.tradingmodule_config import TradingModuleConfig
 
 class TradingModule:
 
-    def __init__(self, config: TradingModuleConfig):
+    def __init__(self, config: ConfigModule):
         self.config = config
         self.budget = float(self.config.starting_capital)
         self.realised_profit = self.budget
@@ -26,7 +26,8 @@ class TradingModule:
         self.exposure_per_trade = float(self.config.exposure_per_trade)
         self.amount_of_pairs = len(self.config.pairs)
         if self.amount_of_pairs < self.max_open_trades:
-            print_warning("max_open_trades exceeds amount of pairs in whitelist. max_open_trades will be limited to the amount of pairs in whitelist.")
+            print_warning("max_open_trades exceeds amount of pairs in whitelist. max_open_trades will be limited to "
+                          "the amount of pairs in whitelist.")
 
         self.fee = config.fee / 100
         self.sl_type = config.stoploss_type
