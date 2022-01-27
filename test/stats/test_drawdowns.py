@@ -318,8 +318,7 @@ def test_drawdown_with_stoploss_one_trade():
 
     fixture.frame_with_signals['COIN'].test_scenario_down_10_up_100_down_75_one_trade()
 
-    fixture.trading_module_config.stoploss = -50
-    fixture.stats_config.stoploss = -50
+    fixture.config.stoploss = -50
 
     # Act
     stats = fixture.create().analyze()
@@ -336,8 +335,7 @@ def test_drawdown_with_stoploss_multiple_trades():
 
     fixture.frame_with_signals['COIN'].test_scenario_down_10_up_100_down_75_three_trades()
 
-    fixture.trading_module_config.stoploss = -50
-    fixture.stats_config.stoploss = -50
+    fixture.config.stoploss = -50
 
     # Act
     stats = fixture.create().analyze()

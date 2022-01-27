@@ -13,8 +13,7 @@ def test_fee_equals_stoploss():
 
     fixture.frame_with_signals['COIN'].test_scenario_flat_one_trade_no_sell()
 
-    fixture.trading_module_config.stoploss = -1
-    fixture.stats_config.stoploss = -1
+    fixture.config.stoploss = -1
 
     # Act
     stats = fixture.create().analyze()
@@ -233,7 +232,7 @@ def test_sell_reason_roi():
 
     fixture.frame_with_signals['COIN'].test_scenario_up_100_one_trade()
 
-    fixture.trading_module_config.roi = {
+    fixture.config.roi = {
         "0": 50
     }
 
@@ -251,8 +250,7 @@ def test_sell_reason_stoploss():
 
     fixture.frame_with_signals['COIN'].test_scenario_down_50_one_trade()
 
-    fixture.trading_module_config.stoploss = -25
-    fixture.stats_config.stoploss = -25
+    fixture.config.stoploss = -25
 
     # Act
     stats = fixture.create().analyze()

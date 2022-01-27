@@ -41,7 +41,7 @@ def test_roi_reached_multiple_times():
     fixture.frame_with_signals['COIN'].test_scenario_up_100_one_trade_no_sell()
     fixture.frame_with_signals['COIN'].test_scenario_up_100_one_trade_no_sell()
 
-    fixture.trading_module_config.roi = {
+    fixture.config.roi = {
         "0": 10
     }
 
@@ -60,7 +60,7 @@ def test_roi_set_not_reached():
     fixture.frame_with_signals['COIN'].test_scenario_up_100_one_trade()
     fixture.frame_with_signals['COIN'].test_scenario_up_100_one_trade()
 
-    fixture.trading_module_config.roi = {
+    fixture.config.roi = {
         "0": 150
     }
 
@@ -122,8 +122,7 @@ def test_stoploss():
 
     fixture.frame_with_signals['COIN'].test_scenario_down_50_one_trade()
 
-    fixture.trading_module_config.stoploss = -25
-    fixture.stats_config.stoploss = -25
+    fixture.config.stoploss = -25
 
     # Act
     stats = fixture.create().analyze()
@@ -139,12 +138,11 @@ def test_trailing_stoploss():
     # Arrange
     fixture = StatsFixture(['COIN'])
 
-    fixture.trading_module_config.stoploss_type = "trailing"
+    fixture.config.stoploss_type = "trailing"
 
     fixture.frame_with_signals['COIN'].test_scenario_up_100_down_20_down_75_one_trade()
 
-    fixture.trading_module_config.stoploss = -25
-    fixture.stats_config.stoploss = -25
+    fixture.config.stoploss = -25
 
     # Act
     stats = fixture.create().analyze()
@@ -159,7 +157,7 @@ def test_dynamic_stoploss():
     # Arrange
     fixture = StatsFixture(['COIN'])
 
-    fixture.trading_module_config.stoploss_type = "dynamic"
+    fixture.config.stoploss_type = "dynamic"
 
     fixture.frame_with_signals['COIN'] \
         .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0, stoploss=1) \
@@ -178,7 +176,7 @@ def test_dynamic_stoploss_high():
     # Arrange
     fixture = StatsFixture(['COIN'])
 
-    fixture.trading_module_config.stoploss_type = "dynamic"
+    fixture.config.stoploss_type = "dynamic"
 
     fixture.frame_with_signals['COIN'] \
         .add_entry(open=2, high=2, low=2, close=2, volume=1, buy=1, sell=0, stoploss=1) \
@@ -199,8 +197,7 @@ def test_dividing_assets():
 
     fixture.frame_with_signals['COIN2'].test_scenario_down_50_one_trade()
 
-    fixture.trading_module_config.stoploss = 25
-    fixture.stats_config.stoploss = 25
+    fixture.config.stoploss = 25
 
     # Act
     stats = fixture.create().analyze()
@@ -237,8 +234,8 @@ def test_n_average_trades():
     # Arrange
     fixture = StatsFixture(['COIN'])
 
-    fixture.stats_config.backtesting_to = 86400000
-    fixture.stats_config.backtesting_from = 0
+    fixture.config.backtesting_to = 86400000
+    fixture.config.backtesting_from = 0
 
     # Win/Loss/Open
     fixture.frame_with_signals['COIN'].test_scenario_down_10_up_100_down_75_three_trades()
@@ -257,8 +254,8 @@ def test_n_average_trades_no_trades():
     # Arrange
     fixture = StatsFixture(['COIN'])
 
-    fixture.stats_config.backtesting_to = 86400000  # one day
-    fixture.stats_config.backtesting_from = 0
+    fixture.config.backtesting_to = 86400000  # one day
+    fixture.config.backtesting_from = 0
 
     # Loss/Loss/Open
     fixture.frame_with_signals['COIN'].test_scenario_flat_no_trades()
@@ -278,8 +275,8 @@ def test_n_average_trades_more_time_less_trades():
     # Arrange
     fixture = StatsFixture(['COIN'])
 
-    fixture.stats_config.backtesting_to = 172800000  # two days
-    fixture.stats_config.backtesting_from = 0
+    fixture.config.backtesting_to = 172800000  # two days
+    fixture.config.backtesting_from = 0
 
     # Win/Loss/Open
     fixture.frame_with_signals['COIN'].test_scenario_down_10_up_100_down_75_three_trades()
@@ -295,8 +292,8 @@ def test_n_average_trades_less_time_more_trades():
     # Arrange
     fixture = StatsFixture(['COIN'])
 
-    fixture.stats_config.backtesting_to = 43200000  # half a day
-    fixture.stats_config.backtesting_from = 0
+    fixture.config.backtesting_to = 43200000  # half a day
+    fixture.config.backtesting_from = 0
 
     # Win/Loss/Open
     fixture.frame_with_signals['COIN'].test_scenario_down_10_up_100_down_75_three_trades()
@@ -449,9 +446,8 @@ def test_rejected_buy_signal_reject_low_budget():
     # Arrange
     fixture = StatsFixture(['COIN'])
 
-    fixture.trading_module_config.starting_capital = 0
-
     # Win/Loss/Open
+    fixture.frame_with_signals['COIN'].test_scenario_down_100()
     fixture.frame_with_signals['COIN'].test_scenario_down_10_up_100_down_75_three_trades()
 
     # Act
@@ -465,7 +461,7 @@ def test_rejected_buy_signal_reject_exposure():
     # Arrange
     fixture = StatsFixture(['COIN', 'COIN2'])
 
-    fixture.trading_module_config.exposure_per_trade = 200
+    fixture.config.exposure_per_trade = 200
 
     # Win/Loss/Open
     fixture.frame_with_signals['COIN'].test_scenario_down_10_up_100_down_75_one_trade()

@@ -7,6 +7,7 @@ from optuna import Trial
 from cli.print_utils import print_error
 from modules.output import OutputModule
 from modules.setup import ConfigModule, DataModule, SetupModule
+from modules.setup.config import create_config
 from modules.stats.stats import StatsModule
 from modules.stats.tradingmodule import TradingModule
 
@@ -44,7 +45,7 @@ class BacktestRunner:
 async def create_backtest_runner(args: object) -> Generator[BacktestRunner, None, None]:
     config = None
     try:
-        config = await ConfigModule.create(args)
+        config = create_config(args)
         data_module = await DataModule.create(config)
         setup_module = SetupModule(config, data_module)
         algo_module, df, strategy = await setup_module.setup()
