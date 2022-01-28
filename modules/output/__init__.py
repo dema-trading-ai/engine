@@ -39,7 +39,8 @@ class OutputModule(object):
         except OSError:
             pass
 
-        print_info("Logging trades to " + FONT_BOLD + f"data/backtesting-data/trades_log_{self.config.strategy_name}.json" + FONT_RESET + "...")
+        print_info("Logging trades to " + FONT_BOLD +
+                   f"data/backtesting-data/trades_log_{self.config.strategy_name}.json" + FONT_RESET + "...")
         log_trades(stats, self.config)
 
         # write orders to a  tearsheet
@@ -56,7 +57,8 @@ class OutputModule(object):
 
         # Export backtest result as JSON
         if self.config.export_result:
-            print_info("Exporting backtest report to " + FONT_BOLD + "data/backtesting-data/backtest_result.json" + FONT_RESET + "...")
+            print_info("Exporting backtest report to " + FONT_BOLD + "data/backtesting-data/backtest_result.json" +
+                       FONT_RESET + "...")
             export_backtest_result(stats, strategy_definition)
 
         show_signature()
@@ -121,4 +123,3 @@ def create_tearsheet(trades):
 def export_backtest_result(stats, strategy_definition):
     with open(f"data/backtesting-data/{strategy_definition.strategy_name}_backtest_result.json", 'w') as f:
         json.dump(dataclasses.asdict(stats.main_results), default=str, fp=f)
-
