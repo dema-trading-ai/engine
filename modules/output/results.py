@@ -1,7 +1,6 @@
 # Libraries
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-import typing
 
 from rich.console import JustifyMethod
 from rich.padding import Padding
@@ -224,10 +223,12 @@ class CoinInsights:
     median_trade_currency: float
 
     @staticmethod
-    def show(instances: typing.List['CoinInsights'], currency_symbol: str):
+    def show(instances: ['CoinInsights'], currency_symbol: str):
         justification: JustifyMethod = "center"
 
         coin_performance_table = CoinInsights.create_coin_performance_table(justification, currency_symbol)
+
+        trade_perf_per_coin_table = CoinInsights.create_trade_perf_per_coin_table(justification, currency_symbol)
 
         coin_metrics_table = CoinInsights.create_coin_metrics_table(justification)
 
@@ -242,14 +243,17 @@ class CoinInsights:
                                            colorize(round(c.avg_profit_percentage, 2), 0),
                                            colorize(round(c.cum_profit_percentage, 2), 0),
                                            colorize(round(c.total_profit_percentage, 2), 0),
-                                           colorize(round(c.profit, 2), 0),
-                                           f"{colorize(round((c.best_trade_ratio - 1) * 100, 2), 0)} / "
-                                           f"{colorize(round((c.worst_trade_ratio - 1) * 100, 2), 0)} / "
-                                           f"{colorize(round((c.median_trade_ratio - 1) * 100, 2), 0)}",
-                                           f"{colorize(round(c.best_trade_currency, 2), 0)} / "
-                                           f"{colorize(round(c.worst_trade_currency, 2), 0)} / "
-                                           f"{colorize(round(c.median_trade_currency, 2), 0)}"
+                                           colorize(round(c.profit, 2), 0)
                                            )
+
+            trade_perf_per_coin_table.add_row(c.pair,
+                                              f"{colorize(round((c.best_trade_ratio - 1) * 100, 2), 0)} / "
+                                              f"{colorize(round((c.median_trade_ratio - 1) * 100, 2), 0)} / "
+                                              f"{colorize(round((c.worst_trade_ratio - 1) * 100, 2), 0)}",
+                                              f"{colorize(round(c.best_trade_currency, 2), 0)} / "
+                                              f"{colorize(round(c.median_trade_currency, 2), 0)} / "
+                                              f"{colorize(round(c.worst_trade_currency, 2), 0)}"
+                                              )
 
             coin_metrics_table.add_row(c.pair,
                                        colorize(round(c.market_change, 2), 0),
@@ -275,25 +279,37 @@ class CoinInsights:
         table_grid = Table(box=box.SIMPLE)
         table_grid.add_column(":moneybag: COIN INSIGHTS :moneybag:")
         table_grid.add_row(coin_performance_table)
+        table_grid.add_row(trade_perf_per_coin_table)
         table_grid.add_row(coin_metrics_table)
         table_grid.add_row(coin_signal_table)
         console_color.print(table_grid)
 
     @staticmethod
-    def create_coin_performance_table(justification, currency_symbol: str) -> Table:
+    def create_coin_performance_table(justification: JustifyMethod, currency_symbol: str) -> Table:
         coin_performance_table = Table(title="Coin Performance\n(All columns indicate returns)",
-                                       box=box.ROUNDED)
+                                       box=box.ROUNDED,
+                                       width=100)
         coin_performance_table.add_column("Pair", justify=justification)
         coin_performance_table.add_column("Average (%)", justify=justification)
         coin_performance_table.add_column("Cumulative (%)", justify=justification)
         coin_performance_table.add_column("Total (%)", justify=justification)
         coin_performance_table.add_column(f"Actual ({currency_symbol})", justify=justification)
-        coin_performance_table.add_column("Percentage-based", justify=justification)
-        coin_performance_table.add_column("Currency-based", justify=justification)
         return coin_performance_table
 
     @staticmethod
-    def create_coin_metrics_table(justification) -> Table:
+    def create_trade_perf_per_coin_table(justification: JustifyMethod, currency_symbol: str) -> Table:
+        trade_perf_per_coin_table = Table(title="Trade Performance per Coin",
+                                          box=box.ROUNDED,
+                                          width=100)
+        trade_perf_per_coin_table.add_column("Pair", justify=justification)
+        trade_perf_per_coin_table.add_column("Relative trade ranking (%)\nBest / median / worst", justify=justification)
+        trade_perf_per_coin_table.add_column(f"Absolute trade ranking ({currency_symbol})\nBest / median / worst",
+                                             justify=justification)
+
+        return trade_perf_per_coin_table
+
+    @staticmethod
+    def create_coin_metrics_table(justification: JustifyMethod) -> Table:
         coin_metrics_table = Table(title="Coin Metrics", box=box.ROUNDED, width=100)
         coin_metrics_table.add_column("Pair", justify=justification)
         coin_metrics_table.add_column("Market change (%)", justify=justification)
@@ -308,7 +324,7 @@ class CoinInsights:
         return coin_metrics_table
 
     @staticmethod
-    def create_coin_signals_table(justification) -> Table:
+    def create_coin_signals_table(justification: JustifyMethod) -> Table:
         coin_signal_table = Table(title="Coin Signals", box=box.ROUNDED, width=100)
         coin_signal_table.add_column("Pair", justify=justification)
         coin_signal_table.add_column("Trades (W/L)", justify=justification)
@@ -330,7 +346,7 @@ class LeftOpenTradeResult:
     opened_at: datetime
 
     @staticmethod
-    def show(instances: typing.List['LeftOpenTradeResult'], currency_symbol):
+    def show(instances: ['LeftOpenTradeResult'], currency_symbol):
         justification: JustifyMethod = "center"
 
         left_open_trades_table = LeftOpenTradeResult.create_left_open_trades_table(justification, currency_symbol)
@@ -349,7 +365,7 @@ class LeftOpenTradeResult:
         console_color.print(table_grid)
 
     @staticmethod
-    def create_left_open_trades_table(justification, currency_symbol) -> Table:
+    def create_left_open_trades_table(justification: JustifyMethod, currency_symbol) -> Table:
         left_open_trades_table = Table(title="Left open trades", box=box.ROUNDED, width=100)
         left_open_trades_table.add_column("Pair", justify=justification)
         left_open_trades_table.add_column("Cur. profit (%)", justify=justification)
