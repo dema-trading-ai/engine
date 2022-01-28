@@ -4,7 +4,7 @@ from typing import Optional
 from modules.stats.trade import Trade
 
 
-def med(trades_return: list[float, ...], default=None) -> Optional[float]:
+def med(trades_return: [float, ...], default=None) -> Optional[float]:
     """Finds the median in a list of trade returns"""
 
     trades_return = sorted(trades_return)
@@ -71,8 +71,9 @@ def calculate_trade_durations(closed_trades: [Trade]):
 
 
 def compute_risk_reward_ratio(closed_trades: [Trade]) -> float:
+
     if len(closed_trades) == 0:
-        return 0.0
+        return 0
 
     winning_trades = []
     losing_trades = []
