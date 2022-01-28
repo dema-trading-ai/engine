@@ -41,6 +41,7 @@ class ConfigModule(object):
         self.exposure_per_trade = None
         self.stoploss_type = None
         self.stoploss = None
+        self.roi = None
         self.fee = None
         self.strategy_definition = None
         self.strategy_name = None

@@ -63,11 +63,14 @@ class BackTesting:
             indicators = self.strategy.sell_signal(indicators)
             indicators = indicators.append(df.loc[df["close"].isnull()]).sort_index()
             self.df[pair] = indicators.copy()
+
             if stoploss_type == "dynamic":
                 stoploss = self.strategy.stoploss(indicators)
                 validate_dynamic_stoploss(stoploss)
                 indicators['stoploss'] = stoploss['stoploss']
+
             data_dict[pair] = indicators.to_dict('index')
+
             if not self.df[pair][['open', 'high', 'low', 'close', 'volume', 'pair']].equals(
                     df[['open', 'high', 'low', 'close', 'volume', 'pair']]
             ):

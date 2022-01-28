@@ -22,7 +22,7 @@ class BacktestRunner:
 
     def run_backtest(self):
         pair_dicts, dict_with_signals = self.algo_module.run()
-        trading_module = TradingModule(self.config)
+        trading_module = TradingModule(self.config, self.strategy)
         stats_module = StatsModule(self.config, dict_with_signals, trading_module, pair_dicts)
         return stats_module.analyze()
 
