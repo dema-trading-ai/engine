@@ -227,6 +227,12 @@ class CoinInsights:
     perf_weeks_win: int
     perf_weeks_draw: int
     perf_weeks_loss: int
+    prof_months_win: int
+    prof_months_draw: int
+    prof_months_loss: int
+    perf_months_win: int
+    perf_months_draw: int
+    perf_months_loss: int
     avg_trade_duration: timedelta
     longest_trade_duration: timedelta
     shortest_trade_duration: timedelta
@@ -263,6 +269,8 @@ class CoinInsights:
                                        colorize(round(c.max_realised_drawdown, 2), 0),
                                        f"{c.perf_weeks_win} / {c.perf_weeks_draw} / {c.perf_weeks_loss}",
                                        f"{c.prof_weeks_win} / {c.prof_weeks_draw} / {c.prof_weeks_loss}",
+                                       f"{c.perf_months_win} / {c.perf_months_draw} / {c.perf_months_loss}",
+                                       f"{c.prof_months_win} / {c.prof_months_draw} / {c.prof_months_loss}",
                                        )
 
             coin_signal_table.add_row(c.pair,
@@ -307,6 +315,10 @@ class CoinInsights:
         coin_metrics_table.add_column("Weekly perf. vs market (W/D/L)",
                                       justify=justification)
         coin_metrics_table.add_column("Profitable weeks (W/D/L)",
+                                      justify=justification)
+        coin_metrics_table.add_column("Monthly perf. vs market (W/D/L)",
+                                      justify=justification)
+        coin_metrics_table.add_column("Profitable months (W/D/L)",
                                       justify=justification)
         return coin_metrics_table
 
