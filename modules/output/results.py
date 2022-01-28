@@ -172,12 +172,12 @@ def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown
     performance_table.add_row('Market drawdown BTC/USDT',
                               colorize(round(self.market_drawdown_btc,
                                              2), 0, '%'))
-    performance_table.add_row(
-        'Sharpe ratio (90d / 3y)', f'{round(self.sharpe_90d, 2) if self.sharpe_90d is not None else "-"} / '
-                                   f'{round(self.sharpe_3y, 2) if self.sharpe_3y is not None else "-"}')
-    performance_table.add_row(
-        'Sortino ratio (90d / 3y)', f'{round(self.sortino_90d, 2) if self.sortino_90d is not None else "-"} /'
-                                    f' {round(self.sortino_3y, 2) if self.sortino_3y is not None else "-"}')
+    performance_table.add_row('Sharpe ratio (90d / 3y)',
+                              f'{round(self.sharpe_90d, 2) if self.sharpe_90d is not None else "-"} / '
+                              f'{round(self.sharpe_3y, 2) if self.sharpe_3y is not None else "-"}')
+    performance_table.add_row('Sortino ratio (90d / 3y)',
+                              f'{round(self.sortino_90d, 2) if self.sortino_90d is not None else "-"} / '
+                              f'{round(self.sortino_3y, 2) if self.sortino_3y is not None else "-"}')
     performance_table.add_row('Total fee paid',
                               f"{round(self.total_fee_amount)} {currency_symbol}")
     return performance_table
