@@ -8,7 +8,8 @@ from modules.output.results import CoinInsights, MainResults, LeftOpenTradeResul
 from modules.public.pairs_data import PairsData
 from modules.public.trading_stats import TradingStats
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio, get_max_drawdown_ratio_without_buy_rows
-from modules.stats.metrics.profit_ratio import get_seen_cum_profit_ratio_per_coin, get_realised_profit_ratio
+from modules.stats.metrics.profit_ratio import get_realised_profit_ratio, get_seen_cum_profit_ratio, \
+    get_profit_ratio_from_capital
 from modules.stats.drawdown.for_portfolio import get_max_seen_drawdown_for_portfolio, \
     get_max_realised_drawdown_for_portfolio
 from modules.stats.ratios.for_portfolio import get_sharpe_sortino_ratios
@@ -17,8 +18,7 @@ from modules.stats.metrics.market_change import get_market_change, get_market_dr
 from modules.stats.metrics.trades import calculate_best_worst_trade, get_number_of_losing_trades, \
     get_number_of_consecutive_losing_trades, calculate_trade_durations, compute_median_trade_profit, \
     compute_risk_reward_ratio
-from modules.stats.metrics.winning_weeks import get_profitable_timeframe_for_portfolio, \
-    get_outperforming_timeframe_for_portfolio, get_outperforming_timeframe_per_coin, get_profitable_timeframe_per_coin
+from modules.stats.metrics.winning_weeks import get_profitable_timeframe, get_outperforming_timeframe
 from modules.stats.stats_config import StatsConfig
 from modules.stats.trade import Trade, SellReason
 from modules.stats.tradingmodule import TradingModule
@@ -106,20 +106,23 @@ class StatsModule:
         sharpe_90d, sortino_90d, sharpe_3y, sortino_3y = \
             get_sharpe_sortino_ratios(self.trading_module.capital_per_timestamp)
 
-        prof_weeks_win, prof_weeks_draw, prof_weeks_loss = get_profitable_timeframe_for_portfolio(
-            self.trading_module.capital_per_timestamp
+        profit_ratio_per_timestamp = get_profit_ratio_from_capital(self.trading_module.capital_per_timestamp)
+        prof_weeks_win, prof_weeks_draw, prof_weeks_loss = get_profitable_timeframe(
+            profit_ratio_per_timestamp
         )
-        perf_weeks_win, perf_weeks_draw, perf_weeks_loss = get_outperforming_timeframe_for_portfolio(
-            self.trading_module.capital_per_timestamp,
+        perf_weeks_win, perf_weeks_draw, perf_weeks_loss, x = get_outperforming_timeframe(
             market_change_weekly,
+            profit_ratio_per_timestamp,
             "W"
         )
-        prof_months_win, prof_months_draw, prof_months_loss = get_profitable_timeframe_for_portfolio(
-            self.trading_module.capital_per_timestamp, "M"
+        prof_months_win, prof_months_draw, prof_months_loss = get_profitable_timeframe(
+            profit_ratio_per_timestamp,
+            "M"
         )
-        perf_months_win, perf_months_draw, perf_months_loss = get_outperforming_timeframe_for_portfolio(
-            self.trading_module.capital_per_timestamp,
-            market_change_monthly, "M"
+        perf_months_win, perf_months_draw, perf_months_loss, x = get_outperforming_timeframe(
+            market_change_monthly,
+            profit_ratio_per_timestamp,
+            "M"
         )
 
         nr_losing_trades = get_number_of_losing_trades(closed_trades)
@@ -287,7 +290,7 @@ class StatsModule:
             trades_per_coin = {pair: [] for pair in self.frame_with_signals.keys()}
         for key, closed_pair_trades in trades_per_coin.items():
             # Calculate max seen drawdown ratio
-            seen_cum_profit_ratio_df = get_seen_cum_profit_ratio_per_coin(
+            seen_cum_profit_ratio_df = get_seen_cum_profit_ratio(
                 self.frame_with_signals[key],
                 closed_pair_trades,
                 self.config.fee
@@ -313,7 +316,7 @@ class StatsModule:
             per_coin_stats[key]["perf_weeks_win"], \
             per_coin_stats[key]["perf_weeks_draw"], \
             per_coin_stats[key]["perf_weeks_loss"], \
-            market_change_weekly[key] = get_outperforming_timeframe_per_coin(
+            market_change_weekly[key] = get_outperforming_timeframe(
                 self.frame_with_signals[key],
                 seen_cum_profit_ratio_df,
                 "W"
@@ -323,7 +326,7 @@ class StatsModule:
             per_coin_stats[key]["perf_months_win"], \
             per_coin_stats[key]["perf_months_draw"], \
             per_coin_stats[key]["perf_months_loss"], \
-            market_change_monthly[key] = get_outperforming_timeframe_per_coin(
+            market_change_monthly[key] = get_outperforming_timeframe(
                 self.frame_with_signals[key],
                 seen_cum_profit_ratio_df,
                 "M"
@@ -332,7 +335,7 @@ class StatsModule:
             # Find profitable weeks for current coin
             per_coin_stats[key]["prof_weeks_win"], \
             per_coin_stats[key]["prof_weeks_draw"], \
-            per_coin_stats[key]["prof_weeks_loss"] = get_profitable_timeframe_per_coin(
+            per_coin_stats[key]["prof_weeks_loss"] = get_profitable_timeframe(
                 seen_cum_profit_ratio_df,
                 "W"
             )
@@ -340,7 +343,7 @@ class StatsModule:
             # Find profitable months for current coin
             per_coin_stats[key]["prof_months_win"], \
             per_coin_stats[key]["prof_months_draw"], \
-            per_coin_stats[key]["prof_months_loss"] = get_profitable_timeframe_per_coin(
+            per_coin_stats[key]["prof_months_loss"] = get_profitable_timeframe(
                 seen_cum_profit_ratio_df,
                 "M"
             )
