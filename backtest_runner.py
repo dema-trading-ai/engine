@@ -24,7 +24,7 @@ class BacktestRunner:
 
     def run_backtest(self):
         pair_dicts, dict_with_signals = self.algo_module.run()
-        trading_module = TradingModule(self.trading_module_config)
+        trading_module = TradingModule(self.trading_module_config, self.strategy)
         stats_module = StatsModule(self.stats_config, dict_with_signals, trading_module, pair_dicts)
         return stats_module.analyze()
 

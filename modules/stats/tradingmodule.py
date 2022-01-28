@@ -3,10 +3,10 @@ from datetime import datetime
 from typing import Optional
 
 # Files
+from backtesting.strategy import Strategy
 from cli.print_utils import print_info, print_warning
 from modules.stats.trade import SellReason, Trade
 from modules.stats.tradingmodule_config import TradingModuleConfig
-
 
 # ======================================================================
 # TradingModule is responsible for tracking trades, calling strategy methods
@@ -18,8 +18,9 @@ from modules.stats.tradingmodule_config import TradingModuleConfig
 
 class TradingModule:
 
-    def __init__(self, config: TradingModuleConfig):
+    def __init__(self, config: TradingModuleConfig, strategy: Strategy):
         self.config = config
+        self.strategy = strategy
         self.budget = float(self.config.starting_capital)
         self.realised_profit = self.budget
 
@@ -27,8 +28,8 @@ class TradingModule:
         self.exposure_per_trade = float(self.config.exposure_per_trade)
         self.amount_of_pairs = len(self.config.pairs)
         if self.amount_of_pairs < self.max_open_trades:
-            print_warning(
-                "max_open_trades exceeds amount of pairs in whitelist. max_open_trades will be limited to the amount of pairs in whitelist.")
+            print_warning("max_open_trades exceeds amount of pairs in whitelist. max_open_trades will be limited to "
+                          "the amount of pairs in whitelist.")
 
         self.fee = config.fee / 100
         self.sl_type = config.stoploss_type
@@ -44,6 +45,7 @@ class TradingModule:
         self.highest_total_capital_open_trades = {}
         self.total_fee_paid = 0
         self.rejected_buy_signal = 0
+        self.buy_cooldown = {pair: 0 for pair in self.config.pairs}
 
     def tick(self, ohlcv: dict, data_dict: dict) -> None:
         trade = self.find_open_trade(ohlcv['pair'])
@@ -56,6 +58,9 @@ class TradingModule:
         self.update_capital_per_timestamp(ohlcv)
 
     def no_trade_tick(self, ohlcv: dict, data_dict: dict) -> None:
+        if self.buy_cooldown[ohlcv['pair']] > 0:
+            self.buy_cooldown[ohlcv['pair']] -= 1
+            return
         if ohlcv['buy'] == 1:
             self.open_trade(ohlcv, data_dict)
 
@@ -96,6 +101,8 @@ class TradingModule:
         self.closed_trades.append(trade)
         self.update_realised_profit(trade)
 
+        self.buy_cooldown[ohlcv['pair']] = self.strategy.buy_cooldown(trade)
+
     def open_trade(self, ohlcv: dict, data_dict: dict) -> None:
 
         # Find available trade spaces
@@ -111,8 +118,7 @@ class TradingModule:
             return
 
         # Define spend amount based on realised profit
-        spend_amount = ((1. / min(self.max_open_trades, self.amount_of_pairs))
-                        * self.exposure_per_trade) * self.realised_profit
+        spend_amount = ((1. / min(self.max_open_trades, self.amount_of_pairs)) * self.exposure_per_trade) * self.realised_profit
         if spend_amount > self.budget:
             spend_amount = self.budget
 
