@@ -41,6 +41,7 @@ class Strategy(abc.ABC):
         """
         return
 
+    @abc.abstractmethod
     def buy_signal(self, dataframe: DataFrame) -> DataFrame:
         """
         :param dataframe: Dataframe filled with indicators from generate_indicators
@@ -50,6 +51,7 @@ class Strategy(abc.ABC):
         """
         return
 
+    @abc.abstractmethod
     def sell_signal(self, dataframe: DataFrame) -> DataFrame:
         """
         :param dataframe: Dataframe filled with indicators from generate_indicators
