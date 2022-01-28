@@ -17,8 +17,8 @@ from modules.stats.metrics.market_change import get_market_change, get_market_dr
 from modules.stats.metrics.trades import calculate_best_worst_trade, get_number_of_losing_trades, \
     get_number_of_consecutive_losing_trades, calculate_trade_durations, compute_median_trade_profit, \
     compute_risk_reward_ratio
-from modules.stats.metrics.winning_weeks import get_outperforming_weeks_per_coin, \
-    get_outperforming_weeks_for_portfolio, get_profitable_weeks_for_portfolio, get_profitable_weeks_per_coin
+from modules.stats.metrics.winning_weeks import get_profitable_timeframe_for_portfolio, \
+    get_outperforming_timeframe_for_portfolio, get_outperforming_timeframe_per_coin, get_profitable_timeframe_per_coin
 from modules.stats.stats_config import StatsConfig
 from modules.stats.trade import Trade, SellReason
 from modules.stats.tradingmodule import TradingModule
@@ -58,9 +58,10 @@ class StatsModule:
         return self.generate_backtesting_result(market_change, market_drawdown)
 
     def generate_backtesting_result(self, market_change: dict, market_drawdown: dict) -> TradingStats:
-        coin_results, market_change_weekly = self.generate_coin_results(self.trading_module.closed_trades,
-                                                                        market_change,
-                                                                        market_drawdown)
+        coin_results, market_change_weekly, market_change_monthly = self.generate_coin_results(
+            self.trading_module.closed_trades,
+            market_change,
+            market_drawdown)
         best_trade, worst_trade = calculate_best_worst_trade(self.trading_module.closed_trades)
         open_trade_results = self.get_left_open_trades_results(self.trading_module.open_trades)
 
@@ -72,7 +73,9 @@ class StatsModule:
             market_drawdown,
             best_trade,
             worst_trade,
-            market_change_weekly)
+            market_change_weekly,
+            market_change_monthly
+        )
         self.calculate_statistics_for_plots(self.trading_module.closed_trades, self.trading_module.open_trades)
 
         return TradingStats(
@@ -89,16 +92,13 @@ class StatsModule:
 
     def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float,
                               market_change: dict, market_drawdown: dict, best_trade, worst_trade,
-                              market_change_weekly: dict) -> MainResults:
-        # Get total budget and calculate overall profit
+                              market_change_weekly: dict, market_change_monthly) -> MainResults:
         budget += calculate_worth_of_open_trades(open_trades)
         overall_profit_percentage = ((budget - self.config.starting_capital) / self.config.starting_capital) * 100
 
-        # Find max seen and realised drawdown
         max_realised_drawdown = get_max_realised_drawdown_for_portfolio(
             self.trading_module.realised_profits_per_timestamp
         )
-
         max_seen_drawdown = get_max_seen_drawdown_for_portfolio(
             self.trading_module.capital_per_timestamp
         )
@@ -106,15 +106,20 @@ class StatsModule:
         sharpe_90d, sortino_90d, sharpe_3y, sortino_3y = \
             get_sharpe_sortino_ratios(self.trading_module.capital_per_timestamp)
 
-        # Find amount of winning, draw and losing weeks for portfolio
-        prof_weeks_win, prof_weeks_draw, prof_weeks_loss = get_profitable_weeks_for_portfolio(
+        prof_weeks_win, prof_weeks_draw, prof_weeks_loss = get_profitable_timeframe_for_portfolio(
             self.trading_module.capital_per_timestamp
         )
-
-        # Find amount of winning, draw and losing weeks for portfolio
-        perf_weeks_win, perf_weeks_draw, perf_weeks_loss = get_outperforming_weeks_for_portfolio(
+        perf_weeks_win, perf_weeks_draw, perf_weeks_loss = get_outperforming_timeframe_for_portfolio(
             self.trading_module.capital_per_timestamp,
-            market_change_weekly
+            market_change_weekly,
+            "W"
+        )
+        prof_months_win, prof_months_draw, prof_months_loss = get_profitable_timeframe_for_portfolio(
+            self.trading_module.capital_per_timestamp, "M"
+        )
+        perf_months_win, perf_months_draw, perf_months_loss = get_outperforming_timeframe_for_portfolio(
+            self.trading_module.capital_per_timestamp,
+            market_change_monthly, "M"
         )
 
         nr_losing_trades = get_number_of_losing_trades(closed_trades)
@@ -181,6 +186,12 @@ class StatsModule:
                            perf_weeks_win=perf_weeks_win,
                            perf_weeks_draw=perf_weeks_draw,
                            perf_weeks_loss=perf_weeks_loss,
+                           prof_months_win=prof_months_win,
+                           prof_months_draw=prof_months_draw,
+                           prof_months_loss=prof_months_loss,
+                           perf_months_win=perf_months_win,
+                           perf_months_draw=perf_months_draw,
+                           perf_months_loss=perf_months_loss,
                            max_seen_drawdown=(max_seen_drawdown['drawdown'] - 1) * 100,
                            drawdown_from=max_seen_drawdown['from'],
                            drawdown_to=max_seen_drawdown['to'],
@@ -199,7 +210,7 @@ class StatsModule:
                            )
 
     def generate_coin_results(self, closed_trades: [Trade], market_change: dict, market_drawdown: dict) -> [list, dict]:
-        stats, market_change_weekly = self.calculate_statistics_per_coin(closed_trades)
+        stats, market_change_weekly, market_change_monthly = self.calculate_statistics_per_coin(closed_trades)
         new_stats = []
 
         for coin in stats:
@@ -232,7 +243,7 @@ class StatsModule:
                                         sell_signal=stats[coin]['sell_reasons'][SellReason.SELL_SIGNAL])
             new_stats.append(coin_insight)
 
-        return new_stats, market_change_weekly
+        return new_stats, market_change_weekly, market_change_monthly
 
     def calculate_statistics_per_coin(self, closed_trades):
         per_coin_stats = {
@@ -262,6 +273,7 @@ class StatsModule:
             } for pair in self.frame_with_signals.keys()
         }
         market_change_weekly = {pair: None for pair in self.frame_with_signals.keys()}
+        market_change_monthly = {pair: None for pair in self.frame_with_signals.keys()}
         trades_per_coin = group_by(closed_trades, "pair")
 
         print_info("Calculating statistics")
@@ -287,25 +299,45 @@ class StatsModule:
 
             # Find avg, longest and shortest trade durations
             per_coin_stats[key]["avg_trade_duration"], \
-                per_coin_stats[key]["longest_trade_duration"], \
-                per_coin_stats[key]["shortest_trade_duration"] = \
+            per_coin_stats[key]["longest_trade_duration"], \
+            per_coin_stats[key]["shortest_trade_duration"] = \
                 calculate_trade_durations(closed_pair_trades)
 
             # Find winning, draw and losing weeks for current coin
             per_coin_stats[key]["perf_weeks_win"], \
-                per_coin_stats[key]["perf_weeks_draw"], \
-                per_coin_stats[key]["perf_weeks_loss"], \
-                market_change_weekly[key] = get_outperforming_weeks_per_coin(
-                    self.frame_with_signals[key],
-                    seen_cum_profit_ratio_df
-                )
+            per_coin_stats[key]["perf_weeks_draw"], \
+            per_coin_stats[key]["perf_weeks_loss"], \
+            market_change_weekly[key] = get_outperforming_timeframe_per_coin(
+                self.frame_with_signals[key],
+                seen_cum_profit_ratio_df,
+                "W"
+            )
+
+            # Find winning, draw and losing months for current coin
+            per_coin_stats[key]["perf_months_win"], \
+            per_coin_stats[key]["perf_months_draw"], \
+            per_coin_stats[key]["perf_months_loss"], \
+            market_change_monthly[key] = get_outperforming_timeframe_per_coin(
+                self.frame_with_signals[key],
+                seen_cum_profit_ratio_df,
+                "M"
+            )
 
             # Find profitable weeks for current coin
             per_coin_stats[key]["prof_weeks_win"], \
-                per_coin_stats[key]["prof_weeks_draw"], \
-                per_coin_stats[key]["prof_weeks_loss"] = get_profitable_weeks_per_coin(
-                    seen_cum_profit_ratio_df
-                )
+            per_coin_stats[key]["prof_weeks_draw"], \
+            per_coin_stats[key]["prof_weeks_loss"] = get_profitable_timeframe_per_coin(
+                seen_cum_profit_ratio_df,
+                "W"
+            )
+
+            # Find profitable months for current coin
+            per_coin_stats[key]["prof_months_win"], \
+            per_coin_stats[key]["prof_months_draw"], \
+            per_coin_stats[key]["prof_months_loss"] = get_profitable_timeframe_per_coin(
+                seen_cum_profit_ratio_df,
+                "M"
+            )
 
             for trade in closed_pair_trades:
                 # Update average profit
@@ -333,7 +365,7 @@ class StatsModule:
                     per_coin_stats[key]['total_duration'] = trade.closed_at - trade.opened_at
                 else:
                     per_coin_stats[key]['total_duration'] += trade.closed_at - trade.opened_at
-        return per_coin_stats, market_change_weekly
+        return per_coin_stats, market_change_weekly, market_change_monthly
 
     def calculate_statistics_for_plots(self, closed_trades, open_trades):
         # Used for plotting

@@ -45,6 +45,12 @@ class MainResults:
     perf_weeks_win: int
     perf_weeks_draw: int
     perf_weeks_loss: int
+    prof_months_win: int
+    prof_months_draw: int
+    prof_months_loss: int
+    perf_months_win: int
+    perf_months_draw: int
+    perf_months_loss: int
     max_seen_drawdown: float
     drawdown_from: int
     drawdown_to: int

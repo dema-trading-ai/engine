@@ -13,8 +13,7 @@ def get_market_ratio(signal_dict):
     return df
 
 
-def get_outperforming_weeks_per_coin(signal_dict: dict, cum_profit_ratio):
-    # Create dataframes
+def get_outperforming_timeframe_per_coin(signal_dict: dict, cum_profit_ratio, timeframe="W"):
     cum_profit_ratio = cum_profit_ratio.iloc[1:]
     ohlcv_df = get_market_ratio(signal_dict)
     ohlcv_df = ohlcv_df.iloc[1:]
@@ -24,48 +23,45 @@ def get_outperforming_weeks_per_coin(signal_dict: dict, cum_profit_ratio):
     ohlcv_df.index = datetime_index
     cum_profit_ratio.index = datetime_index
 
-    # Resample dataframes to one week
-    coin_close_price_weekly = ohlcv_df['close'].resample('W', origin='start').ohlc()
-    market_change_weekly = coin_close_price_weekly['close'] / coin_close_price_weekly['open']
+    # Resample dataframes to timeframe
+    coin_close_price = ohlcv_df['close'].resample(timeframe, origin='start').ohlc()
+    market_change = coin_close_price['close'] / coin_close_price['open']
 
     coin_capital = cum_profit_ratio['value'] * 1000
-    cum_profit_ratio_weekly = coin_capital.resample('W', origin='start').ohlc()
-    coin_capital_weekly = cum_profit_ratio_weekly['close'] / cum_profit_ratio_weekly['open']
+    cum_profit_ratio = coin_capital.resample(timeframe, origin='start').ohlc()
+    coin_capital = cum_profit_ratio['close'] / cum_profit_ratio['open']
 
     # Define the winning weeks
-    wins = len(coin_capital_weekly[coin_capital_weekly > market_change_weekly + 0.001])
-    losses = len(coin_capital_weekly[coin_capital_weekly < market_change_weekly - 0.001])
-    draws = len(coin_capital_weekly) - wins - losses
+    wins = len(coin_capital[coin_capital > market_change + 0.001])
+    losses = len(coin_capital[coin_capital < market_change - 0.001])
+    draws = len(coin_capital) - wins - losses
 
-    return wins, draws, losses, market_change_weekly
+    return wins, draws, losses, market_change
 
 
-def get_outperforming_weeks_for_portfolio(capital_per_timestamp, market_change_weekly):
-    coins = list(market_change_weekly.keys())
-    market_change_weekly_first_coin = market_change_weekly[coins[0]]
+def get_outperforming_timeframe_for_portfolio(capital_per_timestamp, market_change, timeframe="W"):
+    coins = list(market_change.keys())
+    market_change_first_coin = market_change[coins[0]]
 
     # Combine market change of multiple coins into one dataframe
-    combined_market_change_df = DataFrame(market_change_weekly_first_coin, columns=[coins[0]])
+    combined_market_change_df = DataFrame(market_change_first_coin, columns=[coins[0]])
     for coin in coins[1:]:
-        combined_market_change_df[coin] = market_change_weekly[coin]
+        combined_market_change_df[coin] = market_change[coin]
 
-    # Calculate average market change
     combined_market_change_df['avg_market_change'] = combined_market_change_df.mean(axis=1)
 
-    # Calculate capital per timestamp
-    capital_per_timestamp_weekly = calculate_capital_per_week(capital_per_timestamp)
+    capital_per_timestamp_timeframe = calculate_capital_per_timeframe(capital_per_timestamp, timeframe)
 
-    # Define the winning weeks
-    wins = len(capital_per_timestamp_weekly[capital_per_timestamp_weekly['weekly_profit'] >
-                                            (combined_market_change_df['avg_market_change'] + 0.001)])
-    losses = len(capital_per_timestamp_weekly[capital_per_timestamp_weekly['weekly_profit'] <
-                                              (combined_market_change_df['avg_market_change'] - 0.001)])
-    draws = len(capital_per_timestamp_weekly) - wins - losses
+    wins = len(capital_per_timestamp_timeframe[capital_per_timestamp_timeframe['profit'] >
+                                               (combined_market_change_df['avg_market_change'] + 0.001)])
+    losses = len(capital_per_timestamp_timeframe[capital_per_timestamp_timeframe['profit'] <
+                                                 (combined_market_change_df['avg_market_change'] - 0.001)])
+    draws = len(capital_per_timestamp_timeframe) - wins - losses
 
     return wins, draws, losses
 
 
-def get_profitable_weeks_per_coin(cum_profit_ratio):
+def get_profitable_timeframe_per_coin(cum_profit_ratio, timeframe="W"):
     # Create dataframes
     cum_profit_ratio = cum_profit_ratio.iloc[1:]
 
@@ -75,33 +71,31 @@ def get_profitable_weeks_per_coin(cum_profit_ratio):
 
     # Resample dataframes to one week
     coin_capital = cum_profit_ratio['value'] * 1000
-    coin_capital = coin_capital.resample('W', origin='start').ohlc()
-    coin_capital_weekly = \
+    coin_capital = coin_capital.resample(timeframe, origin='start').ohlc()
+    coin_capital_timeframe = \
         coin_capital['close'] / coin_capital['open']
 
     # Define the winning weeks
-    wins = len(coin_capital_weekly[coin_capital_weekly > 1.001])
-    losses = len(coin_capital_weekly[coin_capital_weekly < 0.999])
-    draws = len(coin_capital_weekly) - wins - losses
+    wins = len(coin_capital_timeframe[coin_capital_timeframe > 1.001])
+    losses = len(coin_capital_timeframe[coin_capital_timeframe < 0.999])
+    draws = len(coin_capital_timeframe) - wins - losses
 
     return wins, draws, losses
 
 
-def get_profitable_weeks_for_portfolio(capital_per_timestamp):
-    # Create dataframe for capital per timestamp
-    capital_per_timestamp_weekly = calculate_capital_per_week(capital_per_timestamp)
+def get_profitable_timeframe_for_portfolio(capital_per_timestamp, timeframe="W"):
+    capital_per_timestamp_timeframe = calculate_capital_per_timeframe(capital_per_timestamp, timeframe)
 
-    # Define the winning weeks
-    wins = len(capital_per_timestamp_weekly[capital_per_timestamp_weekly['weekly_profit'] >
-                                            1.001])
-    losses = len(capital_per_timestamp_weekly[capital_per_timestamp_weekly['weekly_profit'] <
-                                              0.999])
-    draws = len(capital_per_timestamp_weekly) - wins - losses
+    wins = len(capital_per_timestamp_timeframe[capital_per_timestamp_timeframe['profit'] >
+                                               1.001])
+    losses = len(capital_per_timestamp_timeframe[capital_per_timestamp_timeframe['profit'] <
+                                                 0.999])
+    draws = len(capital_per_timestamp_timeframe) - wins - losses
 
     return wins, draws, losses
 
 
-def calculate_capital_per_week(capital_per_timestamp):
+def calculate_capital_per_timeframe(capital_per_timestamp, timeframe):
     capital_per_timestamp_df = DataFrame(capital_per_timestamp.values(),
                                          index=capital_per_timestamp.keys(),
                                          columns=['capital']).iloc[1:]
@@ -111,15 +105,15 @@ def calculate_capital_per_week(capital_per_timestamp):
     base_capital = DataFrame([capital_per_timestamp[0]], columns=["capital"],
                              index=[starting_time])
     first_timestep = DataFrame([capital_per_timestamp[starting_time]], columns=["capital"],
-                             index=[starting_time + 1])
+                               index=[starting_time + 1])
     capital_per_timestamp_df = capital_per_timestamp_df.append(base_capital).append(first_timestep).sort_index()
 
-    # Set index to datetime and resample to one week
+    # Set index to datetime and resample to timeframe
     capital_per_timestamp_df.index = [datetime.fromtimestamp(ms / 1000.0) for ms in capital_per_timestamp_df.index]
-    capital_per_timestamp_weekly = capital_per_timestamp_df['capital'].resample('W', origin='start').ohlc()
+    capital_per_timestamp_timeframe = capital_per_timestamp_df['capital'].resample(timeframe, origin='start').ohlc()
 
     # Calculate market change
-    capital_per_timestamp_weekly['weekly_profit'] = \
-        capital_per_timestamp_weekly['close'] / capital_per_timestamp_weekly['open']
+    capital_per_timestamp_timeframe['profit'] = \
+        capital_per_timestamp_timeframe['close'] / capital_per_timestamp_timeframe['open']
 
-    return capital_per_timestamp_weekly
+    return capital_per_timestamp_timeframe

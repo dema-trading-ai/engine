@@ -133,6 +133,10 @@ def create_trade_info_table(self: MainResults, currency_symbol, justification) -
                                                       f' / {self.prof_weeks_loss}')
     trade_info_table.add_row('Weekly perf. vs market (W/D/L)', f'{self.perf_weeks_win} / {self.perf_weeks_draw}'
                                                       f' / {self.perf_weeks_loss}')
+    trade_info_table.add_row('Profitable months (W/D/L)', f'{self.prof_months_win} / {self.prof_months_draw}'
+                                                      f' / {self.prof_months_loss}')
+    trade_info_table.add_row('Monthly perf. vs market (W/D/L)', f'{self.perf_months_win} / {self.perf_months_draw}'
+                                                      f' / {self.perf_months_loss}')
     return trade_info_table
 
 
