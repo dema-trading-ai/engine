@@ -114,9 +114,14 @@ def read_config(config_path: str) -> dict:
             data = configfile.read()
 
     except FileNotFoundError:
+        if config_path is None:
+            add_info = "Couldn't find a config file. Either use the flag '-c' with a path to the desired " \
+                       "config\n\tfile or name the file you wish to use 'config.json'."
+
+        else:
+            add_info = f"Couldn't find a file at {config_path}."
         ErrorOutput(sys.exc_info(),
-                    add_info=f"Couldn't find a config file. Either use the flag '-c' with a path to the desired "
-                             f"config\n\tfile or name the file you wish to use 'config.json'.",
+                    add_info=add_info,
                     stop=True).print_error()
 
     except Exception as e:
