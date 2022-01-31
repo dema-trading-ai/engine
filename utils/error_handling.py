@@ -45,6 +45,10 @@ class StrategyNotFoundError(GeneralError):
     pass
 
 
+class OfflineMissingDataError(GeneralError):
+    pass
+
+
 class ErrorOutput(GeneralError):
     """Error output module"""
 

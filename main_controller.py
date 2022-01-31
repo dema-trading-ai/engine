@@ -10,8 +10,8 @@ from cli.print_utils import print_info
 class MainController:
 
     @staticmethod
-    async def run(args) -> None:
-        async with create_backtest_runner(args) as runner:
+    async def run(args, connection) -> None:
+        async with create_backtest_runner(args, connection) as runner:
 
             if args.alpha_hyperopt:
                 os.environ["VERBOSITY"] = "no_warnings"

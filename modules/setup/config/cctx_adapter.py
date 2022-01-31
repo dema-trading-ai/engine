@@ -7,7 +7,7 @@ from modules.setup.config.Exchanges import Exchange
 from utils.error_handling import TimeframeNotSupportedByExchange, ErrorOutput
 
 
-def create_cctx_exchange(exchange_name: Exchange, timeframe: str):
+def create_cctx_exchange(exchange_name: Exchange, timeframe: str) -> Exchange:
     print_info('Connecting to exchange...')
 
     exchange = None

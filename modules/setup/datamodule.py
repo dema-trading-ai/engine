@@ -15,7 +15,8 @@ from cli.print_utils import print_info, print_error, print_warning
 from modules.setup.config import ConfigModule
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
 from utils.utils import get_ohlcv_indicators, parse_timeframe
-from utils.error_handling import ErrorOutput, ConfigError
+from utils.error_handling import ErrorOutput, ConfigError, OfflineMissingDataError
+
 
 # ======================================================================
 # DataModule is responsible for downloading OHLCV data, preparing it
@@ -27,30 +28,59 @@ from utils.error_handling import ErrorOutput, ConfigError
 
 class DataModule:
 
-    def __init__(self):
+    def __init__(self, connection):
         self.config = None
         self.exchange = None
+        self.connection = connection
 
     @staticmethod
-    async def create(config: ConfigModule):
+    async def create(config: ConfigModule, connection: bool):
         print_info('Starting DemaTrading.ai data-module...')
-        data_module = DataModule()
+        data_module = DataModule(connection)
         data_module.config = config
         data_module.exchange = config.exchange
-        await data_module.load_markets()
+        if connection:
+            await data_module.load_markets()
         return data_module
 
     async def load_btc_marketchange(self):
-        print_info("Fetching market change of BTC/USDT...")
-        begin_data = await self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe=self.config.timeframe,
-                                                     since=self.config.backtesting_from, limit=1)
-        end_timestamp = int(np.floor(self.config.backtesting_to / self.config.timeframe_ms) * self.config.timeframe_ms) - self.config.timeframe_ms
-        end_data = await self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe=self.config.timeframe, since=end_timestamp,
-                                                   limit=1)
+        try:
+            datafile = f'data-BTCUSDT{self.config.timeframe}.feather'
+            datadir = 'data/backtesting-data/binance'
 
-        begin_close_value = begin_data[0][4]
-        end_close_value = end_data[0][4]
-        return end_close_value / begin_close_value
+            if datafile not in os.listdir(datadir):
+                if not self.connection:
+                    raise OfflineMissingDataError()
+
+                else:
+                    print_info("Fetching market change of BTC/USDT...")
+                    begin_data = await self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe=self.config.timeframe,
+                                                                 since=self.config.backtesting_from, limit=1)
+                    end_timestamp = int(np.floor(self.config.backtesting_to / self.config.timeframe_ms) *
+                                        self.config.timeframe_ms) - self.config.timeframe_ms
+                    end_data = await self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe=self.config.timeframe,
+                                                               since=end_timestamp, limit=1)
+
+                    begin_close_value = begin_data[0][4]
+                    end_close_value = end_data[0][4]
+
+                    return end_close_value / begin_close_value
+            else:
+                print_info("Using last saved data on market change of BTC/USDT...")
+                df = pd.read_feather(datadir + '/' + datafile, columns=get_ohlcv_indicators() + ["index"])
+                df.set_index("index", inplace=True)
+
+                begin_close_value = df['close'].iloc[0]
+                end_close_value = df['close'].iloc[-1]
+
+                return end_close_value / begin_close_value
+
+        except OfflineMissingDataError:
+            ErrorOutput(sys.exc_info(),
+                        add_info="You are trying to run an offline backtest on unavailable data. Either connect to the"
+                                 "\n\tinternet to download it, or revise your config file to only include pairs you "
+                                 "have saved locally.",
+                        stop=True).print_error()
 
     async def load_btc_drawdown(self, df: dict):
         print_info("Fetching market drawdown of BTC/USDT...")
@@ -65,8 +95,10 @@ class DataModule:
         return bitcoin_drawdown
 
     async def load_historical_data(self, pairs, check_backtesting_period=True) -> dict:
-        dataframes = await asyncio.gather(*[self.get_pair_data(pair, self.config.timeframe) if not isinstance(pair, tuple)
-                                            else self.get_pair_data(pair[0], pair[1]) for pair in pairs])   # if tuple then additional pair and timeframe comes specified with it
+        dataframes = await asyncio.gather(
+            *[self.get_pair_data(pair, self.config.timeframe) if not isinstance(pair, tuple)
+              else self.get_pair_data(pair[0], pair[1]) for pair in
+              pairs])  # if tuple then additional pair and timeframe comes specified with it
 
         history_data = {key: value for [key, value] in dataframes}
 
@@ -173,7 +205,7 @@ class DataModule:
             print_error("Backtesting datafile was not found.")
             return None
         except EnvironmentError:
-            print_error(f"Something went wrong loading datafile {sys.exc_info()[0]}")
+            print_error(f"Something went wrong while loading datafile {sys.exc_info()[0]}")
             return None
         except rapidjson.JSONDecodeError:
             os.remove(filepath)
@@ -184,7 +216,6 @@ class DataModule:
         timesteps_forward = int(n_downloaded_candles) * self.config.timeframe_ms
         final_timestamp = self.config.backtesting_from + (
                 timesteps_forward - self.config.timeframe_ms)  # last tick is excluded
-
 
         # Return correct backtesting period
         df = await self.check_backtesting_period(pair, df, final_timestamp)

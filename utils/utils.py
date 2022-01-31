@@ -2,10 +2,11 @@
 import os
 import re
 import sys
+import requests
 from pathlib import Path
 
 from modules.stats.trade import Trade
-from cli.print_utils import print_config_error
+from cli.print_utils import print_config_error, print_warning
 
 CURRENT_VERSION = "v0.7.18"
 
@@ -81,3 +82,15 @@ def parse_timeframe(timeframe_str: str):
         print_config_error("Error while parsing the timeframe from config.json")
         sys.exit()
     return timeframe_time
+
+
+def check_internet_connection() -> bool:
+    try:
+        requests.get("https://google.com", timeout=5)
+        print("Connected to the Internet")
+        return True
+
+    except (requests.ConnectionError, requests.Timeout):
+        print_warning("Your device doesn't seem to be connected to the Internet. "
+                      "New data and version checks unavailable.")
+        return False

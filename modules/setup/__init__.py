@@ -35,7 +35,4 @@ class SetupModule(object):
                                         await self.data_module.load_btc_drawdown(ohlcv_pair_frames))
 
         return AlgoModule(self.config, ohlcv_pair_frames, strategy,
-                          additional_ohlcv_pair_frames), \
-            ohlcv_pair_frames, \
-            strategy, \
-            stats_config
+                          additional_ohlcv_pair_frames), ohlcv_pair_frames, strategy, stats_config

@@ -10,6 +10,7 @@ from cli.arg_parse import execute_for_args
 from cli.checks.latest_version import print_warning_if_version_outdated
 from cli.prepare_workspace import prepare_workspace
 from cli.print_utils import print_debug, is_verbosity
+from utils.utils import check_internet_connection
 from main_controller import MainController
 
 # Hack, PyInstaller + rich on Windows in GitHub actions fails because it cannot find encoding of stdout, this sets
@@ -22,19 +23,23 @@ if sys.stdout.isatty() is False and PYTHONIOENCODING is not False and sys.stdout
 
 RUNFOLDER = os.path.dirname(os.path.realpath(__file__))
 
+CONNECTION = check_internet_connection()
+
 
 def main():
-    print_warning_if_version_outdated()
+    if CONNECTION:
+        print_warning_if_version_outdated()
     execute_for_args({
         'init': run_init,
         'default': run_engine
     })
-    print_warning_if_version_outdated()
+    if CONNECTION:
+        print_warning_if_version_outdated()
 
 
 def run_engine(args):
     controller = MainController()
-    asyncio.get_event_loop().run_until_complete(controller.run(args))
+    asyncio.get_event_loop().run_until_complete(controller.run(args, CONNECTION))
 
 
 def run_init(args):

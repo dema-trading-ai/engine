@@ -1,3 +1,4 @@
+import os
 import sys
 from contextlib import asynccontextmanager
 from typing import Generator
@@ -5,6 +6,7 @@ from typing import Generator
 from optuna import Trial
 
 from cli.print_utils import print_error
+from utils.error_handling import ErrorOutput, OfflineMissingDataError
 from modules.output import OutputModule
 from modules.setup import ConfigModule, DataModule, SetupModule
 from modules.stats.stats import StatsModule
@@ -42,13 +44,37 @@ class BacktestRunner:
         stats = self.run_backtest()
         OutputModule(self.stats_config).output(stats, self.module.strategy_definition)
 
+    @staticmethod
+    def check_required_data(config_module: ConfigModule) -> None:
+        try:
+            pairs = config_module.pairs
+
+            # Add BTC to list in case not watched by user since it's the baseline for the results
+            if 'BTC/USDT' not in pairs:
+                pairs.append('BTC/USDT')
+
+            for pair in pairs:
+                pair = pair.replace('/', '')
+                filename = f'data-{pair}{config_module.timeframe}.feather'
+                if filename not in os.listdir('data/backtesting-data/binance'):
+                    raise OfflineMissingDataError()
+
+        except OfflineMissingDataError:
+            ErrorOutput(sys.exc_info(),
+                        add_info="You are trying to run an offline backtest on unavailable data. Either connect to the"
+                                 "\n\tinternet to download it, or revise your config file to only include pairs you "
+                                 "have saved locally.",
+                        stop=True).print_error()
+
 
 @asynccontextmanager
-async def create_backtest_runner(args: object) -> Generator[BacktestRunner, None, None]:
+async def create_backtest_runner(args: object, connection: bool) -> Generator[BacktestRunner, None, None]:
     config_module = None
     try:
         config_module = await ConfigModule.create(args)
-        data_module = await DataModule.create(config_module)
+        if not connection:
+            BacktestRunner.check_required_data(config_module)
+        data_module = await DataModule.create(config_module, connection)
         setup_module = SetupModule(config_module, data_module)
         algo_module, df, strategy, stats_config = await setup_module.setup()
         backtest_runner = BacktestRunner(config_module, data_module, algo_module, df, strategy, stats_config)
