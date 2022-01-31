@@ -4,7 +4,7 @@ from pandas import DataFrame
 from modules.stats.metrics.profit_ratio import with_copied_initial_row
 
 
-def get_market_ratio(signal_dict):
+def get_market_ratio_per_coin(signal_dict):
     df = DataFrame(signal_dict.values()).set_index("time")
     df = with_copied_initial_row(df)
     df["close"] = df["close"].fillna(value=None, method='ffill')
@@ -13,9 +13,24 @@ def get_market_ratio(signal_dict):
     return df
 
 
-def get_outperforming_timeframe(signal_dict: dict, cum_profit_ratio: DataFrame, timeframe="W"):
+def get_market_ratios(signal_dict: dict) -> DataFrame:
+    coins = list(signal_dict.keys())
+    market_ratio = {}
+    for coin in coins:
+        market_ratio[coin] = get_market_ratio_per_coin(signal_dict[coin])
+    market_ratio_first_coin = market_ratio[coins[0]]
+
+    # Combine market change of multiple coins into one dataframe
+    combined_market_ratio_df = DataFrame(market_ratio_first_coin, columns=[coins[0]])
+    for coin in coins[1:]:
+        combined_market_ratio_df[coin] = market_ratio[coin]
+
+    combined_market_ratio_df['avg_market_ratio'] = combined_market_ratio_df.mean(axis=1)
+    return combined_market_ratio_df
+
+
+def get_outperforming_timeframe(cum_profit_ratio: DataFrame, market_ratio_df: DataFrame, timeframe="W"):
     cum_profit_ratio = cum_profit_ratio.iloc[1:]
-    market_ratio_df = get_market_ratio(signal_dict)
     market_ratio_df = market_ratio_df.iloc[1:]
 
     # Refactor index of dataframes
@@ -36,7 +51,7 @@ def get_outperforming_timeframe(signal_dict: dict, cum_profit_ratio: DataFrame, 
     losses = len(capital[capital < market_change - 0.001])
     draws = len(capital) - wins - losses
 
-    return wins, draws, losses, market_change
+    return wins, draws, losses
 
 
 def get_profitable_timeframe(cum_profit_ratio, timeframe="W"):
