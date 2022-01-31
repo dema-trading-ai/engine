@@ -1,7 +1,7 @@
 import math
 from datetime import timedelta
 
-from test.stats.stats_test_utils import StatsFixture
+from test.stats.stats_test_utils import StatsFixture, CooldownStrategy
 from test.utils.signal_frame import ONE_MIL, THIRTY_MIN, EIGHT_HOURS, SIX_HOURS, TWELVE_HOURS
 
 
@@ -53,7 +53,7 @@ def test_roi_reached_multiple_times():
 
 
 def test_roi_set_not_reached():
-    """Given 'multiple roi reached and multiple buys', 'capital' should 'reflect expected value'"""
+    """Given 'multiple roi not reached and multiple buys', 'capital' should 'reflect expected value'"""
     # Arrange
     fixture = StatsFixture(['COIN'])
 
@@ -538,45 +538,7 @@ def test_sharpe_sortino_ratios_no_sell():
     assert stats.main_results.sharpe_90d is None
     assert stats.main_results.sortino_90d is None
 
-
-def test_trade_profit():
-    # Checks the best, median, and worst trade profits, should return a float
-
-    # Arrange
-    fixture = StatsFixture(['COIN'])
-
-    # Win/Loss/Open
-    fixture.frame_with_signals['COIN'].test_scenario_down_10_up_100_down_75_three_trades()
-
-    # Act
-    stats = fixture.create().analyze()
-
-    assert math.isclose(stats.main_results.median_trade_profit, -11.791, abs_tol=0.001)
-    assert math.isclose(stats.main_results.best_trade_profit_percentage, 96.02, abs_tol=0.001)
-    assert math.isclose(stats.main_results.best_trade_currency_amount, 84.698, abs_tol=0.001)
-    assert math.isclose(stats.main_results.worst_trade_profit_percentage, -75.498, abs_tol=0.001)
-    assert math.isclose(stats.main_results.worst_trade_currency_amount, -130.541, abs_tol=0.001)
-
-
-def test_median_trade_profit_no_trades():
-    # No trades, should return 0.0
-
-    # Arrange
-    fixture = StatsFixture(['COIN'])
-
-    # Win/Loss/Open
-    fixture.frame_with_signals['COIN'].test_scenario_up_100_down_20_down_75_no_trades()
-
-    # Act
-    stats = fixture.create().analyze()
-
-    assert stats.main_results.median_trade_profit == 0.0
-    assert stats.main_results.best_trade_profit_percentage == 0.0
-    assert stats.main_results.best_trade_currency_amount == 0.0
-    assert stats.main_results.worst_trade_profit_percentage == 0.0
-    assert stats.main_results.worst_trade_currency_amount == 0.0
-
-
+    
 def test_profitable_weeks_one_win():
     # One week, all days are positive - outcome should be one profitable week.
 
@@ -755,3 +717,65 @@ def test_risk_reward_ratio_one_losing_trade():
     # Assert
     assert stats.main_results.risk_reward_ratio == 0
     assert isinstance(stats.main_results.risk_reward_ratio, float)
+
+
+def test_cooldown_sell_signal():
+    # Tests the cooldown function - with multiple buy and sell signals, on which the consecutive ones fall in
+    # the cooldown period.
+
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+
+    # Act
+    stats = fixture.create_with_strategy(CooldownStrategy()).analyze()
+
+    # Assert
+    assert stats.main_results.n_trades == 1
+
+
+def test_cooldown_stoploss():
+    # Tests the cooldown function - when stoploss is hit
+
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.trading_module_config.stoploss = -25
+    fixture.stats_config.stoploss = -25
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade()
+
+    # Act
+    stats = fixture.create_with_strategy(CooldownStrategy()).analyze()
+
+    # Assert
+    assert stats.main_results.n_trades == 2
+
+
+def test_cooldown_roi():
+    # Tests the cooldown function - when roi is hit
+
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    fixture.trading_module_config.roi = {
+        "0": 25
+    }
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade()
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade()
+
+    # Act
+    stats = fixture.create_with_strategy(CooldownStrategy()).analyze()
+
+    # Assert
+    assert stats.main_results.n_trades == 3
