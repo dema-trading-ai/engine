@@ -14,9 +14,8 @@ from modules.stats.drawdown.for_portfolio import get_max_seen_drawdown_for_portf
 from modules.stats.ratios.for_portfolio import get_sharpe_sortino_ratios
 from modules.stats.drawdown.per_trade import get_max_seen_drawdown_per_trade
 from modules.stats.metrics.market_change import get_market_change, get_market_drawdown
-from modules.stats.metrics.trades import calculate_best_worst_trade, get_number_of_losing_trades, \
-    get_number_of_consecutive_losing_trades, calculate_trade_durations, compute_median_trade_profit, \
-    compute_risk_reward_ratio
+from modules.stats.metrics.trades import compute_trade_rankings, get_number_of_losing_trades, \
+    get_number_of_consecutive_losing_trades, calculate_trade_durations, compute_risk_reward_ratio
 from modules.stats.metrics.winning_weeks import get_winning_weeks_per_coin, \
     get_winning_weeks_for_portfolio, get_profitable_weeks_for_portfolio, get_profitable_weeks_per_coin
 from modules.stats.stats_config import StatsConfig
@@ -55,13 +54,13 @@ class StatsModule:
 
         market_change = get_market_change(self.df, pairs, self.frame_with_signals)
         market_drawdown = get_market_drawdown(pairs, self.frame_with_signals)
-        return self.generate_backtesting_result(market_change, market_drawdown)
+        return self.generate_backtesting_result(market_change, market_drawdown, pairs)
 
-    def generate_backtesting_result(self, market_change: dict, market_drawdown: dict) -> TradingStats:
+    def generate_backtesting_result(self, market_change: dict, market_drawdown: dict, pairs: list) -> TradingStats:
         coin_results, market_change_weekly = self.generate_coin_results(self.trading_module.closed_trades,
                                                                         market_change,
-                                                                        market_drawdown)
-        best_trade, worst_trade = calculate_best_worst_trade(self.trading_module.closed_trades)
+                                                                        market_drawdown,
+                                                                        pairs)
         open_trade_results = self.get_left_open_trades_results(self.trading_module.open_trades)
 
         main_results = self.generate_main_results(
@@ -70,8 +69,6 @@ class StatsModule:
             self.trading_module.budget,
             market_change,
             market_drawdown,
-            best_trade,
-            worst_trade,
             market_change_weekly)
         self.calculate_statistics_for_plots(self.trading_module.closed_trades, self.trading_module.open_trades)
 
@@ -88,8 +85,7 @@ class StatsModule:
         )
 
     def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float,
-                              market_change: dict, market_drawdown: dict, best_trade, worst_trade,
-                              market_change_weekly: dict) -> MainResults:
+                              market_change: dict, market_drawdown: dict, market_change_weekly: dict) -> MainResults:
         # Get total budget and calculate overall profit
         budget += calculate_worth_of_open_trades(open_trades)
         overall_profit_percentage = ((budget - self.config.starting_capital) / self.config.starting_capital) * 100
@@ -120,23 +116,7 @@ class StatsModule:
         nr_losing_trades = get_number_of_losing_trades(closed_trades)
         nr_consecutive_losing_trades = get_number_of_consecutive_losing_trades(closed_trades)
 
-        best_trade_profit_percentage = 0
-        best_trade_currency_amount = 0
-        best_trade_pair = ""
-        worst_trade_profit_percentage = 0
-        worst_trade_currency_amount = 0
-        worst_trade_pair = ""
-        risk_reward_ratio = 0
-        if best_trade:
-            best_trade_profit_percentage = (best_trade.profit_ratio - 1) * 100
-            worst_trade_profit_percentage = (worst_trade.profit_ratio - 1) * 100
-            best_trade_currency_amount = best_trade.profit_dollar
-            worst_trade_currency_amount = worst_trade.profit_dollar
-            best_trade_pair = best_trade.pair
-            worst_trade_pair = worst_trade.pair
-            risk_reward_ratio = compute_risk_reward_ratio(closed_trades)
-
-        median_trade_profit = compute_median_trade_profit(closed_trades)
+        risk_reward_ratio = compute_risk_reward_ratio(closed_trades)
 
         avg_trade_duration, longest_trade_duration, shortest_trade_duration = \
             calculate_trade_durations(closed_trades)
@@ -166,12 +146,6 @@ class StatsModule:
                            n_trades_with_loss=nr_losing_trades,
                            n_consecutive_losses=nr_consecutive_losing_trades,
                            max_realised_drawdown=(max_realised_drawdown - 1) * 100,
-                           worst_trade_profit_percentage=worst_trade_profit_percentage,
-                           worst_trade_currency_amount=worst_trade_currency_amount,
-                           worst_trade_pair=worst_trade_pair,
-                           best_trade_profit_percentage=best_trade_profit_percentage,
-                           best_trade_currency_amount=best_trade_currency_amount,
-                           best_trade_pair=best_trade_pair,
                            avg_trade_duration=avg_trade_duration,
                            longest_trade_duration=longest_trade_duration,
                            shortest_trade_duration=shortest_trade_duration,
@@ -194,12 +168,13 @@ class StatsModule:
                            sharpe_3y=sharpe_3y,
                            sortino_90d=sortino_90d,
                            sortino_3y=sortino_3y,
-                           median_trade_profit=median_trade_profit,
                            risk_reward_ratio=risk_reward_ratio
                            )
 
-    def generate_coin_results(self, closed_trades: [Trade], market_change: dict, market_drawdown: dict) -> [list, dict]:
+    def generate_coin_results(self, closed_trades: [Trade], market_change: dict, market_drawdown: dict, pairs: list) \
+            -> [list, dict]:
         stats, market_change_weekly = self.calculate_statistics_per_coin(closed_trades)
+        trade_rankings = compute_trade_rankings(closed_trades, pairs)
         new_stats = []
 
         for coin in stats:
@@ -229,7 +204,13 @@ class StatsModule:
                                         shortest_trade_duration=stats[coin]['shortest_trade_duration'],
                                         roi=stats[coin]['sell_reasons'][SellReason.ROI],
                                         stoploss=stats[coin]['sell_reasons'][SellReason.STOPLOSS],
-                                        sell_signal=stats[coin]['sell_reasons'][SellReason.SELL_SIGNAL])
+                                        sell_signal=stats[coin]['sell_reasons'][SellReason.SELL_SIGNAL],
+                                        best_trade_ratio=trade_rankings[coin]['ratio']['best'],
+                                        worst_trade_ratio=trade_rankings[coin]['ratio']['worst'],
+                                        median_trade_ratio=trade_rankings[coin]['ratio']['median'],
+                                        best_trade_currency=trade_rankings[coin]['currency']['best'],
+                                        worst_trade_currency=trade_rankings[coin]['currency']['worst'],
+                                        median_trade_currency=trade_rankings[coin]['currency']['median'])
             new_stats.append(coin_insight)
 
         return new_stats, market_change_weekly
@@ -316,7 +297,7 @@ class StatsModule:
                     per_coin_stats[key]['total_profit_ratio'] * trade.profit_ratio
 
                 # Update profit and amount of trades
-                per_coin_stats[key]['total_profit_amount'] += trade.profit_dollar
+                per_coin_stats[key]['total_profit_amount'] += trade.profit_currency
                 per_coin_stats[key]['amount_of_trades'] += 1
                 if trade.profit_ratio > 1:
                     per_coin_stats[key]['amount_of_winning_trades'] += 1
@@ -359,7 +340,7 @@ class StatsModule:
             )
             left_open_trade_results = LeftOpenTradeResult(pair=trade.pair,
                                                           curr_profit_percentage=(trade.profit_ratio - 1) * 100,
-                                                          curr_profit=trade.profit_dollar,
+                                                          curr_profit=trade.profit_currency,
                                                           max_seen_drawdown=(max_seen_drawdown - 1) * 100,
                                                           opened_at=trade.opened_at)
 
