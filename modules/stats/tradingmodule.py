@@ -207,5 +207,5 @@ class TradingModule:
             self.budget_per_timestamp[ohlcv['time']] + self.total_capital_open_trades.get(ohlcv['time'], 0)
 
     def update_realised_profit(self, trade: Trade) -> None:
-        self.realised_profit += trade.profit_dollar
-        self.realised_profits_per_timestamp[int(datetime.timestamp(trade.closed_at)*1000)] = self.realised_profit
+        self.realised_profit += trade.profit_currency
+        self.realised_profits_per_timestamp[int(datetime.timestamp(trade.closed_at) * 1000)] = self.realised_profit

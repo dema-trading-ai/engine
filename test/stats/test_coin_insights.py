@@ -22,7 +22,7 @@ def test_fee_equals_stoploss():
     assert math.isclose(stats.coin_results[0].total_profit_percentage, -1.99)
 
 
-def test_profit_worst_trade():
+def test_return_worst_trade():
     """Given only losing trades, 'worst trade' should be worst of all trades"""
     # Arrange
     fixture = StatsFixture(['COIN', 'COIN2', 'COIN3'])
@@ -36,10 +36,10 @@ def test_profit_worst_trade():
 
     # Assert
     assert math.isclose(stats.coin_results[-1].total_profit_percentage, -75.4975)
-    assert math.isclose(stats.main_results.worst_trade_profit_percentage, -75.4975)
+    assert math.isclose(stats.coin_results[-1].worst_trade_ratio, 0.245025)
 
 
-def test_profit_best_trade():
+def test_return_best_trade():
     """Given only winning trades, 'best trade' should be best of all trades"""
     # Arrange
     fixture = StatsFixture(['COIN', 'COIN2', 'COIN3'])
@@ -53,10 +53,33 @@ def test_profit_best_trade():
 
     # Assert
     assert math.isclose(stats.coin_results[-1].total_profit_percentage, 96.02)
-    assert math.isclose(stats.main_results.best_trade_profit_percentage, 96.02)
+    assert math.isclose(stats.coin_results[-1].best_trade_ratio, 1.9602)
 
 
-def test_profit_best_worst_trade_only_wins():
+def test_return_different_trades():
+    """Given three different trades, should return three different trades, one per metric"""
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE', 'COIN3/BASE'])
+
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade()
+    fixture.frame_with_signals['COIN2/BASE'].test_scenario_up_50_one_trade()
+    fixture.frame_with_signals['COIN3/BASE'].test_scenario_up_100_one_trade()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    sorted_trades = sorted(stats.coin_results, key=lambda coin: coin.total_profit_percentage, reverse=True)
+
+    # Assert
+    assert math.isclose(sorted_trades[0].best_trade_ratio, 1.9602)
+    assert math.isclose(sorted_trades[0].best_trade_currency, 32.006, abs_tol=0.001)
+    assert math.isclose(sorted_trades[1].median_trade_ratio, 1.47015, abs_tol=0.00001)
+    assert math.isclose(sorted_trades[1].median_trade_currency, 15.6717, abs_tol=0.0001)
+    assert math.isclose(sorted_trades[2].worst_trade_ratio, 0.49005)
+    assert math.isclose(sorted_trades[2].worst_trade_currency, -16.9983, abs_tol=0.0001)
+
+
+def test_return_best_worst_trade_only_wins():
     """Given only winning trades, 'worst trade' should be worst of all trades,
     and 'best trade' should be best of all trades"""
     # Arrange
@@ -69,13 +92,13 @@ def test_profit_best_worst_trade_only_wins():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.main_results.best_trade_profit_percentage, 96.02)
+    assert math.isclose(stats.coin_results[1].best_trade_ratio, 1.9602)
     assert math.isclose(stats.coin_results[1].total_profit_percentage, 96.02)
-    assert math.isclose(stats.main_results.worst_trade_profit_percentage, 47.015)
+    assert math.isclose(stats.coin_results[0].worst_trade_ratio, 1.47015)
     assert math.isclose(stats.coin_results[0].total_profit_percentage, 47.015)
 
 
-def test_profit_best_worst_trade_only_losses():
+def test_return_best_worst_trade_only_losses():
     """Given only losing trades, 'worst trade' should be worst of all trades,
     and 'best trade' should be best of all trades"""
     # Arrange
@@ -88,13 +111,13 @@ def test_profit_best_worst_trade_only_losses():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.main_results.best_trade_profit_percentage, -50.995)
+    assert math.isclose(stats.coin_results[0].best_trade_ratio, 0.49005, abs_tol=0.00001)
     assert math.isclose(stats.coin_results[0].total_profit_percentage, -50.995)
-    assert math.isclose(stats.main_results.worst_trade_profit_percentage, -75.4975)
+    assert math.isclose(stats.coin_results[1].worst_trade_ratio, 0.24502, abs_tol=0.00001)
     assert math.isclose(stats.coin_results[1].total_profit_percentage, -75.4975)
 
 
-def test_profit_no_trades():
+def test_return_no_trades():
     """Given no trades, profit should be zero"""
     # Arrange
     fixture = StatsFixture(['COIN'])
@@ -105,11 +128,49 @@ def test_profit_no_trades():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.main_results.best_trade_profit_percentage, 0)
-    assert math.isclose(stats.main_results.worst_trade_profit_percentage, 0)
     assert math.isclose(stats.coin_results[0].total_profit_percentage, 0)
     assert math.isclose(stats.coin_results[0].cum_profit_percentage, 0)
     assert math.isclose(stats.coin_results[0].avg_profit_percentage, 0)
+
+
+def test_trade_performance_return():
+    # Checks the best, median, and worst trade profits, should return a float
+
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    assert math.isclose(stats.coin_results[0].best_trade_ratio, 1.9602, abs_tol=0.0001)
+    assert math.isclose(stats.coin_results[0].best_trade_currency, 84.698, abs_tol=0.001)
+    assert math.isclose(stats.coin_results[0].worst_trade_ratio, 0.245025, abs_tol=0.00001)
+    assert math.isclose(stats.coin_results[0].worst_trade_currency, -130.541, abs_tol=0.001)
+    assert math.isclose(stats.coin_results[0].median_trade_ratio, 0.88209, abs_tol=0.00001)
+    assert math.isclose(stats.coin_results[0].median_trade_currency, -11.791, abs_tol=0.001)
+
+
+def test_trade_performance_return_no_trades():
+    # No trades, should return None
+
+    # Arrange
+    fixture = StatsFixture(['COIN/BASE'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_no_trades()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    assert stats.coin_results[0].best_trade_ratio is None
+    assert stats.coin_results[0].best_trade_currency is None
+    assert stats.coin_results[0].worst_trade_ratio is None
+    assert stats.coin_results[0].worst_trade_currency is None
+    assert stats.coin_results[0].median_trade_ratio is None
+    assert stats.coin_results[0].median_trade_currency is None
 
 
 def test_nr_of_trades_no_trades():
