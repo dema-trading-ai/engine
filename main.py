@@ -40,7 +40,7 @@ def run_engine(args, online: bool):
     asyncio.get_event_loop().run_until_complete(controller.run(args, online))
 
 
-def run_init(args):
+def run_init(args, _):
     prepare_workspace(args)
 
 
