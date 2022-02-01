@@ -13,7 +13,7 @@ from .strategy_definition import StrategyDefinition
 from .cctx_adapter import create_cctx_exchange
 from .currencies import get_currency_symbol
 from .validations import validate_and_read_cli, check_for_missing_config_items
-from cli.print_utils import print_info, print_standard, print_warning, print_error
+from cli.print_utils import print_info, print_standard, print_warning
 from utils.error_handling import ConfigError, ErrorOutput
 
 msec = 1000
@@ -50,9 +50,9 @@ class ConfigModule(object):
         self.pairs = []
 
     @staticmethod
-    async def create(args):
+    async def create(args, online: bool):
         config_module = ConfigModule()
-        config = read_config(args.config)
+        config = read_config(args.config, online)
         config = check_for_missing_config_items(config)
         validate_and_read_cli(config, args)
         get_plot_indicators(config)
@@ -104,11 +104,18 @@ class ConfigModule(object):
         await self.exchange.close()
 
 
-def read_config(config_path: str) -> dict:
+def read_config(config_path: str, online: bool) -> dict:
     print_standard(
         '=================================== \n'
         ' DemaTrading.ai BACKTESTING ENGINE \n'
         '===================================')
+
+    if online:
+        print_info("Backtesting online")
+    else:
+        print_warning("Your device doesn't seem to be connected to the Internet. "
+                      "New data and version checks unavailable.", force=True)
+
     try:
         with open(config_path or "config.json", 'r', encoding='utf-8') as configfile:
             data = configfile.read()

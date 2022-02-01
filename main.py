@@ -23,23 +23,21 @@ if sys.stdout.isatty() is False and PYTHONIOENCODING is not False and sys.stdout
 
 RUNFOLDER = os.path.dirname(os.path.realpath(__file__))
 
-CONNECTION = check_internet_connection()
 
-
-def main():
-    if CONNECTION:
+def main(online: bool):
+    if online:
         print_warning_if_version_outdated()
     execute_for_args({
         'init': run_init,
         'default': run_engine
-    })
-    if CONNECTION:
+    }, online)
+    if online:
         print_warning_if_version_outdated()
 
 
-def run_engine(args):
+def run_engine(args, online: bool):
     controller = MainController()
-    asyncio.get_event_loop().run_until_complete(controller.run(args, CONNECTION))
+    asyncio.get_event_loop().run_until_complete(controller.run(args, online))
 
 
 def run_init(args):
@@ -50,7 +48,8 @@ if __name__ == "__main__":
     multiprocessing.freeze_support()
     if not is_verbosity(verbosity="debug"):
         optuna.logging.set_verbosity(optuna.logging.WARNING)
+    connection_status = check_internet_connection()
     start_time = perf_counter()
-    main()
+    main(connection_status)
     end_time = perf_counter()
     print_debug(f"Elapsed time: {end_time - start_time}s")

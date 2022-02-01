@@ -1,5 +1,6 @@
 # Libraries
 import asyncio
+from datetime import datetime
 import os
 import sys
 from os import path
@@ -14,6 +15,7 @@ from cli.print_utils import print_info, print_error, print_warning
 # Files
 from modules.setup.config import ConfigModule
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
+from modules.setup.market_change import online_fetch_btc_marketchange, offline_fetch_btc_marketchange
 from utils.utils import get_ohlcv_indicators, parse_timeframe
 from utils.error_handling import ErrorOutput, ConfigError, OfflineMissingDataError
 
@@ -28,71 +30,73 @@ from utils.error_handling import ErrorOutput, ConfigError, OfflineMissingDataErr
 
 class DataModule:
 
-    def __init__(self, connection):
+    def __init__(self, online):
         self.config = None
         self.exchange = None
-        self.connection = connection
+        self.online = online
 
     @staticmethod
-    async def create(config: ConfigModule, connection: bool):
+    async def create(config: ConfigModule, online: bool):
         print_info('Starting DemaTrading.ai data-module...')
-        data_module = DataModule(connection)
+        data_module = DataModule(online)
         data_module.config = config
         data_module.exchange = config.exchange
-        if connection:
+        if online:
             await data_module.load_markets()
         return data_module
 
-    async def load_btc_marketchange(self):
+    async def load_btc_marketchange(self) -> float:
         try:
             datafile = f'data-BTCUSDT{self.config.timeframe}.feather'
             datadir = 'data/backtesting-data/binance'
 
-            if datafile not in os.listdir(datadir):
-                if not self.connection:
-                    raise OfflineMissingDataError()
+            if not self.online:
+                if datafile in os.listdir(datadir):
+                    print_info("Using last saved data on market change of BTC/USDT...")
+                    market_change = offline_fetch_btc_marketchange(datadir + '/' + datafile)
 
                 else:
-                    print_info("Fetching market change of BTC/USDT...")
-                    begin_data = await self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe=self.config.timeframe,
-                                                                 since=self.config.backtesting_from, limit=1)
-                    end_timestamp = int(np.floor(self.config.backtesting_to / self.config.timeframe_ms) *
-                                        self.config.timeframe_ms) - self.config.timeframe_ms
-                    end_data = await self.exchange.fetch_ohlcv(symbol='BTC/USDT', timeframe=self.config.timeframe,
-                                                               since=end_timestamp, limit=1)
+                    raise OfflineMissingDataError()
 
-                    begin_close_value = begin_data[0][4]
-                    end_close_value = end_data[0][4]
-
-                    return end_close_value / begin_close_value
             else:
-                print_info("Using last saved data on market change of BTC/USDT...")
-                df = pd.read_feather(datadir + '/' + datafile, columns=get_ohlcv_indicators() + ["index"])
-                df.set_index("index", inplace=True)
+                print_info("Fetching market change of BTC/USDT...")
+                market_change = await online_fetch_btc_marketchange(self.config, self.exchange)
 
-                begin_close_value = df['close'].iloc[0]
-                end_close_value = df['close'].iloc[-1]
-
-                return end_close_value / begin_close_value
+            return market_change
 
         except OfflineMissingDataError:
             ErrorOutput(sys.exc_info(),
-                        add_info="You are trying to run an offline backtest on unavailable data. Either connect to the"
-                                 "\n\tinternet to download it, or revise your config file to only include pairs you "
-                                 "have saved locally.",
+                        add_info="Trying to download the required BTC/USDT pair as it used as baseline. "
+                                 "\n\tSince it is not present locally and you are not connected, "
+                                 "you cannot run a backtest",
                         stop=True).print_error()
 
-    async def load_btc_drawdown(self, df: dict):
-        print_info("Fetching market drawdown of BTC/USDT...")
+    async def load_btc_drawdown(self, df: dict) -> float:
+        try:
+            if not self.online:
+                if 'BTC/USDT' in df.keys():
+                    print_info("Using last saved data on market drawdown of BTC/USDT...")
+                    bitcoin_df = df.get('BTC/USDT')
 
-        if 'BTC/USDT' in df.keys():
-            bitcoin_df = df.get('BTC/USDT')
-        else:
-            pair, bitcoin_df = await self.get_pair_data('BTC/USDT', self.config.timeframe)
-        bitcoin_values = bitcoin_df[['close']].rename(columns={'close': 'value'})
+                else:
+                    raise OfflineMissingDataError
 
-        bitcoin_drawdown = get_max_drawdown_ratio(bitcoin_values)
-        return bitcoin_drawdown
+            else:
+                print_info("Fetching market drawdown of BTC/USDT...")
+                pair, bitcoin_df = await self.get_pair_data('BTC/USDT', self.config.timeframe)
+
+            bitcoin_values = bitcoin_df[['close']].rename(columns={'close': 'value'})
+
+            bitcoin_drawdown = get_max_drawdown_ratio(bitcoin_values)
+
+            return bitcoin_drawdown
+
+        except OfflineMissingDataError:
+            ErrorOutput(sys.exc_info(),
+                        add_info="Trying to download the required BTC/USDT pair as it used as baseline. "
+                                 "\n\tSince it is not present locally and you are not connected, "
+                                 "you cannot run a backtest",
+                        stop=True)
 
     async def load_historical_data(self, pairs, check_backtesting_period=True) -> dict:
         dataframes = await asyncio.gather(
@@ -115,17 +119,37 @@ class DataModule:
     async def get_pair_data(self, pair, timeframe):
         self.config.timeframe = timeframe
         self.config.timeframe_ms = parse_timeframe(timeframe)
+        df = pd.DataFrame()
 
-        if self.is_datafolder_exist(pair):
-            print_info("Reading datafile for %s." % pair)
-            try:
-                df = await self.read_data_from_datafile(pair)
-            except rapidjson.JSONDecodeError:
-                print_info("Unable to read datafile for %s, starting download..." % pair)
-                df = await self.download_data_for_pair(pair, self.config.backtesting_from, self.config.backtesting_to)
-        else:
-            print_info("Did not find datafile for %s, starting download..." % pair)
-            df = await self.download_data_for_pair(pair, self.config.backtesting_from, self.config.backtesting_to)
+        try:
+            if self.is_datafolder_exist(pair):
+                print_info("Reading datafile for %s." % pair)
+                try:
+                    df = await self.read_data_from_datafile(pair)
+
+                except rapidjson.JSONDecodeError:
+                    if self.online:
+                        print_info("Unable to read datafile for %s, starting download..." % pair)
+                        df = await self.download_data_for_pair(pair, self.config.backtesting_from,
+                                                               self.config.backtesting_to)
+                    else:
+                        raise OfflineMissingDataError
+
+            else:
+                if self.online:
+                    print_info("Did not find datafile for %s, starting download..." % pair)
+                    df = await self.download_data_for_pair(pair, self.config.backtesting_from,
+                                                           self.config.backtesting_to)
+                else:
+                    raise OfflineMissingDataError
+
+        except OfflineMissingDataError:
+            ErrorOutput(sys.exc_info(),
+                        add_info="You are trying to run an offline backtest on unavailable data. Either connect to the"
+                                 "\n\tinternet to download it, or revise your config file to only include pairs you "
+                                 "have saved locally.)",
+                        stop=True)
+
         return pair, df
 
     async def load_markets(self) -> None:
@@ -247,26 +271,53 @@ class DataModule:
         notify = True  # Used for printing message once (improved readability)
 
         # Check if previous data needs to be downloaded
-        if self.config.backtesting_from < df_begin:
-            print_info("Incomplete datafile. Downloading extra candle(s)...")
-            notify = False
-            prev_df = await self.download_data_for_pair(pair, self.config.backtesting_from, df_begin, save=False)
-            df = pd.concat([prev_df, df])
-            extra_candles += len(prev_df.index)
+        try:
+            if self.config.backtesting_from < df_begin:
+                if self.online:
+                    print_info("Incomplete datafile. Downloading extra candle(s)...")
+                    notify = False
+                    prev_df = await self.download_data_for_pair(pair,
+                                                                self.config.backtesting_from,
+                                                                df_begin,
+                                                                save=False)
+                    df = pd.concat([prev_df, df])
+                    extra_candles += len(prev_df.index)
 
-        # Check if new data needs to be downloaded
-        if final_timestamp > df_end:
-            if notify:
-                print_info("Incomplete datafile. Downloading extra candle(s)...")
-            new_df = await self.download_data_for_pair(pair, df_end + self.config.timeframe_ms,
-                                                       self.config.backtesting_to,
-                                                       save=False)
-            df = pd.concat([df, new_df])
-            extra_candles += len(new_df.index)
+                else:
+                    raise OfflineMissingDataError()
 
-        # Check if new candles were downloaded
-        if extra_candles > 0:
-            print_info("[%s] %s extra candle(s) downloaded." % (pair, extra_candles))
+            # Check if new data needs to be downloaded
+            if final_timestamp > df_end:
+                if self.online:
+                    if notify:
+                        print_info("Incomplete datafile. Downloading extra candle(s)...")
+                    new_df = await self.download_data_for_pair(pair, df_end + self.config.timeframe_ms,
+                                                               self.config.backtesting_to,
+                                                               save=False)
+                    df = pd.concat([df, new_df])
+                    extra_candles += len(new_df.index)
+
+                else:
+                    raise OfflineMissingDataError()
+
+            # Check if new candles were downloaded
+            if extra_candles > 0:
+                print_info("[%s] %s extra candle(s) downloaded." % (pair, extra_candles))
+
+        except OfflineMissingDataError:
+
+            local_timeframe_begin = datetime.fromtimestamp(self.config.backtesting_from / 1000).date()
+            local_timeframe_end = datetime.fromtimestamp(self.config.backtesting_to / 1000).date()
+            avail_timeframe_begin = datetime.fromtimestamp(df_begin / 1000).date()
+            avail_timeframe_end = datetime.fromtimestamp(df_end / 1000).date()
+
+            ErrorOutput(sys.exc_info(),
+                        add_info=f"It appears the backtesting timeframe you have selected "
+                                 f"(from {local_timeframe_begin} to {local_timeframe_end}) is not the same "
+                                 f"as the one saved \n\tlocally (from {avail_timeframe_begin} to "
+                                 f"{avail_timeframe_end}). Since your device is offline, it is only possible to "
+                                 f"run a backtest within the timeframe available locally.",
+                        stop=True).print_error()
 
         return df
 

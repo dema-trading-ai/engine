@@ -45,36 +45,39 @@ class BacktestRunner:
         OutputModule(self.stats_config).output(stats, self.module.strategy_definition)
 
     @staticmethod
-    def check_required_data(config_module: ConfigModule) -> None:
-        try:
-            pairs = config_module.pairs
+    def check_local_data(config: ConfigModule) -> None:
 
-            # Add BTC to list in case not watched by user since it's the baseline for the results
-            if 'BTC/USDT' not in pairs:
-                pairs.append('BTC/USDT')
+        dirpath = f'data/backtesting-data/{str(config.exchange).lower()}'
+
+        try:
+            if not os.path.exists(dirpath):
+                raise OfflineMissingDataError()
+
+            pairs = config.pairs
 
             for pair in pairs:
                 pair = pair.replace('/', '')
-                filename = f'data-{pair}{config_module.timeframe}.feather'
-                if filename not in os.listdir('data/backtesting-data/binance'):
+                filename = f'data-{pair}{config.timeframe}.feather'
+
+                if filename not in os.listdir(dirpath):
                     raise OfflineMissingDataError()
 
         except OfflineMissingDataError:
             ErrorOutput(sys.exc_info(),
                         add_info="You are trying to run an offline backtest on unavailable data. Either connect to the"
                                  "\n\tinternet to download it, or revise your config file to only include pairs you "
-                                 "have saved locally.",
+                                 "have saved locally.)",
                         stop=True).print_error()
 
 
 @asynccontextmanager
-async def create_backtest_runner(args: object, connection: bool) -> Generator[BacktestRunner, None, None]:
+async def create_backtest_runner(args: object, online: bool) -> Generator[BacktestRunner, None, None]:
     config_module = None
     try:
-        config_module = await ConfigModule.create(args)
-        if not connection:
-            BacktestRunner.check_required_data(config_module)
-        data_module = await DataModule.create(config_module, connection)
+        config_module = await ConfigModule.create(args, online)
+        if not online:
+            BacktestRunner.check_local_data(config_module)
+        data_module = await DataModule.create(config_module, online)
         setup_module = SetupModule(config_module, data_module)
         algo_module, df, strategy, stats_config = await setup_module.setup()
         backtest_runner = BacktestRunner(config_module, data_module, algo_module, df, strategy, stats_config)
