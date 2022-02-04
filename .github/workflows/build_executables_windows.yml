@@ -64,10 +64,10 @@ jobs:
           name: engine-windows
           path: ./dist/engine/engine.zip
       - name: Notify via Endid
-          uses: endid-app/endid-github-action@master
-          with:
-            token: ${{ secrets.ENDID_SECRET }}
-            status: ${{ job.status }}
+        uses: endid-app/endid-github-action@master
+        with:
+          token: ${{ secrets.ENDID_SECRET }}
+          status: ${{ job.status }}
   test:
     needs:
       - build
@@ -89,10 +89,10 @@ jobs:
           PYTHONLEGACYWINDOWSIOENCODING: true
           PYTHONIOENCODING: utf-8
       - name: Notify via Endid
-          uses: endid-app/endid-github-action@master
-          with:
-            token: ${{ secrets.ENDID_SECRET }}
-            status: ${{ job.status }}
+        uses: endid-app/endid-github-action@master
+        with:
+          token: ${{ secrets.ENDID_SECRET }}
+          status: ${{ job.status }}
   deploy:
     needs:
       - build
