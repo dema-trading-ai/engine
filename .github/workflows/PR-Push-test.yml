@@ -34,5 +34,5 @@ jobs:
       - name: Notify via Endid
         uses: endid-app/endid-github-action@master
         with:
-          token: ${{ secrets.endid_token }}
+          token: ${{ secrets.ENDID_SECRET }}
           status: ${{ job.status }}
