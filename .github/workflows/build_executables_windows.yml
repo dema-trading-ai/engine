@@ -63,12 +63,6 @@ jobs:
           if-no-files-found: error
           name: engine-windows
           path: ./dist/engine/engine.zip
-    - name: Notify via Endid
-      runs-on: ubuntu-latest
-      uses: endid-app/endid-github-action@master
-      with:
-        token: ${{ secrets.ENDID_SECRET }}
-        status: ${{ job.status }}
   test:
     needs:
       - build
