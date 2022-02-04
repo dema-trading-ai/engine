@@ -63,11 +63,12 @@ jobs:
           if-no-files-found: error
           name: engine-windows
           path: ./dist/engine/engine.zip
-      - name: Notify via Endid
-        uses: endid-app/endid-github-action@master
-        with:
-          token: ${{ secrets.ENDID_SECRET }}
-          status: ${{ job.status }}
+    - name: Notify via Endid
+      runs-on: ubuntu-latest
+      uses: endid-app/endid-github-action@master
+      with:
+        token: ${{ secrets.ENDID_SECRET }}
+        status: ${{ job.status }}
   test:
     needs:
       - build
@@ -88,11 +89,6 @@ jobs:
         env:
           PYTHONLEGACYWINDOWSIOENCODING: true
           PYTHONIOENCODING: utf-8
-      - name: Notify via Endid
-        uses: endid-app/endid-github-action@master
-        with:
-          token: ${{ secrets.ENDID_SECRET }}
-          status: ${{ job.status }}
   deploy:
     needs:
       - build
@@ -112,8 +108,15 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.DO_SPACES_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SPACES_SECRET }}
-      - name: Notify via Endid
-        uses: endid-app/endid-github-action@master
-        with:
-          token: ${{ secrets.ENDID_SECRET }}
-          status: ${{ job.status }}
+  notify:
+      needs:
+        - test
+        - build
+      runs-on: ubuntu-18.04
+      steps:
+        - uses: actions/checkout@v2
+        - name: Notify via Endid
+          uses: endid-app/endid-github-action@master
+          with:
+            token: ${{ secrets.ENDID_SECRET }}
+            status: ${{ job.status }}
