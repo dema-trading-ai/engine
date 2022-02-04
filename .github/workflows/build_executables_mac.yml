@@ -85,3 +85,15 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.DO_SPACES_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SPACES_SECRET }}
+  notify:
+    needs:
+      - test
+      - build
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Notify via Endid
+        uses: endid-app/endid-github-action@master
+        with:
+          token: ${{ secrets.ENDID_SECRET }}
+          status: ${{ job.status }}

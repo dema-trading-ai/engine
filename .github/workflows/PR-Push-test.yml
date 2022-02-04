@@ -33,4 +33,5 @@ jobs:
         with:
           token: ${{ secrets.ENDID_SECRET }}
           status: ${{ job.status }}
+          message: This is a test
       
