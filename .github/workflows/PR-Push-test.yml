@@ -28,6 +28,8 @@ jobs:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: cobertura.xml
   notify:
+    needs:
+      - pytest-test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
