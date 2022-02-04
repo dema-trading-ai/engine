@@ -16,7 +16,7 @@ def test_capital():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.main_results.end_capital == 196.02
+    assert stats.main_results.end_capital == 96.02
 
 
 def test_profit_percentage():
