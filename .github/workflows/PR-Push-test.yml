@@ -27,8 +27,9 @@ jobs:
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: cobertura.xml
-          
+
       - name: Notify via Endid
+        if: always()
         uses: endid-app/endid-github-action@master
         with:
           token: ${{ secrets.ENDID_SECRET }}
