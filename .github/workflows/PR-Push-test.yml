@@ -27,11 +27,12 @@ jobs:
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: cobertura.xml
-
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
       - name: Notify via Endid
         uses: endid-app/endid-github-action@master
         with:
-          token: ${{ secrets.ENDID_SECRET }}
+          token: ${{ secrets.endid_token }}
           status: ${{ job.status }}
-          message: This is a test
-      
