@@ -13,3 +13,4 @@ pyinstaller==4.9
 pyarrow==6.0.1
 optuna==2.10.0
 pandas_ta==0.3.14b
+scipy==1.8.0
