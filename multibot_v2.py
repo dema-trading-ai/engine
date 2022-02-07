@@ -214,7 +214,7 @@ def custom_run(util, combinations):
     combination_title = '-'.join(cleaned_filenames)
     results[combination_title] = {"profit": profit, "drawdown": drawdown}
 
-    save_trade_log(results, BASE_DIR + f'/data/backtesting-data/gold_results_fluctus.json')
+    save_trade_log(results, BASE_DIR + '/data/backtesting-data/platinum_laika_fluctus_results.json')
 
 
 # Start the program
@@ -223,15 +223,22 @@ utility = Utilities()
 
 BASE_DIR_EXT = BASE_DIR + "/data/backtesting-data/trade_logs/trades_log_"
 
-logs_platinum = ["Bot1", "BuyHoldSmart", "Athena_VWAP", "DaanStrategy002", "KaguTsuchi", "Hawk_heikin", "fluctus"]
-logs_gold = ["Athena_VWAP", "DaanStrategy002", "KaguTsuchi", "Hawk_heikin", "fluctus"]
+logs_platinum = ["senex_seneca", "BuyHoldSmart", "Athena_VWAP", "DaanStrategy002", "KaguTsuchi", "Hawk_heikin"]
+logs_gold = ["Athena_VWAP", "DaanStrategy002", "KaguTsuchi", "Hawk_heikin"]
+
+logs_to_add = ['Everest', 'Ibis', 'Lhotse', 'Prometheus', 'Bot1_laika', 'Bot2_laika', 'Bot3_laika']
+
+logs_gold += logs_to_add
+logs_platinum += logs_to_add
 
 files_platinum = [BASE_DIR_EXT + bot_name + ".json" for bot_name in logs_platinum]
 files_gold = [BASE_DIR_EXT + bot_name + ".json" for bot_name in logs_gold]
 
+# logs = ["Frigg_freq", "AmeNoUzume_freq", "Artemis_freq", "Balder_freq", "FlowerPower_freq", "GreenGrass_freq", "Heimdall_freq", "Hephaestus_freq", "Hestia_freq", "KaguTsuchi_freq", "Odin_freq", "Takemikazuchi_freq", "Omoikane_freq", "ADALovelace_freq", "Panther_freq", "Blipe_freq", "Osprey_freq", "HODLbotPro_freq"]
+# files = [[BASE_DIR_EXT + bot_name + ".json"] for bot_name in logs]
 
 try:
     # combine_and_run_multibot(utility)
-    custom_run(utility, files_gold)
+    custom_run(utility, files_platinum)
 except Exception as e:
     utility.write_log_to_file(f'[ERROR] Fatal error, unable to continue: {str(e)}')

@@ -39,13 +39,32 @@ def parse_trade_json(trades, filename):
     mot = data['max-open-trades']
     timeframe = data['timeframe']
     for k, v in data['trades'].items():
-        if v['status'] == 'open':
-            # Skip open trades for now
-            continue
+        if 'status' in v:
+            if v['status'] == 'open':
+                # Skip open trades for now
+                continue
 
         profit = round((v['close_price'] - v['open_price']) / v['open_price'], 3)
         open_timestamp = dt2ts(datetime.datetime.strptime(v['opened_at'], "%Y-%m-%d %H:%M:%S"))
         close_timestamp = dt2ts(datetime.datetime.strptime(v['closed_at'], "%Y-%m-%d %H:%M:%S"))
+        trade = Trade(open_timestamp=open_timestamp, close_timestamp=close_timestamp, profit=profit)
+        trades.append(trade)
+
+    return mot, timeframe, trades
+
+
+def parse_trade_json_freq(trades, filename):
+    data = read_trade_log(filename)
+    mot = data['max-open-trades']
+    timeframe = data['timeframe']
+    for trade in data['trades']:
+        if trade['is_open']:
+            # Skip open trades for now
+            continue
+
+        profit = round((trade['close_rate'] - trade['open_rate']) / trade['open_rate'], 3)
+        open_timestamp = dt2ts(datetime.datetime.strptime(trade['open_date'], "%Y-%m-%d %H:%M:%S"))
+        close_timestamp = dt2ts(datetime.datetime.strptime(trade['close_date'], "%Y-%m-%d %H:%M:%S"))
         trade = Trade(open_timestamp=open_timestamp, close_timestamp=close_timestamp, profit=profit)
         trades.append(trade)
 

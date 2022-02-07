@@ -164,7 +164,7 @@ def combine_and_run_multibot():
 #     results = {}
 #     all_combinations = list(itertools.combinations(files, i))
 #     for j, combination in enumerate(all_combinations):
-#         combination = ['/Users/marijnpc/Trading/engine/data/backtesting-data/trade_logs/trades_log_Bot1.json', '/Users/marijnpc/Trading/engine/data/backtesting-data/trade_logs/trades_log_MyStrategy.json']
+#         combination = ['/Users/marijnpc/Trading/engine/data/backtesting-data/trade_logs/trades_log_senex_seneca.json', '/Users/marijnpc/Trading/engine/data/backtesting-data/trade_logs/trades_log_MyStrategy.json']
 #
 #         # combination = ['/Users/marijnpc/Trading/engine/data/backtesting-data/trade_logs/trades_log_JustABotti.json', '/Users/marijnpc/Trading/engine/data/backtesting-data/trade_logs/trades_log_KaguTsuchi.json', '/Users/marijnpc/Trading/engine/data/backtesting-data/trade_logs/trades_log_ObiOneKenobi.json', '/Users/marijnpc/Trading/engine/data/backtesting-data/trade_logs/trades_log_Omoikane.json']
 #         write_log_to_file(f'[INFO] Currently running combination {j} out of {len(all_combinations)} options for {i} combinations')

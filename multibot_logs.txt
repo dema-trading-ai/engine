@@ -1,0 +1,8 @@
+[2022-02-02 17:01:31.533959] - [ERROR] Something went wrong: [Errno 2] No such file or directory: 'FlowerPower_freq'
+[2022-02-02 17:04:20.541313] - [ERROR] Something went wrong: [Errno 2] No such file or directory: 'FlowerPower_freq'
+[2022-02-03 11:41:56.164429] - [ERROR] Something went wrong: [Errno 2] No such file or directory: '/Users/marijnpc/Trading/engine/data/backtesting-data/freq_logs/trades_log_Hepheastus_freq.json'
+[2022-02-03 17:14:55.636629] - [ERROR] Something went wrong: [Errno 2] No such file or directory: '/Users/marijnpc/Trading/engine/data/backtesting-data/freq_logs/trades_log_Athena_VWAP.json'
+[2022-02-03 17:15:06.060267] - [ERROR] Something went wrong: string indices must be integers
+[2022-02-03 17:15:30.184324] - [ERROR] Something went wrong: [Errno 2] No such file or directory: '/Users/marijnpc/Trading/engine/data/backtesting-data/trade_logs/trades_log_Everest.json'
+[2022-02-03 17:16:12.928467] - [ERROR] Something went wrong: 'status'
+[2022-02-03 17:18:23.687844] - [ERROR] Something went wrong: [Errno 2] No such file or directory: '/Users/marijnpc/Trading/engine/data/backtesting-data/trade_logs/trades_log_Bot1.json'
