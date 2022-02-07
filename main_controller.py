@@ -11,6 +11,7 @@ class MainController:
 
     @staticmethod
     async def run(args) -> None:
+        # added comment just for checking purposes
         async with create_backtest_runner(args) as runner:
 
             if args.alpha_hyperopt:
