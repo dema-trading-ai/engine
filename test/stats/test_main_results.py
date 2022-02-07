@@ -1,5 +1,5 @@
 import math
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from test.stats.stats_test_utils import StatsFixture, CooldownStrategy
 from test.utils.signal_frame import ONE_MIL, THIRTY_MIN, EIGHT_HOURS, SIX_HOURS, TWELVE_HOURS
@@ -584,7 +584,7 @@ def test_profitable_weeks_one_loss():
 
 
 def test_profitable_weeks_no_trades_market_down():
-    # One week, all days are positive - outcome should be draw for profitable week, win for outperform
+    # One week, all days are positive - outcome should be a draw for profitable week, win for outperform
     # market week, since the market is going down.
     # Arrange
     fixture = StatsFixture(['COIN'])
@@ -607,7 +607,7 @@ def test_profitable_weeks_no_trades_market_down():
 
 
 def test_profitable_weeks_no_trades_market_up():
-    # One week, all days are negative - outcome should be draw for profitable week, loss for outperform
+    # One week, all days are negative - outcome should be a draw for profitable week, loss for outperform
     # market week, since the market is going up.
     # Arrange
     fixture = StatsFixture(['COIN'])
@@ -630,7 +630,7 @@ def test_profitable_weeks_no_trades_market_up():
 
 
 def test_profitable_weeks_no_trades_market_flat():
-    # One week, all days are flat - outcome should be drawn for profitable week, draw for outperform
+    # One week, all days are flat - outcome should be a draw for profitable week, draw for outperform
     # market week, since the market is flat.
 
     # Arrange
@@ -656,10 +656,10 @@ def test_risk_reward_ratio():
     # Checks that two trades return a ratio, should return a float
 
     # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
+    fixture = StatsFixture(['COIN'])
 
     # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_75_two_trades()
+    fixture.frame_with_signals['COIN'].test_scenario_up_100_down_75_two_trades()
 
     # Act
     stats = fixture.create().analyze()
@@ -672,10 +672,10 @@ def test_risk_reward_ratio_no_trade():
     # Checks that the risk/ reward ratio can't be computed as there are no trades, should return 0 as an int
 
     # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
+    fixture = StatsFixture(['COIN'])
 
     # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_no_trades()
+    fixture.frame_with_signals['COIN'].test_scenario_up_no_trades()
 
     # Act
     stats = fixture.create().analyze()
@@ -689,10 +689,10 @@ def test_risk_reward_ratio_one_winning_trade():
     # Checks that the risk/ reward ratio can't be computed as there are no losing trades, should return 0.0 as a float
 
     # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
+    fixture = StatsFixture(['COIN'])
 
     # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade()
+    fixture.frame_with_signals['COIN'].test_scenario_up_50_one_trade()
 
     # Act
     stats = fixture.create().analyze()
@@ -706,10 +706,10 @@ def test_risk_reward_ratio_one_losing_trade():
     # Checks that the risk/ reward ratio can't be computed as there are no winning trades, should return 0.0 as a float
 
     # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
+    fixture = StatsFixture(['COIN'])
 
     # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade()
+    fixture.frame_with_signals['COIN'].test_scenario_down_50_one_trade()
 
     # Act
     stats = fixture.create().analyze()
@@ -724,10 +724,10 @@ def test_cooldown_sell_signal():
     # the cooldown period.
 
     # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
+    fixture = StatsFixture(['COIN'])
 
     # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+    fixture.frame_with_signals['COIN'].test_scenario_down_10_up_100_down_75_three_trades()
 
     # Act
     stats = fixture.create_with_strategy(CooldownStrategy()).analyze()
@@ -740,15 +740,15 @@ def test_cooldown_stoploss():
     # Tests the cooldown function - when stoploss is hit
 
     # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
+    fixture = StatsFixture(['COIN'])
 
     fixture.trading_module_config.stoploss = -25
     fixture.stats_config.stoploss = -25
 
     # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade()
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade()
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade()
+    fixture.frame_with_signals['COIN'].test_scenario_down_50_one_trade()
+    fixture.frame_with_signals['COIN'].test_scenario_up_50_one_trade()
+    fixture.frame_with_signals['COIN'].test_scenario_up_50_one_trade()
 
     # Act
     stats = fixture.create_with_strategy(CooldownStrategy()).analyze()
@@ -761,21 +761,58 @@ def test_cooldown_roi():
     # Tests the cooldown function - when roi is hit
 
     # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
+    fixture = StatsFixture(['COIN'])
 
     fixture.trading_module_config.roi = {
         "0": 25
     }
 
     # Win/Loss/Open
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade()
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade()
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade()
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade()
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade()
+    fixture.frame_with_signals['COIN'].test_scenario_up_50_one_trade()
+    fixture.frame_with_signals['COIN'].test_scenario_up_50_one_trade()
+    fixture.frame_with_signals['COIN'].test_scenario_up_50_one_trade()
+    fixture.frame_with_signals['COIN'].test_scenario_up_50_one_trade()
+    fixture.frame_with_signals['COIN'].test_scenario_up_50_one_trade()
 
     # Act
     stats = fixture.create_with_strategy(CooldownStrategy()).analyze()
 
     # Assert
     assert stats.main_results.n_trades == 3
+
+
+def test_most_consecutive_losses():
+    """Two losses in a row, one gain, should return 2"""
+
+    # Arrange
+    fixture = StatsFixture(['COIN'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN'].test_scenario_down_50_one_trade()
+    fixture.frame_with_signals['COIN'].test_scenario_down_50_one_trade()
+    fixture.frame_with_signals['COIN'].test_scenario_up_50_one_trade()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.main_results.n_consecutive_losses == 2
+
+
+def test_most_consecutive_losses_start_end():
+    """Two losses in a row, one gain, should return two dates"""
+
+    # Arrange
+    fixture = StatsFixture(['COIN'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN'].test_scenario_down_50_one_trade(timestep=TWELVE_HOURS)
+    fixture.frame_with_signals['COIN'].test_scenario_down_50_one_trade(timestep=TWELVE_HOURS)
+    fixture.frame_with_signals['COIN'].test_scenario_up_50_one_trade()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.main_results.dates_consecutive_losing_trades[0] == datetime(2020, 1, 1, 0, 0)
+    assert stats.main_results.dates_consecutive_losing_trades[-1] == datetime(2020, 1, 2, 12, 0)
