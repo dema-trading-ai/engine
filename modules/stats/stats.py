@@ -127,6 +127,13 @@ class StatsModule:
         timespan_seconds = (tested_to - tested_from).total_seconds()
         nr_days = timespan_seconds / timedelta(days=1).total_seconds()
 
+        market_change_btc = "-"
+        market_drawdown_btc = "-"
+        if self.config.btc_marketchange_ratio:
+            market_change_btc = (self.config.btc_marketchange_ratio - 1) * 100
+        if self.config.btc_drawdown_ratio:
+            market_drawdown_btc = (self.config.btc_drawdown_ratio - 1) * 100
+        
         return MainResults(tested_from=tested_from,
                            tested_to=tested_to,
                            timeframe=self.config.timeframe,
@@ -135,12 +142,8 @@ class StatsModule:
                            exposure_per_trade=self.config.exposure_per_trade,
                            market_change_coins=(market_change['all'] - 1) * 100,
                            market_drawdown_coins=(market_drawdown['all'] - 1) * 100,
-                           market_change_btc=(
-                                                     self.config.btc_marketchange_ratio - 1
-                                             ) * 100 if self.config.btc_marketchange_ratio else '-',
-                           market_drawdown_btc=(
-                                                       self.config.btc_drawdown_ratio - 1
-                                               ) * 100 if self.config.btc_drawdown_ratio else '-',
+                           market_change_btc=market_change_btc,
+                           market_drawdown_btc=market_drawdown_btc,
                            starting_capital=self.config.starting_capital,
                            end_capital=budget,
                            overall_profit_percentage=overall_profit_percentage,
@@ -272,25 +275,25 @@ class StatsModule:
 
             # Find avg, longest and shortest trade durations
             per_coin_stats[key]["avg_trade_duration"], \
-                per_coin_stats[key]["longest_trade_duration"], \
-                per_coin_stats[key]["shortest_trade_duration"] = \
+            per_coin_stats[key]["longest_trade_duration"], \
+            per_coin_stats[key]["shortest_trade_duration"] = \
                 calculate_trade_durations(closed_pair_trades)
 
             # Find winning, draw and losing weeks for current coin
             per_coin_stats[key]["win_weeks"], \
-                per_coin_stats[key]["draw_weeks"], \
-                per_coin_stats[key]["loss_weeks"], \
-                market_change_weekly[key] = get_winning_weeks_per_coin(
-                    self.frame_with_signals[key],
-                    seen_cum_profit_ratio_df
-                )
+            per_coin_stats[key]["draw_weeks"], \
+            per_coin_stats[key]["loss_weeks"], \
+            market_change_weekly[key] = get_winning_weeks_per_coin(
+                self.frame_with_signals[key],
+                seen_cum_profit_ratio_df
+            )
 
             # Find profitable weeks for current coin
             per_coin_stats[key]["prof_weeks_win"], \
-                per_coin_stats[key]["prof_weeks_draw"], \
-                per_coin_stats[key]["prof_weeks_loss"] = get_profitable_weeks_per_coin(
-                    seen_cum_profit_ratio_df
-                )
+            per_coin_stats[key]["prof_weeks_draw"], \
+            per_coin_stats[key]["prof_weeks_loss"] = get_profitable_weeks_per_coin(
+                seen_cum_profit_ratio_df
+            )
 
             for trade in closed_pair_trades:
                 # Update average profit
