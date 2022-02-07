@@ -13,7 +13,14 @@ from modules.setup import ConfigModule
 
 def plot_per_coin(stats: TradingStats, config: ConfigModule):
     Path("data/backtesting-data/plots/").mkdir(parents=True, exist_ok=True)
-    processes = [Process(target=plot_coin, args=(config.mainplot_indicators, config.subplot_indicators, config.strategy_name, stats, key, value)) for key, value in stats.df.items()]
+    processes = [Process(target=plot_coin, args=(
+        config.mainplot_indicators,
+        config.subplot_indicators,
+        config.strategy_name,
+        stats,
+        key,
+        value
+    )) for key, value in stats.df.items()]
     for p in processes:
         p.start()
 
