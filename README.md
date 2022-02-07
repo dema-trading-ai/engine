@@ -28,7 +28,7 @@ trading, your own strategies, your algorithms, or just a chit chat with like-min
 you are more than welcome join our Discord server, where we will facilitate whatever need you 
 may have.
 
-##### [Join Discord server](https://discord.gg/WXxjtNzjEx)
+##### [Join Discord server](https://dematrading.io/discord)
 
 
 # Installing
