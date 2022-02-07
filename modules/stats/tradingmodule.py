@@ -57,7 +57,7 @@ class TradingModule:
         self.update_budget_per_timestamp(ohlcv)
         self.update_capital_per_timestamp(ohlcv)
 
-    def no_trade_tick(self, ohlcv: dict, data_dict: dict) -> None:
+    def no_trade_tick(self, ohlcv: dict) -> None:
         if self.buy_cooldown[ohlcv['pair']] > 0:
             self.buy_cooldown[ohlcv['pair']] -= 1
             return
@@ -100,9 +100,9 @@ class TradingModule:
         self.open_trades.remove(trade)
         self.closed_trades.append(trade)
         self.update_realised_profit(trade)
-
-    def open_trade(self, ohlcv: dict, data_dict: dict) -> None:
         self.buy_cooldown[ohlcv['pair']] = self.strategy.buy_cooldown(trade)
+
+    def open_trade(self, ohlcv: dict) -> None:
 
         # Find available trade spaces
         open_trades = len(self.open_trades)
