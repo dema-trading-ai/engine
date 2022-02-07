@@ -13,7 +13,7 @@ class MainController:
     async def run(args) -> None:
         # add comment just for checking purpose
         async with create_backtest_runner(args) as runner:
-
+            print("testing")
             if args.alpha_hyperopt:
                 os.environ["VERBOSITY"] = "no_warnings"
                 study = optuna.create_study()
