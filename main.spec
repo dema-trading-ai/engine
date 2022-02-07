@@ -42,5 +42,5 @@ coll = COLLECT(exe,
                a.datas,
                strip=False,
                upx=True,
-               upx_exclude=[scipy],
+               upx_exclude=[],
                name='engine')
