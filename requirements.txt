@@ -15,4 +15,4 @@ optuna==2.10.0
 openpyxl==3.0.9
 certifi==2021.10.8
 pandas_ta==0.3.14b
-scipy==1.8.0
+scipy==1.7.2
