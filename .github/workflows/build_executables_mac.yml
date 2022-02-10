@@ -38,7 +38,7 @@ jobs:
       - name: install requirements
         run: pip install -r requirements.txt
       - name: install gcc
-        run: brew reinstall gcc --with-fortran
+        run: brew reinstall gcc
       - name: build executable
         run: python build_scripts/build.py
       - name: build archive
