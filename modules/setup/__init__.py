@@ -31,8 +31,8 @@ class SetupModule(object):
         # Reset original timeframe
         self.config.timeframe = strategy.timeframe
         self.config.timeframe_ms = parse_timeframe(strategy.timeframe)
-        stats_config = get_stats_config(self.config, await self.data_module.load_btc_marketchange(),
-                                        await self.data_module.load_btc_drawdown(ohlcv_pair_frames))
+        btc_info = await self.data_module.load_btc_baseline()
+        stats_config = get_stats_config(self.config, btc_info[0], btc_info[1])
 
         return AlgoModule(self.config, ohlcv_pair_frames, strategy,
                           additional_ohlcv_pair_frames), ohlcv_pair_frames, strategy, stats_config

@@ -21,8 +21,8 @@ class ConsoleColors:
     ERROR = '[bright_red]'
 
 
-def print_warning(text, force: bool = False):
-    if is_verbosity("quiet") or is_verbosity("no_warnings") and not force:
+def print_warning(text):
+    if is_verbosity("quiet") or is_verbosity("no_warnings"):
         return
     console_standard.print("[WARNING] ", end='')
     console_color.print(f"{ConsoleColors.WARNING}{text}[/]")

@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def get_max_drawdown_ratio(df: pd.DataFrame):
+def get_max_drawdown_ratio(df: pd.DataFrame) -> float:
     """
     @param df: with column["value"]
     """

@@ -67,7 +67,7 @@ class ConfigModule(object):
         config_module.strategy_definition = StrategyDefinition(config['strategy-name'], config['strategies-folder'])
         config_module.strategy_name = config_module.strategy_definition.strategy_name
         config_module.exchange_name = exchange_str
-        config_module.exchange = create_cctx_exchange(config_module.exchange_name, config_module.timeframe)
+        config_module.exchange = create_cctx_exchange(config_module.exchange_name, config_module.timeframe, online)
         backtesting_till_now = config["backtesting-till-now"]
         backtesting_from = config["backtesting-from"]
         backtesting_to = config["backtesting-to"]
@@ -114,7 +114,7 @@ def read_config(config_path: str, online: bool) -> dict:
         print_info("Backtesting online")
     else:
         print_warning("Your device doesn't seem to be connected to the Internet. "
-                      "New data and version checks unavailable.", force=True)
+                      "New data and version checks unavailable.")
 
     try:
         with open(config_path or "config.json", 'r', encoding='utf-8') as configfile:
