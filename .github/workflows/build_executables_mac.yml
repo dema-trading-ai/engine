@@ -37,10 +37,8 @@ jobs:
             ${{ runner.os }}-pyinstaller
       - name: install requirements
         run: pip install -r requirements.txt
-      - name: install gcc
-        run: brew install gcc
       - name: build executable
-        run: python build_scripts/build.py
+        run: python build_scripts/build.py --one-file
       - name: build archive
         run: zip -r ./engine.zip .
         working-directory: dist/engine
