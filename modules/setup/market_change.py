@@ -1,7 +1,6 @@
 from ccxt import Exchange
 import numpy as np
 import pandas as pd
-from typing import Tuple
 import asyncio
 
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
