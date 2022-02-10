@@ -270,7 +270,7 @@ def test_n_average_trades_no_trades():
     assert stats.main_results.n_average_trades == 0
     assert stats.main_results.n_left_open_trades == 0
     assert stats.main_results.n_trades_with_loss == 0
-    assert stats.main_results.n_consecutive_losses == 0
+    assert stats.main_results.n_consecutive_losses is None
 
 
 def test_n_average_trades_more_time_less_trades():

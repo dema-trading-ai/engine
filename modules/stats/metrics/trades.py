@@ -71,9 +71,14 @@ def get_number_of_consecutive_losing_trades(closed_trades: [Trade]) -> \
             temp_date_consecutive_trades = []
             temp_nr_consecutive_trades = 0
 
-        nr_consecutive_trades = max(temp_nr_consecutive_trades, nr_consecutive_trades)
+        nr_consecutive_trades = max((temp_nr_consecutive_trades, nr_consecutive_trades), default=0)
 
-    longest_consecutive_losing_trades = max(date_consecutive_trades, key=lambda trade_dates: len(trade_dates))
+    longest_consecutive_losing_trades = max(date_consecutive_trades, key=lambda trade_dates: len(trade_dates),
+                                            default=[])
+
+    if len(longest_consecutive_losing_trades) == 0:
+        return None, None
+
     start_date_longest_consecutive_losing_trades, end_date_longest_consecutive_losing_trade = \
         longest_consecutive_losing_trades[0][0], longest_consecutive_losing_trades[-1][-1]
 
