@@ -15,4 +15,5 @@ optuna==2.10.0
 openpyxl==3.0.9
 certifi==2021.10.8
 pandas_ta==0.3.14b
-scipy==1.7.2
+-i https://github.com/scipy/scipy/releases/download/v1.8.0/scipy-1.8.0-cp39-cp39-macosx_10_9_x86_64.whl
+scipy
