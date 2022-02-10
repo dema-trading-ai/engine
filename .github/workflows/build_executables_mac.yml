@@ -36,9 +36,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pyinstaller
       - name: install requirements
-        run: pip install -r requirements.txt
-      - name: install gcc
-        run: brew reinstall gcc
+        run: pip install -r requirements.txt --platform macosx-10_16_x86_64
       - name: build executable
         run: python build_scripts/build.py
       - name: build archive
