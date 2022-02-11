@@ -425,7 +425,7 @@ def test_trade_length_four_trades():
     assert stats.coin_results[0].shortest_trade_duration == timedelta(microseconds=1000)
 
 
-def test_winning_weeks():
+def test_winning_weeks_and_months():
     """week is defined as winning when trade profit > market change"""
     # Arrange
     fixture = StatsFixture(['COIN', 'COIN2'])
@@ -444,3 +444,9 @@ def test_winning_weeks():
     assert stats.coin_results[1].perf_weeks_win == stats.coin_results[0].perf_weeks_draw == 0
     assert stats.main_results.perf_weeks_loss == 1
     assert stats.main_results.perf_weeks_win == stats.main_results.perf_weeks_draw == 0
+    assert stats.coin_results[0].perf_months_win == 1
+    assert stats.coin_results[0].perf_months_draw == stats.coin_results[0].perf_months_draw == 0
+    assert stats.coin_results[1].perf_months_loss == 1
+    assert stats.coin_results[1].perf_months_win == stats.coin_results[0].perf_months_draw == 0
+    assert stats.main_results.perf_months_loss == 1
+    assert stats.main_results.perf_months_win == stats.main_results.perf_months_draw == 0
