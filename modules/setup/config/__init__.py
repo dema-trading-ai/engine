@@ -52,9 +52,9 @@ class ConfigModule(object):
         self.pairs = []
 
     @staticmethod
-    async def create(args):
+    async def create(args, online: bool):
         config_module = ConfigModule()
-        config = read_config(args.config)
+        config = read_config(args.config, online)
         config = check_for_missing_config_items(config)
         validate_and_read_cli(config, args)
         get_plot_indicators(config)
@@ -69,7 +69,7 @@ class ConfigModule(object):
         config_module.strategy_definition = StrategyDefinition(config['strategy-name'], config['strategies-folder'])
         config_module.strategy_name = config_module.strategy_definition.strategy_name
         config_module.exchange_name = exchange_str
-        config_module.exchange = create_cctx_exchange(config_module.exchange_name, config_module.timeframe)
+        config_module.exchange = create_cctx_exchange(config_module.exchange_name, config_module.timeframe, online)
         backtesting_till_now = config["backtesting-till-now"]
         backtesting_from = config["backtesting-from"]
         backtesting_to = config["backtesting-to"]
@@ -108,11 +108,18 @@ class ConfigModule(object):
         await self.exchange.close()
 
 
-def read_config(config_path: str) -> dict:
+def read_config(config_path: str, online: bool) -> dict:
     print_standard(
         '=================================== \n'
         ' DemaTrading.ai BACKTESTING ENGINE \n'
         '===================================')
+
+    if online:
+        print_info("Backtesting online")
+    else:
+        print_warning("Your device doesn't seem to be connected to the Internet. "
+                      "New data and version checks unavailable.")
+
     try:
         with open(config_path or "config.json", 'r', encoding='utf-8') as configfile:
             data = configfile.read()

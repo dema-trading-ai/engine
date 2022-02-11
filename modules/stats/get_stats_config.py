@@ -1,8 +1,11 @@
+from typing import Optional
+
 from modules.setup import ConfigModule
 from modules.stats.stats_config import StatsConfig
 
 
-def get_stats_config(config: ConfigModule, btc_marketchange_ratio: float, btc_drawdown_ratio: float) -> StatsConfig:
+def get_stats_config(config: ConfigModule, btc_marketchange_ratio: Optional[float],
+                     btc_drawdown_ratio: Optional[float]) -> StatsConfig:
     return StatsConfig(
         strategy_definition=config.strategy_definition,
         strategy_name=config.strategy_name,

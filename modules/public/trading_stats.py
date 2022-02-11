@@ -17,8 +17,8 @@ class MainResults:
     exposure_per_trade: float
     market_change_coins: float
     market_drawdown_coins: float
-    market_change_btc: float
-    market_drawdown_btc: float
+    market_change_btc: Optional[float]
+    market_drawdown_btc: Optional[float]
     starting_capital: float
     end_capital: float
     overall_profit_percentage: float
