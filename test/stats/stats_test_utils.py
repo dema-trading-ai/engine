@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 
 import pandas as pd
 from pandas import DataFrame
@@ -6,11 +7,11 @@ from pandas import DataFrame
 from backtesting.strategy import Strategy
 from modules.stats.stats import StatsModule
 from modules.stats.stats_config import StatsConfig
+from modules.stats.trade import Trade, SellReason
 from modules.stats.tradingmodule import TradingModule
 from modules.stats.tradingmodule_config import TradingModuleConfig
 from test.utils.signal_frame import MockPairFrame
 from utils.utils import get_ohlcv_indicators
-from modules.stats.trade import Trade, SellReason
 
 os.environ["VERBOSITY"] = "quiet"  # disables printing of info and warning messages
 
@@ -35,6 +36,7 @@ class StatsFixture:
             starting_capital=100,
             backtesting_from=1,
             backtesting_to=10,
+            backtesting_duration=timedelta(days=1),
             timeframe='1ms',
             btc_marketchange_ratio=1,
             btc_drawdown_ratio=1,

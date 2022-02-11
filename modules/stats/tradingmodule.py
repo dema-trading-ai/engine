@@ -8,6 +8,7 @@ from cli.print_utils import print_info, print_warning
 from modules.stats.trade import SellReason, Trade
 from modules.stats.tradingmodule_config import TradingModuleConfig
 
+
 # ======================================================================
 # TradingModule is responsible for tracking trades, calling strategy methods
 # and virtually opening / closing trades based on strategies' signal.
@@ -125,7 +126,7 @@ class TradingModule:
         # Create new trade class
         date = datetime.fromtimestamp(ohlcv['time'] / 1000)
         new_trade = \
-            Trade(ohlcv, spend_amount, self.fee, date, self.sl_type, self.sl_perc)
+            Trade(ohlcv, spend_amount, self.fee, date, self.sl_type, self.sl_perc, self.budget)
         new_trade.configure_stoploss()
         new_trade.update_stats(ohlcv, first=True)
 

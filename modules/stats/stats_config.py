@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import timedelta
 from typing import Literal
 
 
@@ -18,6 +19,7 @@ class StatsConfig:
     btc_drawdown_ratio: float
     backtesting_to: int
     backtesting_from: int
+    backtesting_duration: timedelta
     timeframe: str
     plots: bool
     tearsheet: bool

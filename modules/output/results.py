@@ -3,10 +3,10 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Optional
 
+from rich import box
 from rich.console import JustifyMethod
 from rich.padding import Padding
 from rich.table import Table
-from rich import box
 
 # Files
 from cli.print_utils import print_standard, console_color
@@ -119,6 +119,7 @@ def create_trade_info_table(self: MainResults, justification) -> Table:
                              f"{self.n_consecutive_losses} ({start_most_consecutive_losses} / "
                              f"{end_most_consecutive_losses})")
     trade_info_table.add_row('Risk / reward ratio', str(round(self.risk_reward_ratio, 2)))
+    trade_info_table.add_row('Volume turnover (daily avg.)', str(round(self.volume_turnover * 100, 2)))
     trade_info_table.add_row('Shortest trade duration', str(shortest_trade_duration))
     trade_info_table.add_row('Avg. trade duration', str(avg_trade_duration))
     trade_info_table.add_row('Longest trade duration', str(longest_trade_duration))
