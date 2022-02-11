@@ -2,6 +2,7 @@
 import os
 import re
 import sys
+import requests
 from pathlib import Path
 
 from modules.stats.trade import Trade
@@ -81,3 +82,12 @@ def parse_timeframe(timeframe_str: str):
         print_config_error("Error while parsing the timeframe from config.json")
         sys.exit()
     return timeframe_time
+
+
+def check_internet_connection() -> bool:
+    try:
+        requests.get("https://google.com", timeout=5)
+        return True
+
+    except (requests.ConnectionError, requests.Timeout):
+        return False

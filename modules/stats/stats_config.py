@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, Optional
 
 
 @dataclass
@@ -14,8 +14,8 @@ class StatsConfig:
     stoploss_type: str
     max_open_trades: int
     exposure_per_trade: float
-    btc_marketchange_ratio: float
-    btc_drawdown_ratio: float
+    btc_marketchange_ratio: Optional[float]
+    btc_drawdown_ratio: Optional[float]
     backtesting_to: int
     backtesting_from: int
     timeframe: str
