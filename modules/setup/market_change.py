@@ -9,7 +9,7 @@ from utils.utils import get_ohlcv_indicators
 
 
 async def online_fetch_btc_info(exchange: Exchange, date_from: int, date_to: int, timeframe_ms: int,
-                                timeframe: str, filepath: str, filename: str) -> pd.DataFrame:
+                                timeframe: str) -> pd.DataFrame:
     start_date = date_from
     fetch_ohlcv_limit = 1000
 

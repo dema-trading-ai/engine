@@ -61,7 +61,7 @@ class DataModule:
         elif self.online:
             print_info(f"Fetching BTC/USDT data from {self.config.exchange_name}")
             data = await online_fetch_btc_info(self.exchange, self.config.backtesting_from, self.config.backtesting_to,
-                                               self.config.timeframe_ms, self.config.timeframe, filepath, filename)
+                                               self.config.timeframe_ms, self.config.timeframe)
             self.save_dataframe('BTC/USDT', data)
 
         else:
