@@ -29,10 +29,10 @@ class SetupModule(object):
         # Reset original timeframe
         self.config.timeframe = strategy.timeframe
         self.config.timeframe_ms = parse_timeframe(strategy.timeframe)
-        self.config.btc_marketchange_ratio = await self.data_module.load_btc_marketchange()
-        self.config.btc_drawdown_ratio = await self.data_module.load_btc_drawdown(ohlcv_pair_frames)
+
+        btc_marketchange_ratio, btc_drawdown_ratio = await self.data_module.load_btc_baseline()
+        self.config.btc_marketchange_ratio = btc_marketchange_ratio
+        self.config.btc_drawdown_ratio = btc_drawdown_ratio
 
         return AlgoModule(self.config, ohlcv_pair_frames, strategy,
-                          additional_ohlcv_pair_frames), \
-            ohlcv_pair_frames, \
-            strategy
+                          additional_ohlcv_pair_frames), ohlcv_pair_frames, strategy

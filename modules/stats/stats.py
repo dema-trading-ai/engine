@@ -126,13 +126,6 @@ class StatsModule:
 
         timespan_seconds = (tested_to - tested_from).total_seconds()
         nr_days = timespan_seconds / timedelta(days=1).total_seconds()
-
-        market_change_btc = "-"
-        market_drawdown_btc = "-"
-        if self.config.btc_marketchange_ratio:
-            market_change_btc = (self.config.btc_marketchange_ratio - 1) * 100
-        if self.config.btc_drawdown_ratio:
-            market_drawdown_btc = (self.config.btc_drawdown_ratio - 1) * 100
         
         return MainResults(tested_from=tested_from,
                            tested_to=tested_to,
@@ -142,8 +135,8 @@ class StatsModule:
                            exposure_per_trade=self.config.exposure_per_trade,
                            market_change_coins=(market_change['all'] - 1) * 100,
                            market_drawdown_coins=(market_drawdown['all'] - 1) * 100,
-                           market_change_btc=market_change_btc,
-                           market_drawdown_btc=market_drawdown_btc,
+                           market_change_btc=self.config.btc_marketchange_ratio,
+                           market_drawdown_btc=self.config.btc_drawdown_ratio,
                            starting_capital=self.config.starting_capital,
                            end_capital=budget,
                            overall_profit_percentage=overall_profit_percentage,

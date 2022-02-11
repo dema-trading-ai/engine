@@ -1,3 +1,4 @@
+import os
 import sys
 from contextlib import asynccontextmanager
 from typing import Generator
@@ -5,6 +6,7 @@ from typing import Generator
 from optuna import Trial
 
 from cli.print_utils import print_error
+from utils.error_handling import ErrorOutput, OfflineMissingDataError
 from modules.output import OutputModule
 from modules.setup import ConfigModule, DataModule, SetupModule
 from modules.setup.config import create_config
@@ -40,13 +42,40 @@ class BacktestRunner:
         stats = self.run_backtest()
         OutputModule(self.config).output(stats, self.config.strategy_definition)
 
+    @staticmethod
+    def check_local_data(config: ConfigModule) -> None:
+
+        dirpath = f'data/backtesting-data/{str(config.exchange).lower()}'
+
+        try:
+            if not os.path.exists(dirpath):
+                raise OfflineMissingDataError()
+
+            pairs = config.pairs
+
+            for pair in pairs:
+                pair = pair.replace('/', '')
+                filename = f'data-{pair}{config.timeframe}.feather'
+
+                if filename not in os.listdir(dirpath):
+                    raise OfflineMissingDataError()
+
+        except OfflineMissingDataError:
+            ErrorOutput(sys.exc_info(),
+                        add_info="You are trying to run an offline backtest on unavailable data. Either connect to the"
+                                 "\n\tinternet to download it, or revise your config file to only include pairs you "
+                                 "have saved locally.)",
+                        stop=True).print_error()
+
 
 @asynccontextmanager
-async def create_backtest_runner(args: object) -> Generator[BacktestRunner, None, None]:
+async def create_backtest_runner(args: object, online: bool) -> Generator[BacktestRunner, None, None]:
     config = None
     try:
-        config = create_config(args)
-        data_module = await DataModule.create(config)
+        config = create_config(args, online)
+        if not online:
+            BacktestRunner.check_local_data(config)
+        data_module = await DataModule.create(config, online)
         setup_module = SetupModule(config, data_module)
         algo_module, df, strategy = await setup_module.setup()
         backtest_runner = BacktestRunner(config, data_module, algo_module, df, strategy)

@@ -58,7 +58,7 @@ class StatsFixture:
             "subplot_indicators": [["volume"]]
         }
 
-        self.config = create_config_from_dict(raw_config)
+        self.config = create_config_from_dict(raw_config, False)
         self.frame_with_signals = MockPairFrame(pairs)
 
     def create(self):
