@@ -9,9 +9,10 @@ plotly==5.4.0
 python-rapidjson==1.5
 rich==10.16.0
 ta-lib==0.4.23
-pyinstaller~=4.3
+pyinstaller==4.9
 pyarrow==6.0.1
 optuna==2.10.0
 openpyxl==3.0.9
 certifi==2021.10.8
 pandas_ta==0.3.14b
+scipy==1.7.3
