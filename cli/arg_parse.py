@@ -24,7 +24,7 @@ def read_spec() -> list:
     return json.loads(spec)
 
 
-def execute_for_args(actions: CliActions):
+def execute_for_args(actions: CliActions, online: bool):
     config_spec = read_spec()
     parser = argparse.ArgumentParser(description=CLI_DESCR)
     parser.set_defaults(func=actions['default'])
@@ -40,7 +40,7 @@ def execute_for_args(actions: CliActions):
         parser.add_argument("-" + cli["short"], "--" + p["name"], type=t)
 
     args = parser.parse_args()
-    args.func(args)
+    args.func(args, online)
 
 
 def spec_type_to_python_type(t: str):
