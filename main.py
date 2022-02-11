@@ -10,8 +10,8 @@ from cli.arg_parse import execute_for_args
 from cli.checks.latest_version import print_warning_if_version_outdated
 from cli.prepare_workspace import prepare_workspace
 from cli.print_utils import print_debug, is_verbosity
-from utils.utils import check_internet_connection
 from main_controller import MainController
+from utils.utils import check_internet_connection
 
 # Hack, PyInstaller + rich on Windows in GitHub actions fails because it cannot find encoding of stdout, this sets
 # it on stdout if not set
@@ -37,7 +37,7 @@ def main(online: bool):
 
 def run_engine(args, online: bool):
     controller = MainController()
-    asyncio.run(controller.run(args))
+    asyncio.run(controller.run(args, online))
 
 
 def run_init(args, _):
