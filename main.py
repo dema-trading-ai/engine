@@ -37,7 +37,7 @@ def main(online: bool):
 
 def run_engine(args, online: bool):
     controller = MainController()
-    asyncio.get_event_loop().run_until_complete(controller.run(args, online))
+    asyncio.run(controller.run(args))
 
 
 def run_init(args, _):
