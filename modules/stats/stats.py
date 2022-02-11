@@ -62,7 +62,7 @@ class StatsModule:
     def generate_backtesting_result(self, market_change: dict, market_drawdown: dict, pairs: list) -> TradingStats:
         self.market_ratio_df = get_market_ratios(self.frame_with_signals)
 
-        coin_results, market_change_weekly = self.generate_coin_results(
+        coin_results = self.generate_coin_results(
             self.trading_module.closed_trades,
             market_change,
             market_drawdown,
@@ -75,8 +75,7 @@ class StatsModule:
             self.trading_module.closed_trades,
             self.trading_module.budget,
             market_change,
-            market_drawdown,
-            market_change_weekly
+            market_drawdown
         )
         self.calculate_statistics_for_plots(self.trading_module.closed_trades, self.trading_module.open_trades)
 
@@ -93,7 +92,7 @@ class StatsModule:
         )
 
     def generate_main_results(self, open_trades: [Trade], closed_trades: [Trade], budget: float,
-                              market_change: DataFrame, market_drawdown: dict, market_change_weekly: dict) -> MainResults:
+                              market_change: DataFrame, market_drawdown: dict) -> MainResults:
         budget += calculate_worth_of_open_trades(open_trades)
         overall_profit_percentage = ((budget - self.config.starting_capital) / self.config.starting_capital) * 100
 
@@ -118,12 +117,12 @@ class StatsModule:
         )
         perf_weeks_win, perf_weeks_draw, perf_weeks_loss = get_outperforming_timeframe(
             profit_ratio_per_timestamp,
-            self.market_ratio_df,
+            self.market_ratio_df['avg_market_ratio'],
             "W"
         )
         perf_months_win, perf_months_draw, perf_months_loss = get_outperforming_timeframe(
             profit_ratio_per_timestamp,
-            self.market_ratio_df,
+            self.market_ratio_df['avg_market_ratio'],
             "M"
         )
 
@@ -192,7 +191,7 @@ class StatsModule:
                            )
 
     def generate_coin_results(self, closed_trades: [Trade], market_change: dict, market_drawdown: dict, pairs: list) -> [list, dict]:
-        stats, market_change_weekly = self.calculate_statistics_per_coin(closed_trades)
+        stats = self.calculate_statistics_per_coin(closed_trades)
         trade_rankings = compute_trade_rankings(closed_trades, pairs)
         new_stats = []
 
@@ -264,7 +263,13 @@ class StatsModule:
                 "prof_weeks_loss": 0,
                 "perf_weeks_win": 0,
                 "perf_weeks_draw": 0,
-                "perf_weeks_loss": 0
+                "perf_weeks_loss": 0,
+                "prof_months_win": 0,
+                "prof_months_draw": 0,
+                "prof_months_loss": 0,
+                "perf_months_win": 0,
+                "perf_months_draw": 0,
+                "perf_months_loss": 0
             } for pair in self.frame_with_signals.keys()
         }
         trades_per_coin = group_by(closed_trades, "pair")

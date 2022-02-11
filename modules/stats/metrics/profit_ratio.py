@@ -41,7 +41,7 @@ def get_profit_ratio(df, fee_percentage, closed_trades):
 def get_profit_ratio_from_capital(capital: dict):
     df = DataFrame(capital.items(), columns=['time', 'capital']).set_index('time')
     df["profit_ratio"] = df["capital"] / df["capital"].shift(1)
-    df.iloc[0]["profit_ratio"] = 1
+    df.loc[0, "profit_ratio"] = 1
     df["value"] = df["profit_ratio"].cumprod()
     return df
 

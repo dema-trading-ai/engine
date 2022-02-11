@@ -1,5 +1,8 @@
 from datetime import datetime
 from pandas import DataFrame
+import pandas as pd
+
+pd.options.mode.chained_assignment = 'raise'
 
 from modules.stats.metrics.profit_ratio import with_copied_initial_row
 
@@ -10,7 +13,7 @@ def get_market_ratio_per_coin(signal_dict):
     df["close"] = df["close"].fillna(value=None, method='ffill')
     df["market_ratio"] = (df["close"] / df["close"].shift(1))
     df["market_ratio"] = df["market_ratio"].fillna(value=1)
-    return df
+    return df["market_ratio"]
 
 
 def get_market_ratios(signal_dict: dict) -> DataFrame:
@@ -21,7 +24,7 @@ def get_market_ratios(signal_dict: dict) -> DataFrame:
     market_ratio_first_coin = market_ratio[coins[0]]
 
     # Combine market change of multiple coins into one dataframe
-    combined_market_ratio_df = DataFrame(market_ratio_first_coin, columns=[coins[0]])
+    combined_market_ratio_df = DataFrame(market_ratio_first_coin).rename(columns={"market_ratio": coins[0]})
     for coin in coins[1:]:
         combined_market_ratio_df[coin] = market_ratio[coin]
 
@@ -39,7 +42,7 @@ def get_outperforming_timeframe(cum_profit_ratio: DataFrame, market_ratio_df: Da
     cum_profit_ratio.index = datetime_index
 
     # Resample dataframes to timeframe
-    close_price = market_ratio_df['close'].resample(timeframe, origin='start').ohlc()
+    close_price = market_ratio_df.resample(timeframe, origin='start').ohlc()
     market_change = close_price['close'] / close_price['open']
 
     capital = cum_profit_ratio['value'] * 1000
