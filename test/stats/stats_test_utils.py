@@ -28,6 +28,11 @@ OHLCV_INDICATORS = get_ohlcv_indicators()
 class StatsFixture:
 
     def __init__(self, pairs: list):
+
+        stripped_pairs = []
+        for pair in pairs:
+            stripped_pairs.append(pair.replace("/USDT", ""))
+
         raw_config = {
             "exchange": "binance",
             "timeframe": "30m",
@@ -40,7 +45,7 @@ class StatsFixture:
             "stoploss-type": "static",
             "stoploss": STOPLOSS,
             "roi": {"0": int(9999999999)},
-            "pairs": pairs,
+            "pairs": stripped_pairs,
             "randomize-pair-order": False,
             "currency": "USDT",
             "fee": FEE_PERCENTAGE,
@@ -61,14 +66,14 @@ class StatsFixture:
                    self.frame_with_signals.items()}
         
         trading_module = TradingModule(self.config, TestStrategy())
-        return StatsModule(self.stats_config, self.frame_with_signals, trading_module, pair_df)
+        return StatsModule(self.config, self.frame_with_signals, trading_module, pair_df)
 
     def create_with_strategy(self, strategy: Strategy):
         pair_df = {k: pd.DataFrame.from_dict(v, orient='index', columns=OHLCV_INDICATORS) for k, v in
                    self.frame_with_signals.items()}
         
-        trading_module = TradingModule(self.trading_module_config, strategy)
-        return StatsModule(self.stats_config, self.frame_with_signals, trading_module, pair_df)
+        trading_module = TradingModule(self.config, strategy)
+        return StatsModule(self.config, self.frame_with_signals, trading_module, pair_df)
 
 
 class TestStrategy(Strategy):
