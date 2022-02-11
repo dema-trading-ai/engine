@@ -3,10 +3,10 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Optional
 
+from rich import box
 from rich.console import JustifyMethod
 from rich.padding import Padding
 from rich.table import Table
-from rich import box
 
 # Files
 from cli.print_utils import print_standard, console_color
@@ -115,9 +115,9 @@ def create_trade_info_table(self: MainResults, justification) -> Table:
     trade_info_table.add_row('Left-open trades', str(self.n_left_open_trades))
     trade_info_table.add_row('Trades with loss', str(self.n_trades_with_loss))
     trade_info_table.add_row('Rejected buy signals', str(self.rejected_buy_signal))
-    trade_info_table.add_row('Most consecutive losses (Start / end)',
-                             f"{self.n_consecutive_losses} ({start_most_consecutive_losses} / "
-                             f"{end_most_consecutive_losses})")
+    trade_info_table.add_row('Most consecutive losses', str(self.n_consecutive_losses))
+    trade_info_table.add_row(' - Start most con. losses', str(start_most_consecutive_losses))
+    trade_info_table.add_row(' - End most con. losses', str(end_most_consecutive_losses))
     trade_info_table.add_row('Risk / reward ratio', str(round(self.risk_reward_ratio, 2)))
     trade_info_table.add_row('Shortest trade duration', str(shortest_trade_duration))
     trade_info_table.add_row('Avg. trade duration', str(avg_trade_duration))
