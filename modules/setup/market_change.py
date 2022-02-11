@@ -1,7 +1,8 @@
-from ccxt import Exchange
+import asyncio
+
 import numpy as np
 import pandas as pd
-import asyncio
+from ccxt import Exchange
 
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
 from utils.utils import get_ohlcv_indicators
@@ -37,8 +38,6 @@ async def online_fetch_btc_info(exchange: Exchange, date_from: int, date_to: int
     df = pd.DataFrame(data=data, index=index, columns=get_ohlcv_indicators()[:-3])
     df['pair'] = 'BTC/USDT'
     df['buy'], df['sell'] = 0, 0
-
-    df.reset_index().to_feather(filepath + '/' + filename)  # Save locally
 
     return df
 

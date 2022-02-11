@@ -1,8 +1,8 @@
 # Libraries
 import asyncio
-from datetime import datetime
 import os
 import sys
+from datetime import datetime
 from os import path
 from typing import Optional, Tuple
 
@@ -16,8 +16,8 @@ from cli.print_utils import print_info, print_error, print_warning
 from modules.setup.config import ConfigModule
 from modules.setup.market_change import online_fetch_btc_info, offline_fetch_btc_info, compute_market_change, \
     compute_drawdown
-from utils.utils import get_ohlcv_indicators, parse_timeframe
 from utils.error_handling import ErrorOutput, ConfigError, OfflineMissingDataError
+from utils.utils import get_ohlcv_indicators, parse_timeframe
 
 
 # ======================================================================
@@ -54,19 +54,20 @@ class DataModule:
         filename = f'data-BTCUSDT{self.config.timeframe}.feather'
         filepath = 'data/backtesting-data/binance'
 
-        if not self.online:
-            if filename in os.listdir(filepath):
-                print_info("Using last locally saved data of BTC/USDT...")
-                data = offline_fetch_btc_info(filepath + '/' + filename)
-            else:
-                print_warning("The BTC/USDT pair used for baseline is not saved locally and you are offline. Some "
-                              "metrics will be unavailable.")
-                return None, None
-        else:
+        if filename in os.listdir(filepath):
+            print_info("Using last locally saved data of BTC/USDT...")
+            data = offline_fetch_btc_info(filepath + '/' + filename)
+
+        elif self.online:
             print_info(f"Fetching BTC/USDT data from {self.config.exchange_name}")
             data = await online_fetch_btc_info(self.exchange, self.config.backtesting_from, self.config.backtesting_to,
                                                self.config.timeframe_ms, self.config.timeframe, filepath, filename)
             self.save_dataframe('BTC/USDT', data)
+
+        else:
+            print_warning("The BTC/USDT pair used for baseline is not saved locally and you are offline. Some "
+                          "metrics will be unavailable.")
+            return None, None
 
         market_change = compute_market_change(data)
 
