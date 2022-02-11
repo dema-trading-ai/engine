@@ -14,7 +14,7 @@
     "60": 4,
     "120": 3
   },
-  "pairs": ["BTC", "ETH", "LTC"],
+  "pairs": ["BTC", "LTC", "ETH"],
   "randomize-pair-order": false,
   "currency": "USDT",
   "fee": 0.25,
