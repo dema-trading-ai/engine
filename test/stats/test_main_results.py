@@ -30,7 +30,7 @@ def test_profit_percentage():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.main_results.overall_profit_percentage, 96.02)
+    assert math.isclose(stats.main_results.overall_profit_ratio, 0.9602)
 
 
 def test_roi_reached_multiple_times():

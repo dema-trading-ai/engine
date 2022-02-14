@@ -1,5 +1,4 @@
 import math
-
 from datetime import datetime
 
 from test.stats.stats_test_utils import StatsFixture
@@ -31,7 +30,7 @@ def test_open_trades_profit_percentage_positive():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.open_trade_results[0].curr_profit_percentage == 98
+    assert stats.open_trade_results[0].curr_profit_ratio == 0.98
 
 
 def test_open_trades_profit_percentage_negative():
@@ -45,7 +44,7 @@ def test_open_trades_profit_percentage_negative():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.open_trade_results[0].curr_profit_percentage == -50.5
+    assert stats.open_trade_results[0].curr_profit_ratio == -0.505
 
 
 def test_open_trades_profit_positive():
@@ -87,7 +86,7 @@ def test_open_trades_drawdown_positive():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.open_trade_results[0].max_seen_drawdown, -1)
+    assert math.isclose(stats.open_trade_results[0].max_seen_drawdown, -0.01, abs_tol=0.01)
     assert math.isclose(stats.main_results.max_seen_drawdown, stats.open_trade_results[0].max_seen_drawdown)
 
 
@@ -104,7 +103,7 @@ def test_open_trades_drawdown_negative():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.open_trade_results[0].max_seen_drawdown == -50.5
+    assert stats.open_trade_results[0].max_seen_drawdown == -0.505
     assert stats.main_results.max_seen_drawdown == stats.open_trade_results[0].max_seen_drawdown
 
 

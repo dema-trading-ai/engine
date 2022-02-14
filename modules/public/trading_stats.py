@@ -21,13 +21,14 @@ class MainResults:
     market_drawdown_btc: Optional[float]
     starting_capital: float
     end_capital: float
-    overall_profit_percentage: float
+    overall_profit_ratio: float
     n_trades: int
     n_average_trades: float
     n_left_open_trades: int
     n_trades_with_loss: int
     n_consecutive_losses: int
     max_realised_drawdown: float
+    max_seen_drawdown: float
     risk_reward_ratio: float
     avg_trade_duration: timedelta
     longest_trade_duration: timedelta
@@ -38,7 +39,6 @@ class MainResults:
     win_weeks: int
     draw_weeks: int
     loss_weeks: int
-    max_seen_drawdown: float
     drawdown_from: int
     drawdown_to: int
     drawdown_at: int
