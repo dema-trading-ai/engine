@@ -1,20 +1,21 @@
 import sys
-
 import ccxt.async_support as ccxt
-from cli.print_utils import print_info
 
+from cli.print_utils import print_info
 from modules.setup.config.Exchanges import Exchange
 from utils.error_handling import TimeframeNotSupportedByExchange, ErrorOutput
 
 
-def create_cctx_exchange(exchange_name: Exchange, timeframe: str):
-    print_info('Connecting to exchange...')
+def create_cctx_exchange(exchange_name: str, timeframe: str, online: bool) -> Exchange:
+    if online:
+        print_info('Connecting to exchange...')
 
     exchange = None
 
     try:
         exchange = getattr(ccxt, exchange_name)()
-        print_info(f"Connected to exchange: {exchange_name}.")
+        if online:
+            print_info(f"Connected to exchange: {exchange_name}.")
 
     except AttributeError:
         ErrorOutput(sys.exc_info(),

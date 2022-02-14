@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import timedelta, datetime
-from typing import Optional
+from typing import Optional, Tuple
 
 from pandas import DataFrame
 
@@ -17,8 +17,8 @@ class MainResults:
     exposure_per_trade: float
     market_change_coins: float
     market_drawdown_coins: float
-    market_change_btc: float
-    market_drawdown_btc: float
+    market_change_btc: Optional[float]
+    market_drawdown_btc: Optional[float]
     starting_capital: float
     end_capital: float
     overall_profit_percentage: float
@@ -27,8 +27,10 @@ class MainResults:
     n_left_open_trades: int
     n_trades_with_loss: int
     n_consecutive_losses: int
+    dates_consecutive_losing_trades: Optional[Tuple[datetime, datetime]]
     max_realised_drawdown: float
     risk_reward_ratio: float
+    volume_turnover: float
     avg_trade_duration: timedelta
     longest_trade_duration: timedelta
     shortest_trade_duration: timedelta

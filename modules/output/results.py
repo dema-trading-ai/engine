@@ -1,11 +1,12 @@
 # Libraries
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from typing import Optional
 
+from rich import box
 from rich.console import JustifyMethod
 from rich.padding import Padding
 from rich.table import Table
-from rich import box
 
 # Files
 from cli.print_utils import print_standard, console_color
@@ -43,6 +44,13 @@ def format_time_difference(avg_trade_duration_unformatted: timedelta) -> str:
     else:
         avg_trade_duration = '-'
     return avg_trade_duration
+
+
+def format_date(date: Optional[datetime]) -> str:
+    if date is None:
+        return "-"
+
+    return f"{date.year}-{date.month}-{date.day} {date.hour}:{date.minute}0"
 
 
 def show_mainresults(self: MainResults, currency_symbol: str):
@@ -92,6 +100,8 @@ def create_trade_info_table(self: MainResults, justification) -> Table:
     avg_trade_duration = format_time_difference(self.avg_trade_duration)
     longest_trade_duration = format_time_difference(self.longest_trade_duration)
     shortest_trade_duration = format_time_difference(self.shortest_trade_duration)
+    start_most_consecutive_losses = format_date(self.dates_consecutive_losing_trades[0])
+    end_most_consecutive_losses = format_date(self.dates_consecutive_losing_trades[1])
 
     trade_info_table = Table(box=box.ROUNDED)
     trade_info_table.add_column("Trade Info "
@@ -105,16 +115,18 @@ def create_trade_info_table(self: MainResults, justification) -> Table:
     trade_info_table.add_row('Left-open trades', str(self.n_left_open_trades))
     trade_info_table.add_row('Trades with loss', str(self.n_trades_with_loss))
     trade_info_table.add_row('Rejected buy signals', str(self.rejected_buy_signal))
-    trade_info_table.add_row('Most consecutive losses',
-                             str(self.n_consecutive_losses))
+    trade_info_table.add_row('Most consecutive losses', str(self.n_consecutive_losses))
+    trade_info_table.add_row(' - Start most con. losses', str(start_most_consecutive_losses))
+    trade_info_table.add_row(' - End most con. losses', str(end_most_consecutive_losses))
     trade_info_table.add_row('Risk / reward ratio', str(round(self.risk_reward_ratio, 2)))
+    trade_info_table.add_row('Volume turnover (daily avg.)', str(round(self.volume_turnover * 100, 2)))
     trade_info_table.add_row('Shortest trade duration', str(shortest_trade_duration))
     trade_info_table.add_row('Avg. trade duration', str(avg_trade_duration))
     trade_info_table.add_row('Longest trade duration', str(longest_trade_duration))
     trade_info_table.add_row('Profitable weeks (W/D/L)', f'{self.prof_weeks_win} / {self.prof_weeks_draw}'
-                                                         f' / {self.prof_weeks_loss}')
+                             f' / {self.prof_weeks_loss}')
     trade_info_table.add_row('Weekly perf. vs market (W/D/L)', f'{self.win_weeks} / {self.draw_weeks}'
-                                                               f' / {self.loss_weeks}')
+                             f' / {self.loss_weeks}')
     return trade_info_table
 
 
@@ -146,14 +158,12 @@ def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown
                               colorize(round(self.market_change_coins,
                                              2), 0, '%'))
     performance_table.add_row('Market change BTC/USDT',
-                              colorize(round(self.market_change_btc,
-                                             2), 0, '%'))
-    performance_table.add_row('Market drawdown coins',
-                              colorize(round(self.market_drawdown_coins,
-                                             2), 0, '%'))
+                              "Unavailable" if self.market_change_btc is None else colorize(
+                                  round(self.market_change_btc, 2), 0, '%'))
+    performance_table.add_row('Market drawdown coins', colorize(round(self.market_drawdown_coins, 2), 0, "%"))
     performance_table.add_row('Market drawdown BTC/USDT',
-                              colorize(round(self.market_drawdown_btc,
-                                             2), 0, '%'))
+                              "Unavailable" if self.market_drawdown_btc is None else colorize(
+                                  round(self.market_drawdown_coins, 2), 0, '%'))
     performance_table.add_row('Sharpe ratio (90d / 3y)',
                               f'{round(self.sharpe_90d, 2) if self.sharpe_90d is not None else "-"} / '
                               f'{round(self.sharpe_3y, 2) if self.sharpe_3y is not None else "-"}')

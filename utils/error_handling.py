@@ -45,6 +45,10 @@ class StrategyNotFoundError(GeneralError):
     pass
 
 
+class OfflineMissingDataError(GeneralError):
+    pass
+
+
 class ErrorOutput(GeneralError):
     """Error output module"""
 
@@ -62,6 +66,6 @@ class ErrorOutput(GeneralError):
         return default_text if len(self.add_info) == 0 else default_text + add_text
 
     def print_error(self):
-        print_utils.print_error(self.__str__() + "\n\tExiting..." if self.stop else self.__str__())
+        print_utils.print_error(self.__str__() + "\n\n\tExiting..." if self.stop else self.__str__())
         if self.stop:
             sys.exit(1)
