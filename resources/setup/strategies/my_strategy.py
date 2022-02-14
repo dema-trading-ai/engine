@@ -62,6 +62,7 @@ class MyStrategy(Strategy):
 
         dataframe.loc[
             (
+                (dataframe['rsi'] > 70) &
                 (dataframe['volume'] > 0)
             ),
             'sell'] = 1

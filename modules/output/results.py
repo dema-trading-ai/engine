@@ -342,7 +342,7 @@ class CoinInsights:
 
     @staticmethod
     def create_coin_perf_per_timeframe_table(justification: JustifyMethod, currency_symbol: str) -> Table:
-        coin_perf_per_timeframe_table = Table(title="Coin Performance per Timeframe",
+        coin_perf_per_timeframe_table = Table(title="Weekly and Monthly Performance per Coin",
                                               box=box.ROUNDED,
                                               width=100)
         coin_perf_per_timeframe_table.add_column("Pair", justify=justification)
