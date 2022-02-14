@@ -27,7 +27,7 @@ class Trade:
     closed_at: Any
     sell_reason: SellReason
 
-    def __init__(self, ohlcv: dict, spend_amount: float, fee: float, date: datetime, sl_type: str, sl_perc: float):
+    def __init__(self, ohlcv: dict, spend_amount: float, fee: float, date: datetime, sl_type: str, sl_perc: float, current_capital: float):
         # Basic trade data
         self.status = 'open'
         self.pair = ohlcv['pair']
@@ -50,7 +50,7 @@ class Trade:
         self.max_seen_drawdown = 1.0  # ratio
         self.starting_amount = spend_amount
         self.capital = spend_amount - self.fee_paid_open  # apply fee
-        self.capital_per_timestamp = {}
+        self.equity = spend_amount / current_capital
         self.currency_amount = (self.capital / ohlcv['close'])
 
         # Stoploss configurations

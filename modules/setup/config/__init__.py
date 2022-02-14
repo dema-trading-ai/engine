@@ -5,16 +5,19 @@
 import json
 import sys
 from datetime import datetime
+from typing import Tuple
 
-# Files
-from utils.utils import get_plot_indicators, parse_timeframe
-from .legacy_transforms import transform_subplot_config
-from .strategy_definition import StrategyDefinition
-from .cctx_adapter import create_cctx_exchange
-from .currencies import get_currency_symbol
-from .validations import validate_and_read_cli, check_for_missing_config_items
+import ccxt.binance
+
 from cli.print_utils import print_info, print_standard, print_warning
 from utils.error_handling import ConfigError, ErrorOutput
+# Files
+from utils.utils import get_plot_indicators, parse_timeframe
+from .cctx_adapter import create_cctx_exchange
+from .currencies import get_currency_symbol
+from .legacy_transforms import transform_subplot_config
+from .strategy_definition import StrategyDefinition
+from .validations import validate_and_read_cli, check_for_missing_config_items
 
 msec = 1000
 minute = 60 * msec
@@ -37,6 +40,7 @@ class ConfigModule(object):
         self.export_result = None
         self.backtesting_from = None
         self.backtesting_to = None
+        self.backtesting_duration = None
         self.max_open_trades = None
         self.exposure_per_trade = None
         self.stoploss_type = None
@@ -79,7 +83,9 @@ class ConfigModule(object):
                                                                                       backtesting_from, backtesting_to,
                                                                                       backtesting_till_now,
                                                                                       config_module.timeframe_ms)
-
+        config_module.backtesting_duration = \
+            datetime.fromtimestamp(config_module.backtesting_to / 1000) - \
+            datetime.fromtimestamp(config_module.backtesting_from / 1000)
         for pair in config["pairs"]:
             config_module.pairs.append(pair + "/" + config["currency"])
         config_module.fee = config["fee"]
@@ -138,7 +144,9 @@ def create_config_from_dict(config: dict, online) -> ConfigModule:
                                                                                   backtesting_from, backtesting_to,
                                                                                   backtesting_till_now,
                                                                                   config_module.timeframe_ms)
-
+    config_module.backtesting_duration = \
+        datetime.fromtimestamp(config_module.backtesting_to / 1000) - \
+        datetime.fromtimestamp(config_module.backtesting_from / 1000)
     for pair in config["pairs"]:
         config_module.pairs.append(pair + "/" + config["currency"])
     config_module.fee = config["fee"]
@@ -205,8 +213,8 @@ def print_pairs(pairs):
     print_info("Watching pairs: %s." % pairs_string[:-1])
 
 
-def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtesting_till_now: bool,
-                   timeframe_ms: int) -> tuple:
+def config_from_to(exchange: ccxt.binance, backtesting_from: int, backtesting_to: int, backtesting_till_now: bool,
+                   timeframe_ms: int) -> Tuple[int, int]:
     # Configure milliseconds
     today_ms = exchange.milliseconds()
     backtesting_from_ms = exchange.parse8601("%sT00:00:00Z" % backtesting_from)

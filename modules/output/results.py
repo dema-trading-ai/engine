@@ -119,6 +119,7 @@ def create_trade_info_table(self: MainResults, justification) -> Table:
     trade_info_table.add_row(' - Start most con. losses', str(start_most_consecutive_losses))
     trade_info_table.add_row(' - End most con. losses', str(end_most_consecutive_losses))
     trade_info_table.add_row('Risk / reward ratio', str(round(self.risk_reward_ratio, 2)))
+    trade_info_table.add_row('Volume turnover (daily avg.)', str(round(self.volume_turnover * 100, 2)))
     trade_info_table.add_row('Shortest trade duration', str(shortest_trade_duration))
     trade_info_table.add_row('Avg. trade duration', str(avg_trade_duration))
     trade_info_table.add_row('Longest trade duration', str(longest_trade_duration))
