@@ -21,7 +21,6 @@ from modules.stats.metrics.market_change import get_market_change, get_market_dr
 from modules.stats.metrics.winning_weeks import get_profitable_timeframe, get_outperforming_timeframe, get_market_ratios
 from modules.stats.metrics.trades import compute_trade_rankings, get_number_of_losing_trades, \
     get_number_of_consecutive_losing_trades, calculate_trade_durations, compute_risk_reward_ratio
-from modules.stats.stats_config import StatsConfig
 from modules.stats.trade import Trade, SellReason
 from modules.stats.tradingmodule import TradingModule
 
