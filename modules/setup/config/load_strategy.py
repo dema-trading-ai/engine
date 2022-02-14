@@ -6,7 +6,6 @@ import sys
 from backtesting.strategy import Strategy
 from modules.algo.hyperopt.hyperopt_strategy import inject_hyperopt_parameters
 from modules.setup.config import StrategyDefinition
-from cli.print_utils import print_error
 from utils.error_handling import ErrorOutput, NotAStrategySubclassError, StrategyNotFoundError
 
 

@@ -1,12 +1,13 @@
 # Libraries
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 # Files
 from backtesting.strategy import Strategy
 from cli.print_utils import print_info, print_warning
+from modules.setup import ConfigModule
 from modules.stats.trade import SellReason, Trade
-from modules.stats.tradingmodule_config import TradingModuleConfig
+
 
 # ======================================================================
 # TradingModule is responsible for tracking trades, calling strategy methods
@@ -18,7 +19,7 @@ from modules.stats.tradingmodule_config import TradingModuleConfig
 
 class TradingModule:
 
-    def __init__(self, config: TradingModuleConfig, strategy: Strategy):
+    def __init__(self, config: ConfigModule, strategy: Strategy):
         self.config = config
         self.strategy = strategy
         self.budget = float(self.config.starting_capital)
@@ -47,22 +48,22 @@ class TradingModule:
         self.rejected_buy_signal = 0
         self.buy_cooldown = {pair: 0 for pair in self.config.pairs}
 
-    def tick(self, ohlcv: dict, data_dict: dict) -> None:
+    def tick(self, ohlcv: dict) -> None:
         trade = self.find_open_trade(ohlcv['pair'])
         if trade:
             trade.update_stats(ohlcv)
             self.open_trade_tick(ohlcv, trade)
         else:
-            self.no_trade_tick(ohlcv, data_dict)
+            self.no_trade_tick(ohlcv)
         self.update_budget_per_timestamp(ohlcv)
         self.update_capital_per_timestamp(ohlcv)
 
-    def no_trade_tick(self, ohlcv: dict, data_dict: dict) -> None:
+    def no_trade_tick(self, ohlcv: dict) -> None:
         if self.buy_cooldown[ohlcv['pair']] > 0:
             self.buy_cooldown[ohlcv['pair']] -= 1
             return
         if ohlcv['buy'] == 1:
-            self.open_trade(ohlcv, data_dict)
+            self.open_trade(ohlcv)
 
     def open_trade_tick(self, ohlcv: dict, trade: Trade):
         stoploss_reached = self.check_stoploss_open_trade(trade, ohlcv)
@@ -100,10 +101,9 @@ class TradingModule:
         self.open_trades.remove(trade)
         self.closed_trades.append(trade)
         self.update_realised_profit(trade)
-
         self.buy_cooldown[ohlcv['pair']] = self.strategy.buy_cooldown(trade)
 
-    def open_trade(self, ohlcv: dict, data_dict: dict) -> None:
+    def open_trade(self, ohlcv: dict) -> None:
 
         # Find available trade spaces
         open_trades = len(self.open_trades)
@@ -118,14 +118,16 @@ class TradingModule:
             return
 
         # Define spend amount based on realised profit
-        spend_amount = ((1. / min(self.max_open_trades, self.amount_of_pairs)) * self.exposure_per_trade) * self.realised_profit
+        spend_amount = (
+                               (1. / min(self.max_open_trades, self.amount_of_pairs)) * self.exposure_per_trade
+                       ) * self.realised_profit
         if spend_amount > self.budget:
             spend_amount = self.budget
 
         # Create new trade class
         date = datetime.fromtimestamp(ohlcv['time'] / 1000)
         new_trade = \
-            Trade(ohlcv, spend_amount, self.fee, date, self.sl_type, self.sl_perc)
+            Trade(ohlcv, spend_amount, self.fee, date, self.sl_type, self.sl_perc, self.budget)
         new_trade.configure_stoploss()
         new_trade.update_stats(ohlcv, first=True)
 
@@ -146,7 +148,7 @@ class TradingModule:
             return True
         return False
 
-    def get_roi_over_time(self, time_passed: datetime) -> float:
+    def get_roi_over_time(self, time_passed: timedelta) -> float:
         passed_minutes = time_passed.seconds / 60
         roi = self.config.roi['0']
 
@@ -155,7 +157,8 @@ class TradingModule:
                 roi = value
         return roi
 
-    def check_stoploss_open_trade(self, trade: Trade, ohlcv: dict) -> bool:
+    @staticmethod
+    def check_stoploss_open_trade(trade: Trade, ohlcv: dict) -> bool:
         sl_signal = trade.check_for_sl(ohlcv)
         if sl_signal:
             return True

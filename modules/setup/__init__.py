@@ -5,8 +5,6 @@ from modules.algo import AlgoModule
 from modules.setup.config import print_pairs, get_additional_pairs, ConfigModule
 from modules.setup.config.load_strategy import load_strategy_from_config
 from modules.setup.datamodule import DataModule
-from modules.stats.stats_config import StatsConfig
-from modules.stats.get_stats_config import get_stats_config
 from utils.utils import parse_timeframe
 
 
@@ -16,7 +14,7 @@ class SetupModule(object):
         self.data_module = data_module
         self.config = config_module
 
-    async def setup(self) -> Tuple[AlgoModule, dict, Strategy, StatsConfig]:
+    async def setup(self) -> Tuple[AlgoModule, dict, Strategy]:
         print_pairs(self.config.pairs)
         ohlcv_pair_frames = await self.data_module.load_historical_data(self.config.pairs)
 
@@ -31,8 +29,10 @@ class SetupModule(object):
         # Reset original timeframe
         self.config.timeframe = strategy.timeframe
         self.config.timeframe_ms = parse_timeframe(strategy.timeframe)
-        btc_info = await self.data_module.load_btc_baseline()
-        stats_config = get_stats_config(self.config, btc_info[0], btc_info[1])
+
+        btc_marketchange_ratio, btc_drawdown_ratio = await self.data_module.load_btc_baseline()
+        self.config.btc_marketchange_ratio = btc_marketchange_ratio
+        self.config.btc_drawdown_ratio = btc_drawdown_ratio
 
         return AlgoModule(self.config, ohlcv_pair_frames, strategy,
-                          additional_ohlcv_pair_frames), ohlcv_pair_frames, strategy, stats_config
+                          additional_ohlcv_pair_frames), ohlcv_pair_frames, strategy

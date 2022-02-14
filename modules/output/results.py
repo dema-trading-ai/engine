@@ -1,6 +1,7 @@
 # Libraries
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from typing import Optional
 
 from rich import box
 from rich.console import JustifyMethod
@@ -43,6 +44,13 @@ def format_time_difference(avg_trade_duration_unformatted: timedelta) -> str:
     else:
         avg_trade_duration = '-'
     return avg_trade_duration
+
+
+def format_date(date: Optional[datetime]) -> str:
+    if date is None:
+        return "-"
+
+    return f"{date.year}-{date.month}-{date.day} {date.hour}:{date.minute}0"
 
 
 def convert_ratio_to_percentage(ratio: float) -> float:
@@ -97,6 +105,10 @@ def create_trade_info_table(self: MainResults, justification) -> Table:
     avg_trade_duration = format_time_difference(self.avg_trade_duration)
     longest_trade_duration = format_time_difference(self.longest_trade_duration)
     shortest_trade_duration = format_time_difference(self.shortest_trade_duration)
+    start_most_consecutive_losses = format_date(
+        self.dates_consecutive_losing_trades[0]) if self.dates_consecutive_losing_trades is not None else "-"
+    end_most_consecutive_losses = format_date(
+        self.dates_consecutive_losing_trades[1]) if self.dates_consecutive_losing_trades is not None else "-"
 
     trade_info_table = Table(box=box.ROUNDED)
     trade_info_table.add_column("Trade Info "
@@ -110,16 +122,26 @@ def create_trade_info_table(self: MainResults, justification) -> Table:
     trade_info_table.add_row('Left-open trades', str(self.n_left_open_trades))
     trade_info_table.add_row('Trades with loss', str(self.n_trades_with_loss))
     trade_info_table.add_row('Rejected buy signals', str(self.rejected_buy_signal))
-    trade_info_table.add_row('Most consecutive losses',
-                             str(self.n_consecutive_losses))
+    trade_info_table.add_row('Most consecutive losses', str(self.n_consecutive_losses))
+    trade_info_table.add_row(' - Start most con. losses', str(start_most_consecutive_losses))
+    trade_info_table.add_row(' - End most con. losses', str(end_most_consecutive_losses))
     trade_info_table.add_row('Risk / reward ratio', str(round(self.risk_reward_ratio, 2)))
+    trade_info_table.add_row('Volume turnover (daily avg.)', str(round(self.volume_turnover * 100, 2)))
     trade_info_table.add_row('Shortest trade duration', str(shortest_trade_duration))
     trade_info_table.add_row('Avg. trade duration', str(avg_trade_duration))
     trade_info_table.add_row('Longest trade duration', str(longest_trade_duration))
-    trade_info_table.add_row('Profitable weeks (W/D/L)', f'{self.prof_weeks_win} / {self.prof_weeks_draw}'
-                                                         f' / {self.prof_weeks_loss}')
-    trade_info_table.add_row('Weekly perf. vs market (W/D/L)', f'{self.win_weeks} / {self.draw_weeks}'
-                                                               f' / {self.loss_weeks}')
+    trade_info_table.add_row('Profitable weeks (W/D/L)',
+                             f'[bright_green]{self.prof_weeks_win}[/bright_green] / {self.prof_weeks_draw}'
+                             f' / [bright_red]{self.prof_weeks_loss}[/bright_red]')
+    trade_info_table.add_row('Weekly perf. vs market (W/D/L)',
+                             f'[bright_green]{self.perf_weeks_win}[/bright_green] / {self.perf_weeks_draw}'
+                             f' / [bright_red]{self.perf_weeks_loss}[/bright_red]')
+    trade_info_table.add_row('Profitable months (W/D/L)',
+                             f'[bright_green]{self.prof_months_win}[/bright_green] / {self.prof_months_draw}'
+                             f' / [bright_red]{self.prof_months_loss}[/bright_red]')
+    trade_info_table.add_row('Monthly perf. vs market (W/D/L)',
+                             f'[bright_green]{self.perf_months_win}[/bright_green] / {self.perf_months_draw}'
+                             f' / [bright_red]{self.perf_months_loss}[/bright_red]')
     return trade_info_table
 
 
@@ -206,9 +228,15 @@ class CoinInsights:
     prof_weeks_win: int
     prof_weeks_draw: int
     prof_weeks_loss: int
-    win_weeks: int
-    draw_weeks: int
-    loss_weeks: int
+    perf_weeks_win: int
+    perf_weeks_draw: int
+    perf_weeks_loss: int
+    prof_months_win: int
+    prof_months_draw: int
+    prof_months_loss: int
+    perf_months_win: int
+    perf_months_draw: int
+    perf_months_loss: int
     avg_trade_duration: timedelta
     longest_trade_duration: timedelta
     shortest_trade_duration: timedelta
@@ -227,6 +255,9 @@ class CoinInsights:
         justification: JustifyMethod = "center"
 
         coin_performance_table = CoinInsights.create_coin_performance_table(justification, currency_symbol)
+
+        coin_perf_per_timeframe_table = CoinInsights.create_coin_perf_per_timeframe_table(justification,
+                                                                                          currency_symbol)
 
         trade_perf_per_coin_table = CoinInsights.create_trade_perf_per_coin_table(justification, currency_symbol)
 
@@ -257,22 +288,41 @@ class CoinInsights:
                                            colorize(round(c.profit, 2), 0)
                                            )
 
-            trade_perf_per_coin_table.add_row(c.pair,
-                                              f"{colorize(best_trade_ratio, 0)} / "
-                                              f"{colorize(median_trade_ratio, 0)} / "
-                                              f"{colorize(worst_trade_ratio, 0)}",
-                                              f"{colorize(round(c.best_trade_currency, 2), 0)} / "
-                                              f"{colorize(round(c.median_trade_currency, 2), 0)} / "
-                                              f"{colorize(round(c.worst_trade_currency, 2), 0)}"
-                                              )
+            coin_perf_per_timeframe_table.add_row(c.pair,
+                                                  f"[bright_green]{c.perf_weeks_win}[/bright_green]"
+                                                  f" / {c.perf_weeks_draw} / [bright_red]"
+                                                  f"{c.perf_weeks_loss}[/bright_red]",
+
+                                                  f"[bright_green]{c.prof_weeks_win}[/bright_green]"
+                                                  f" / {c.prof_weeks_draw} / [bright_red]"
+                                                  f"{c.prof_weeks_loss}[/bright_red]",
+
+                                                  f"[bright_green]{c.perf_months_win}[/bright_green]"
+                                                  f" / {c.perf_months_draw} / [bright_red]"
+                                                  f"{c.perf_months_loss}[/bright_red]",
+
+                                                  f"[bright_green]{c.prof_months_win}[/bright_green]"
+                                                  f" / {c.prof_months_draw} / [bright_red]"
+                                                  f"{c.prof_months_loss}[/bright_red]",
+                                                  )
+
+            trade_perf_per_coin_table.add_row(
+                c.pair,
+                f"{colorize(best_trade_ratio, 0) if c.best_trade_ratio is not None else '-'}"
+                f" / "
+                f"{colorize(median_trade_ratio, 0) if c.median_trade_ratio is not None else '-'}"
+                f" / "
+                f"{colorize(worst_trade_ratio, 0) if c.worst_trade_ratio is not None else '-'}",
+                f"{colorize(round(c.best_trade_currency, 2), 0) if c.best_trade_currency is not None else '-'} / "
+                f"{colorize(round(c.median_trade_currency, 2), 0) if c.median_trade_ratio is not None else '-'} / "
+                f"{colorize(round(c.worst_trade_currency, 2), 0) if c.worst_trade_currency is not None else '-'}"
+            )
 
             coin_metrics_table.add_row(c.pair,
                                        colorize(market_change, 0),
                                        colorize(market_drawdown, 0),
                                        colorize(max_seen_drawdown, 0),
                                        colorize(max_realised_drawdown, 0),
-                                       f"{c.win_weeks} / {c.draw_weeks} / {c.loss_weeks}",
-                                       f"{c.prof_weeks_win} / {c.prof_weeks_draw} / {c.prof_weeks_loss}",
                                        )
 
             coin_signal_table.add_row(c.pair,
@@ -290,6 +340,7 @@ class CoinInsights:
         table_grid = Table(box=box.SIMPLE)
         table_grid.add_column(":moneybag: COIN INSIGHTS :moneybag:")
         table_grid.add_row(coin_performance_table)
+        table_grid.add_row(coin_perf_per_timeframe_table)
         table_grid.add_row(trade_perf_per_coin_table)
         table_grid.add_row(coin_metrics_table)
         table_grid.add_row(coin_signal_table)
@@ -306,6 +357,22 @@ class CoinInsights:
         coin_performance_table.add_column("Total (%)", justify=justification)
         coin_performance_table.add_column(f"Actual ({currency_symbol})", justify=justification)
         return coin_performance_table
+
+    @staticmethod
+    def create_coin_perf_per_timeframe_table(justification: JustifyMethod, currency_symbol: str) -> Table:
+        coin_perf_per_timeframe_table = Table(title="Weekly and Monthly Performance per Coin",
+                                              box=box.ROUNDED,
+                                              width=100)
+        coin_perf_per_timeframe_table.add_column("Pair", justify=justification)
+        coin_perf_per_timeframe_table.add_column("Weekly perf. vs market (W/D/L)",
+                                                 justify=justification)
+        coin_perf_per_timeframe_table.add_column("Profitable weeks (W/D/L)",
+                                                 justify=justification)
+        coin_perf_per_timeframe_table.add_column("Monthly perf. vs market (W/D/L)",
+                                                 justify=justification)
+        coin_perf_per_timeframe_table.add_column("Profitable months (W/D/L)",
+                                                 justify=justification)
+        return coin_perf_per_timeframe_table
 
     @staticmethod
     def create_trade_perf_per_coin_table(justification: JustifyMethod, currency_symbol: str) -> Table:
@@ -327,11 +394,7 @@ class CoinInsights:
         coin_metrics_table.add_column("Market drawdown (%)", justify=justification)
         coin_metrics_table.add_column("Max. seen drawdown (%)", justify=justification)
         coin_metrics_table.add_column("Max. realised drawdown (%)",
-                                      justify=justification)
-        coin_metrics_table.add_column("Weekly perf. vs market (W/D/L)",
-                                      justify=justification)
-        coin_metrics_table.add_column("Profitable weeks (W/D/L)",
-                                      justify=justification)
+                                                 justify=justification)
         return coin_metrics_table
 
     @staticmethod
