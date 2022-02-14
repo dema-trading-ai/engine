@@ -115,9 +115,9 @@ def create_trade_info_table(self: MainResults, justification) -> Table:
     trade_info_table.add_row('Left-open trades', str(self.n_left_open_trades))
     trade_info_table.add_row('Trades with loss', str(self.n_trades_with_loss))
     trade_info_table.add_row('Rejected buy signals', str(self.rejected_buy_signal))
-    trade_info_table.add_row('Most consecutive losses (Start / end)',
-                             f"{self.n_consecutive_losses} ({start_most_consecutive_losses} / "
-                             f"{end_most_consecutive_losses})")
+    trade_info_table.add_row('Most consecutive losses', str(self.n_consecutive_losses))
+    trade_info_table.add_row(' - Start most con. losses', str(start_most_consecutive_losses))
+    trade_info_table.add_row(' - End most con. losses', str(end_most_consecutive_losses))
     trade_info_table.add_row('Risk / reward ratio', str(round(self.risk_reward_ratio, 2)))
     trade_info_table.add_row('Volume turnover (daily avg.)', str(round(self.volume_turnover * 100, 2)))
     trade_info_table.add_row('Shortest trade duration', str(shortest_trade_duration))
