@@ -24,7 +24,7 @@ class MyStrategyAdvanced(Strategy):
             ("BTC/USDT", "4h")
         ]
 
-    def generate_indicators(self, dataframe: DataFrame, additional_pairs) -> DataFrame:
+    def generate_indicators(self, dataframe: DataFrame, additional_pairs=None) -> DataFrame:
         """
         :param dataframe: All passed candles (current candle included!) with OHLCV data
         :type dataframe: DataFrame
@@ -37,7 +37,7 @@ class MyStrategyAdvanced(Strategy):
         add_btc_data = additional_pairs['BTC/USDT']
         # Add your indicators like usual
         add_btc_data['rsi'] = ta.RSI(add_btc_data, timeperiod=14)
-        # Finally merge the additional btc data with the standard dataframe.
+        # Finally, merge the additional btc data with the standard dataframe.
         # The new column will have the following format: ['<column>_<pair>_<timeframe>']
         dataframe = self.join_additional_data(dataframe, add_btc_data, self.timeframe, "4h")
 

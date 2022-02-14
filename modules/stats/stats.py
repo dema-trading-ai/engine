@@ -9,6 +9,7 @@ from cli.print_utils import print_info
 from modules.output.results import CoinInsights, MainResults, LeftOpenTradeResult
 from modules.public.pairs_data import PairsData
 from modules.public.trading_stats import TradingStats
+from modules.setup import ConfigModule
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio, get_max_drawdown_ratio_without_buy_rows
 from modules.stats.metrics.profit_ratio import get_realised_profit_ratio, get_seen_cum_profit_ratio, \
     get_profit_ratio_from_capital
@@ -30,7 +31,7 @@ from utils.utils import calculate_worth_of_open_trades
 
 class StatsModule:
 
-    def __init__(self, config: StatsConfig, frame_with_signals: PairsData, trading_module: TradingModule, df):
+    def __init__(self, config: ConfigModule, frame_with_signals: PairsData, trading_module: TradingModule, df):
         self.buy_points = None
         self.sell_points = None
         self.df = df
@@ -53,7 +54,7 @@ class StatsModule:
             for pair in pairs:
                 pair_dict = self.frame_with_signals[pair]
                 tick_dict = pair_dict[tick]
-                self.trading_module.tick(tick_dict, pair_dict)
+                self.trading_module.tick(tick_dict)
 
         market_change = get_market_change(self.df, pairs, self.frame_with_signals)
         market_drawdown = get_market_drawdown(pairs, self.frame_with_signals)
@@ -127,7 +128,8 @@ class StatsModule:
         )
 
         nr_losing_trades = get_number_of_losing_trades(closed_trades)
-        nr_consecutive_losing_trades = get_number_of_consecutive_losing_trades(closed_trades)
+        nr_consecutive_losing_trades, dates_consecutive_losing_trades = \
+            get_number_of_consecutive_losing_trades(closed_trades)
 
         risk_reward_ratio = compute_risk_reward_ratio(closed_trades)
 
@@ -139,7 +141,7 @@ class StatsModule:
 
         timespan_seconds = (tested_to - tested_from).total_seconds()
         nr_days = timespan_seconds / timedelta(days=1).total_seconds()
-
+        
         return MainResults(tested_from=tested_from,
                            tested_to=tested_to,
                            timeframe=self.config.timeframe,
@@ -158,6 +160,7 @@ class StatsModule:
                            n_left_open_trades=len(open_trades),
                            n_trades_with_loss=nr_losing_trades,
                            n_consecutive_losses=nr_consecutive_losing_trades,
+                           dates_consecutive_losing_trades=dates_consecutive_losing_trades,
                            max_realised_drawdown=(max_realised_drawdown - 1) * 100,
                            avg_trade_duration=avg_trade_duration,
                            longest_trade_duration=longest_trade_duration,
@@ -297,8 +300,8 @@ class StatsModule:
 
             # Find avg, longest and shortest trade durations
             per_coin_stats[key]["avg_trade_duration"], \
-                per_coin_stats[key]["longest_trade_duration"], \
-                per_coin_stats[key]["shortest_trade_duration"] = \
+            per_coin_stats[key]["longest_trade_duration"], \
+            per_coin_stats[key]["shortest_trade_duration"] = \
                 calculate_trade_durations(closed_pair_trades)
 
             # Find winning, draw and losing weeks for current coin
