@@ -1,7 +1,6 @@
-from datetime import datetime, timedelta
 import random
-
 from collections import defaultdict
+from datetime import datetime, timedelta
 
 from pandas import DataFrame
 
@@ -15,15 +14,20 @@ from modules.stats.metrics.profit_ratio import get_realised_profit_ratio, get_se
     get_profit_ratio_from_capital
 from modules.stats.drawdown.for_portfolio import get_max_seen_drawdown_for_portfolio, \
     get_max_realised_drawdown_for_portfolio
-from modules.stats.ratios.for_portfolio import get_sharpe_sortino_ratios
 from modules.stats.drawdown.per_trade import get_max_seen_drawdown_per_trade
 from modules.stats.metrics.market_change import get_market_change, get_market_drawdown
 from modules.stats.metrics.winning_weeks import get_profitable_timeframe, get_outperforming_timeframe, get_market_ratios
 from modules.stats.metrics.trades import compute_trade_rankings, get_number_of_losing_trades, \
     get_number_of_consecutive_losing_trades, calculate_trade_durations, compute_risk_reward_ratio
+from modules.stats.metrics.profit_ratio import get_seen_cum_profit_ratio_per_coin, get_realised_profit_ratio
+from modules.stats.metrics.trades import compute_trade_rankings, get_number_of_losing_trades, \
+    get_number_of_consecutive_losing_trades, calculate_trade_durations, compute_risk_reward_ratio, \
+    compute_volume_turnover
+from modules.stats.metrics.winning_weeks import get_winning_weeks_per_coin, \
+    get_winning_weeks_for_portfolio, get_profitable_weeks_for_portfolio, get_profitable_weeks_per_coin
+from modules.stats.ratios.for_portfolio import get_sharpe_sortino_ratios
 from modules.stats.trade import Trade, SellReason
 from modules.stats.tradingmodule import TradingModule
-
 from utils.dict import group_by
 from utils.utils import calculate_worth_of_open_trades
 
@@ -132,6 +136,8 @@ class StatsModule:
 
         risk_reward_ratio = compute_risk_reward_ratio(closed_trades)
 
+        volume_turnover = compute_volume_turnover(closed_trades, self.config.backtesting_duration)
+
         avg_trade_duration, longest_trade_duration, shortest_trade_duration = \
             calculate_trade_durations(closed_trades)
 
@@ -140,7 +146,7 @@ class StatsModule:
 
         timespan_seconds = (tested_to - tested_from).total_seconds()
         nr_days = timespan_seconds / timedelta(days=1).total_seconds()
-        
+
         return MainResults(tested_from=tested_from,
                            tested_to=tested_to,
                            timeframe=self.config.timeframe,
@@ -189,7 +195,8 @@ class StatsModule:
                            sharpe_3y=sharpe_3y,
                            sortino_90d=sortino_90d,
                            sortino_3y=sortino_3y,
-                           risk_reward_ratio=risk_reward_ratio
+                           risk_reward_ratio=risk_reward_ratio,
+                           volume_turnover=volume_turnover
                            )
 
     def generate_coin_results(self, closed_trades: [Trade], market_change: dict, market_drawdown: dict, pairs: list) -> [list, dict]:

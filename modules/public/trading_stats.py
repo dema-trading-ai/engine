@@ -30,6 +30,7 @@ class MainResults:
     dates_consecutive_losing_trades: Optional[Tuple[datetime, datetime]]
     max_realised_drawdown: float
     risk_reward_ratio: float
+    volume_turnover: float
     avg_trade_duration: timedelta
     longest_trade_duration: timedelta
     shortest_trade_duration: timedelta

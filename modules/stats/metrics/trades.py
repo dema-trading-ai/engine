@@ -1,4 +1,5 @@
 from datetime import timedelta, datetime
+from statistics import mean
 from typing import Optional, Tuple
 
 from modules.stats.trade import Trade
@@ -128,3 +129,19 @@ def compute_risk_reward_ratio(closed_trades: [Trade]) -> float:
     risk_reward_ratio = avg_gain / abs(avg_loss)
 
     return risk_reward_ratio
+
+
+def compute_volume_turnover(closed_trades: [Trade], backtesting_duration: timedelta) -> float:
+
+    amount_trades = len(closed_trades)
+
+    if amount_trades == 0:
+        return 0.0
+
+    all_trade_equity = [trade.equity for trade in closed_trades]
+
+    avg_trade_equity = mean(all_trade_equity)
+
+    daily_avg_trade_equity = (amount_trades * avg_trade_equity) / backtesting_duration.days
+
+    return daily_avg_trade_equity

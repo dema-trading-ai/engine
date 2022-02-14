@@ -3,13 +3,13 @@ import os
 import pandas as pd
 from pandas import DataFrame
 
-from modules.setup.config import create_config_from_dict
 from backtesting.strategy import Strategy
+from modules.setup.config import create_config_from_dict
 from modules.stats.stats import StatsModule
+from modules.stats.trade import Trade, SellReason
 from modules.stats.tradingmodule import TradingModule
 from test.utils.signal_frame import MockPairFrame
 from utils.utils import get_ohlcv_indicators
-from modules.stats.trade import Trade, SellReason
 
 os.environ["VERBOSITY"] = "quiet"  # disables printing of info and warning messages
 
@@ -64,14 +64,14 @@ class StatsFixture:
     def create(self):
         pair_df = {k: pd.DataFrame.from_dict(v, orient='index', columns=OHLCV_INDICATORS) for k, v in
                    self.frame_with_signals.items()}
-        
+
         trading_module = TradingModule(self.config, TestStrategy())
         return StatsModule(self.config, self.frame_with_signals, trading_module, pair_df)
 
     def create_with_strategy(self, strategy: Strategy):
         pair_df = {k: pd.DataFrame.from_dict(v, orient='index', columns=OHLCV_INDICATORS) for k, v in
                    self.frame_with_signals.items()}
-        
+
         trading_module = TradingModule(self.config, strategy)
         return StatsModule(self.config, self.frame_with_signals, trading_module, pair_df)
 

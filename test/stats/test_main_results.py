@@ -923,3 +923,19 @@ def test_most_consecutive_losses_start_end():
     # Assert
     assert stats.main_results.dates_consecutive_losing_trades[0] == datetime(2020, 1, 1, 0, 0)
     assert stats.main_results.dates_consecutive_losing_trades[-1] == datetime(2020, 1, 2, 12, 0)
+
+
+def test_volume_turnover():
+    """Two losses in a row, one gain, should return two dates"""
+
+    # Arrange
+    fixture = StatsFixture(['COIN/USDT'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_up_100_down_75_two_trades()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert math.isclose(stats.main_results.volume_turnover, 0.011, abs_tol=0.001)
