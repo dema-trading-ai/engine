@@ -15,7 +15,6 @@ from utils.utils import check_internet_connection
 
 # Hack, PyInstaller + rich on Windows in GitHub actions fails because it cannot find encoding of stdout, this sets
 # it on stdout if not set
-
 os.environ["PYTHONIOENCODING"] = "utf-8"
 PYTHONIOENCODING = os.environ.get("PYTHONIOENCODING", False)
 if sys.stdout.isatty() is False and PYTHONIOENCODING is not False and sys.stdout.encoding != PYTHONIOENCODING:

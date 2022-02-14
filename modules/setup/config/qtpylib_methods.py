@@ -322,7 +322,7 @@ def rolling_weighted_mean(series, window=200, min_periods=None):
 def hull_moving_average(series, window=200, min_periods=None):
     min_periods = window if min_periods is None else min_periods
     ma = (2 * rolling_weighted_mean(series, window / 2, min_periods)) - \
-         rolling_weighted_mean(series, window, min_periods)
+        rolling_weighted_mean(series, window, min_periods)
     return rolling_weighted_mean(ma, np.sqrt(window), min_periods)
 
 
@@ -424,7 +424,7 @@ def macd(series, fast=3, slow=10, smooth=16):
     return value is emaslow, emafast, macd which are len(x) arrays
     """
     macd_line = rolling_weighted_mean(series, window=fast) - \
-                rolling_weighted_mean(series, window=slow)
+        rolling_weighted_mean(series, window=slow)
     signal = rolling_weighted_mean(macd_line, window=smooth)
     histogram = macd_line - signal
     # return macd_line, signal, histogram
@@ -545,7 +545,7 @@ def cci(series, window=14):
 def stoch(df, window=14, d=3, k=3, fast=False):
     """
     compute the n period relative strength indicator
-    http://excelta.blogspot.co.il/2013/09/stochastic-oscillator-technical.html
+    https://excelta.blogspot.co.il/2013/09/stochastic-oscillator-technical.html
     """
 
     my_df = pd.DataFrame(index=df.index)

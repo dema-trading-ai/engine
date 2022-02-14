@@ -5,15 +5,18 @@ from backtesting.strategy import Strategy
 from modules.setup.config import qtpylib_methods as qtpylib
 from modules.public import technical_indicators as indicator
 
+
 class IndicatorSample(Strategy):
     """
     This is an example custom strategy, that inherits from the main Strategy class
     """
 
-    def generate_indicators(self, dataframe: DataFrame) -> DataFrame:
+    def generate_indicators(self, dataframe: DataFrame, additional_pairs=None) -> DataFrame:
         """
         :param dataframe: All passed candles (current candle included!) with OHLCV data
         :type dataframe: DataFrame
+        :param additional_pairs: Possible additional pairs with specified timeframe
+        :type additional_pairs: dict
         :return: Dataframe filled with indicator-data
         :rtype: DataFrame
         """
@@ -257,7 +260,7 @@ class IndicatorSample(Strategy):
     def buy_signal(self, dataframe: DataFrame) -> DataFrame:
         """
         :param dataframe: Dataframe filled with indicators from generate_indicators
-        :type indicators: DataFrame
+        :type dataframe: DataFrame
         :return: dataframe filled with buy signals
         :rtype: DataFrame
         """
@@ -278,7 +281,7 @@ class IndicatorSample(Strategy):
     def sell_signal(self, dataframe: DataFrame) -> DataFrame:
         """
         :param dataframe: Dataframe filled with indicators from generate_indicators
-        :type indicators: DataFrame
+        :type dataframe: DataFrame
         :return: dataframe filled with sell signals
         :rtype: DataFrame
         """

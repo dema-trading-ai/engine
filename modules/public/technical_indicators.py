@@ -8,7 +8,7 @@ from utils.error_handling import ErrorOutput, ModeNotAvailableError
 
 def absolute_strength_histogram(dataframe, length=9, smooth=3, mode="RSI"):
     """
-    Absolute Strenght Index. Returns smoothed bulls, smoothed bears, and difference
+    Absolute Strength Index. Returns smoothed bulls, smoothed bears, and difference
     :param dataframe: Dataframe with values
     :param length: Period of Evaluation
     :param smooth: Period of Smoothing
@@ -75,7 +75,7 @@ def stoch_rsi(dataframe, period=14, smooth_d=3, smooth_k=3, rsi_period=14):
 
 def VWMA(source, volume, length):
     """
-    The vwma function returns volume-weighted moving average of 'source' for 'length' bars back.
+    The VWMA function returns volume-weighted moving average of 'source' for 'length' bars back.
     :param source: Prices to process
     :param volume: Volume
     :param length: Number of candles
@@ -143,9 +143,9 @@ def heikin_dataframe(dataframe):
         'volume': dataframe['volume']
     }
 
-    heikin_dataframe = pd.DataFrame(heikin_dict)
+    heikin_df = pd.DataFrame(heikin_dict)
 
-    return heikin_dataframe
+    return heikin_df
 
 
 def HMA(dataframe, timeperiod):
