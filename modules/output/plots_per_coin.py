@@ -8,12 +8,19 @@ from plotly.subplots import make_subplots
 
 from modules.output.plots import plot_sizes, add_buy_sell_signal, add_buy_sell_points, add_indicators
 from modules.public.trading_stats import TradingStats
-from modules.stats.stats_config import StatsConfig
+from modules.setup import ConfigModule
 
 
-def plot_per_coin(stats: TradingStats, config: StatsConfig):
+def plot_per_coin(stats: TradingStats, config: ConfigModule):
     Path("data/backtesting-data/plots/").mkdir(parents=True, exist_ok=True)
-    processes = [Process(target=plot_coin, args=(config, stats, key, value)) for key, value in stats.df.items()]
+    processes = [Process(target=plot_coin, args=(
+        config.mainplot_indicators,
+        config.subplot_indicators,
+        config.strategy_name,
+        stats,
+        key,
+        value
+    )) for key, value in stats.df.items()]
     for p in processes:
         p.start()
 
@@ -21,9 +28,17 @@ def plot_per_coin(stats: TradingStats, config: StatsConfig):
         p.join()
 
 
-def plot_coin(config, stats, pair: str, pair_data):
+def plot_coin(mainplot_indicators, subplot_indicators, strategy_name, stats, pair: str, pair_data):
+    # Check for old plot and remove it
+    if os.path.exists('./data/backtesting-data/plots/'):
+        try:
+            os.remove('./data/backtesting-data/plots/plot' + pair.replace('/', '') + '.html')
+
+        except FileNotFoundError:
+            pass
+
     # create figure
-    rows, height = plot_sizes(config.subplot_indicators)
+    rows, height = plot_sizes(subplot_indicators)
     fig = make_subplots(rows=rows, cols=1, row_heights=height, vertical_spacing=0.02, shared_xaxes=True)
     # slider blocks subplots otherwise
     if rows > 1:
@@ -38,7 +53,8 @@ def plot_coin(config, stats, pair: str, pair_data):
         high=pair_data["high"],
         low=pair_data["low"],
         close=pair_data["close"],
-        name='OHLC')
+        name='OHLC'
+    )
 
     fig.add_trace(ohlc, row=1, col=1)
 
@@ -47,11 +63,11 @@ def plot_coin(config, stats, pair: str, pair_data):
     # add actual buy and sell moments
     fig = add_buy_sell_points(fig, pair, dates, stats.buypoints, stats.sellpoints)
     # add indicators
-    fig = add_indicators(fig, dates, pair_data, config.mainplot_indicators, config.subplot_indicators)
+    fig = add_indicators(fig, dates, pair_data, mainplot_indicators, subplot_indicators)
 
     fig.update_xaxes(range=[dates[0], dates[-1]])
     fig.update_layout(
-        title='%s Chart' % pair,
+        title=f'{pair} Chart ({strategy_name})',
         yaxis_title=pair,
         template='ggplot2',
         dragmode='pan',
@@ -68,4 +84,5 @@ def plot_coin(config, stats, pair: str, pair_data):
         ]
     )
 
-    fig.write_html("data/backtesting-data/plots/plot%s.html" % pair.replace("/", ""), config={'scrollZoom': True})
+    fig.write_html(f"data/backtesting-data/plots/plot_{pair.replace('/', '')}_{strategy_name}.html",
+                   config={'scrollZoom': True})

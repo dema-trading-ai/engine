@@ -11,6 +11,7 @@ from modules.public.trading_stats import TradingStats
 #
 # © 2021 DemaTrading.ai
 # ======================================================================
+from modules.stats.trade import Trade
 from utils.utils import parse_timeframe
 
 """
@@ -40,6 +41,7 @@ class Strategy(abc.ABC):
         """
         return
 
+    @abc.abstractmethod
     def buy_signal(self, dataframe: DataFrame) -> DataFrame:
         """
         :param dataframe: Dataframe filled with indicators from generate_indicators
@@ -49,6 +51,7 @@ class Strategy(abc.ABC):
         """
         return
 
+    @abc.abstractmethod
     def sell_signal(self, dataframe: DataFrame) -> DataFrame:
         """
         :param dataframe: Dataframe filled with indicators from generate_indicators
@@ -73,6 +76,18 @@ class Strategy(abc.ABC):
         :rtype: DataFrame
         """
         return
+
+    def buy_cooldown(self, last_trade: Trade) -> int:
+        """
+        Override this method if you want to add a buy cooldown when a trade is closed. This means that
+        for the pair of the closed trade, a new trade cannot be opened for x time-steps.
+
+        :param last_trade: The last trade that was closed
+        :type last_trade: Trade
+        :return: the amount of time-steps in which a new trade for the current pair may not be opened
+        :rtype: int
+        """
+        return 0
 
     def join_additional_data(self, dataframe, additional_pair, original_timeframe, timeframe_additional, ffill=True):
         """
