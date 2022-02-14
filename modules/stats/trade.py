@@ -27,7 +27,7 @@ class Trade:
     closed_at: Any
     sell_reason: SellReason
 
-    def __init__(self, ohlcv: dict, spend_amount: float, fee: float, date: datetime, sl_type: str, sl_perc: float):
+    def __init__(self, ohlcv: dict, spend_amount: float, fee: float, date: datetime, sl_type: str, sl_perc: float, current_capital: float):
         # Basic trade data
         self.status = 'open'
         self.pair = ohlcv['pair']
@@ -44,13 +44,13 @@ class Trade:
         self.candle_low = None
         self.candle_open = None
         self.profit_ratio = None
-        self.profit_dollar = None
+        self.profit_currency = None
 
         # Calculations for trade worth
         self.max_seen_drawdown = 1.0  # ratio
         self.starting_amount = spend_amount
         self.capital = spend_amount - self.fee_paid_open  # apply fee
-        self.capital_per_timestamp = {}
+        self.equity = spend_amount / current_capital
         self.currency_amount = (self.capital / ohlcv['close'])
 
         # Stoploss configurations
@@ -84,7 +84,7 @@ class Trade:
         if update_capital:  # always triggers except when a trade is closed
             self.capital = self.currency_amount * self.current
         self.profit_ratio = self.capital / self.starting_amount
-        self.profit_dollar = self.capital - self.starting_amount
+        self.profit_currency = self.capital - self.starting_amount
 
     def configure_stoploss(self) -> None:
         if self.sl_type == 'standard':  # for backwards compatability - can be removed in the future

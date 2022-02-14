@@ -11,9 +11,9 @@ def test_multiple_periods_realized_drawdown_two_drawdown_periods():
     periods, realized drawdown should be the drawdown of the biggest drawdown
     period"""
     # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
+    fixture = StatsFixture(['COIN/USDT'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_down_10_up_100_down_75_three_trades()
 
     # Act
     stats = fixture.create().analyze()
@@ -26,9 +26,9 @@ def test_multiple_periods_realized_drawdown_one_drawdown_period():
     """Given multiple trades, creating one drawdown period, realized
     drawdown should be the drawdown of the entire period"""
     # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
+    fixture = StatsFixture(['COIN/USDT'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_three_trades()
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_up_100_down_20_down_75_three_trades()
 
     # Act
     stats = fixture.create().analyze()
@@ -40,9 +40,9 @@ def test_multiple_periods_realized_drawdown_one_drawdown_period():
 def test_simple_realized_drawdown():
     """Given 'sell at half value', 'realized drawdown' should 'be half'"""
     # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
+    fixture = StatsFixture(['COIN/USDT'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade()
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_down_50_one_trade()
 
     # Act
     stats = fixture.create().analyze()
@@ -54,11 +54,11 @@ def test_simple_realized_drawdown():
 def test_simple_no_realized_drawdown():
     """Given 'no drawdown trades', 'realized drawdown' should 'none'"""
     # Arrange
-    fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE'])
+    fixture = StatsFixture(['COIN/USDT', 'COIN2/USDT'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade()
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_up_50_one_trade()
 
-    fixture.frame_with_signals['COIN2/BASE'].test_scenario_up_50_one_trade()
+    fixture.frame_with_signals['COIN2/USDT'].test_scenario_up_50_one_trade()
 
     # Act
     stats = fixture.create().analyze()
@@ -72,13 +72,13 @@ def test_multiple_periods_realized_drawdown():
     'realised drawdown' should be a combination over these trades. It combines the tests
     defined in test_multiple_periods_realized_drawdown_*"""
     # Arrange
-    fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE', 'COIN3/BASE'])
+    fixture = StatsFixture(['COIN/USDT', 'COIN2/USDT', 'COIN3/USDT'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_down_10_up_100_down_75_three_trades()
 
-    fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+    fixture.frame_with_signals['COIN2/USDT'].test_scenario_down_10_up_100_down_75_three_trades()
 
-    fixture.frame_with_signals['COIN3/BASE'].test_scenario_up_100_down_20_down_75_three_trades()
+    fixture.frame_with_signals['COIN3/USDT'].test_scenario_up_100_down_20_down_75_three_trades()
 
     # Act
     stats = fixture.create().analyze()
@@ -90,9 +90,9 @@ def test_multiple_periods_realized_drawdown():
 def test_simple_seen_drawdown():
     """ Given 'sell at half value', 'seen drawdown' should 'be half'"""
     # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
+    fixture = StatsFixture(['COIN/USDT'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade(timestep=DAILY)
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_down_50_one_trade(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
@@ -107,9 +107,9 @@ def test_simple_seen_drawdown():
 def test_simple_no_seen_drawdown():
     """ Given 'no drawdown trades', 'seen drawdown' should be equal to the fee (1%)"""
     # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
+    fixture = StatsFixture(['COIN/USDT'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_50_one_trade(timestep=DAILY)
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_up_50_one_trade(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
@@ -126,9 +126,9 @@ def test_multiple_periods_seen_drawdown_two_drawdown_periods():
     periods, seen drawdown should be the drawdown of the biggest drawdown
     period, which in this case does not incorporate fees """
     # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
+    fixture = StatsFixture(['COIN/USDT'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades(timestep=DAILY)
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_down_10_up_100_down_75_three_trades(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
@@ -145,9 +145,9 @@ def test_multiple_periods_seen_drawdown_one_drawdown_period():
     drawdown should be the drawdown of the entire period,
     including the buy and sell fees """
     # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
+    fixture = StatsFixture(['COIN/USDT'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_three_trades(timestep=DAILY)
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_up_100_down_20_down_75_three_trades(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
@@ -165,13 +165,13 @@ def test_multiple_periods_seen_drawdown_easy():
     'seen drawdown' should be a combination over these trades, including the
     buy fee """
     # Arrange
-    fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE', 'COIN3/BASE'])
+    fixture = StatsFixture(['COIN/USDT', 'COIN2/USDT', 'COIN3/USDT'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade(timestep=DAILY)
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_down_50_one_trade(timestep=DAILY)
 
-    fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_50_one_trade(timestep=DAILY)
+    fixture.frame_with_signals['COIN2/USDT'].test_scenario_down_50_one_trade(timestep=DAILY)
 
-    fixture.frame_with_signals['COIN3/BASE'].test_scenario_down_75_one_trade(timestep=DAILY)
+    fixture.frame_with_signals['COIN3/USDT'].test_scenario_down_75_one_trade(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
@@ -187,13 +187,13 @@ def test_multiple_periods_seen_drawdown():
     """ Given coins with multiple trades over more drawdown periods, their combined
     'seen drawdown' should be a combination over these trades"""
     # Arrange
-    fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE', 'COIN3/BASE'])
+    fixture = StatsFixture(['COIN/USDT', 'COIN2/USDT', 'COIN3/USDT'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades(timestep=DAILY)
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_down_10_up_100_down_75_three_trades(timestep=DAILY)
 
-    fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_10_up_100_down_75_three_trades(timestep=DAILY)
+    fixture.frame_with_signals['COIN2/USDT'].test_scenario_down_10_up_100_down_75_three_trades(timestep=DAILY)
 
-    fixture.frame_with_signals['COIN3/BASE'].test_scenario_up_100_down_20_down_75_three_trades(timestep=DAILY)
+    fixture.frame_with_signals['COIN3/USDT'].test_scenario_up_100_down_20_down_75_three_trades(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
@@ -209,9 +209,9 @@ def test_drawdown_equality():
     """Given one coin, 'max seen/real drawdown' from main results should be equal
     to that of the coin insights"""
     # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
+    fixture = StatsFixture(['COIN/USDT'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_one_trade()
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_up_100_down_20_down_75_one_trade()
 
     # Act
     stats = fixture.create().analyze()
@@ -226,9 +226,9 @@ def test_seen_drawdown_equals_realised_drawdown():
     lowest seen drawdown and 'max realised drawdown' should be the lowest
     actual realised drawdown"""
     # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
+    fixture = StatsFixture(['COIN/USDT'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_50_one_trade()
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_down_50_one_trade()
 
     # Act
     stats = fixture.create().analyze()
@@ -243,9 +243,9 @@ def test_drawdown_simple():
     lowest seen drawdown and 'max realised drawdown' should be the lowest
     actual realised drawdown"""
     # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
+    fixture = StatsFixture(['COIN/USDT'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_one_trade(timestep=DAILY)
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_up_100_down_20_down_75_one_trade(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
@@ -263,9 +263,9 @@ def test_drawdown_multiple_peaks():
     """Given multiple trades, 'max seen drawdown' should be the lowest seen drawdown
     of the combined trades"""
     # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
+    fixture = StatsFixture(['COIN/USDT'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_one_trade(timestep=DAILY)
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_down_10_up_100_down_75_one_trade(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
@@ -282,14 +282,14 @@ def test_drawdown_multiple_pairs():
     """Given multiple pairs, 'max seen drawdown' should be the lowest seen drawdown
     of the different pairs combined"""
     # Arrange
-    fixture = StatsFixture(['COIN/BASE', 'COIN2/BASE'])
+    fixture = StatsFixture(['COIN/USDT', 'COIN2/USDT'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades(timestep=DAILY)
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_flat_no_trades(timestep=DAILY)
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_up_100_down_20_down_75_one_trade(timestep=DAILY)
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_down_10_up_100_down_75_three_trades(timestep=DAILY)
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_flat_no_trades(timestep=DAILY)
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_up_100_down_20_down_75_one_trade(timestep=DAILY)
 
-    fixture.frame_with_signals['COIN2/BASE'].test_scenario_up_100_down_20_down_75_three_trades(timestep=DAILY)
-    fixture.frame_with_signals['COIN2/BASE'].test_scenario_down_10_up_100_down_75_three_trades(timestep=DAILY)
+    fixture.frame_with_signals['COIN2/USDT'].test_scenario_up_100_down_20_down_75_three_trades(timestep=DAILY)
+    fixture.frame_with_signals['COIN2/USDT'].test_scenario_down_10_up_100_down_75_three_trades(timestep=DAILY)
 
     # Act
     stats = fixture.create().analyze()
@@ -314,12 +314,11 @@ def test_drawdown_multiple_pairs():
 def test_drawdown_with_stoploss_one_trade():
     """Given stoploss hit, coin insight drawdown should be correct"""
     # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
+    fixture = StatsFixture(['COIN/USDT'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_one_trade()
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_down_10_up_100_down_75_one_trade()
 
-    fixture.trading_module_config.stoploss = -50
-    fixture.stats_config.stoploss = -50
+    fixture.config.stoploss = -50
 
     # Act
     stats = fixture.create().analyze()
@@ -332,12 +331,11 @@ def test_drawdown_with_stoploss_one_trade():
 def test_drawdown_with_stoploss_multiple_trades():
     """Given stoploss hit, coin insight drawdown should be correct"""
     # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
+    fixture = StatsFixture(['COIN/USDT'])
 
-    fixture.frame_with_signals['COIN/BASE'].test_scenario_down_10_up_100_down_75_three_trades()
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_down_10_up_100_down_75_three_trades()
 
-    fixture.trading_module_config.stoploss = -50
-    fixture.stats_config.stoploss = -50
+    fixture.config.stoploss = -50
 
     # Act
     stats = fixture.create().analyze()
@@ -350,9 +348,9 @@ def test_drawdown_with_stoploss_multiple_trades():
 def test_seen_drawdown_up_down():
     """Given 'one trade', 'seen_drawdown' should 'reflect actual'"""
     # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
+    fixture = StatsFixture(['COIN/USDT'])
 
-    fixture.frame_with_signals["COIN/BASE"] \
+    fixture.frame_with_signals["COIN/USDT"] \
         .multiply_price(1, TradeAction.BUY) \
         .multiply_price(4) \
         .multiply_price(0.1, TradeAction.SELL)
@@ -366,9 +364,9 @@ def test_seen_drawdown_up_down():
 def test_seen_drawdown_down():
     """Given 'one trade', 'seen_drawdown' should 'reflect actual'"""
     # Arrange
-    fixture = StatsFixture(['COIN/BASE'])
+    fixture = StatsFixture(['COIN/USDT'])
 
-    fixture.frame_with_signals["COIN/BASE"] \
+    fixture.frame_with_signals["COIN/USDT"] \
         .multiply_price(1, TradeAction.BUY) \
         .multiply_price(0.1, TradeAction.SELL)
 
