@@ -1,11 +1,10 @@
 import os
-from datetime import timedelta
 
 import pandas as pd
 from pandas import DataFrame
 
-from modules.setup.config import create_config_from_dict
 from backtesting.strategy import Strategy
+from modules.setup.config import create_config_from_dict
 from modules.stats.stats import StatsModule
 from modules.stats.trade import Trade, SellReason
 from modules.stats.tradingmodule import TradingModule
