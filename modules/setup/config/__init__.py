@@ -7,6 +7,8 @@ import sys
 from datetime import datetime
 from typing import Tuple
 
+import ccxt.binance
+
 from cli.print_utils import print_info, print_standard, print_warning
 from utils.error_handling import ConfigError, ErrorOutput
 # Files
@@ -142,7 +144,9 @@ def create_config_from_dict(config: dict, online) -> ConfigModule:
                                                                                   backtesting_from, backtesting_to,
                                                                                   backtesting_till_now,
                                                                                   config_module.timeframe_ms)
-
+    config_module.backtesting_duration = \
+        datetime.fromtimestamp(config_module.backtesting_to / 1000) - \
+        datetime.fromtimestamp(config_module.backtesting_from / 1000)
     for pair in config["pairs"]:
         config_module.pairs.append(pair + "/" + config["currency"])
     config_module.fee = config["fee"]
@@ -209,7 +213,7 @@ def print_pairs(pairs):
     print_info("Watching pairs: %s." % pairs_string[:-1])
 
 
-def config_from_to(exchange, backtesting_from: int, backtesting_to: int, backtesting_till_now: bool,
+def config_from_to(exchange: ccxt.binance, backtesting_from: int, backtesting_to: int, backtesting_till_now: bool,
                    timeframe_ms: int) -> Tuple[int, int]:
     # Configure milliseconds
     today_ms = exchange.milliseconds()

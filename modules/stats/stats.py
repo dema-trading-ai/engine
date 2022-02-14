@@ -19,7 +19,6 @@ from modules.stats.metrics.trades import compute_trade_rankings, get_number_of_l
 from modules.stats.metrics.winning_weeks import get_winning_weeks_per_coin, \
     get_winning_weeks_for_portfolio, get_profitable_weeks_for_portfolio, get_profitable_weeks_per_coin
 from modules.stats.ratios.for_portfolio import get_sharpe_sortino_ratios
-from modules.stats.stats_config import StatsConfig
 from modules.stats.trade import Trade, SellReason
 from modules.stats.tradingmodule import TradingModule
 from utils.dict import group_by
