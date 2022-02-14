@@ -1,5 +1,3 @@
-from ccxt.async_support import binance
+from typing import Literal
 
-Exchange = {
-    'binance': binance
-}
+Exchange = Literal["binance"]
