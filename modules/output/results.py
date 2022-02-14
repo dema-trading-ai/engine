@@ -124,9 +124,9 @@ def create_trade_info_table(self: MainResults, justification) -> Table:
     trade_info_table.add_row('Avg. trade duration', str(avg_trade_duration))
     trade_info_table.add_row('Longest trade duration', str(longest_trade_duration))
     trade_info_table.add_row('Profitable weeks (W/D/L)', f'{self.prof_weeks_win} / {self.prof_weeks_draw}'
-                                                         f' / {self.prof_weeks_loss}')
+                             f' / {self.prof_weeks_loss}')
     trade_info_table.add_row('Weekly perf. vs market (W/D/L)', f'{self.win_weeks} / {self.draw_weeks}'
-                                                               f' / {self.loss_weeks}')
+                             f' / {self.loss_weeks}')
     return trade_info_table
 
 

@@ -8,7 +8,7 @@ from modules.output.plots_per_coin import plot_per_coin
 from modules.output.equity_plot import equity_plot
 from modules.output.results import show_signature, CoinInsights, LeftOpenTradeResult, show_mainresults
 from modules.public.trading_stats import TradingStats
-from modules.stats.stats_config import StatsConfig
+from modules.setup import ConfigModule
 from modules.stats.trade import SellReason
 from modules.setup.config.strategy_definition import StrategyDefinition
 
@@ -17,9 +17,9 @@ FONT_RESET = "\033[0m"
 
 
 class OutputModule(object):
-    config: StatsConfig
+    config: ConfigModule
 
-    def __init__(self, config: StatsConfig):
+    def __init__(self, config: ConfigModule):
         self.config = config
 
     def output(self, stats: TradingStats, strategy_definition: StrategyDefinition):
@@ -75,7 +75,7 @@ def show_trade_anomalies(stats: TradingStats):
         print_warning("Profit for affected trades will be set to 0%")
 
 
-def log_trades(stats: TradingStats, config: StatsConfig):
+def log_trades(stats: TradingStats, config: ConfigModule):
     trades_dict = {
         "max-open-trades": config.max_open_trades,
         "timeframe": config.timeframe,
