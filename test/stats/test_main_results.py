@@ -652,10 +652,10 @@ def test_profitable_months_one_win():
     # One month, all days are positive - outcome should be one profitable month.
 
     # Arrange
-    fixture = StatsFixture(['COIN'])
+    fixture = StatsFixture(['COIN/USDT'])
 
     # Win/Loss/Open
-    fixture.frame_with_signals['COIN'].generate_trades(days=30, timestep=EIGHT_HOURS)
+    fixture.frame_with_signals['COIN/USDT'].generate_trades(days=30, timestep=EIGHT_HOURS)
 
     # Act
     stats = fixture.create().analyze()
@@ -672,12 +672,12 @@ def test_profitable_months_one_win():
 def test_profitable_months_one_loss():
     # One month, all days are negative - outcome should be one losing month.
     # Arrange
-    fixture = StatsFixture(['COIN'])
+    fixture = StatsFixture(['COIN/USDT'])
 
     # Win/Loss/Open
 
     for _ in range(30):
-        fixture.frame_with_signals['COIN'].test_scenario_down_50_one_trade(timestep=TWELVE_HOURS)
+        fixture.frame_with_signals['COIN/USDT'].test_scenario_down_50_one_trade(timestep=TWELVE_HOURS)
 
     # Act
     stats = fixture.create().analyze()
@@ -695,12 +695,12 @@ def test_profitable_months_no_trades_market_down():
     # One month, all days are positive - outcome should be draw for profitable month, win for outperform
     # market month, since the market is going down.
     # Arrange
-    fixture = StatsFixture(['COIN'])
+    fixture = StatsFixture(['COIN/USDT'])
 
     # Win/Loss/Open
 
     for _ in range(30):
-        fixture.frame_with_signals['COIN'].test_scenario_up_100_down_20_down_75_no_trades(timestep=SIX_HOURS)
+        fixture.frame_with_signals['COIN/USDT'].test_scenario_up_100_down_20_down_75_no_trades(timestep=SIX_HOURS)
 
     # Act
     stats = fixture.create().analyze()
@@ -718,12 +718,12 @@ def test_profitable_months_no_trades_market_up():
     # One month, all days are negative - outcome should be draw for profitable month, loss for outperform
     # market month, since the market is going up.
     # Arrange
-    fixture = StatsFixture(['COIN'])
+    fixture = StatsFixture(['COIN/USDT'])
 
     # Win/Loss/Open
 
     for _ in range(30):
-        fixture.frame_with_signals['COIN'].test_scenario_up_no_trades(timestep=TWELVE_HOURS)
+        fixture.frame_with_signals['COIN/USDT'].test_scenario_up_no_trades(timestep=TWELVE_HOURS)
 
     # Act
     stats = fixture.create().analyze()
@@ -742,11 +742,11 @@ def test_profitable_months_no_trades_market_flat():
     # market month, since the market is flat.
 
     # Arrange
-    fixture = StatsFixture(['COIN'])
+    fixture = StatsFixture(['COIN/USDT'])
 
     # Win/Loss/Open
     for _ in range(30):
-        fixture.frame_with_signals['COIN'].test_scenario_flat_no_trades(timestep=TWELVE_HOURS)
+        fixture.frame_with_signals['COIN/USDT'].test_scenario_flat_no_trades(timestep=TWELVE_HOURS)
 
     # Act
     stats = fixture.create().analyze()

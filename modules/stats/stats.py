@@ -18,13 +18,8 @@ from modules.stats.drawdown.per_trade import get_max_seen_drawdown_per_trade
 from modules.stats.metrics.market_change import get_market_change, get_market_drawdown
 from modules.stats.metrics.winning_weeks import get_profitable_timeframe, get_outperforming_timeframe, get_market_ratios
 from modules.stats.metrics.trades import compute_trade_rankings, get_number_of_losing_trades, \
-    get_number_of_consecutive_losing_trades, calculate_trade_durations, compute_risk_reward_ratio
-from modules.stats.metrics.profit_ratio import get_seen_cum_profit_ratio_per_coin, get_realised_profit_ratio
-from modules.stats.metrics.trades import compute_trade_rankings, get_number_of_losing_trades, \
     get_number_of_consecutive_losing_trades, calculate_trade_durations, compute_risk_reward_ratio, \
     compute_volume_turnover
-from modules.stats.metrics.winning_weeks import get_winning_weeks_per_coin, \
-    get_winning_weeks_for_portfolio, get_profitable_weeks_for_portfolio, get_profitable_weeks_per_coin
 from modules.stats.ratios.for_portfolio import get_sharpe_sortino_ratios
 from modules.stats.trade import Trade, SellReason
 from modules.stats.tradingmodule import TradingModule
