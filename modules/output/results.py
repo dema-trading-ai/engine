@@ -100,8 +100,10 @@ def create_trade_info_table(self: MainResults, justification) -> Table:
     avg_trade_duration = format_time_difference(self.avg_trade_duration)
     longest_trade_duration = format_time_difference(self.longest_trade_duration)
     shortest_trade_duration = format_time_difference(self.shortest_trade_duration)
-    start_most_consecutive_losses = format_date(self.dates_consecutive_losing_trades[0])
-    end_most_consecutive_losses = format_date(self.dates_consecutive_losing_trades[1])
+    start_most_consecutive_losses = format_date(
+        self.dates_consecutive_losing_trades[0]) if self.dates_consecutive_losing_trades is not None else "-"
+    end_most_consecutive_losses = format_date(
+        self.dates_consecutive_losing_trades[1]) if self.dates_consecutive_losing_trades is not None else "-"
 
     trade_info_table = Table(box=box.ROUNDED)
     trade_info_table.add_column("Trade Info "
@@ -291,14 +293,17 @@ class CoinInsights:
                                                   f"{c.prof_months_loss}[/bright_red]",
                                                   )
 
-            trade_perf_per_coin_table.add_row(c.pair,
-                                              f"{colorize(round((c.best_trade_ratio - 1) * 100, 2), 0)} / "
-                                              f"{colorize(round((c.median_trade_ratio - 1) * 100, 2), 0)} / "
-                                              f"{colorize(round((c.worst_trade_ratio - 1) * 100, 2), 0)}",
-                                              f"{colorize(round(c.best_trade_currency, 2), 0)} / "
-                                              f"{colorize(round(c.median_trade_currency, 2), 0)} / "
-                                              f"{colorize(round(c.worst_trade_currency, 2), 0)}"
-                                              )
+            trade_perf_per_coin_table.add_row(
+                c.pair,
+                f"{colorize(round((c.best_trade_ratio - 1) * 100, 2), 0) if c.best_trade_ratio is not None else '-'}"
+                f" / "
+                f"{colorize(round((c.median_trade_ratio - 1) * 100, 2), 0) if c.median_trade_ratio is not None else '-'}"
+                f" / "
+                f"{colorize(round((c.worst_trade_ratio - 1) * 100, 2), 0) if c.worst_trade_ratio is not None else '-'}",
+                f"{colorize(round(c.best_trade_currency, 2), 0) if c.best_trade_currency is not None else '-'} / "
+                f"{colorize(round(c.median_trade_currency, 2), 0) if c.median_trade_ratio is not None else '-'} / "
+                f"{colorize(round(c.worst_trade_currency, 2), 0) if c.worst_trade_currency is not None else '-'}"
+            )
 
             coin_metrics_table.add_row(c.pair,
                                        colorize(round(c.market_change, 2), 0),
