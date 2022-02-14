@@ -114,7 +114,8 @@ class StatsModule:
         )
 
         nr_losing_trades = get_number_of_losing_trades(closed_trades)
-        nr_consecutive_losing_trades = get_number_of_consecutive_losing_trades(closed_trades)
+        nr_consecutive_losing_trades, dates_consecutive_losing_trades = \
+            get_number_of_consecutive_losing_trades(closed_trades)
 
         risk_reward_ratio = compute_risk_reward_ratio(closed_trades)
 
@@ -145,6 +146,7 @@ class StatsModule:
                            n_left_open_trades=len(open_trades),
                            n_trades_with_loss=nr_losing_trades,
                            n_consecutive_losses=nr_consecutive_losing_trades,
+                           dates_consecutive_losing_trades=dates_consecutive_losing_trades,
                            max_realised_drawdown=(max_realised_drawdown - 1) * 100,
                            avg_trade_duration=avg_trade_duration,
                            longest_trade_duration=longest_trade_duration,

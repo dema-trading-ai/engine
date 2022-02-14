@@ -1,5 +1,5 @@
 import math
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from test.stats.stats_test_utils import StatsFixture, CooldownStrategy
 from test.utils.signal_frame import ONE_MIL, THIRTY_MIN, EIGHT_HOURS, SIX_HOURS, TWELVE_HOURS
@@ -267,7 +267,7 @@ def test_n_average_trades_no_trades():
     assert stats.main_results.n_average_trades == 0
     assert stats.main_results.n_left_open_trades == 0
     assert stats.main_results.n_trades_with_loss == 0
-    assert stats.main_results.n_consecutive_losses == 0
+    assert stats.main_results.n_consecutive_losses is None
 
 
 def test_n_average_trades_more_time_less_trades():
@@ -580,7 +580,7 @@ def test_profitable_weeks_one_loss():
 
 
 def test_profitable_weeks_no_trades_market_down():
-    # One week, all days are positive - outcome should be draw for profitable week, win for outperform
+    # One week, all days are positive - outcome should be a draw for profitable week, win for outperform
     # market week, since the market is going down.
     # Arrange
     fixture = StatsFixture(['COIN/USDT'])
@@ -603,7 +603,7 @@ def test_profitable_weeks_no_trades_market_down():
 
 
 def test_profitable_weeks_no_trades_market_up():
-    # One week, all days are negative - outcome should be draw for profitable week, loss for outperform
+    # One week, all days are negative - outcome should be a draw for profitable week, loss for outperform
     # market week, since the market is going up.
     # Arrange
     fixture = StatsFixture(['COIN/USDT'])
@@ -626,7 +626,7 @@ def test_profitable_weeks_no_trades_market_up():
 
 
 def test_profitable_weeks_no_trades_market_flat():
-    # One week, all days are flat - outcome should be drawn for profitable week, draw for outperform
+    # One week, all days are flat - outcome should be a draw for profitable week, draw for outperform
     # market week, since the market is flat.
 
     # Arrange
@@ -774,3 +774,40 @@ def test_cooldown_roi():
 
     # Assert
     assert stats.main_results.n_trades == 3
+
+
+def test_most_consecutive_losses():
+    """Two losses in a row, one gain, should return 2"""
+
+    # Arrange
+    fixture = StatsFixture(['COIN/USDT'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_down_50_one_trade()
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_down_50_one_trade()
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_up_50_one_trade()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.main_results.n_consecutive_losses == 2
+
+
+def test_most_consecutive_losses_start_end():
+    """Two losses in a row, one gain, should return two dates"""
+
+    # Arrange
+    fixture = StatsFixture(['COIN/USDT'])
+
+    # Win/Loss/Open
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_down_50_one_trade(timestep=TWELVE_HOURS)
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_down_50_one_trade(timestep=TWELVE_HOURS)
+    fixture.frame_with_signals['COIN/USDT'].test_scenario_up_50_one_trade()
+
+    # Act
+    stats = fixture.create().analyze()
+
+    # Assert
+    assert stats.main_results.dates_consecutive_losing_trades[0] == datetime(2020, 1, 1, 0, 0)
+    assert stats.main_results.dates_consecutive_losing_trades[-1] == datetime(2020, 1, 2, 12, 0)

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import timedelta, datetime
-from typing import Optional
+from typing import Optional, Tuple
 
 from pandas import DataFrame
 
@@ -27,6 +27,7 @@ class MainResults:
     n_left_open_trades: int
     n_trades_with_loss: int
     n_consecutive_losses: int
+    dates_consecutive_losing_trades: Optional[Tuple[datetime, datetime]]
     max_realised_drawdown: float
     risk_reward_ratio: float
     avg_trade_duration: timedelta

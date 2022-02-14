@@ -1,5 +1,5 @@
-from datetime import timedelta
-from typing import Optional
+from datetime import timedelta, datetime
+from typing import Optional, Tuple
 
 from modules.stats.trade import Trade
 
@@ -8,14 +8,17 @@ def med(trades_return: [float, ...], default=None) -> Optional[float]:
     """Finds the median in a list of trade returns"""
 
     trades_return = sorted(trades_return)
-    n = len(trades_return)
-    if n == 0:
+    number_of_trades = len(trades_return)
+
+    if number_of_trades == 0:
         return default
-    if n % 2 == 1:
-        return trades_return[n // 2]
+
+    if number_of_trades % 2 == 1:
+        return trades_return[number_of_trades // 2]
+
     else:
-        i = n // 2
-        return (trades_return[i - 1] + trades_return[i]) / 2
+        index = number_of_trades // 2
+        return (trades_return[index - 1] + trades_return[index]) / 2
 
 
 def compute_trade_rankings(closed_trades: [Trade], pairs: list) -> dict:
@@ -47,16 +50,39 @@ def get_number_of_losing_trades(closed_trades: [Trade]) -> int:
     return nr_losing_trades
 
 
-def get_number_of_consecutive_losing_trades(closed_trades: [Trade]):
+def get_number_of_consecutive_losing_trades(closed_trades: [Trade]) -> \
+        Tuple[Optional[int], Optional[Tuple[datetime, datetime]]]:
+
+    if len(closed_trades) == 0:
+        return None, None
+
     nr_consecutive_trades = 0
     temp_nr_consecutive_trades = 0
+    temp_date_consecutive_trades = []
+    date_consecutive_trades = []
+
     for trade in closed_trades:
         if trade.profit_ratio <= 1:
             temp_nr_consecutive_trades += 1
+            temp_date_consecutive_trades.append((trade.opened_at, trade.closed_at))
+
         else:
+            date_consecutive_trades.append(temp_date_consecutive_trades)
+            temp_date_consecutive_trades = []
             temp_nr_consecutive_trades = 0
-        nr_consecutive_trades = max(temp_nr_consecutive_trades, nr_consecutive_trades)
-    return nr_consecutive_trades
+
+        nr_consecutive_trades = max((temp_nr_consecutive_trades, nr_consecutive_trades), default=0)
+
+    longest_consecutive_losing_trades = max(date_consecutive_trades, default=[])
+
+    if len(longest_consecutive_losing_trades) == 0:
+        return None, None
+
+    start_date_longest_consecutive_losing_trades, end_date_longest_consecutive_losing_trade = \
+        longest_consecutive_losing_trades[0][0], longest_consecutive_losing_trades[-1][-1]
+
+    return nr_consecutive_trades, (start_date_longest_consecutive_losing_trades,
+                                   end_date_longest_consecutive_losing_trade)
 
 
 def calculate_trade_durations(closed_trades: [Trade]):
