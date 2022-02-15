@@ -8,7 +8,7 @@ tqdm
 plotly
 python-rapidjson
 rich
-ta-lib
+ta-lib==0.4.23
 pyinstaller
 pyarrow
 optuna

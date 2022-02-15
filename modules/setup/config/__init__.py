@@ -68,7 +68,7 @@ class ConfigModule(object):
         config_module.mainplot_indicators = config["mainplot_indicators"]
         config_module.subplot_indicators = transform_subplot_config(config["subplot_indicators"])
         config_module.starting_capital = float(config["starting-capital"])
-        config_module.raw_config = config  # TODO remove, should be typed
+        config_module.raw_config = config
         exchange_str = config["exchange"]
         config_module.timeframe = config["timeframe"]
         config_module.timeframe_ms = parse_timeframe(config_module.timeframe)
@@ -129,7 +129,7 @@ def create_config_from_dict(config: dict, online) -> ConfigModule:
     config_module.mainplot_indicators = config["mainplot_indicators"]
     config_module.subplot_indicators = transform_subplot_config(config["subplot_indicators"])
     config_module.starting_capital = float(config["starting-capital"])
-    config_module.raw_config = config  # TODO remove, should be typed
+    config_module.raw_config = config
     exchange_str = config["exchange"]
     config_module.timeframe = config["timeframe"]
     config_module.timeframe_ms = parse_timeframe(config_module.timeframe)
