@@ -1,9 +1,11 @@
 import argparse
 import json
 import os
+import sys
 from datetime import datetime
 from typing import TypedDict, Callable
 
+from utils.error_handling import WrongSpecTypeError, ErrorOutput
 from utils.utils import get_project_root
 
 CliActions = TypedDict("CliActions", {
@@ -22,7 +24,7 @@ def read_spec() -> list:
     return json.loads(spec)
 
 
-def execute_for_args(actions: CliActions):
+def execute_for_args(actions: CliActions, online: bool):
     config_spec = read_spec()
     parser = argparse.ArgumentParser(description=CLI_DESCR)
     parser.set_defaults(func=actions['default'])
@@ -38,23 +40,26 @@ def execute_for_args(actions: CliActions):
         parser.add_argument("-" + cli["short"], "--" + p["name"], type=t)
 
     args = parser.parse_args()
-    args.func(args)
+    args.func(args, online)
 
 
 def spec_type_to_python_type(t: str):
-    if t == "string":
-        return str
-    elif t == "int":
-        return int
-    elif t == "float":
-        return float
-    elif t == "dict":
-        return dict
-    elif t == "list":
-        return list
-    elif t == "bool":
-        return bool
-    elif t == "datetime":
-        return datetime
-    else:
-        raise Exception
+    try:
+        if t == "string":
+            return str
+        elif t == "int":
+            return int
+        elif t == "float":
+            return float
+        elif t == "dict":
+            return dict
+        elif t == "list":
+            return list
+        elif t == "bool":
+            return bool
+        elif t == "datetime":
+            return datetime
+        else:
+            raise WrongSpecTypeError()
+    except WrongSpecTypeError:
+        ErrorOutput(sys.exc_info(), stop=True).print_error()

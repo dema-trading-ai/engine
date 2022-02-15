@@ -15,7 +15,8 @@ a = Analysis(['main.py'],
              hiddenimports=[
                  "talib",
                  "modules.setup.config.qtpylib_methods",
-                 "modules.public.technical_indicators"],
+                 "modules.public.technical_indicators",
+                 "pandas_ta"],
              hookspath=["./hooks"],
              runtime_hooks=[],
              excludes=[],
@@ -23,8 +24,10 @@ a = Analysis(['main.py'],
              win_private_assemblies=False,
              cipher=block_cipher,
              noarchive=False)
+
 pyz = PYZ(a.pure, a.zipped_data,
           cipher=block_cipher)
+
 exe = EXE(pyz,
           a.scripts,
           [],
@@ -34,7 +37,8 @@ exe = EXE(pyz,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
-          console=True )
+          console=True)
+
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,

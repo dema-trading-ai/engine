@@ -1,35 +1,48 @@
-import talib.abstract as ta
-import pandas as pd
+import sys
+
 import numpy as np
+import pandas as pd
+import talib.abstract as ta
+
+from utils.error_handling import ErrorOutput, ModeNotAvailableError
 
 
 def absolute_strength_histogram(dataframe, length=9, smooth=3, mode="RSI"):
     """
-    Absolute Strenght Index. Returns smoothed bulls, smoothed bears, and difference
+    Absolute Strength Index. Returns smoothed bulls, smoothed bears, and difference
     :param dataframe: Dataframe with values
     :param length: Period of Evaluation
     :param smooth: Period of Smoothing
     :param mode: Indicator method. Choose from: ["RSI", "STOCHASTIC", "ADX"]
     :return:
     """
+
     df = dataframe.copy()
 
-    if mode == "RSI":
-        df['bulls'] = 0.5 * (abs(df['close'] - df['close'].shift(1)) + (df['close'] - df['close'].shift(1)))
-        df['bears'] = 0.5 * (abs(df['close'] - df['close'].shift(1)) - (df['close'] - df['close'].shift(1)))
+    try:
 
-    elif mode == "STOCHASTIC":
-        df['lowest_bars'] = df['close'].rolling(length).min()
-        df['highest_bars'] = df['close'].rolling(length).max()
+        if mode == "RSI":
+            df['bulls'] = 0.5 * (abs(df['close'] - df['close'].shift(1)) + (df['close'] - df['close'].shift(1)))
+            df['bears'] = 0.5 * (abs(df['close'] - df['close'].shift(1)) - (df['close'] - df['close'].shift(1)))
 
-        df['bulls'] = df['close'] - df['lowest_bars']
-        df['bears'] = df['highest_bars'] - df['close']
+        elif mode == "STOCHASTIC":
+            df['lowest_bars'] = df['close'].rolling(length).min()
+            df['highest_bars'] = df['close'].rolling(length).max()
 
-    elif mode == "ADX":
-        df['bulls'] = 0.5 * (abs(df['high'] - df['high'].shift(1)) + (df['high'] - df['high'].shift(1)))
-        df['bears'] = 0.5 * (abs(df['low'].shift(1) - df['low']) + (df['low'].shift(1) - df['low']))
-    else:
-        raise ValueError("Mode not implemented yet, use RSI, STOCHASTIC or ADX")
+            df['bulls'] = df['close'] - df['lowest_bars']
+            df['bears'] = df['highest_bars'] - df['close']
+
+        elif mode == "ADX":
+            df['bulls'] = 0.5 * (abs(df['high'] - df['high'].shift(1)) + (df['high'] - df['high'].shift(1)))
+            df['bears'] = 0.5 * (abs(df['low'].shift(1) - df['low']) + (df['low'].shift(1) - df['low']))
+
+        else:
+            raise ModeNotAvailableError
+
+    except ModeNotAvailableError:
+        ErrorOutput(sys.exc_info(),
+                    add_info="Mode not implemented yet, use RSI, STOCHASTIC or ADX.",
+                    stop=True).print_error()
 
     df['avg_bulls'] = ta.EMA(df['bulls'], timeperiod=length)
     df['avg_bears'] = ta.EMA(df['bears'], timeperiod=length)
@@ -54,7 +67,8 @@ def stoch_rsi(dataframe, period=14, smooth_d=3, smooth_k=3, rsi_period=14):
     """
     df = dataframe.copy()
     df['rsi'] = ta.RSI(df, timeperiod=rsi_period)
-    stochrsi = (df['rsi'] - df['rsi'].rolling(period).min()) / (df['rsi'].rolling(period).max() - df['rsi'].rolling(period).min())
+    stochrsi = (df['rsi'] - df['rsi'].rolling(period).min()) / (
+            df['rsi'].rolling(period).max() - df['rsi'].rolling(period).min())
     df['srsi_k'] = stochrsi.rolling(smooth_k).mean() * 100
     df['srsi_d'] = df['srsi_k'].rolling(smooth_d).mean()
     return df['srsi_k'], df['srsi_d']
@@ -62,7 +76,7 @@ def stoch_rsi(dataframe, period=14, smooth_d=3, smooth_k=3, rsi_period=14):
 
 def VWMA(source, volume, length):
     """
-    The vwma function returns volume-weighted moving average of 'source' for 'length' bars back.
+    The VWMA function returns volume-weighted moving average of 'source' for 'length' bars back.
     :param source: Prices to process
     :param volume: Volume
     :param length: Number of candles
@@ -130,9 +144,9 @@ def heikin_dataframe(dataframe):
         'volume': dataframe['volume']
     }
 
-    heikin_dataframe = pd.DataFrame(heikin_dict)
+    heikin_df = pd.DataFrame(heikin_dict)
 
-    return heikin_dataframe
+    return heikin_df
 
 
 def HMA(dataframe, timeperiod):
@@ -143,4 +157,5 @@ def HMA(dataframe, timeperiod):
     :param timeperiod: The timeperiod of the HMA
     :return: The Hull Moving Average
     """
-    return ta.WMA(2*ta.WMA(dataframe['close'], timeperiod // 2) - ta.WMA(dataframe['close'], timeperiod), int(np.floor(np.sqrt(timeperiod))))
+    return ta.WMA(2 * ta.WMA(dataframe['close'], timeperiod // 2) - ta.WMA(dataframe['close'], timeperiod),
+                  int(np.floor(np.sqrt(timeperiod))))

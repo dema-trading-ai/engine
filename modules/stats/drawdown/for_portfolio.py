@@ -1,8 +1,9 @@
-import pandas as pd
 from datetime import timedelta
 
-from modules.stats.drawdown.drawdown import get_max_drawdown_ratio, compute_drawdown_lengths
+import pandas as pd
+
 from modules.stats import utils
+from modules.stats.drawdown.drawdown import get_max_drawdown_ratio, compute_drawdown_lengths
 
 
 def get_max_seen_drawdown_for_portfolio(capital_per_timestamp: dict):
@@ -11,7 +12,7 @@ def get_max_seen_drawdown_for_portfolio(capital_per_timestamp: dict):
     df = pd.DataFrame.from_dict(capital_per_timestamp, columns=['value'], orient='index')
     df["drawdown"] = df["value"] / df["value"].cummax()
 
-    max_seen_drawdown["drawdown"] = df["drawdown"].min()
+    max_seen_drawdown["drawdown"] = df["drawdown"].min() - 1
     max_seen_drawdown["at"] = df["drawdown"].idxmin()
     max_seen_drawdown["from"] = df.loc[:max_seen_drawdown["at"]].value.idxmax()
     df_after_max_drawdown = df.loc[max_seen_drawdown["at"]:]
@@ -33,7 +34,7 @@ def get_max_realised_drawdown_for_portfolio(realised_profits_per_timestamp: dict
     df = pd.DataFrame.from_dict(realised_profits_per_timestamp, columns=['value'], orient='index')
     max_realised_drawdown = get_max_drawdown_ratio(df)
 
-    return max_realised_drawdown
+    return max_realised_drawdown - 1
 
 
 def get_longest_drawdown(per_timestamp_dict: dict) -> dict[str, timedelta | bool]:

@@ -3,9 +3,9 @@ import sys
 from typing import Tuple
 
 from backtesting.strategy import Strategy
+from cli.print_utils import print_info, print_error
 from modules.public.pairs_data import PairsData
 from modules.setup.config import ConfigModule
-from cli.print_utils import print_info, print_warning, print_error
 from modules.setup.config.validations import validate_dynamic_stoploss
 
 
@@ -15,9 +15,6 @@ from modules.setup.config.validations import validate_dynamic_stoploss
 #
 # © 2021 DemaTrading.ai
 # ======================================================================
-#
-# These constants are used for displaying and
-# emphasizing in commandline backtestresults
 
 
 class BackTesting:
@@ -66,19 +63,19 @@ class BackTesting:
             indicators = self.strategy.sell_signal(indicators)
             indicators = indicators.append(df.loc[df["close"].isnull()]).sort_index()
             self.df[pair] = indicators.copy()
+
             if stoploss_type == "dynamic":
                 stoploss = self.strategy.stoploss(indicators)
                 validate_dynamic_stoploss(stoploss)
                 indicators['stoploss'] = stoploss['stoploss']
+
             data_dict[pair] = indicators.to_dict('index')
+
             if not self.df[pair][['open', 'high', 'low', 'close', 'volume', 'pair']].equals(
                     df[['open', 'high', 'low', 'close', 'volume', 'pair']]
             ):
                 print_error(
-                    "It is not allowed to edit OHLCV data in your strategy. In order to use edited OHLCV data, be sure to save it in a different variable.")
+                    "It is not allowed to edit OHLCV data in your strategy. In order to use edited OHLCV data, be sure"
+                    " to save it in a different variable.")
                 sys.exit()
-
-        if stoploss_type == 'standard':
-            self.config.stoploss_type = 'static'
-            print_warning(f"The use of 'standard' is deprecated. Using static stoploss of {self.config.stoploss}%.")
         return data_dict

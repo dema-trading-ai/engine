@@ -1,18 +1,19 @@
 import functools
 import inspect
+
 from modules.algo.hyperopt.parameter_symbol import ParameterSymbol
 from modules.algo.hyperopt.parameters.category_parameter import CategoricalParameter
-from modules.public.hyperopt_parameter import categorical_parameter
 from modules.algo.hyperopt.parameters.float_parameter import FloatParameter, float_property
 from modules.algo.hyperopt.parameters.integer_parameter import IntegerParameter, int_property
+from modules.public.hyperopt_parameter import categorical_parameter
 
 
 def flip_params(func):
     @functools.wraps(func)
-    def newfunc(*args):
+    def new_function(*args):
         return func(*args[::-1])
 
-    return newfunc
+    return new_function
 
 
 is_parameter = functools.partial(flip_params(isinstance), ParameterSymbol)

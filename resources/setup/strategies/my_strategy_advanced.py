@@ -1,10 +1,11 @@
 # Mandatory Imports
-import talib.abstract as ta
-from pandas import DataFrame
-from backtesting.strategy import Strategy
-
 # Optional Imports
 import numpy as np
+import talib.abstract as ta
+from pandas import DataFrame
+
+from backtesting.strategy import Strategy
+from modules.stats.trade import Trade, SellReason
 
 
 class MyStrategyAdvanced(Strategy):
@@ -22,7 +23,7 @@ class MyStrategyAdvanced(Strategy):
             ("BTC/USDT", "4h")
         ]
 
-    def generate_indicators(self, dataframe: DataFrame, additional_pairs) -> DataFrame:
+    def generate_indicators(self, dataframe: DataFrame, additional_pairs=None) -> DataFrame:
         """
         :param dataframe: All passed candles (current candle included!) with OHLCV data
         :type dataframe: DataFrame
@@ -35,7 +36,7 @@ class MyStrategyAdvanced(Strategy):
         add_btc_data = additional_pairs['BTC/USDT']
         # Add your indicators like usual
         add_btc_data['rsi'] = ta.RSI(add_btc_data, timeperiod=14)
-        # Finally merge the additional btc data with the standard dataframe.
+        # Finally, merge the additional btc data with the standard dataframe.
         # The new column will have the following format: ['<column>_<pair>_<timeframe>']
         dataframe = self.join_additional_data(dataframe, add_btc_data, self.timeframe, "4h")
 
@@ -163,3 +164,22 @@ class MyStrategyAdvanced(Strategy):
         # END STRATEGY
 
         return dataframe
+
+    def buy_cooldown(self, last_trade: Trade) -> int:
+        """
+        Override this method if you want to add a buy cooldown when a trade is closed. This means that
+        for the pair of the closed trade, a new trade cannot be opened for x time-steps.
+
+        :param last_trade: The last trade that was closed
+        :type last_trade: Trade
+        :return: the amount of time-steps in which a new trade for the current pair may not be opened
+        :rtype: int
+        """
+        cooldown = 0
+        if last_trade.sell_reason == SellReason.STOPLOSS:
+            cooldown = 10
+        elif last_trade.sell_reason == SellReason.SELL_SIGNAL:
+            cooldown = 5
+        elif last_trade.sell_reason == SellReason.ROI:
+            cooldown = 1
+        return cooldown
