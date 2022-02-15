@@ -45,6 +45,10 @@ class StrategyNotFoundError(GeneralError):
     pass
 
 
+class StrategyConfigurationError(GeneralError):
+    pass
+
+
 class OfflineMissingDataError(GeneralError):
     pass
 

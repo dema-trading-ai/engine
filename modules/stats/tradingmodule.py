@@ -1,4 +1,5 @@
 # Libraries
+import sys
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -7,6 +8,7 @@ from backtesting.strategy import Strategy
 from cli.print_utils import print_info, print_warning
 from modules.setup import ConfigModule
 from modules.stats.trade import SellReason, Trade
+from utils.error_handling import ErrorOutput
 
 
 # ======================================================================
@@ -59,9 +61,18 @@ class TradingModule:
         self.update_capital_per_timestamp(ohlcv)
 
     def no_trade_tick(self, ohlcv: dict) -> None:
-        if self.buy_cooldown[ohlcv['pair']] > 0:
-            self.buy_cooldown[ohlcv['pair']] -= 1
-            return
+        try:
+            if self.buy_cooldown[ohlcv['pair']] > 0:
+                self.buy_cooldown[ohlcv['pair']] -= 1
+                return
+
+        except TypeError:
+            ErrorOutput(sys.exc_info(),
+                        add_info=f"It appears you have set the cooldown as type "
+                                 f"{type(self.buy_cooldown[ohlcv['pair']]).__name__} when it should be "
+                                 f"either a float or an int.",
+                        stop=True).print_error()
+
         if ohlcv['buy'] == 1:
             self.open_trade(ohlcv)
 
