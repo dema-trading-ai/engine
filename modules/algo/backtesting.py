@@ -2,10 +2,12 @@
 import sys
 from typing import Tuple
 
+import pandas as pd
+
 from backtesting.strategy import Strategy
+from cli.print_utils import print_info, print_error
 from modules.public.pairs_data import PairsData
 from modules.setup.config import ConfigModule
-from cli.print_utils import print_info, print_error
 from modules.setup.config.validations import validate_dynamic_stoploss
 
 
@@ -61,7 +63,7 @@ class BackTesting:
 
             indicators = self.strategy.buy_signal(indicators)
             indicators = self.strategy.sell_signal(indicators)
-            indicators = indicators.append(df.loc[df["close"].isnull()]).sort_index()
+            indicators = pd.concat((indicators, df.loc[df["close"].isnull()])).sort_index()
             self.df[pair] = indicators.copy()
 
             if stoploss_type == "dynamic":

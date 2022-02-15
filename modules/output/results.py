@@ -53,7 +53,10 @@ def format_date(date: Optional[datetime]) -> str:
     return f"{date.year}-{date.month}-{date.day} {date.hour}:{date.minute}0"
 
 
-def convert_ratio_to_percentage(ratio: float) -> float:
+def convert_ratio_to_percentage(ratio: float) -> Optional[float]:
+    if ratio is None:
+        return None
+
     percentage = ratio * 100
     return round(percentage, 2)
 
