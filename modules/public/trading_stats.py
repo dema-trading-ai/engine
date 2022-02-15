@@ -21,7 +21,7 @@ class MainResults:
     market_drawdown_btc: Optional[float]
     starting_capital: float
     end_capital: float
-    overall_profit_percentage: float
+    overall_profit_ratio: float
     n_trades: int
     n_average_trades: float
     n_left_open_trades: int
@@ -29,6 +29,7 @@ class MainResults:
     n_consecutive_losses: int
     dates_consecutive_losing_trades: Optional[Tuple[datetime, datetime]]
     max_realised_drawdown: float
+    max_seen_drawdown: float
     risk_reward_ratio: float
     volume_turnover: float
     avg_trade_duration: timedelta
@@ -46,7 +47,6 @@ class MainResults:
     perf_months_win: int
     perf_months_draw: int
     perf_months_loss: int
-    max_seen_drawdown: float
     drawdown_from: int
     drawdown_to: int
     drawdown_at: int
