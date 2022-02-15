@@ -272,9 +272,9 @@ class CoinInsights:
             total_profit_percentage = convert_ratio_to_percentage(c.total_profit_ratio)
             market_change = convert_ratio_to_percentage(c.market_change)
             market_drawdown = convert_ratio_to_percentage(c.market_drawdown)
-            best_trade_ratio = convert_ratio_to_percentage(c.best_trade_ratio)
-            worst_trade_ratio = convert_ratio_to_percentage(c.worst_trade_ratio)
-            median_trade_ratio = convert_ratio_to_percentage(c.median_trade_ratio)
+            best_trade_percentage = convert_ratio_to_percentage(c.best_trade_ratio)
+            worst_trade_percentage = convert_ratio_to_percentage(c.worst_trade_ratio)
+            median_trade_percentage = convert_ratio_to_percentage(c.median_trade_ratio)
             max_seen_drawdown = convert_ratio_to_percentage(c.max_seen_drawdown)
             max_realised_drawdown = convert_ratio_to_percentage(c.max_realised_drawdown)
 
@@ -308,11 +308,11 @@ class CoinInsights:
 
             trade_perf_per_coin_table.add_row(
                 c.pair,
-                f"{colorize(best_trade_ratio, 0) if c.best_trade_ratio is not None else '-'}"
+                f"{colorize(best_trade_percentage, 0) if c.best_trade_ratio is not None else '-'}"
                 f" / "
-                f"{colorize(median_trade_ratio, 0) if c.median_trade_ratio is not None else '-'}"
+                f"{colorize(median_trade_percentage, 0) if c.median_trade_ratio is not None else '-'}"
                 f" / "
-                f"{colorize(worst_trade_ratio, 0) if c.worst_trade_ratio is not None else '-'}",
+                f"{colorize(worst_trade_percentage, 0) if c.worst_trade_ratio is not None else '-'}",
                 f"{colorize(round(c.best_trade_currency, 2), 0) if c.best_trade_currency is not None else '-'} / "
                 f"{colorize(round(c.median_trade_currency, 2), 0) if c.median_trade_ratio is not None else '-'} / "
                 f"{colorize(round(c.worst_trade_currency, 2), 0) if c.worst_trade_currency is not None else '-'}"
