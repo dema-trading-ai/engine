@@ -54,6 +54,8 @@ def format_date(date: Optional[datetime]) -> str:
 
 
 def convert_ratio_to_percentage(ratio: float) -> float:
+    if ratio is None:
+        return 0
     percentage = ratio * 100
     return round(percentage, 2)
 
