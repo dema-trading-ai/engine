@@ -4,10 +4,10 @@ on:
     branches: [development, main]
 jobs:
   pytest-test:
-    runs-on: ubuntu-lates
+    runs-on: ubuntu-latest
     steps:
       - name: Set Timezone
-        uses: szenius/set-timezone@v1.0
+        uses: szenius/st-timezone@v1.0
         with:
           timezoneLinux: "Europe/Amsterdam"
           timezoneMacos: "Europe/Amsterdam"
