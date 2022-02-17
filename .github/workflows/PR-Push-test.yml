@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set Timezone
-        uses: szenius/t-timezone@v1.0
+        uses: szenius/st-timezone@v1.0
         with:
           timezoneLinux: "Europe/Amsterdam"
           timezoneMacos: "Europe/Amsterdam"
