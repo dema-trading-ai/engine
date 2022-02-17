@@ -4,7 +4,7 @@ on:
     branches: [development, main]
 jobs:
   pytest-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-lates
     steps:
       - name: Set Timezone
         uses: szenius/set-timezone@v1.0
