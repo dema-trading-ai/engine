@@ -1,4 +1,4 @@
-#!C:/Program\ Files/Git/usr/bin/sh.exe
+#!/bin/bash
 
 # Include any branches for which you wish to disable this script
 
