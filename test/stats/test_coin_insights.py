@@ -118,7 +118,7 @@ def test_return_best_worst_trade_only_losses():
 
 
 def test_return_no_trades():
-    """Given no trades, profit should be zero"""
+    """Given no trades, profit should be zero and count of trades should be 0"""
     # Arrange
     fixture = StatsFixture(['COIN/USDT'])
 
@@ -128,12 +128,13 @@ def test_return_no_trades():
     stats = fixture.create().analyze()
 
     # Assert
-    assert math.isclose(stats.coin_results[0].total_profit_ratio, 0)
-    assert math.isclose(stats.coin_results[0].cum_profit_ratio, 0)
-    assert math.isclose(stats.coin_results[0].avg_profit_ratio, 0)
+    assert stats.coin_results[0].total_profit_ratio == 0
+    assert stats.coin_results[0].cum_profit_ratio == 0
+    assert stats.coin_results[0].avg_profit_ratio == 0
+    assert stats.coin_results[0].n_trades == 0
 
 
-def test_trade_performance_return():
+def test_median_trade_performance_return():
     # Checks the best, median, and worst trade profits, should return a float
 
     # Arrange
@@ -145,10 +146,7 @@ def test_trade_performance_return():
     # Act
     stats = fixture.create().analyze()
 
-    assert math.isclose(stats.coin_results[0].best_trade_ratio, 0.9602, abs_tol=0.0001)
-    assert math.isclose(stats.coin_results[0].best_trade_currency, 84.698, abs_tol=0.001)
-    assert math.isclose(stats.coin_results[0].worst_trade_ratio, -0.754975, abs_tol=0.00001)
-    assert math.isclose(stats.coin_results[0].worst_trade_currency, -130.541, abs_tol=0.001)
+    # Assert
     assert math.isclose(stats.coin_results[0].median_trade_ratio, -0.11791, abs_tol=0.00001)
     assert math.isclose(stats.coin_results[0].median_trade_currency, -11.791, abs_tol=0.001)
 
@@ -171,20 +169,6 @@ def test_trade_performance_return_no_trades():
     assert stats.coin_results[0].worst_trade_currency is None
     assert stats.coin_results[0].median_trade_ratio is None
     assert stats.coin_results[0].median_trade_currency is None
-
-
-def test_nr_of_trades_no_trades():
-    """Given no trades, nr of trades should be zero"""
-    # Arrange
-    fixture = StatsFixture(['COIN/USDT'])
-
-    fixture.frame_with_signals['COIN/USDT'].test_scenario_flat_no_trades()
-
-    # Act
-    stats = fixture.create().analyze()
-
-    # Assert
-    assert math.isclose(stats.coin_results[0].n_trades, 0)
 
 
 def test_nr_of_trades_one_trade():
