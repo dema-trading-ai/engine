@@ -37,4 +37,4 @@ def engine_statistics(no_statistics: bool):
         'engine_version': CURRENT_VERSION,
         'executable': is_running_as_executable()
     }
-    session.get('https://enginemetricspdbom7kn-logengineruns.functions.fnc.fr-par.scw.cloud')
+    session.post('https://enginemetricspdbom7kn-logengineruns.functions.fnc.fr-par.scw.cloud', data=stats)
