@@ -3,8 +3,7 @@ import os.path
 
 
 def test_default_config():
-    config_path = ""
-
+    #  Start at the current working directory and recursively go up in the directories until the config file is found
     os.getcwd()
 
     while "config.json" not in os.listdir():
