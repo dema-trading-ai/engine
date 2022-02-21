@@ -1,7 +1,7 @@
 import math
 from datetime import timedelta, datetime
 
-from test.stats.stats_test_utils import StatsFixture, CooldownStrategy
+from test.stats.stats_test_utils import StatsFixture, CooldownStrategy, create_test_date, create_test_timestamp
 from test.utils.signal_frame import ONE_MIL, THIRTY_MIN, EIGHT_HOURS, SIX_HOURS, TWELVE_HOURS, DAILY
 
 
@@ -234,8 +234,7 @@ def test_n_average_trades():
     # Arrange
     fixture = StatsFixture(['COIN/USDT'])
 
-    fixture.config.backtesting_to = 86400000
-    fixture.config.backtesting_from = 0
+    fixture.config.backtesting_to = create_test_timestamp(year=2020, month=1, day=2)
 
     # Win/Loss/Open
     fixture.frame_with_signals['COIN/USDT'].test_scenario_down_10_up_100_down_75_three_trades()
@@ -254,8 +253,7 @@ def test_n_average_trades_no_trades():
     # Arrange
     fixture = StatsFixture(['COIN/USDT'])
 
-    fixture.config.backtesting_to = 86400000  # one day
-    fixture.config.backtesting_from = 0
+    fixture.config.backtesting_to = create_test_timestamp(year=2020, month=1, day=2) # one day
 
     # Loss/Loss/Open
     fixture.frame_with_signals['COIN/USDT'].test_scenario_flat_no_trades()
@@ -275,8 +273,7 @@ def test_n_average_trades_more_time_less_trades():
     # Arrange
     fixture = StatsFixture(['COIN/USDT'])
 
-    fixture.config.backtesting_to = 172800000  # two days
-    fixture.config.backtesting_from = 0
+    fixture.config.backtesting_to = create_test_timestamp(year=2020, month=1, day=3)  # two days
 
     # Win/Loss/Open
     fixture.frame_with_signals['COIN/USDT'].test_scenario_down_10_up_100_down_75_three_trades()
@@ -292,8 +289,7 @@ def test_n_average_trades_less_time_more_trades():
     # Arrange
     fixture = StatsFixture(['COIN/USDT'])
 
-    fixture.config.backtesting_to = 43200000  # half a day
-    fixture.config.backtesting_from = 0
+    fixture.config.backtesting_to = create_test_timestamp(year=2020, month=1, day=1, hour=12)  # half a day
 
     # Win/Loss/Open
     fixture.frame_with_signals['COIN/USDT'].test_scenario_down_10_up_100_down_75_three_trades()
@@ -653,9 +649,12 @@ def test_profitable_months_one_win():
 
     # Arrange
     fixture = StatsFixture(['COIN/USDT'])
+    fixture.config.backtesting_from = create_test_timestamp(year=2020, month=1, day=2)
+    fixture.config.backtesting_to = create_test_timestamp(year=2020, month=1, day=29)
+    fixture.frame_with_signals['COIN/USDT'].set_starting_time(create_test_timestamp(year=2020, month=1, day=2))
 
     # Win/Loss/Open
-    fixture.frame_with_signals['COIN/USDT'].generate_trades(days=30, timestep=EIGHT_HOURS)
+    fixture.frame_with_signals['COIN/USDT'].generate_trades(days=29, timestep=EIGHT_HOURS)
 
     # Act
     stats = fixture.create().analyze()
@@ -673,6 +672,7 @@ def test_profitable_months_one_loss():
     # One month, all days are negative - outcome should be one losing month.
     # Arrange
     fixture = StatsFixture(['COIN/USDT'])
+    fixture.frame_with_signals['COIN/USDT'].set_starting_time(create_test_timestamp(year=2020, month=1, day=2))
 
     # Win/Loss/Open
 
@@ -696,6 +696,7 @@ def test_profitable_months_no_trades_market_down():
     # market month, since the market is going down.
     # Arrange
     fixture = StatsFixture(['COIN/USDT'])
+    fixture.frame_with_signals['COIN/USDT'].set_starting_time(create_test_timestamp(year=2020, month=1, day=2))
 
     # Win/Loss/Open
 
@@ -719,6 +720,7 @@ def test_profitable_months_no_trades_market_up():
     # market month, since the market is going up.
     # Arrange
     fixture = StatsFixture(['COIN/USDT'])
+    fixture.frame_with_signals['COIN/USDT'].set_starting_time(create_test_timestamp(year=2020, month=1, day=2))
 
     # Win/Loss/Open
 
@@ -743,6 +745,7 @@ def test_profitable_months_no_trades_market_flat():
 
     # Arrange
     fixture = StatsFixture(['COIN/USDT'])
+    fixture.frame_with_signals['COIN/USDT'].set_starting_time(create_test_timestamp(year=2020, month=1, day=2))
 
     # Win/Loss/Open
     for _ in range(30):
@@ -921,8 +924,8 @@ def test_most_consecutive_losses_start_end():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.main_results.dates_consecutive_losing_trades[0] == datetime(2020, 1, 1, 0, 0)
-    assert stats.main_results.dates_consecutive_losing_trades[-1] == datetime(2020, 1, 2, 12, 0)
+    assert stats.main_results.dates_consecutive_losing_trades[0] == datetime(2020, 1, 1, 1, 0)
+    assert stats.main_results.dates_consecutive_losing_trades[-1] == datetime(2020, 1, 2, 13, 0)
 
 
 def test_volume_turnover():

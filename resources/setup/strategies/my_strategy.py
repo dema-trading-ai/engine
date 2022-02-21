@@ -42,8 +42,6 @@ class MyStrategy(Strategy):
 
         dataframe.loc[
             (
-                (dataframe['rsi'] < 30) &
-                (dataframe['ema5'] < dataframe['ema21']) &
                 (dataframe['volume'] > 0)
             ),
             'buy'] = 1

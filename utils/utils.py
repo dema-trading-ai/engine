@@ -79,6 +79,8 @@ def parse_timeframe(timeframe_str: str):
         timeframe_time = int(items[1]) * MINUTE
     elif items[2] == 'h':
         timeframe_time = int(items[1]) * HOUR
+    elif items[2] == 'd':
+        timeframe_time = int(items[1]) * DAY
     else:
         print_config_error("Error while parsing the timeframe from config.json")
         sys.exit()

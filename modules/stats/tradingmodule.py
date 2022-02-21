@@ -38,9 +38,10 @@ class TradingModule:
 
         self.closed_trades = []
         self.open_trades = []
-        self.budget_per_timestamp = {}
-        self.capital_per_timestamp = {0: self.budget}
-        self.realised_profits_per_timestamp = {0: self.budget}
+        timestep_before_start = self.config.backtesting_from - self.config.timeframe_ms
+        self.budget_per_timestamp = {timestep_before_start: self.budget}
+        self.capital_per_timestamp = {timestep_before_start: self.budget}
+        self.realised_profits_per_timestamp = {timestep_before_start: self.budget}
         self.total_capital_open_trades = {}
         self.lowest_total_capital_open_trades = {}
         self.highest_total_capital_open_trades = {}

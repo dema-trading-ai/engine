@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 import pandas as pd
 from pandas import DataFrame
@@ -10,6 +11,8 @@ from modules.stats.trade import Trade, SellReason
 from modules.stats.tradingmodule import TradingModule
 from test.utils.signal_frame import MockPairFrame
 from utils.utils import get_ohlcv_indicators
+import pytz
+
 
 os.environ["VERBOSITY"] = "quiet"  # disables printing of info and warning messages
 
@@ -38,8 +41,8 @@ class StatsFixture:
             "max-open-trades": max_open_trades,
             "exposure-per-trade": exposure_per_trade,
             "starting-capital": STARTING_CAPITAL,
-            "backtesting-from": "2021-01-01",
-            "backtesting-to": "2021-07-01",
+            "backtesting-from": "2020-01-01",
+            "backtesting-to": "2020-07-01",
             "backtesting-till-now": False,
             "stoploss-type": "static",
             "stoploss": STOPLOSS,
@@ -98,3 +101,15 @@ class CooldownStrategy(TestStrategy):
         elif last_trade.sell_reason == SellReason.ROI:
             cooldown = 1
         return cooldown
+
+
+def date(timestamp) -> datetime:
+    return datetime.fromtimestamp(timestamp / 1000)
+
+
+def create_test_date(year=1970, month=1, day=1, hour=0, minute=0, second=0) -> datetime:
+    return datetime.fromtimestamp(datetime(year, month, day, hour, minute, second, 0, pytz.UTC).timestamp())
+
+
+def create_test_timestamp(year=1970, month=1, day=1, hour=0, minute=0, second=0) -> int:
+    return datetime(year, month, day, hour, minute, second, 0, pytz.UTC).timestamp() * 1000

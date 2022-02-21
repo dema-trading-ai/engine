@@ -118,7 +118,7 @@ def test_open_trades_opened_at():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.open_trade_results[0].opened_at == datetime(year=2020, month=1, day=1)
+    assert stats.open_trade_results[0].opened_at == datetime(year=2020, month=1, day=1, hour=1)
 
 
 def test_open_trades_opened_at_timestep_three():
@@ -133,4 +133,4 @@ def test_open_trades_opened_at_timestep_three():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.open_trade_results[0].opened_at == datetime(year=2020, month=1, day=3)
+    assert stats.open_trade_results[0].opened_at == datetime(year=2020, month=1, day=3, hour=1)
