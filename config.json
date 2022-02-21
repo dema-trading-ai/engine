@@ -22,7 +22,7 @@
   "randomize-pair-order": false,
   "currency": "USDT",
   "fee": 0.25,
-  "strategy-name": "StratHyperopt",
+  "strategy-name": "MyStrategy",
   "strategies-folder": "resources/setup/strategies",
   "plots": true,
   "tearsheet": false,
