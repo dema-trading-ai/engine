@@ -28,7 +28,7 @@ class MainController:
         if args.n_trials and args.n_trials > 0:
             n_trials = args.n_trials
         else:
-            n_trials = 1
+            n_trials = 100
 
         print_info(f"Running parameter hyperoptimization with {n_trials} trials.")
         print_info("If you want to exit the program halfway, press 'ctrl + c', and you will get the "
