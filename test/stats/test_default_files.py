@@ -5,17 +5,12 @@ import os.path
 def test_default_config():
     config_path = ""
 
-    current_working_dir = os.getcwd()
-    os.chdir('../')
+    os.getcwd()
 
-    if "config.json" in os.listdir():
-        config_path = os.path.abspath("config.json")
-
-    else:
+    while "config.json" not in os.listdir():
         os.chdir('../')
 
-        if "config.json" in os.listdir():
-            config_path = os.path.abspath("config.json")
+    config_path = os.path.abspath("config.json")
 
     default_dict = {
         "exchange": "binance",
