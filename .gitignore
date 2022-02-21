@@ -134,9 +134,11 @@ dmypy.json
 # .DS_Store
 .DS_Store
 
-**/.idea/**
+**/.idea/**git staqgit
 .idea/**
 .idea
 .idea/
 
 **/backtesting-data/**
+
+statistics_id.txt
