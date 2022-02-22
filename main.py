@@ -3,7 +3,6 @@ import multiprocessing
 import os
 import sys
 from time import perf_counter
-from requests_futures.sessions import FuturesSession
 
 import optuna
 
@@ -48,9 +47,6 @@ def run_engine(args, online: bool):
 
 def run_init(args, _):
     prepare_workspace(args)
-
-
-
 
 
 if __name__ == "__main__":
