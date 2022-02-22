@@ -15,9 +15,12 @@ def get_or_generate_random_id() -> str:
         with open("./statistics_id.txt", "r") as f:
             data = f.read()
             # check if data is valid uuid (protection for code injection)
+            print("test ID: ")
+            print(data)
             try:
                 random_id = str(uuid.UUID(data))
             except ValueError:
+                print("VALUE-ERROR")
                 create_new_id = True
     if create_new_id:
         # create file and generate random id
