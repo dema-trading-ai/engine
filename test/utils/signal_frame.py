@@ -2,8 +2,6 @@ from enum import Enum
 from typing import TypeVar
 
 # Define different timestep values
-import ccxt
-
 WEEKLY = 604800000  # 7 days in milliseconds
 DAILY = 86400000  # 24 hours in milliseconds
 TWELVE_HOURS = 43200000  # 12 hours in milliseconds
@@ -24,9 +22,10 @@ class MockOHLCVWithSignal(dict, object):
     current_time: int
 
     def __init__(self, key):
+        from test.stats.stats_test_utils import create_test_timestamp
         super().__init__()
         self.__key = key
-        self.current_time = ccxt.binance.parse8601("2020-01-01T00:00:00Z")
+        self.current_time = create_test_timestamp(year=2020, month=1, day=1)
 
     def set_starting_time(self, starting_time):
         self.current_time = starting_time

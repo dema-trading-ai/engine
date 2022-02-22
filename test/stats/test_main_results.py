@@ -1,5 +1,5 @@
 import math
-from datetime import timedelta, datetime
+from datetime import timedelta
 
 from test.stats.stats_test_utils import StatsFixture, CooldownStrategy, create_test_date, create_test_timestamp
 from test.utils.signal_frame import ONE_MIL, THIRTY_MIN, EIGHT_HOURS, SIX_HOURS, TWELVE_HOURS, DAILY
@@ -253,7 +253,7 @@ def test_n_average_trades_no_trades():
     # Arrange
     fixture = StatsFixture(['COIN/USDT'])
 
-    fixture.config.backtesting_to = create_test_timestamp(year=2020, month=1, day=2) # one day
+    fixture.config.backtesting_to = create_test_timestamp(year=2020, month=1, day=2)  # one day
 
     # Loss/Loss/Open
     fixture.frame_with_signals['COIN/USDT'].test_scenario_flat_no_trades()
@@ -924,8 +924,8 @@ def test_most_consecutive_losses_start_end():
     stats = fixture.create().analyze()
 
     # Assert
-    assert stats.main_results.dates_consecutive_losing_trades[0] == datetime(2020, 1, 1, 1, 0)
-    assert stats.main_results.dates_consecutive_losing_trades[-1] == datetime(2020, 1, 2, 13, 0)
+    assert stats.main_results.dates_consecutive_losing_trades[0] == create_test_date(2020, 1, 1, 0, 0)
+    assert stats.main_results.dates_consecutive_losing_trades[-1] == create_test_date(2020, 1, 2, 12, 0)
 
 
 def test_volume_turnover():

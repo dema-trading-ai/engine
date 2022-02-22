@@ -1,5 +1,4 @@
 import math
-from datetime import datetime
 from datetime import timedelta
 from test.stats.stats_test_utils import StatsFixture, create_test_date, date
 from test.utils.signal_frame import TradeAction, DAILY, ONE_MIL
