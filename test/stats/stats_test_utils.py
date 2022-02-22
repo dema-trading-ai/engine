@@ -101,7 +101,7 @@ class CooldownStrategy(TestStrategy):
         return cooldown
 
 
-def date(timestamp) -> datetime:
+def date(timestamp: int) -> datetime:
     return datetime.fromtimestamp(timestamp / 1000)
 
 
