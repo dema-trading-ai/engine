@@ -1,7 +1,5 @@
-import sys
 from enum import Enum
 from typing import TypeVar
-from utils.error_handling import ErrorOutput
 
 # Define different timestep values
 WEEKLY = 604800000  # 7 days in milliseconds
@@ -264,6 +262,14 @@ class MockOHLCVWithSignal(dict, object):
         self.add_entry(open=5, high=5, low=5, close=5, volume=1, buy=1, sell=0, timestep=timestep)
         self.add_entry(open=5, high=5, low=3, close=3, volume=1, buy=0, sell=1, timestep=timestep)
         self.add_entry(open=3, high=5.4, low=3, close=5.4, volume=1, buy=0, sell=0, timestep=timestep)
+
+    def test_scenario_down_100(self, timestep=THIRTY_MIN):
+        """
+        Chart flow:
+        1. Trend goes down 100%
+        """
+        self.add_entry(open=1, high=1, low=1, close=1, volume=1, buy=1, sell=0, timestep=timestep)
+        self.add_entry(open=1, high=1, low=0, close=0, volume=1, buy=0, sell=1, timestep=timestep)
 
     def multiply_price(self, multiplier: float, trade_action: TradeAction = TradeAction.NOTHING):
 

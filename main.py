@@ -7,14 +7,15 @@ from time import perf_counter
 import optuna
 
 from cli.arg_parse import execute_for_args
+from cli.checks.engine_use_statistics import engine_statistics
 from cli.checks.latest_version import print_warning_if_version_outdated
 from cli.prepare_workspace import prepare_workspace
-from cli.print_utils import print_debug, is_verbosity
+from cli.print_utils import print_debug, is_verbosity, print_warning
 from main_controller import MainController
+from utils.utils import check_internet_connection
 
 # Hack, PyInstaller + rich on Windows in GitHub actions fails because it cannot find encoding of stdout, this sets
 # it on stdout if not set
-
 os.environ["PYTHONIOENCODING"] = "utf-8"
 PYTHONIOENCODING = os.environ.get("PYTHONIOENCODING", False)
 if sys.stdout.isatty() is False and PYTHONIOENCODING is not False and sys.stdout.encoding != PYTHONIOENCODING:
@@ -23,23 +24,30 @@ if sys.stdout.isatty() is False and PYTHONIOENCODING is not False and sys.stdout
 RUNFOLDER = os.path.dirname(os.path.realpath(__file__))
 
 
-def main():
+def main(online: bool):
     print("TESTING PURPOSES")
-    print_warning_if_version_outdated()
+    if online:
+        print_warning_if_version_outdated()
+    else:
+        print_warning("You are not connected to the internet. Certain functionality (like downloading new candle data)"
+                      " will not be available.")
     execute_for_args({
         'init': run_init,
         'default': run_engine
-    })
-    print_warning_if_version_outdated()
+    }, online)
+    if online:
+        print_warning_if_version_outdated()
     print("TESTING PURPOSES")
 
 
-def run_engine(args):
+def run_engine(args, online: bool):
+    if online:
+        engine_statistics(args.no_statistics)
     controller = MainController()
-    asyncio.get_event_loop().run_until_complete(controller.run(args))
+    asyncio.run(controller.run(args, online))
 
 
-def run_init(args):
+def run_init(args, _):
     prepare_workspace(args)
 
 
@@ -47,7 +55,8 @@ if __name__ == "__main__":
     multiprocessing.freeze_support()
     if not is_verbosity(verbosity="debug"):
         optuna.logging.set_verbosity(optuna.logging.WARNING)
+    connection_status = check_internet_connection()
     start_time = perf_counter()
-    main()
+    main(connection_status)
     end_time = perf_counter()
     print_debug(f"Elapsed time: {end_time - start_time}s")

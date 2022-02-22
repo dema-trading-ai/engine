@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def get_max_drawdown_ratio(df: pd.DataFrame):
+def get_max_drawdown_ratio(df: pd.DataFrame) -> float:
     """
     @param df: with column["value"]
     """
@@ -15,7 +15,7 @@ def get_max_drawdown_ratio_without_buy_rows(df: pd.DataFrame):
     """
     df["drawdown_ratio"] = df["value"] / df["value"].cummax()
     ans = df.loc[df['buy'] == 0.0]["drawdown_ratio"].min()
-    return ans
+    return ans - 1
 
 
 def get_max_drawdown_ratio_series(series: pd.Series):

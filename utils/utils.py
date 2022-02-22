@@ -2,12 +2,13 @@
 import os
 import re
 import sys
+import requests
 from pathlib import Path
 
 from modules.stats.trade import Trade
 from cli.print_utils import print_config_error
 
-CURRENT_VERSION = "v0.7.18"
+CURRENT_VERSION = "v0.7.19"
 
 MILLISECONDS = 1000
 MINUTE = 60 * MILLISECONDS
@@ -77,7 +78,18 @@ def parse_timeframe(timeframe_str: str):
         timeframe_time = int(items[1]) * MINUTE
     elif items[2] == 'h':
         timeframe_time = int(items[1]) * HOUR
+    elif items[2] == 'd':
+        timeframe_time = int(items[1]) * DAY
     else:
         print_config_error("Error while parsing the timeframe from config.json")
         sys.exit()
     return timeframe_time
+
+
+def check_internet_connection() -> bool:
+    try:
+        requests.get("https://google.com", timeout=5)
+        return True
+
+    except (requests.ConnectionError, requests.Timeout):
+        return False

@@ -157,5 +157,13 @@
     "name": "randomize-pair-order",
     "type": "bool",
     "default": false
+  },
+  {
+    "name": "no-statistics",
+    "type": "bool",
+    "default": false,
+    "cli": {
+      "short": "nostats"
+    }
   }
 ]
