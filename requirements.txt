@@ -16,3 +16,4 @@ openpyxl==3.0.9
 certifi==2021.10.8
 pandas_ta==0.3.14b
 scipy==1.7.3
+pytz==2021.3
