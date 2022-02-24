@@ -17,8 +17,8 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.9
-      - name: Run TA-lib installation script
-        run: ll && sh installation_helpers/install_talib.sh
+      - name: Download TA-lib
+        run: wget https://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz && tar -xzf ta-lib-0.4.0-src.tar.gz && cd ta-lib/
       - name: Install TA-lib
         run: pip install ta-lib
       - name: save pip cache dir
