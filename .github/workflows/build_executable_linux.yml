@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: 3.9
       - name: Run TA-lib installation script
-        run: sh ../installation_helpers/install_talib.sh
+        run: sh ../../installation_helpers/install_talib.sh
       - name: Install TA-lib
         run: pip install ta-lib
       - name: save pip cache dir
