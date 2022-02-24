@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import Dict
 
 import pandas as pd
 
@@ -37,7 +38,7 @@ def get_max_realised_drawdown_for_portfolio(realised_profits_per_timestamp: dict
     return max_realised_drawdown - 1
 
 
-def get_longest_drawdown(per_timestamp_dict: dict) -> dict[str, timedelta | bool]:
+def get_longest_drawdown(per_timestamp_dict: dict) -> Dict[str, timedelta or bool]:
     """
     Takes a dictionary representing chronological movements of funds and returns a dictionary with the length of the
     longest drawdown within those movements and whether this longest drawdown is ongoing
