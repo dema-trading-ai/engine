@@ -94,9 +94,6 @@ def convert_df_for_plotting(df: pd.DataFrame) -> Tuple[pd.DataFrame, List[dateti
     """
     Takes a raw dataframe and adapts it for simpler plotting work
     """
-    # Remove first value since its 0
-    df.drop(index=df.index[0], axis=0, inplace=True)
-
     dates = [datetime.fromtimestamp(date / 1000) for date in df['timestamp']]
 
     # Transform the index to dates

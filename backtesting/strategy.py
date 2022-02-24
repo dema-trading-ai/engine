@@ -1,9 +1,9 @@
 # Libraries
 import abc
 
+import pandas as pd
 from optuna import Trial
 from pandas import DataFrame
-import pandas as pd
 
 from modules.public.trading_stats import TradingStats
 # ======================================================================

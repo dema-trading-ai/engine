@@ -1,6 +1,7 @@
 import pandas as pd
 
 from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
+from modules.stats.metrics.profit_ratio import with_copied_initial_row
 from modules.stats.trade import Trade
 
 
@@ -20,12 +21,6 @@ def get_max_seen_drawdown_per_trade(signal_dict, trade: Trade, fee_percentage: f
     df["value"] = df["profit_ratio"].cumprod()
 
     return get_max_drawdown_ratio(df)
-
-
-def with_copied_initial_row(df) -> pd.DataFrame:
-    head = df.head(1).copy()
-    head.rename(index=lambda s: 0, inplace=True)
-    return pd.concat([head, df])
 
 
 def apply_profit_ratio(df, open_timestamp):

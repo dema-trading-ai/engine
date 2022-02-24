@@ -1,4 +1,5 @@
 import sys
+
 import ccxt.async_support as ccxt
 
 from cli.print_utils import print_info

@@ -1,7 +1,8 @@
-import talib.abstract as ta
-import pandas as pd
-import numpy as np
 import sys
+
+import numpy as np
+import pandas as pd
+import talib.abstract as ta
 
 from utils.error_handling import ErrorOutput, ModeNotAvailableError
 
@@ -67,7 +68,7 @@ def stoch_rsi(dataframe, period=14, smooth_d=3, smooth_k=3, rsi_period=14):
     df = dataframe.copy()
     df['rsi'] = ta.RSI(df, timeperiod=rsi_period)
     stochrsi = (df['rsi'] - df['rsi'].rolling(period).min()) / (
-                df['rsi'].rolling(period).max() - df['rsi'].rolling(period).min())
+            df['rsi'].rolling(period).max() - df['rsi'].rolling(period).min())
     df['srsi_k'] = stochrsi.rolling(smooth_k).mean() * 100
     df['srsi_d'] = df['srsi_k'].rolling(smooth_d).mean()
     return df['srsi_k'], df['srsi_d']

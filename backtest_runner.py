@@ -6,12 +6,12 @@ from typing import Generator
 from optuna import Trial
 
 from cli.print_utils import print_error
-from utils.error_handling import ErrorOutput, OfflineMissingDataError
 from modules.output import OutputModule
 from modules.setup import ConfigModule, DataModule, SetupModule
 from modules.setup.config import create_config
 from modules.stats.stats import StatsModule
 from modules.stats.tradingmodule import TradingModule
+from utils.error_handling import ErrorOutput, OfflineMissingDataError
 
 
 class BacktestRunner:

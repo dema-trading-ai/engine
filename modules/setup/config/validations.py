@@ -1,11 +1,12 @@
 import json
 import sys
-from pandas import DataFrame
 from typing import Tuple
 
+from pandas import DataFrame
+
 from cli.arg_parse import read_spec, spec_type_to_python_type
-from modules.setup.config.cli import get_cli_config
 from cli.print_utils import print_config_error, print_warning
+from modules.setup.config.cli import get_cli_config
 from utils.error_handling import StoplossConfigError, WrongSpecTypeError, WrongSpecNameError, ErrorOutput
 
 
@@ -178,7 +179,10 @@ def validate_ratios(df: DataFrame) -> Tuple[bool, bool]:
     periods should be computed.
     """
 
-    check_returns = (df['returns'].iloc[1:] == 0).all()
+    if len(df['capital']) > 1:
+        check_returns = (df['returns'].iloc[1:] == 0).all()
+    else:
+        check_returns = False
 
     if check_returns:
         print_warning('Unable to compute Sharpe and Sortino ratios: Perhaps the time period is too short?')

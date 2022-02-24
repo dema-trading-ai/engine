@@ -1,9 +1,8 @@
 # Mandatory Imports
 import talib.abstract as ta
 from pandas import DataFrame
+
 from backtesting.strategy import Strategy
-from modules.setup.config import qtpylib_methods as qtpylib
-from modules.public import technical_indicators as indicator
 
 
 class IndicatorSample(Strategy):
