@@ -27,7 +27,8 @@ class Trade:
     closed_at: Any
     sell_reason: SellReason
 
-    def __init__(self, ohlcv: dict, spend_amount: float, fee: float, date: datetime, sl_type: str, sl_perc: float, current_capital: float):
+    def __init__(self, ohlcv: dict, spend_amount: float, fee: float, date: datetime, sl_type: str, sl_perc: float,
+                 current_capital: float):
         # Basic trade data
         self.status = 'open'
         self.pair = ohlcv['pair']

@@ -1,6 +1,10 @@
+from datetime import timedelta
+from typing import Dict, Union
+
 import pandas as pd
 
-from modules.stats.drawdown.drawdown import get_max_drawdown_ratio
+from modules.stats import utils
+from modules.stats.drawdown.drawdown import get_max_drawdown_ratio, compute_drawdown_lengths
 
 
 def get_max_seen_drawdown_for_portfolio(capital_per_timestamp: dict):
@@ -32,3 +36,30 @@ def get_max_realised_drawdown_for_portfolio(realised_profits_per_timestamp: dict
     max_realised_drawdown = get_max_drawdown_ratio(df)
 
     return max_realised_drawdown - 1
+
+
+def get_longest_drawdown(per_timestamp_dict: dict) -> Dict[str, Union[timedelta, bool]]:
+    """
+    Takes a dictionary representing chronological movements of funds and returns a dictionary with the length of the
+    longest drawdown within those movements and whether this longest drawdown is ongoing
+    :param per_timestamp_dict: Can be either capital or realised profits
+    :return: A dictionary containing the length of the longest drawdown and whether the longest drawdown is ongoing
+    """
+
+    df = utils.convert_timestamp_dict_to_dataframe(per_timestamp_dict)
+
+    longest_drawdown, last_drawdown = compute_drawdown_lengths(df)
+
+    # Checks if the longest drawdown was actually computed
+    if longest_drawdown == timedelta(0) and last_drawdown == timedelta(0):
+        is_ongoing = False
+
+    else:
+        is_ongoing = longest_drawdown == last_drawdown
+
+    drawdown_info = {
+        'longest_drawdown': longest_drawdown,
+        'is_ongoing': is_ongoing
+    }
+
+    return drawdown_info
