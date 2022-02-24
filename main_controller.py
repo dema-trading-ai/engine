@@ -1,5 +1,6 @@
 # Files
 import os
+import sys
 
 import optuna
 from optuna import Trial
@@ -48,5 +49,7 @@ class MainController:
 
             except ValueError:
                 print_info("No trials completed yet. Results not available.")
+
+            sys.exit(1)
 
         print_info(f"Best results: {study.best_params}")

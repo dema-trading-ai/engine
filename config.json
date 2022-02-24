@@ -23,7 +23,7 @@
   "currency": "USDT",
   "fee": 0.25,
   "strategy-name": "MyStrategy",
-  "strategies-folder": "strategies",
+  "strategies-folder": "resources/setup/strategies",
   "plots": true,
   "tearsheet": false,
   "export-result": false,
