@@ -6,6 +6,7 @@ on:
     branches:
       - release/stable
       - development
+      - ENG-36-add-linux-executable-support
 jobs:
   build:
     runs-on: ubuntu-latest
