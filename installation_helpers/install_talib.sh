@@ -5,6 +5,7 @@ else
 fi
 echo "Installing to ${INSTALL_LOC}"
 if [ ! -f "${INSTALL_LOC}/lib/libta_lib.a" ]; then
+  ll -a
   tar zxvf ta-lib-0.4.0-src.tar.gz
   cd ta-lib \
   && rm config.guess config.sub \
