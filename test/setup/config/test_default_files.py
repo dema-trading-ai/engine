@@ -29,7 +29,7 @@ def test_default_configs():
         "currency": "USDT",
         "fee": "0.25",
         "strategy-name": "MyStrategy",
-        "strategies-folder": "resources/setup/strategies",
+        "strategies-folder": "strategies",
         "plots": "true",
         "tearsheet": "false",
         "export-result": "false",
