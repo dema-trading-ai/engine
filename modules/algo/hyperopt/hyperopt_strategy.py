@@ -1,6 +1,7 @@
 import functools
 import inspect
 
+from backtesting.strategy import Strategy
 from modules.algo.hyperopt.parameter_symbol import ParameterSymbol
 from modules.algo.hyperopt.parameters.category_parameter import CategoricalParameter
 from modules.algo.hyperopt.parameters.float_parameter import FloatParameter, float_property
@@ -25,7 +26,7 @@ params = {
 }
 
 
-def inject_hyperopt_parameters(strategy):
+def inject_hyperopt_parameters(strategy: Strategy):
     strategy_class = type(strategy)
     hyperopt_parameters = [(name, property_value) for name, property_value in inspect.getmembers(strategy_class) if
                            is_parameter(property_value)]
