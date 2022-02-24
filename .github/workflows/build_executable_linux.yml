@@ -18,9 +18,9 @@ jobs:
         with:
           python-version: 3.9
       - name: Download TA-lib
-        run: wget https://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz && tar -xzf ta-lib-0.4.0-src.tar.gz && cd ta-lib/
+        run: wget https://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz && tar -xzf ta-lib-0.4.0-src.tar.gz
       - name: Install TA-lib
-        run: sudo ./configure && sudo make && sudo make install
+        run: cd ta-lib/ && sudo ./configure && sudo make && sudo make install
       - name: Install TA-lib
         run: pip install ta-lib
       - name: save pip cache dir
