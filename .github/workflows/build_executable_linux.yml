@@ -20,6 +20,8 @@ jobs:
       - name: Download TA-lib
         run: wget https://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz && tar -xzf ta-lib-0.4.0-src.tar.gz && cd ta-lib/
       - name: Install TA-lib
+        run: sudo ./configure && sudo make && sudo make install
+      - name: Install TA-lib
         run: pip install ta-lib
       - name: save pip cache dir
         id: pipdir
