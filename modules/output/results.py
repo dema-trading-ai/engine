@@ -150,6 +150,9 @@ def create_trade_info_table(self: MainResults, justification) -> Table:
 
 def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown_from_string, drawdown_to_string,
                              justification) -> Table:
+    longest_realised_drawdown = format_time_difference(self.longest_realised_drawdown['longest_drawdown'])
+    longest_seen_drawdown = format_time_difference(self.longest_seen_drawdown['longest_drawdown'])
+
     performance_table = Table(box=box.ROUNDED)
     performance_table.add_column("Performance "
                                  ":chart_with_upwards_trend:", justify=justification,
@@ -168,7 +171,11 @@ def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown
     performance_table.add_row('Max. seen drawdown from', drawdown_from_string)
     performance_table.add_row('Max. seen drawdown to', drawdown_to_string)
     performance_table.add_row('Max. seen drawdown at', drawdown_at_string)
-    performance_table.add_row('Average market change',
+    performance_table.add_row('Longest realised drawdown', longest_realised_drawdown if not self.
+                              longest_realised_drawdown['is_ongoing'] else longest_realised_drawdown + ', (Ongoing)')
+    performance_table.add_row('Longest seen drawdown', longest_seen_drawdown if not self.longest_seen_drawdown[
+        'is_ongoing'] else longest_seen_drawdown + ', (Ongoing)')
+    performance_table.add_row('Market change coins',
                               colorize(convert_ratio_to_percentage(self.market_change_coins), 0, '%'))
     performance_table.add_row('Market change BTC/USDT',
                               "Unavailable" if self.market_change_btc is None else colorize(
@@ -397,7 +404,7 @@ class CoinInsights:
         coin_metrics_table.add_column("Market drawdown (%)", justify=justification)
         coin_metrics_table.add_column("Max. seen drawdown (%)", justify=justification)
         coin_metrics_table.add_column("Max. realised drawdown (%)",
-                                                 justify=justification)
+                                      justify=justification)
         return coin_metrics_table
 
     @staticmethod

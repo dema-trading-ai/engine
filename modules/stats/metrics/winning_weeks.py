@@ -1,9 +1,5 @@
 from datetime import datetime
 from pandas import DataFrame
-import pandas as pd
-
-pd.options.mode.chained_assignment = 'raise'
-
 from modules.stats.metrics.profit_ratio import with_copied_initial_row
 
 
@@ -33,8 +29,9 @@ def get_market_ratios(signal_dict: dict) -> DataFrame:
 
 
 def get_outperforming_timeframe(cum_profit_ratio: DataFrame, market_ratio_df: DataFrame, timeframe="W"):
-    cum_profit_ratio = cum_profit_ratio.iloc[1:]
-    market_ratio_df = market_ratio_df.iloc[1:]
+    # copy dataframes so the originals don't get modified
+    cum_profit_ratio = cum_profit_ratio.copy()
+    market_ratio_df = market_ratio_df.copy()
 
     # Refactor index of dataframes
     datetime_index = [datetime.fromtimestamp(ms / 1000.0) for ms in market_ratio_df.index]
@@ -58,9 +55,8 @@ def get_outperforming_timeframe(cum_profit_ratio: DataFrame, market_ratio_df: Da
 
 
 def get_profitable_timeframe(cum_profit_ratio, timeframe="W"):
-    # Create dataframes
-    cum_profit_ratio = cum_profit_ratio.iloc[1:]
-
+    # copy dataframes so the originals don't get modified
+    cum_profit_ratio = cum_profit_ratio.copy()
     # Refactor index of dataframes
     datetime_index = [datetime.fromtimestamp(ms / 1000.0) for ms in cum_profit_ratio.index]
     cum_profit_ratio.index = datetime_index

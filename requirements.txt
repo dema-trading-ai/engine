@@ -17,3 +17,4 @@ certifi==2021.10.8
 pandas_ta==0.3.14b
 scipy==1.7.3
 requests-futures==1.0.0
+pytz==2021.3

@@ -22,9 +22,10 @@ class MockOHLCVWithSignal(dict, object):
     current_time: int
 
     def __init__(self, key):
+        from test.stats.stats_test_utils import create_test_timestamp
         super().__init__()
         self.__key = key
-        self.current_time = 1577833200000  # 2020-01-01
+        self.current_time = create_test_timestamp(year=2020, month=1, day=1)
 
     def set_starting_time(self, starting_time):
         self.current_time = starting_time

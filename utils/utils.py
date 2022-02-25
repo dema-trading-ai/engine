@@ -2,11 +2,12 @@
 import os
 import re
 import sys
-import requests
 from pathlib import Path
 
-from modules.stats.trade import Trade
+import requests
+
 from cli.print_utils import print_config_error
+from modules.stats.trade import Trade
 
 CURRENT_VERSION = "v0.7.19"
 
