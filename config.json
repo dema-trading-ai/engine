@@ -24,7 +24,7 @@
   "fee": 0.25,
   "strategy-name": "MyStrategy",
   "strategies-folder": "resources/setup/strategies",
-  "plots": false,
+  "plots": true,
   "tearsheet": false,
   "export-result": false,
   "mainplot_indicators": [
