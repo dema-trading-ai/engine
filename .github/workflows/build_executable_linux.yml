@@ -6,7 +6,6 @@ on:
     branches:
       - release/stable
       - development
-      - ENG-36-add-linux-executable-support  # TODO: Remove line
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -77,7 +76,7 @@ jobs:
       - test
     runs-on: ubuntu-latest
     environment: "executable_release"
-    #    if: github.ref == 'refs/heads/release/stable' || github.ref == 'refs/heads/development'  # TODO: uncomment
+    if: github.ref == 'refs/heads/release/stable' || github.ref == 'refs/heads/development'
     steps:
       - uses: actions/checkout@v2
       - name: exe
