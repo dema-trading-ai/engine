@@ -6,7 +6,7 @@ on:
     branches:
       - release/stable
       - development
-      - ENG-36-add-linux-executable-support
+      - ENG-36-add-linux-executable-support  # TODO: Remove line
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,7 +21,7 @@ jobs:
         run: wget https://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz && tar -xzf ta-lib-0.4.0-src.tar.gz
       - name: Install TA-lib
         run: cd ta-lib/ && sudo ./configure && sudo make && sudo make install
-      - name: Install TA-lib
+      - name: Install TA-lib Pytho Wrapper
         run: pip install ta-lib
       - name: save pip cache dir
         id: pipdir
@@ -77,7 +77,7 @@ jobs:
       - test
     runs-on: ubuntu-latest
     environment: "executable_release"
-    #    if: github.ref == 'refs/heads/release/stable' || github.ref == 'refs/heads/development'
+    #    if: github.ref == 'refs/heads/release/stable' || github.ref == 'refs/heads/development'  # TODO: uncomment
     steps:
       - uses: actions/checkout@v2
       - name: exe
@@ -90,3 +90,4 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.DO_SPACES_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SPACES_SECRET }}
+          AWS_EC2_METADATA_DISABLED: true
