@@ -78,7 +78,7 @@ jobs:
       - name: init
         run: ./engine/engine.exe init new-dir
       - name: run
-        run: ../engine/engine.exe
+        run: ../engine/engine.exe -nostats True
         working-directory: ./new-dir
         env:
           PYTHONLEGACYWINDOWSIOENCODING: true
