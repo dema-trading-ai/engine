@@ -140,3 +140,5 @@ dmypy.json
 .idea/
 
 **/backtesting-data/**
+
+statistics_id.txt
