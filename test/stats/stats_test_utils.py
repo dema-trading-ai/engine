@@ -51,7 +51,7 @@ class StatsFixture:
             "fee": FEE_PERCENTAGE,
             "strategy-name": "MyStrategy",
             "strategies-folder": "resources/setup/strategies",
-            "plots": True,
+            "disable-plots": True,
             "tearsheet": False,
             "export-result": False,
             "mainplot_indicators": ["ema5", "ema21"],
