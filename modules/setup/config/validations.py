@@ -40,6 +40,14 @@ def check_for_missing_config_items(config: dict):
     defaults = json.loads(data)
 
     config_complete = True
+
+    if "plots" in config:
+        config["disable-plots"] = not config["plots"]
+        print_warning(f"The 'Plots' config setting has been changed to 'Disable-plots'. This has changed in your config"
+                      f" file, with the value of {config['disable-plots']}.")
+        del config['plots']
+        config_complete = False
+
     for setting in defaults:
         if setting not in config:
             config_complete = False

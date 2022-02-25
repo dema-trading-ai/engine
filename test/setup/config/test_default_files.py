@@ -28,7 +28,7 @@ DEFAULT_CONFIG = {
     "fee": "0.25",
     "strategy-name": "MyStrategy",
     "strategies-folder": "strategies",
-    "plots": "true",
+    "disable-plots": "false",
     "tearsheet": "false",
     "export-result": "false",
     "mainplot_indicators": [

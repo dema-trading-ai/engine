@@ -50,7 +50,7 @@ class OutputModule(object):
             create_tearsheet(stats.trades)
 
         # plot graphs
-        if self.config.plots:
+        if not self.config.disable_plots:
             print_info("Creating plots in " + FONT_BOLD + "data/backtesting-data/plots" + FONT_RESET + "...")
             plot_per_coin(stats, config=self.config)
             equity_plot(stats, self.config.strategy_definition.strategy_name)

@@ -56,11 +56,11 @@
     }
   },
   {
-    "name": "plots",
+    "name": "disable-plots",
     "type": "bool",
-    "default": true,
+    "default": false,
     "cli": {
-      "short": "plots"
+      "short": "no-plots"
     }
   },
   {
