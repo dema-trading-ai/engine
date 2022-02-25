@@ -62,17 +62,20 @@ def test_default_configs():
             loaded_file = json.load(file)
 
             for key, value in loaded_file.items():
-                if isinstance(value, str):
+                if isinstance(value, (str, bool, int, float)):
                     if file_to_test == "config.json" and key == "strategies-folder":
                         assert value == "resources/setup/strategies"
 
                     else:
-                        assert DEFAULT_CONFIG[key] == value
+                        assert DEFAULT_CONFIG[key].lower() == str(value).lower()
 
-                if isinstance(value, dict):
+                elif isinstance(value, dict):
                     for k, v in value.items():
                         assert DEFAULT_CONFIG[key][k] == str(v)
 
-                if isinstance(value, list):
+                elif isinstance(value, list):
                     for count, item in enumerate(value):
                         assert DEFAULT_CONFIG[key][count] == item
+
+                else:
+                    raise AssertionError(f"{key} : {value} slipped through the cracks...")
