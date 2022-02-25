@@ -65,7 +65,7 @@ jobs:
       - name: init
         run: ./engine init new-dir
       - name: run
-        run: ../engine
+        run: ../engine -nostats True
         working-directory: ./new-dir
   deploy:
     needs:
