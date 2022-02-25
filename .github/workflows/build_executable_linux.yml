@@ -1,4 +1,4 @@
-name: Build executable windows
+name: Build executable linux
 on:
   pull_request:
     branches: [ development ]
@@ -8,28 +8,20 @@ on:
       - development
 jobs:
   build:
+    runs-on: ubuntu-latest
     timeout-minutes: 15
-    env:
-      TALIB_URL: TA_Lib-0.4.20-cp39-cp39-win_amd64.whl
-    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: 3.9
-      - uses: actions/cache@v2
-        id: cache-talib
-        with:
-          path: ./${{ env.TALIB_URL }}
-          key: talib-windows-wheel-${{ env.TALIB_URL }}
-          restore-keys: |
-            talib-windows-wheel-${TALIB_URL}
-      - name: download ta-lib
-        if: steps.cache-talib.outputs.cache-hit != 'true'
-        run: curl https://engine-store.ams3.digitaloceanspaces.com/${{ env.TALIB_URL }} -o ${{ env.TALIB_URL }}
-      - name: install ta-lib
-        run: pip install ./TA_Lib-0.4.20-cp39-cp39-win_amd64.whl
+      - name: Download TA-lib
+        run: wget https://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz && tar -xzf ta-lib-0.4.0-src.tar.gz
+      - name: Install TA-lib
+        run: cd ta-lib/ && sudo ./configure && sudo make && sudo make install
+      - name: Install TA-lib Pytho Wrapper
+        run: pip install ta-lib
       - name: save pip cache dir
         id: pipdir
         run: echo "::set-output name=pipcachedir::$(pip cache dir)"
@@ -48,57 +40,53 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pyinstaller
       - name: install requirements
-        run: pip install -r requirements-ci.txt
-      - name: build exe
+        run: pip install -r requirements.txt
+      - name: build executable
         run: python build_scripts/build.py
-        env:
-          PYTHONLEGACYWINDOWSIOENCODING: true
-          PYTHONIOENCODING: utf-8
       - name: build archive
-        run: Compress-Archive . ./engine.zip
+        run: zip -r ./engine.zip .
         working-directory: dist/engine
       - name: Archive built executable
         uses: actions/upload-artifact@v2
         with:
           if-no-files-found: error
-          name: engine-windows
+          name: engine-linux
           path: ./dist/engine/engine.zip
   test:
     needs:
       - build
-    runs-on: windows-latest
-    timeout-minutes: 10
+    runs-on: ubuntu-latest
     steps:
       - name: exe
         uses: actions/download-artifact@v2
         with:
-          name: engine-windows
+          name: engine-linux
       - name: unzip
-        run: Expand-Archive ./engine.zip .
+        run: unzip ./engine.zip
+      - name: set executable bit
+        run: chmod +x ./engine
       - name: init
-        run: ./engine/engine.exe init new-dir
+        run: ./engine init new-dir
       - name: run
-        run: ../engine/engine.exe -nostats True
+        run: ../engine -nostats True
         working-directory: ./new-dir
-        env:
-          PYTHONLEGACYWINDOWSIOENCODING: true
-          PYTHONIOENCODING: utf-8
   deploy:
     needs:
       - build
       - test
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     environment: "executable_release"
-    if: github.ref == 'refs/heads/release/stable' || github.ref == 'refs/heads/development' || github.ref == 'refs/heads/feat/deploy_exe_files_to_do'
+    if: github.ref == 'refs/heads/release/stable' || github.ref == 'refs/heads/development'
     steps:
       - uses: actions/checkout@v2
       - name: exe
         uses: actions/download-artifact@v2
         with:
-          name: engine-windows
+          name: engine-linux
       - run: ls -la
       - run: |
-          aws s3 --endpoint=https://ams3.digitaloceanspaces.com cp ./engine.zip s3://engine-store/engine-windows-${GITHUB_REF##*/}.zip --acl "public-read"
+          aws s3 --endpoint=https://ams3.digitaloceanspaces.com cp ./engine.zip s3://engine-store/engine-linux-${GITHUB_REF##*/}.zip --acl "public-read"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.DO_SPACES_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SPACES_SECRET }}
+          AWS_EC2_METADATA_DISABLED: true

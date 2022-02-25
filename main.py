@@ -7,9 +7,10 @@ from time import perf_counter
 import optuna
 
 from cli.arg_parse import execute_for_args
+from cli.checks.engine_use_statistics import engine_statistics
 from cli.checks.latest_version import print_warning_if_version_outdated
 from cli.prepare_workspace import prepare_workspace
-from cli.print_utils import print_debug, is_verbosity
+from cli.print_utils import print_debug, is_verbosity, print_warning
 from main_controller import MainController
 from utils.utils import check_internet_connection
 
@@ -26,6 +27,9 @@ RUNFOLDER = os.path.dirname(os.path.realpath(__file__))
 def main(online: bool):
     if online:
         print_warning_if_version_outdated()
+    else:
+        print_warning("You are not connected to the internet. Certain functionality (like downloading new candle data)"
+                      " will not be available.")
     execute_for_args({
         'init': run_init,
         'default': run_engine
@@ -35,6 +39,8 @@ def main(online: bool):
 
 
 def run_engine(args, online: bool):
+    if online:
+        engine_statistics(args.no_statistics)
     controller = MainController()
     asyncio.run(controller.run(args, online))
 
