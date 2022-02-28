@@ -74,10 +74,10 @@ def plot_coin(mainplot_indicators, subplot_indicators, strategy_name, stats, pai
         updatemenus=[
             dict(
                 buttons=[
-                     dict(label="Toggle Log / Linear Scale",
-                          method="relayout",
-                          args=[{"yaxis.type": "linear"}],
-                          args2=[{"yaxis.type": "log"}])
+                    dict(label="Toggle Log / Linear Scale",
+                         method="relayout",
+                         args=[{"yaxis.type": "linear"}],
+                         args2=[{"yaxis.type": "log"}])
                 ],
                 type="buttons"
             )

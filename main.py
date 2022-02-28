@@ -7,14 +7,16 @@ from time import perf_counter
 import optuna
 
 from cli.arg_parse import execute_for_args
+from cli.checks.engine_use_statistics import engine_statistics
 from cli.checks.latest_version import print_warning_if_version_outdated
 from cli.prepare_workspace import prepare_workspace
 from cli.print_utils import print_debug, is_verbosity
 from main_controller import MainController
-from utils.utils import check_internet_connection
+from utils.utils import check_internet_connection, prepend_resource_dir
 
 # Hack, PyInstaller + rich on Windows in GitHub actions fails because it cannot find encoding of stdout, this sets
 # it on stdout if not set
+
 os.environ["PYTHONIOENCODING"] = "utf-8"
 PYTHONIOENCODING = os.environ.get("PYTHONIOENCODING", False)
 if sys.stdout.isatty() is False and PYTHONIOENCODING is not False and sys.stdout.encoding != PYTHONIOENCODING:
@@ -35,6 +37,12 @@ def main(online: bool):
 
 
 def run_engine(args, online: bool):
+    if online:
+        engine_statistics(args.no_statistics)
+
+    if args.resources:
+        prepend_resource_dir(args)
+
     controller = MainController()
     asyncio.run(controller.run(args, online))
 

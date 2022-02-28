@@ -53,7 +53,6 @@ def get_number_of_losing_trades(closed_trades: [Trade]) -> int:
 
 def get_number_of_consecutive_losing_trades(closed_trades: [Trade]) -> \
         Tuple[Optional[int], Optional[Tuple[datetime, datetime]]]:
-
     if len(closed_trades) == 0:
         return None, None
 
@@ -98,7 +97,6 @@ def calculate_trade_durations(closed_trades: [Trade]):
 
 
 def compute_risk_reward_ratio(closed_trades: [Trade]) -> float:
-
     if len(closed_trades) == 0:
         return 0
 
@@ -132,7 +130,6 @@ def compute_risk_reward_ratio(closed_trades: [Trade]) -> float:
 
 
 def compute_volume_turnover(closed_trades: [Trade], backtesting_duration: timedelta) -> float:
-
     amount_trades = len(closed_trades)
 
     if amount_trades == 0:

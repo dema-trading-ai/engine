@@ -1,6 +1,6 @@
 import os
-
-import pandas as pd
+from datetime import datetime
+import pytz
 from pandas import DataFrame
 
 from backtesting.strategy import Strategy
@@ -10,6 +10,7 @@ from modules.stats.trade import Trade, SellReason
 from modules.stats.tradingmodule import TradingModule
 from test.utils.signal_frame import MockPairFrame
 from utils.utils import get_ohlcv_indicators
+
 
 os.environ["VERBOSITY"] = "quiet"  # disables printing of info and warning messages
 
@@ -28,7 +29,6 @@ OHLCV_INDICATORS = get_ohlcv_indicators()
 class StatsFixture:
 
     def __init__(self, pairs: list):
-
         stripped_pairs = []
         for pair in pairs:
             stripped_pairs.append(pair.replace("/USDT", ""))
@@ -39,8 +39,8 @@ class StatsFixture:
             "max-open-trades": max_open_trades,
             "exposure-per-trade": exposure_per_trade,
             "starting-capital": STARTING_CAPITAL,
-            "backtesting-from": "2021-01-01",
-            "backtesting-to": "2021-07-01",
+            "backtesting-from": "2020-01-01",
+            "backtesting-to": "2020-07-01",
             "backtesting-till-now": False,
             "stoploss-type": "static",
             "stoploss": STOPLOSS,
@@ -51,7 +51,7 @@ class StatsFixture:
             "fee": FEE_PERCENTAGE,
             "strategy-name": "MyStrategy",
             "strategies-folder": "resources/setup/strategies",
-            "plots": True,
+            "disable-plots": True,
             "tearsheet": False,
             "export-result": False,
             "mainplot_indicators": ["ema5", "ema21"],
@@ -62,14 +62,14 @@ class StatsFixture:
         self.frame_with_signals = MockPairFrame(pairs)
 
     def create(self):
-        pair_df = {k: pd.DataFrame.from_dict(v, orient='index', columns=OHLCV_INDICATORS) for k, v in
+        pair_df = {k: DataFrame.from_dict(v, orient='index', columns=OHLCV_INDICATORS) for k, v in
                    self.frame_with_signals.items()}
 
         trading_module = TradingModule(self.config, TestStrategy())
         return StatsModule(self.config, self.frame_with_signals, trading_module, pair_df)
 
     def create_with_strategy(self, strategy: Strategy):
-        pair_df = {k: pd.DataFrame.from_dict(v, orient='index', columns=OHLCV_INDICATORS) for k, v in
+        pair_df = {k: DataFrame.from_dict(v, orient='index', columns=OHLCV_INDICATORS) for k, v in
                    self.frame_with_signals.items()}
 
         trading_module = TradingModule(self.config, strategy)
@@ -99,3 +99,15 @@ class CooldownStrategy(TestStrategy):
         elif last_trade.sell_reason == SellReason.ROI:
             cooldown = 1
         return cooldown
+
+
+def date(timestamp: int) -> datetime:
+    return datetime.fromtimestamp(timestamp / 1000)
+
+
+def create_test_date(year=1970, month=1, day=1, hour=0, minute=0, second=0) -> datetime:
+    return datetime.fromtimestamp(datetime(year, month, day, hour, minute, second, 0, pytz.UTC).timestamp())
+
+
+def create_test_timestamp(year=1970, month=1, day=1, hour=0, minute=0, second=0) -> int:
+    return datetime(year, month, day, hour, minute, second, 0, pytz.UTC).timestamp() * 1000

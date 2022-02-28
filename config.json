@@ -14,15 +14,26 @@
     "60": 4,
     "120": 3
   },
-  "pairs": ["BTC", "LTC", "ETH"],
+  "pairs": [
+    "BTC",
+    "LTC",
+    "ETH"
+  ],
   "randomize-pair-order": false,
   "currency": "USDT",
   "fee": 0.25,
   "strategy-name": "MyStrategy",
   "strategies-folder": "resources/setup/strategies",
-  "plots": true,
+  "disable-plots": false,
   "tearsheet": false,
   "export-result": false,
-  "mainplot_indicators": ["ema5", "ema21"],
-  "subplot_indicators": [["volume"]]
+  "mainplot_indicators": [
+    "ema5",
+    "ema21"
+  ],
+  "subplot_indicators": [
+    [
+      "volume"
+    ]
+  ]
 }

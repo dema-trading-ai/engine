@@ -1,8 +1,7 @@
 from datetime import datetime
 
-import pandas as pd
 import numpy as np
-from pandas import DataFrame
+import pandas as pd
 
 from modules.stats.trade import Trade, SellReason
 
@@ -39,16 +38,21 @@ def get_profit_ratio(df, fee_percentage, closed_trades):
 
 
 def get_profit_ratio_from_capital(capital: dict):
-    df = DataFrame(capital.items(), columns=['time', 'capital']).set_index('time')
+    df = pd.DataFrame(capital.items(), columns=['time', 'capital']).set_index('time')
     df["profit_ratio"] = df["capital"] / df["capital"].shift(1)
-    df.loc[0, "profit_ratio"] = 1
+    df.loc[df.index[0], "profit_ratio"] = 1
     df["value"] = df["profit_ratio"].cumprod()
     return df
 
 
-def with_copied_initial_row(df) -> pd.DataFrame:
+def with_copied_initial_row(df: pd.DataFrame) -> pd.DataFrame:
+    if len(df.index) < 2:
+        # not enough data, skip
+        return df
+    time_difference = df.index[1] - df.index[0]
+    timestep_before_start = df.index[0] - time_difference
     head = df.head(1).copy()
-    head.rename(index=lambda s: 0, inplace=True)
+    head.rename(index=lambda s: timestep_before_start, inplace=True)
     return pd.concat([head, df])
 
 

@@ -17,11 +17,12 @@ class MainController:
 
             if args.alpha_hyperopt:
                 MainController.run_hyperopt(args, runner)
+
             else:
                 runner.run_outputted_backtest()
 
     @staticmethod
-    def run_hyperopt(args, runner):
+    def run_hyperopt(args, runner) -> None:
         os.environ["VERBOSITY"] = "no_warnings"
         study = optuna.create_study()
 
@@ -39,11 +40,16 @@ class MainController:
 
         try:
             study.optimize(objective, n_trials=n_trials)
+
         except KeyboardInterrupt:
             print_info("Quitting hyperoptimization.")
+
             try:
                 print_info(f"Best results: {study.best_params}")
+
             except ValueError:
                 print_info("No trials completed yet. Results not available.")
-            sys.exit()
+
+            sys.exit(1)
+
         print_info(f"Best results: {study.best_params}")

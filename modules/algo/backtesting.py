@@ -3,9 +3,9 @@ import sys
 from typing import Tuple
 
 from backtesting.strategy import Strategy
+from cli.print_utils import print_info, print_error
 from modules.public.pairs_data import PairsData
 from modules.setup.config import ConfigModule
-from cli.print_utils import print_info, print_error
 from modules.setup.config.validations import validate_dynamic_stoploss
 
 
