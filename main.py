@@ -26,6 +26,7 @@ RUNFOLDER = os.path.dirname(os.path.realpath(__file__))
 
 
 def main(online: bool):
+    print("TESTING PURPOSES")
     if online:
         print_warning_if_version_outdated()
     execute_for_args({
@@ -34,6 +35,7 @@ def main(online: bool):
     }, online)
     if online:
         print_warning_if_version_outdated()
+    print("TESTING PURPOSES")
 
 
 def run_engine(args, online: bool):
