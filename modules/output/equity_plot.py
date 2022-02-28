@@ -4,12 +4,11 @@ from pathlib import Path
 import pandas as pd
 from plotly.graph_objs import Figure
 
-from modules.public.trading_stats import TradingStats
 from modules.output.plots import convert_df_for_plotting, compute_average_market_change
+from modules.public.trading_stats import TradingStats
 
 
 def equity_plot(stats: TradingStats, strategy_name):
-
     # Remove old file
     try:
         os.remove("./data/backtesting-data/plots/equity/equityplot.html")
@@ -23,7 +22,8 @@ def equity_plot(stats: TradingStats, strategy_name):
 
     df_capital, dates = convert_df_for_plotting(df_capital)
 
-    df_average_market_change = compute_average_market_change(stats.df, stats.capital_per_timestamp[0])
+    starting_capital = df_capital.iloc[0]['capital']
+    df_average_market_change = compute_average_market_change(stats.df, starting_capital)
 
     # Define various traces to be plotted
     data = [

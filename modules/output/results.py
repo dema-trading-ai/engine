@@ -53,6 +53,14 @@ def format_date(date: Optional[datetime]) -> str:
     return f"{date.year}-{date.month}-{date.day} {date.hour}:{date.minute}0"
 
 
+def convert_ratio_to_percentage(ratio: float) -> Optional[float]:
+    if ratio is None:
+        return None
+
+    percentage = ratio * 100
+    return round(percentage, 2)
+
+
 def show_mainresults(self: MainResults, currency_symbol: str):
     # Update variables for prettier terminal output
     drawdown_from_string = timestamp_to_string(self.drawdown_from)
@@ -142,6 +150,9 @@ def create_trade_info_table(self: MainResults, justification) -> Table:
 
 def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown_from_string, drawdown_to_string,
                              justification) -> Table:
+    longest_realised_drawdown = format_time_difference(self.longest_realised_drawdown['longest_drawdown'])
+    longest_seen_drawdown = format_time_difference(self.longest_seen_drawdown['longest_drawdown'])
+
     performance_table = Table(box=box.ROUNDED)
     performance_table.add_column("Performance "
                                  ":chart_with_upwards_trend:", justify=justification,
@@ -152,28 +163,28 @@ def create_performance_table(self, currency_symbol, drawdown_at_string, drawdown
                                        round(self.starting_capital, 2),
                                        str(currency_symbol)))
     performance_table.add_row('Overall profit',
-                              colorize(round(
-                                  self.overall_profit_percentage, 2), 0, '%'))
+                              colorize(convert_ratio_to_percentage(self.overall_profit_ratio), 0, '%'))
     performance_table.add_row('Max. realised drawdown',
-                              colorize(round(self.max_realised_drawdown,
-                                             2), 0, '%'))
+                              colorize(convert_ratio_to_percentage(self.max_realised_drawdown), 0, '%'))
     performance_table.add_row('Max. seen drawdown',
-                              colorize(round(self.max_seen_drawdown,
-                                             2), 0, '%'))
-    performance_table.add_row('Max. seen drawdown from',
-                              drawdown_from_string)
+                              colorize(convert_ratio_to_percentage(self.max_seen_drawdown), 0, '%'))
+    performance_table.add_row('Max. seen drawdown from', drawdown_from_string)
     performance_table.add_row('Max. seen drawdown to', drawdown_to_string)
     performance_table.add_row('Max. seen drawdown at', drawdown_at_string)
-    performance_table.add_row('Average market change',
-                              colorize(round(self.market_change_coins,
-                                             2), 0, '%'))
+    performance_table.add_row('Longest realised drawdown', longest_realised_drawdown if not self.
+                              longest_realised_drawdown['is_ongoing'] else longest_realised_drawdown + ', (Ongoing)')
+    performance_table.add_row('Longest seen drawdown', longest_seen_drawdown if not self.longest_seen_drawdown[
+        'is_ongoing'] else longest_seen_drawdown + ', (Ongoing)')
+    performance_table.add_row('Market change coins',
+                              colorize(convert_ratio_to_percentage(self.market_change_coins), 0, '%'))
     performance_table.add_row('Market change BTC/USDT',
                               "Unavailable" if self.market_change_btc is None else colorize(
                                   round(self.market_change_btc, 2), 0, '%'))
-    performance_table.add_row('Market drawdown coins', colorize(round(self.market_drawdown_coins, 2), 0, "%"))
+    performance_table.add_row('Market drawdown coins', colorize(convert_ratio_to_percentage(self.market_drawdown_coins),
+                                                                0, "%"))
     performance_table.add_row('Market drawdown BTC/USDT',
                               "Unavailable" if self.market_drawdown_btc is None else colorize(
-                                  round(self.market_drawdown_coins, 2), 0, '%'))
+                                  convert_ratio_to_percentage(self.market_drawdown_coins), 0, '%'))
     performance_table.add_row('Sharpe ratio (90d / 3y)',
                               f'{round(self.sharpe_90d, 2) if self.sharpe_90d is not None else "-"} / '
                               f'{round(self.sharpe_3y, 2) if self.sharpe_3y is not None else "-"}')
@@ -205,16 +216,17 @@ def create_settings_table(self: MainResults, currency_symbol, justification, tes
                            f"{round(self.starting_capital, 2)} {currency_symbol}")
     settings_table.add_row("Fee percentage", f"{self.fee} %")
     settings_table.add_row("Max. open trades", str(self.max_open_trades))
-    settings_table.add_row("Exposure per trade", str(round(self.exposure_per_trade * 100, 2)) + " %")
+    settings_table.add_row("Exposure per trade", str(round(convert_ratio_to_percentage(self.exposure_per_trade),
+                                                           2)) + " %")
     return settings_table
 
 
 @dataclass
 class CoinInsights:
     pair: str
-    cum_profit_percentage: float
-    total_profit_percentage: float
-    avg_profit_percentage: float
+    cum_profit_ratio: float
+    total_profit_ratio: float
+    avg_profit_ratio: float
     profit: float
     n_trades: int
     n_wins: int
@@ -265,13 +277,24 @@ class CoinInsights:
 
         for c in instances:
             avg_trade_duration = format_time_difference(c.avg_trade_duration)
+            avg_profit_percentage = convert_ratio_to_percentage(c.avg_profit_ratio)
+            cum_profit_percentage = convert_ratio_to_percentage(c.cum_profit_ratio)
+            total_profit_percentage = convert_ratio_to_percentage(c.total_profit_ratio)
+            market_change = convert_ratio_to_percentage(c.market_change)
+            market_drawdown = convert_ratio_to_percentage(c.market_drawdown)
+            best_trade_percentage = convert_ratio_to_percentage(c.best_trade_ratio)
+            worst_trade_percentage = convert_ratio_to_percentage(c.worst_trade_ratio)
+            median_trade_percentage = convert_ratio_to_percentage(c.median_trade_ratio)
+            max_seen_drawdown = convert_ratio_to_percentage(c.max_seen_drawdown)
+            max_realised_drawdown = convert_ratio_to_percentage(c.max_realised_drawdown)
+
             longest_trade_duration = c.longest_trade_duration if c.longest_trade_duration != timedelta(0) else '-'
             shortest_trade_duration = c.shortest_trade_duration if c.shortest_trade_duration != timedelta(0) else '-'
 
             coin_performance_table.add_row(c.pair,
-                                           colorize(round(c.avg_profit_percentage, 2), 0),
-                                           colorize(round(c.cum_profit_percentage, 2), 0),
-                                           colorize(round(c.total_profit_percentage, 2), 0),
+                                           colorize(avg_profit_percentage, 0),
+                                           colorize(cum_profit_percentage, 0),
+                                           colorize(total_profit_percentage, 0),
                                            colorize(round(c.profit, 2), 0)
                                            )
 
@@ -295,21 +318,21 @@ class CoinInsights:
 
             trade_perf_per_coin_table.add_row(
                 c.pair,
-                f"{colorize(round((c.best_trade_ratio - 1) * 100, 2), 0) if c.best_trade_ratio is not None else '-'}"
+                f"{colorize(best_trade_percentage, 0) if c.best_trade_ratio is not None else '-'}"
                 f" / "
-                f"{colorize(round((c.median_trade_ratio - 1) * 100, 2), 0) if c.median_trade_ratio is not None else '-'}"
+                f"{colorize(median_trade_percentage, 0) if c.median_trade_ratio is not None else '-'}"
                 f" / "
-                f"{colorize(round((c.worst_trade_ratio - 1) * 100, 2), 0) if c.worst_trade_ratio is not None else '-'}",
+                f"{colorize(worst_trade_percentage, 0) if c.worst_trade_ratio is not None else '-'}",
                 f"{colorize(round(c.best_trade_currency, 2), 0) if c.best_trade_currency is not None else '-'} / "
                 f"{colorize(round(c.median_trade_currency, 2), 0) if c.median_trade_ratio is not None else '-'} / "
                 f"{colorize(round(c.worst_trade_currency, 2), 0) if c.worst_trade_currency is not None else '-'}"
             )
 
             coin_metrics_table.add_row(c.pair,
-                                       colorize(round(c.market_change, 2), 0),
-                                       colorize(round(c.market_drawdown, 2), 0),
-                                       colorize(round(c.max_seen_drawdown, 2), 0),
-                                       colorize(round(c.max_realised_drawdown, 2), 0),
+                                       colorize(market_change, 0),
+                                       colorize(market_drawdown, 0),
+                                       colorize(max_seen_drawdown, 0),
+                                       colorize(max_realised_drawdown, 0),
                                        )
 
             coin_signal_table.add_row(c.pair,
@@ -381,7 +404,7 @@ class CoinInsights:
         coin_metrics_table.add_column("Market drawdown (%)", justify=justification)
         coin_metrics_table.add_column("Max. seen drawdown (%)", justify=justification)
         coin_metrics_table.add_column("Max. realised drawdown (%)",
-                                                 justify=justification)
+                                      justify=justification)
         return coin_metrics_table
 
     @staticmethod
@@ -401,7 +424,7 @@ class CoinInsights:
 @dataclass
 class LeftOpenTradeResult:
     pair: str
-    curr_profit_percentage: float
+    curr_profit_ratio: float
     curr_profit: float
     max_seen_drawdown: float
     opened_at: datetime
@@ -413,10 +436,12 @@ class LeftOpenTradeResult:
         left_open_trades_table = LeftOpenTradeResult.create_left_open_trades_table(justification, currency_symbol)
 
         for c in instances:
+            curr_profit_percentage = convert_ratio_to_percentage(c.curr_profit_ratio)
+            max_seen_drawdown = convert_ratio_to_percentage(c.max_seen_drawdown)
             left_open_trades_table.add_row(c.pair,
-                                           colorize(round(c.curr_profit_percentage, 2), 0),
+                                           colorize(round(curr_profit_percentage, 2), 0),
                                            colorize(round(c.curr_profit, 2), 0),
-                                           colorize(round(c.max_seen_drawdown, 2), 0),
+                                           colorize(round(max_seen_drawdown, 2), 0),
                                            str(c.opened_at),
                                            )
 

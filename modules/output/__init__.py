@@ -1,16 +1,17 @@
 import dataclasses
 import json
 import os
+
 import pandas as pd
 
 from cli.print_utils import print_warning, print_error, print_info
-from modules.output.plots_per_coin import plot_per_coin
 from modules.output.equity_plot import equity_plot
+from modules.output.plots_per_coin import plot_per_coin
 from modules.output.results import show_signature, CoinInsights, LeftOpenTradeResult, show_mainresults
 from modules.public.trading_stats import TradingStats
 from modules.setup import ConfigModule
-from modules.stats.trade import SellReason
 from modules.setup.config.strategy_definition import StrategyDefinition
+from modules.stats.trade import SellReason
 
 FONT_BOLD = "\033[1m"
 FONT_RESET = "\033[0m"
@@ -49,7 +50,7 @@ class OutputModule(object):
             create_tearsheet(stats.trades)
 
         # plot graphs
-        if self.config.plots:
+        if not self.config.disable_plots:
             print_info("Creating plots in " + FONT_BOLD + "data/backtesting-data/plots" + FONT_RESET + "...")
             plot_per_coin(stats, config=self.config)
             equity_plot(stats, self.config.strategy_definition.strategy_name)

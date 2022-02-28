@@ -20,7 +20,6 @@ from utils.error_handling import ErrorOutput, ConfigError, OfflineMissingDataErr
 from utils.utils import get_ohlcv_indicators, parse_timeframe
 
 
-
 # ======================================================================
 # DataModule is responsible for downloading OHLCV data, preparing it
 # and activating backtesting methods

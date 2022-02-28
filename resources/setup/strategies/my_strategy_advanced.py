@@ -1,11 +1,10 @@
 # Mandatory Imports
-import talib.abstract as ta
-from pandas import DataFrame
-from backtesting.strategy import Strategy
-
 # Optional Imports
 import numpy as np
-from modules.setup.config import qtpylib_methods as qtpylib
+import talib.abstract as ta
+from pandas import DataFrame
+
+from backtesting.strategy import Strategy
 from modules.stats.trade import Trade, SellReason
 
 

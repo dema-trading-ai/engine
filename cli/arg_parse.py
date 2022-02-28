@@ -5,8 +5,8 @@ import sys
 from datetime import datetime
 from typing import TypedDict, Callable
 
-from utils.utils import get_project_root
 from utils.error_handling import WrongSpecTypeError, ErrorOutput
+from utils.utils import get_project_root
 
 CliActions = TypedDict("CliActions", {
     'init': Callable,

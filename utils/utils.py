@@ -1,14 +1,16 @@
 # Libraries
+import argparse
 import os
 import re
 import sys
-import requests
 from pathlib import Path
 
-from modules.stats.trade import Trade
-from cli.print_utils import print_config_error
+import requests
 
-CURRENT_VERSION = "v0.7.19"
+from cli.print_utils import print_config_error
+from modules.stats.trade import Trade
+
+CURRENT_VERSION = "v0.7.21"
 
 MILLISECONDS = 1000
 MINUTE = 60 * MILLISECONDS
@@ -20,7 +22,7 @@ def get_project_root():
     return Path(__file__).parent.parent
 
 
-def get_ohlcv_indicators() -> [str]:
+def get_ohlcv_indicators() -> [str, ...]:
     """
     :return: list with ohlcv indicator names
     """
@@ -78,6 +80,8 @@ def parse_timeframe(timeframe_str: str):
         timeframe_time = int(items[1]) * MINUTE
     elif items[2] == 'h':
         timeframe_time = int(items[1]) * HOUR
+    elif items[2] == 'd':
+        timeframe_time = int(items[1]) * DAY
     else:
         print_config_error("Error while parsing the timeframe from config.json")
         sys.exit()
@@ -91,3 +95,20 @@ def check_internet_connection() -> bool:
 
     except (requests.ConnectionError, requests.Timeout):
         return False
+
+
+def prepend_resource_dir(args: argparse.Namespace) -> None:
+    if args.resources[-1] != "/":
+        args.resources += "/"
+
+    if args.config:
+        args.config = args.resources + args.config
+
+    else:
+        args.config = args.resources + "config.json"
+
+    if args.strategies_folder:
+        args.strategies_folder = args.resources + args.strategies_folder
+
+    else:
+        args.strategies_folder = args.resources + "strategies"

@@ -56,11 +56,11 @@
     }
   },
   {
-    "name": "plots",
+    "name": "disable-plots",
     "type": "bool",
-    "default": true,
+    "default": false,
     "cli": {
-      "short": "plots"
+      "short": "no-plots"
     }
   },
   {
@@ -126,7 +126,10 @@
   {
     "name": "strategies-folder",
     "type": "string",
-    "default": "strategies"
+    "default": "strategies",
+    "cli": {
+      "short": "sf"
+    }
   },
   {
     "name": "alpha-hyperopt",
@@ -157,5 +160,21 @@
     "name": "randomize-pair-order",
     "type": "bool",
     "default": false
+  },
+  {
+    "name": "no-statistics",
+    "type": "bool",
+    "default": false,
+    "cli": {
+      "short": "nostats"
+    }
+  },
+  {
+    "name": "resources",
+    "type": "string",
+    "default": "./",
+    "cli": {
+      "short": "r"
+    }
   }
 ]

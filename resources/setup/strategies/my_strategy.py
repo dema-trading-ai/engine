@@ -1,10 +1,11 @@
 # Mandatory Imports
 import talib.abstract as ta
 from pandas import DataFrame
+
 from backtesting.strategy import Strategy
 
+
 # Optional Imports
-from modules.setup.config import qtpylib_methods as qtpylib
 
 
 class MyStrategy(Strategy):
