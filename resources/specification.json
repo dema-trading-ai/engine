@@ -124,7 +124,7 @@
     }
   },
   {
-    "name": "strategies_folder",
+    "name": "strategies-folder",
     "type": "string",
     "default": "strategies",
     "cli": {
