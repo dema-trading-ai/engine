@@ -6,6 +6,7 @@ on:
     branches:
       - release/stable
       - development
+      - feat/test_executable
 jobs:
   build:
     runs-on: ubuntu-latest
