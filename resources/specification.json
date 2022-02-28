@@ -165,5 +165,13 @@
     "cli": {
       "short": "nostats"
     }
+  },
+  {
+    "name": "resources",
+    "type": "string",
+    "default": "./",
+    "cli": {
+      "short": "r"
+    }
   }
 ]
