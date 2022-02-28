@@ -126,7 +126,10 @@
   {
     "name": "strategies-folder",
     "type": "string",
-    "default": "strategies"
+    "default": "strategies",
+    "cli": {
+      "short": "sf"
+    }
   },
   {
     "name": "alpha-hyperopt",
@@ -164,6 +167,14 @@
     "default": false,
     "cli": {
       "short": "nostats"
+    }
+  },
+  {
+    "name": "resources",
+    "type": "string",
+    "default": "./",
+    "cli": {
+      "short": "r"
     }
   }
 ]

@@ -1,4 +1,5 @@
 # Libraries
+import argparse
 import os
 import re
 import sys
@@ -21,7 +22,7 @@ def get_project_root():
     return Path(__file__).parent.parent
 
 
-def get_ohlcv_indicators() -> [str]:
+def get_ohlcv_indicators() -> [str, ...]:
     """
     :return: list with ohlcv indicator names
     """
@@ -94,3 +95,20 @@ def check_internet_connection() -> bool:
 
     except (requests.ConnectionError, requests.Timeout):
         return False
+
+
+def prepend_resource_dir(args: argparse.Namespace) -> None:
+    if args.resources[-1] != "/":
+        args.resources += "/"
+
+    if args.config:
+        args.config = args.resources + args.config
+
+    else:
+        args.config = args.resources + "config.json"
+
+    if args.strategies_folder:
+        args.strategies_folder = args.resources + args.strategies_folder
+
+    else:
+        args.strategies_folder = args.resources + "strategies"
