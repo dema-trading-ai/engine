@@ -10,7 +10,7 @@ import requests
 from cli.print_utils import print_config_error
 from modules.stats.trade import Trade
 
-CURRENT_VERSION = "v0.7.19"
+CURRENT_VERSION = "v0.7.21"
 
 MILLISECONDS = 1000
 MINUTE = 60 * MILLISECONDS
